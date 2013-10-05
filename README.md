@@ -17,7 +17,8 @@ Here is an independent benchmark comparing <b>libssc</b> with other libraries :
 
 Output
 ------
-<b>libssc</b> outputs compressed data in a simple format which is described here. This format enables parallelization for both compression and decompression.
+<b>libssc</b> outputs compressed data in a simple format, which enables file storage and parallelization for both compression and decompression.
+![libssc output format](http://www.centaurean.com/images/ssc_output_format.png)
 
 API
 ---
