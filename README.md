@@ -1,6 +1,6 @@
 libssc
 ======
-Superfast Symmetric Compression
+Superfast Symmetric Compression library
 
 Preamble
 --------
@@ -12,6 +12,8 @@ The word "symmetric" indicates that compression and decompression speeds are exp
 
 Benchmark
 ---------
+Here is a benchmark of <b>libssc</b>'s fastest mode compared to other libraries, on an Intel® Core™ i3-2105	(x86 64), Asus P8H61-H motherboard with Fedora 19. It is possible to run yours using <a href=https://github.com/quixdb/squash>this project</a>.
+<table><tr><td><img src=http://www.centaurean.com/images/ratio.png/></td><td><img src=http://www.centaurean.com/images/i3.png/></td></tr></table>
 
 API
 ---
