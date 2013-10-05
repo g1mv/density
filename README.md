@@ -20,7 +20,8 @@ API
 Output
 ------
 <b>libssc</b> outputs compressed data in a simple format, which enables file storage and parallelization for both compression and decompression.
-![libssc output format](http://www.centaurean.com/images/ssc_output_format.png). More <a href=https://github.com/gpnuma/libssc/wiki/Format>details here</a>.
+![libssc output format](http://www.centaurean.com/images/ssc_output_format.png)
+More <a href=https://github.com/gpnuma/libssc/wiki/Format>details here</a>.
 
 Building libssc
 ---------------
