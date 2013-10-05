@@ -25,7 +25,7 @@ API
 
 Building libssc
 ---------------
-<b>libssc</b> is fully C99 compliant and can therefore be built on a number of platforms. Build instructions are detailed here.
+<b>libssc</b> is fully C99 compliant and can therefore be built on a number of platforms. Build instructions are <a href=https://github.com/gpnuma/libssc/wiki/Building>detailed here</a>.
 
 FAQ
 ---
