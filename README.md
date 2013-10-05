@@ -29,4 +29,4 @@ Building libssc
 
 FAQ
 ---
-The FAQ can be found here.
+The FAQ can be <a href=https://github.com/gpnuma/libssc/wiki/FAQ>found here</a>.
