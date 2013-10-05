@@ -14,15 +14,14 @@ Benchmark
 ---------
 Here is an independent benchmark comparing <b>libssc</b> with other libraries :
 
+API
+---
+<b>libssc</b> features a *stream API* and a *buffer API* which are very simple to use, yet powerful enough to keep users' creativity unleashed. The stream API is described here, and the buffers API here.
 
 Output
 ------
 <b>libssc</b> outputs compressed data in a simple format, which enables file storage and parallelization for both compression and decompression.
 ![libssc output format](http://www.centaurean.com/images/ssc_output_format.png)
-
-API
----
-<b>libssc</b> features a *stream API* and a *buffer API* which are very simple to use, yet powerful enough to keep users' creativity unleashed. The stream API is described here, and the buffers API here.
 
 Building libssc
 ---------------
