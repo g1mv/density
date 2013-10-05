@@ -1,4 +1,4 @@
-Copyright (c) 2013, Guillaume Voirin
+Copyright (c) 2013, Guillaume Voirin<br/>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
