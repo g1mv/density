@@ -5,7 +5,7 @@ Superfast Symmetric Compression library
 <b>libssc</b> is a free C99, open-source, BSD licensed compression library.
 
 It is focused on high-speed compression, at the best ratio possible.
-The word "symmetric" indicates that compression and decompression speeds are expected to be similar (i.e. very fast).
+The word "symmetric" means that compression and decompression speeds are expected to be similar (i.e. very fast).
 <b>libssc</b> features two APIs to enable quick integration in any project.
 
 Benchmark
@@ -23,8 +23,8 @@ Output
 ![libssc output format](http://www.centaurean.com/images/ssc_output_format.png)
 More <a href=https://github.com/gpnuma/libssc/wiki/Format>details here</a>.
 
-Building libssc
----------------
+Build
+-----
 <b>libssc</b> is fully C99 compliant and can therefore be built on a number of platforms. Build instructions are <a href=https://github.com/gpnuma/libssc/wiki/Building>detailed here</a>.
 
 FAQ
