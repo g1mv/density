@@ -1,0 +1,4 @@
+libssc
+======
+
+Superfast Symmetric Compression
