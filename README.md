@@ -2,8 +2,6 @@ libssc
 ======
 Superfast Symmetric Compression library
 
-Preamble
---------
 <b>libssc</b> is a free C99, open-source, BSD licensed compression library.
 
 It is focused on high-speed compression, at the best ratio possible.
