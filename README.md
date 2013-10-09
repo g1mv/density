@@ -11,7 +11,7 @@ The word "symmetric" means that compression and decompression speeds are expecte
 Benchmark
 ---------
 Here is a benchmark of <b>libssc</b>'s fastest mode compared to other libraries, on an Intel® Core™ i3-2105	(x86 64), Asus P8H61-H motherboard with Fedora 19. It is possible to run yours using <a href=https://github.com/quixdb/squash>this project</a>.
-<table><tr><td><img src=http://www.centaurean.com/images/ratio.png/></td><td><img src=http://www.centaurean.com/images/i3.png/></td></tr></table>
+<table><tr><td><img src=http://www.libssc.net/images/ratio.png/></td><td><img src=http://www.libssc.net/images/i3.png/></td></tr></table>
 
 API
 ---
@@ -20,13 +20,13 @@ API
 Output
 ------
 <b>libssc</b> outputs compressed data in a simple format, which enables file storage and parallelization for both compression and decompression.
-![libssc output format](http://www.centaurean.com/images/ssc_output_format.png)
-More <a href=https://github.com/gpnuma/libssc/wiki/Format>details here</a>.
+![libssc output format](http://www.libssc.net/images/ssc_output_format.png)
+More <a href=http://www.libssc.net/format.html>details here</a>.
 
 Build
 -----
-<b>libssc</b> is fully C99 compliant and can therefore be built on a number of platforms. Build instructions are <a href=https://github.com/gpnuma/libssc/wiki/Building>detailed here</a>.
+<b>libssc</b> is fully C99 compliant and can therefore be built on a number of platforms. Build instructions are <a href=http://www.libssc.net/build.html>detailed here</a>.
 
 FAQ
 ---
-The FAQ can be <a href=https://github.com/gpnuma/libssc/wiki/FAQ>found here</a>.
+The FAQ can be <a href=http://www.libssc.net/faq.html>found here</a>.
