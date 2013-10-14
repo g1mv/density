@@ -27,29 +27,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 11/10/13 17:56
+ * 11/10/13 18:00
  */
 
-#include "main_header.h"
+#ifndef SSC_BLOCK_H
+#define SSC_BLOCK_H
 
-SSC_FORCE_INLINE uint_fast32_t ssc_main_header_read(ssc_byte_buffer *restrict in, ssc_main_header *restrict header) {
-    ssc_byte *pointer = in->pointer + in->position;
-    header->version[0] = *(pointer);
-    header->version[1] = *(pointer + 1);
-    header->version[2] = *(pointer + 2);
-    header->compressionMode = *(pointer + 3);
-    header->blockType = *(pointer + 4);
-    in->position += sizeof(ssc_main_header);
-    return sizeof(ssc_main_header);
-}
+#define SSC_MAX_BLOCK_SIGNATURES_SHIFT                        32
 
-SSC_FORCE_INLINE uint_fast32_t ssc_main_header_write(ssc_byte_buffer *restrict out, const SSC_COMPRESSION_MODE compressionMode, const SSC_BLOCK_TYPE blockType) {
-    ssc_byte *pointer = out->pointer + out->position;
-    *(pointer) = SSC_MAJOR_VERSION;
-    *(pointer + 1) = SSC_MINOR_VERSION;
-    *(pointer + 2) = SSC_REVISION;
-    *(pointer + 3) = compressionMode;
-    *(pointer + 4) = blockType;
-    out->position += sizeof(ssc_main_header);
-    return sizeof(ssc_main_header);
-}
+#define SSC_PREFERRED_BLOCK_SIGNATURES_SHIFT                  11
+#define SSC_PREFERRED_BLOCK_SIGNATURES                        (1 << SSC_PREFERRED_BLOCK_SIGNATURES_SHIFT)
+
+#define SSC_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT       7
+#define SSC_PREFERRED_EFFICIENCY_CHECK_SIGNATURES             (1 << SSC_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT)
+
+typedef enum {
+    SSC_BLOCK_TYPE_DEFAULT = 0,
+    SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK = 1
+} SSC_BLOCK_TYPE;
+
+typedef enum {
+    SSC_BLOCK_MODE_COPY = 0,
+    SSC_BLOCK_MODE_HASH = 1
+} SSC_BLOCK_MODE;
+
+#endif
