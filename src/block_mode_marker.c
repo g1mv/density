@@ -27,31 +27,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 11/10/13 02:06
+ * 19/10/13 00:01
  */
 
-#ifndef SSC_FILE_HEADER_H
-#define SSC_FILE_HEADER_H
+#include "block_mode_marker.h"
 
-#include <stdio.h>
-#include <time.h>
-#include <utime.h>
+SSC_FORCE_INLINE uint_fast32_t ssc_block_mode_marker_read(ssc_byte_buffer *restrict in, ssc_mode_marker *restrict modeMarker) {
+    modeMarker->activeCompressionMode = *(in->pointer + in->position);
 
-#include "globals.h"
-#include "byte_buffer.h"
-#include "block.h"
+    in->position += sizeof(ssc_mode_marker);
 
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    ssc_byte version[3];
-    ssc_byte compressionMode;
-    ssc_byte blockType;
-    ssc_byte parameters[7];
-} ssc_main_header;
-#pragma pack(pop)
+    return sizeof(ssc_mode_marker);
+}
 
-uint_fast32_t ssc_main_header_read(ssc_byte_buffer*, ssc_main_header*);
-uint_fast32_t ssc_main_header_write(ssc_byte_buffer*, const SSC_COMPRESSION_MODE, const SSC_BLOCK_TYPE);
+SSC_FORCE_INLINE uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer *out, SSC_BLOCK_MODE mode) {
+    *(out->pointer + out->position) = (ssc_byte) mode;
 
-#endif
+    out->position += sizeof(ssc_mode_marker);
+
+    return sizeof(ssc_mode_marker);
+}

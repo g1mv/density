@@ -27,31 +27,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 11/10/13 02:06
+ * 18/10/13 23:53
  */
 
-#ifndef SSC_FILE_HEADER_H
-#define SSC_FILE_HEADER_H
+#include "block_header.h"
 
-#include <stdio.h>
-#include <time.h>
-#include <utime.h>
+SSC_FORCE_INLINE uint_fast32_t ssc_block_header_read(ssc_byte_buffer *restrict in, ssc_block_header *restrict blockHeader) {
+    in->position += sizeof(ssc_block_header);
 
-#include "globals.h"
-#include "byte_buffer.h"
-#include "block.h"
+    return sizeof(ssc_block_header);
+}
 
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    ssc_byte version[3];
-    ssc_byte compressionMode;
-    ssc_byte blockType;
-    ssc_byte parameters[7];
-} ssc_main_header;
-#pragma pack(pop)
+SSC_FORCE_INLINE uint_fast32_t ssc_block_header_write(ssc_byte_buffer *out) {
+    out->position += sizeof(ssc_block_header);
 
-uint_fast32_t ssc_main_header_read(ssc_byte_buffer*, ssc_main_header*);
-uint_fast32_t ssc_main_header_write(ssc_byte_buffer*, const SSC_COMPRESSION_MODE, const SSC_BLOCK_TYPE);
-
-#endif
+    return sizeof(ssc_block_header);
+}

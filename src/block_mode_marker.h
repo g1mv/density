@@ -27,15 +27,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 11/10/13 02:06
+ * 18/10/13 23:59
  */
 
-#ifndef SSC_FILE_HEADER_H
-#define SSC_FILE_HEADER_H
-
-#include <stdio.h>
-#include <time.h>
-#include <utime.h>
+#ifndef SSC_BLOCK_MODE_MARKER_H
+#define SSC_BLOCK_MODE_MARKER_H
 
 #include "globals.h"
 #include "byte_buffer.h"
@@ -44,14 +40,12 @@
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    ssc_byte version[3];
-    ssc_byte compressionMode;
-    ssc_byte blockType;
-    ssc_byte parameters[7];
-} ssc_main_header;
+    ssc_byte activeCompressionMode;
+    ssc_byte reserved;    // To ensure 2-byte-wise length of output data // todo
+} ssc_mode_marker;
 #pragma pack(pop)
 
-uint_fast32_t ssc_main_header_read(ssc_byte_buffer*, ssc_main_header*);
-uint_fast32_t ssc_main_header_write(ssc_byte_buffer*, const SSC_COMPRESSION_MODE, const SSC_BLOCK_TYPE);
+uint_fast32_t ssc_block_mode_marker_read(ssc_byte_buffer*, ssc_mode_marker *);
+uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer*, SSC_BLOCK_MODE);
 
 #endif

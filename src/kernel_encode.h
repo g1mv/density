@@ -27,31 +27,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 11/10/13 02:06
+ * 19/10/13 00:24
  */
 
-#ifndef SSC_FILE_HEADER_H
-#define SSC_FILE_HEADER_H
+#ifndef SSC_KERNEL_ENCODE_H
+#define SSC_KERNEL_ENCODE_H
 
-#include <stdio.h>
-#include <time.h>
-#include <utime.h>
-
-#include "globals.h"
-#include "byte_buffer.h"
-#include "block.h"
-
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    ssc_byte version[3];
-    ssc_byte compressionMode;
-    ssc_byte blockType;
-    ssc_byte parameters[7];
-} ssc_main_header;
-#pragma pack(pop)
-
-uint_fast32_t ssc_main_header_read(ssc_byte_buffer*, ssc_main_header*);
-uint_fast32_t ssc_main_header_write(ssc_byte_buffer*, const SSC_COMPRESSION_MODE, const SSC_BLOCK_TYPE);
+typedef enum {
+    SSC_KERNEL_ENCODE_STATE_READY = 0,
+    SSC_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK,
+    SSC_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK,
+    SSC_KERNEL_ENCODE_STATE_FINISHED,
+    SSC_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER,
+    SSC_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER,
+    SSC_KERNEL_ENCODE_STATE_ERROR
+} SSC_KERNEL_ENCODE_STATE;
 
 #endif
