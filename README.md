@@ -1,5 +1,5 @@
-libssc
-======
+libssc <a href="http://www.centaurean.com"><img src="http://www.centaurean.com/images/centaurean.png" width="140" align="right" title="Centaurean"/></a>
+========
 Superfast Symmetric Compression library
 
 <b>libssc</b> is a free C99, open-source, BSD licensed compression library.
