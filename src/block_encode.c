@@ -73,11 +73,11 @@ SSC_FORCE_INLINE void ssc_block_encode_update_totals(ssc_byte_buffer *restrict i
     state->totalWritten += out->position - outPositionBefore;
 }
 
-SSC_FORCE_INLINE SSC_BLOCK_ENCODE_STATE ssc_block_encode_init(ssc_block_encode_state *restrict state, const SSC_BLOCK_MODE mode, const SSC_BLOCK_TYPE blockType, void *kernelState, SSC_KERNEL_ENCODE_STATE (*kernelInit)(void *), SSC_KERNEL_ENCODE_STATE (*kernelProcess)(ssc_byte_buffer *, ssc_byte_buffer *, void *, const ssc_bool), SSC_KERNEL_ENCODE_STATE (*kernelFinish)(void *)) {
+SSC_FORCE_INLINE SSC_BLOCK_ENCODE_STATE ssc_block_encode_init(ssc_block_encode_state *restrict state, const SSC_COMPRESSION_MODE mode, const SSC_BLOCK_TYPE blockType, void *kernelState, SSC_KERNEL_ENCODE_STATE (*kernelInit)(void *), SSC_KERNEL_ENCODE_STATE (*kernelProcess)(ssc_byte_buffer *, ssc_byte_buffer *, void *, const ssc_bool), SSC_KERNEL_ENCODE_STATE (*kernelFinish)(void *)) {
     state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER;
+    state->blockType = blockType;
     state->targetMode = mode;
     state->currentMode = mode;
-    state->blockType = blockType;
 
     state->totalRead = 0;
     state->totalWritten = 0;
@@ -126,36 +126,29 @@ SSC_FORCE_INLINE SSC_BLOCK_ENCODE_STATE ssc_block_encode_process(ssc_byte_buffer
                 inPositionBefore = in->position;
                 outPositionBefore = out->position;
 
-                switch (state->currentMode) {
-                    case SSC_BLOCK_MODE_HASH:
-                        hashEncodeState = state->kernelEncodeProcess(in, out, state->kernelEncodeState, flush);//ssc_argonaut_encode_process(in, out, xorMask, &state->dictionaryData.dictionary, &state->hashEncodeState, flush); // (false) = c3, (true) = c4
-                        ssc_block_encode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
+                hashEncodeState = state->kernelEncodeProcess(in, out, state->kernelEncodeState, flush);
+                ssc_block_encode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
 
-                        switch (hashEncodeState) {
-                            case SSC_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER:
-                                return SSC_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
+                switch (hashEncodeState) {
+                    case SSC_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER:
+                        return SSC_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
 
-                            case SSC_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER:
-                                return SSC_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
+                    case SSC_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER:
+                        return SSC_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
 
-                            case SSC_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK:
-                                state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER;
-                                break;
+                    case SSC_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK:
+                        state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER;
+                        break;
 
-                            case SSC_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK:
-                                state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER;
-                                break;
+                    case SSC_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK:
+                        state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER;
+                        break;
 
-                            case SSC_KERNEL_ENCODE_STATE_FINISHED:
-                                state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER;
-                                break;
+                    case SSC_KERNEL_ENCODE_STATE_FINISHED:
+                        state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER;
+                        break;
 
-                            case SSC_KERNEL_ENCODE_STATE_READY:
-                                break;
-
-                            default:
-                                return SSC_BLOCK_ENCODE_STATE_ERROR;
-                        }
+                    case SSC_KERNEL_ENCODE_STATE_READY:
                         break;
 
                     default:

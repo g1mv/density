@@ -40,7 +40,7 @@ SSC_FORCE_INLINE uint_fast32_t ssc_block_mode_marker_read(ssc_byte_buffer *restr
     return sizeof(ssc_mode_marker);
 }
 
-SSC_FORCE_INLINE uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer *out, SSC_BLOCK_MODE mode) {
+SSC_FORCE_INLINE uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer *out, SSC_COMPRESSION_MODE mode) {
     *(out->pointer + out->position) = (ssc_byte) mode;
 
     out->position += sizeof(ssc_mode_marker);

@@ -68,11 +68,15 @@ endif
 
 CC = @$(PREFIX)cc
 
-SRC = $(wildcard *.c)
+SRC_CHAMELEON = $(wildcard kernel_chameleon_*.c)
+OBJ_CHAMELEON_1P = $(SRC_CHAMELEON:.c=_1p.o)
+OBJ_CHAMELEON_2P = $(SRC_CHAMELEON:.c=_2p.o)
+
+SRC = $(filter-out $(SRC_CHAMELEON), $(wildcard *.c))
 OBJ = $(SRC:.c=.o)
 
-#$(OBJ_ARGONAUT_POST_PROCESSING) $(OBJ_BLOCKS) $(OBJ_CHAMELEON_DEFAULT) $(OBJ_CHAMELEON_DISPERSION)
-ALL_OBJ = $(OBJ)
+#$(OBJ_ARGONAUT_POST_PROCESSING) $(OBJ_BLOCKS)
+ALL_OBJ = $(OBJ_CHAMELEON_1P) $(OBJ_CHAMELEON_2P) $(OBJ)
 
 .PHONY: header footer kernels blocks
 
@@ -90,6 +94,14 @@ $(TARGET)$(EXTENSION): $(ALL_OBJ)
 	@echo ${bold}Linking${normal} ...
 	@echo $^ $(ARROW) ${bold}$(TARGET)$(EXTENSION)${normal}
 	$(CC) -shared -Wl -o $(TARGET)$(EXTENSION) $^ $(CFLAGS)
+
+%_1p.o: %.c
+	@echo $^ $(ARROW) $@
+	$(CC) -c $(CFLAGS) -DSSC_CHAMELEON_1P $< -o $@
+
+%_2p.o: %.c
+	@echo $^ $(ARROW) $@
+	$(CC) -c $(CFLAGS) -DSSC_CHAMELEON_2P $< -o $@
 
 %.o: %.c
 	@echo $^ $(ARROW) $@

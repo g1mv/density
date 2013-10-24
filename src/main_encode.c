@@ -66,19 +66,15 @@ SSC_FORCE_INLINE SSC_ENCODE_STATE ssc_encode_init(ssc_byte_buffer *restrict out,
 
     switch (mode) {
         case SSC_COMPRESSION_MODE_COPY:
-//ssc_block_encode_init(&state->blockEncodeStateA, SSC_BLOCK_MODE_COPY, blockType, NULL, NULL, NULL, NULL);
-///ssc_block_encode_init(&state->blockEncodeStateA, SSC_BLOCK_MODE_HASH, blockType, malloc(sizeof(ssc_huffman_encode_state)), (void*)ssc_huffman_encode_init, (void*)ssc_huffman_encode_process, (void*)ssc_huffman_encode_finish);
             break;
 
         case SSC_COMPRESSION_MODE_CHAMELEON:
-///ssc_block_encode_init(&state->blockEncodeStateA, SSC_BLOCK_MODE_HASH, blockType, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_dispersion, (void*)ssc_chameleon_encode_process_dispersion, (void*)ssc_chameleon_encode_finish_dispersion);
+            ssc_block_encode_init(&state->blockEncodeStateA, SSC_COMPRESSION_MODE_CHAMELEON, blockType, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_1p, (void*)ssc_chameleon_encode_process_1p, (void*)ssc_chameleon_encode_finish_1p);
             break;
 
         case SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON:
-//ssc_block_encode_init(&state->blockEncodeStateA, SSC_BLOCK_MODE_HASH, SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK, malloc(sizeof(ssc_huffman_encode_state)), (void*)ssc_huffman_encode_init, (void*)ssc_huffman_encode_process, (void*)ssc_huffman_encode_finish);
-///ssc_block_encode_init(&state->blockEncodeStateA, SSC_BLOCK_MODE_HASH, SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_dispersion, (void*)ssc_chameleon_encode_process_dispersion, (void*)ssc_chameleon_encode_finish_dispersion);
-///ssc_block_encode_init(&state->blockEncodeStateB, SSC_BLOCK_MODE_HASH, blockType, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_default, (void*)ssc_chameleon_encode_process_default, (void*)ssc_chameleon_encode_finish_default);
-//ssc_block_encode_init(&state->blockEncodeStateB, SSC_BLOCK_MODE_HASH, blockType, malloc(sizeof(ssc_huffman_encode_state)), (void*)ssc_huffman_encode_init, (void*)ssc_huffman_encode_process, (void*)ssc_huffman_encode_finish);
+            ssc_block_encode_init(&state->blockEncodeStateA, SSC_COMPRESSION_MODE_CHAMELEON, SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_1p, (void*)ssc_chameleon_encode_process_1p, (void*)ssc_chameleon_encode_finish_1p);
+            ssc_block_encode_init(&state->blockEncodeStateB, SSC_COMPRESSION_MODE_CHAMELEON, blockType, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_2p, (void*)ssc_chameleon_encode_process_2p, (void*)ssc_chameleon_encode_finish_2p);
             break;
     }
 
@@ -136,7 +132,7 @@ SSC_FORCE_INLINE SSC_ENCODE_STATE ssc_encode_process(ssc_byte_buffer *restrict i
 
             case SSC_ENCODE_PROCESS_WRITE_BLOCKS_IN_TO_WORKBUFFER:
                 state->workBuffer->size = state->workBufferData.memorySize;
-                blockEncodeState = ssc_block_encode_process(in, state->workBuffer, &state->blockEncodeStateA, flush/*, SSC_HASH_XOR_MASK_DISPERSION*/);
+                blockEncodeState = ssc_block_encode_process(in, state->workBuffer, &state->blockEncodeStateA, flush);
                 state->totalRead += in->position - inPositionBefore;
                 switch (blockEncodeState) {
                     case SSC_BLOCK_ENCODE_STATE_READY:
@@ -158,7 +154,7 @@ SSC_FORCE_INLINE SSC_ENCODE_STATE ssc_encode_process(ssc_byte_buffer *restrict i
                 break;
 
             case SSC_ENCODE_PROCESS_WRITE_BLOCKS_WORKBUFFER_TO_OUT:
-                blockEncodeState = ssc_block_encode_process(state->workBuffer, out, &state->blockEncodeStateB, flush && in->position == in->size/*, SSC_HASH_XOR_MASK_DIRECT*/);
+                blockEncodeState = ssc_block_encode_process(state->workBuffer, out, &state->blockEncodeStateB, flush && in->position == in->size);
                 state->totalWritten += out->position - outPositionBefore;
                 switch (blockEncodeState) {
                     case SSC_BLOCK_ENCODE_STATE_READY:

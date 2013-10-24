@@ -64,15 +64,9 @@ typedef struct {
     uint_fast64_t outStart;
 } ssc_block_decode_current_block_data;
 
-/*typedef struct {
-    ssc_dictionary dictionary;
-    uint_fast32_t resetCycle;
-    void (*dictionary_reset)(void *);
-} ssc_block_decode_dictionary_data;*/
-
 typedef struct {
     SSC_BLOCK_DECODE_PROCESS process;
-    SSC_BLOCK_MODE mode;
+    SSC_COMPRESSION_MODE mode;
     SSC_BLOCK_TYPE blockType;
 
     uint_fast64_t totalRead;
@@ -83,18 +77,16 @@ typedef struct {
     ssc_mode_marker lastModeMarker;
     ssc_block_footer lastBlockFooter;
 
-    //ssc_hash_decode_state hashDecodeState;
     ssc_block_decode_current_block_data currentBlockData;
-    //ssc_block_decode_dictionary_data dictionaryData;
 
-    void*kernelDecodeState;
+    void* kernelDecodeState;
     SSC_KERNEL_DECODE_STATE (*kernelDecodeInit)(void*, const uint32_t);
     SSC_KERNEL_DECODE_STATE (*kernelDecodeProcess)(ssc_byte_buffer *, ssc_byte_buffer *, void*, const ssc_bool);
     SSC_KERNEL_DECODE_STATE (*kernelDecodeFinish)(void*);
 } ssc_block_decode_state;
 #pragma pack(pop)
 
-SSC_BLOCK_DECODE_STATE ssc_block_decode_init(ssc_block_decode_state *, const SSC_BLOCK_MODE, const SSC_BLOCK_TYPE, const uint_fast32_t, void*, SSC_KERNEL_DECODE_STATE (*)(void*, const uint32_t), SSC_KERNEL_DECODE_STATE (*)(ssc_byte_buffer *, ssc_byte_buffer *, void*, const ssc_bool), SSC_KERNEL_DECODE_STATE (*)(void*));
+SSC_BLOCK_DECODE_STATE ssc_block_decode_init(ssc_block_decode_state *, const SSC_COMPRESSION_MODE, const SSC_BLOCK_TYPE, const uint_fast32_t, void*, SSC_KERNEL_DECODE_STATE (*)(void*, const uint32_t), SSC_KERNEL_DECODE_STATE (*)(ssc_byte_buffer *, ssc_byte_buffer *, void*, const ssc_bool), SSC_KERNEL_DECODE_STATE (*)(void*));
 SSC_BLOCK_DECODE_STATE ssc_block_decode_process(ssc_byte_buffer *, ssc_byte_buffer *, ssc_block_decode_state *, const ssc_bool);
 SSC_BLOCK_DECODE_STATE ssc_block_decode_finish(ssc_block_decode_state *);
 

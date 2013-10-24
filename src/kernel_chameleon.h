@@ -27,61 +27,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 18/10/13 23:50
+ * 24/10/13 11:57
  */
 
-#ifndef SSC_DECODE_H
-#define SSC_DECODE_H
+#ifndef SSC_CHAMELEON_H
+#define SSC_CHAMELEON_H
 
-#include "block_header.h"
-#include "block_footer.h"
-#include "byte_buffer.h"
-#include "main_header.h"
-#include "main_footer.h"
-#include "block_mode_marker.h"
-#include "block_decode.h"
-#include "kernel_chameleon_decode.h"
+#include "globals.h"
 
-typedef enum {
-    SSC_DECODE_STATE_READY = 0,
-    SSC_DECODE_STATE_STALL_ON_OUTPUT_BUFFER,
-    SSC_DECODE_STATE_STALL_ON_INPUT_BUFFER,
-    SSC_DECODE_STATE_ERROR
-} SSC_DECODE_STATE;
+#ifdef SSC_CHAMELEON_1P
+#define SSC_CHAMELEON_SUFFIX                                        1p
+#define SSC_CHAMELEON_HASH_OFFSET_BASIS                             (uint32_t)2885564586
+#else
+#define SSC_CHAMELEON_SUFFIX                                        2p
+#define SSC_CHAMELEON_HASH_OFFSET_BASIS                             (uint32_t)2166115717
+#endif
 
-typedef enum {
-    SSC_DECODE_PROCESS_READ_BLOCKS,
-    SSC_DECODE_PROCESS_READ_BLOCKS_IN_TO_WORKBUFFER,
-    SSC_DECODE_PROCESS_READ_BLOCKS_WORKBUFFER_TO_OUT,
-    SSC_DECODE_PROCESS_READ_FOOTER,
-    SSC_DECODE_PROCESS_FINISHED
-} SSC_DECODE_PROCESS;
+#define PASTER(x,y) x ## _ ## y
+#define EVALUATOR(x,y)  PASTER(x,y)
+#define CHAMELEON_NAME(function) EVALUATOR(function, SSC_CHAMELEON_SUFFIX)
 
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    uint_fast64_t memorySize;
-} ssc_decode_work_buffer_data;
+#define SSC_CHAMELEON_HASH_BITS                                     16
+#define SSC_CHAMELEON_HASH_PRIME                                    16777619
 
-typedef struct {
-    SSC_DECODE_PROCESS process;
+typedef uint64_t                                                    ssc_hash_signature;
 
-    uint_fast64_t totalRead;
-    uint_fast64_t totalWritten;
-
-    ssc_main_header header;
-    ssc_main_footer footer;
-
-    ssc_block_decode_state blockDecodeStateA;
-    ssc_block_decode_state blockDecodeStateB;
-
-    ssc_byte_buffer* workBuffer;
-    ssc_decode_work_buffer_data workBufferData;
-} ssc_decode_state;
-#pragma pack(pop)
-
-SSC_DECODE_STATE ssc_decode_init(ssc_byte_buffer*, ssc_byte_buffer*, const uint_fast64_t, ssc_decode_state *);
-SSC_DECODE_STATE ssc_decode_process(ssc_byte_buffer *, ssc_byte_buffer *, ssc_decode_state *, const ssc_bool);
-SSC_DECODE_STATE ssc_decode_finish(ssc_byte_buffer *, ssc_decode_state*);
+#define SSC_CHAMELEON_HASH_ALGORITHM(hash, value)                   hash = SSC_CHAMELEON_HASH_OFFSET_BASIS;\
+                                                                    hash ^= value;\
+                                                                    hash *= SSC_CHAMELEON_HASH_PRIME;\
+                                                                    hash = (hash >> (32 - SSC_CHAMELEON_HASH_BITS)) ^ (hash & ((1 << SSC_CHAMELEON_HASH_BITS) - 1));
 
 #endif

@@ -71,7 +71,7 @@ SSC_FORCE_INLINE void ssc_block_decode_update_totals(ssc_byte_buffer *restrict i
     state->totalWritten += out->position - outPositionBefore;
 }
 
-SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_init(ssc_block_decode_state *restrict state, const SSC_BLOCK_MODE mode, const SSC_BLOCK_TYPE blockType, const uint_fast32_t endDataOverhead, void *kernelState, SSC_KERNEL_DECODE_STATE (*kernelInit)(void *, const uint32_t), SSC_KERNEL_DECODE_STATE (*kernelProcess)(ssc_byte_buffer *, ssc_byte_buffer *, void *, const ssc_bool), SSC_KERNEL_DECODE_STATE (*kernelFinish)(void *)) {
+SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_init(ssc_block_decode_state *restrict state, const SSC_COMPRESSION_MODE mode, const SSC_BLOCK_TYPE blockType, const uint_fast32_t endDataOverhead, void *kernelState, SSC_KERNEL_DECODE_STATE (*kernelInit)(void *, const uint32_t), SSC_KERNEL_DECODE_STATE (*kernelProcess)(ssc_byte_buffer *, ssc_byte_buffer *, void *, const ssc_bool), SSC_KERNEL_DECODE_STATE (*kernelFinish)(void *)) {
     state->process = SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER;
     state->mode = mode;
     state->blockType = blockType;
@@ -124,36 +124,29 @@ SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_process(ssc_byte_buffer
                 inPositionBefore = in->position;
                 outPositionBefore = out->position;
 
-                switch (state->mode) {
-                    case SSC_BLOCK_MODE_HASH:
-                        hashDecodeState = state->kernelDecodeProcess(in, out, state->kernelDecodeState, flush);
-                        ssc_block_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
+                hashDecodeState = state->kernelDecodeProcess(in, out, state->kernelDecodeState, flush);
+                ssc_block_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
 
-                        switch (hashDecodeState) {
-                            case SSC_KERNEL_DECODE_STATE_STALL_ON_INPUT_BUFFER:
-                                return SSC_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
+                switch (hashDecodeState) {
+                    case SSC_KERNEL_DECODE_STATE_STALL_ON_INPUT_BUFFER:
+                        return SSC_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
-                            case SSC_KERNEL_DECODE_STATE_STALL_ON_OUTPUT_BUFFER:
-                                return SSC_BLOCK_DECODE_STATE_STALL_ON_OUTPUT_BUFFER;
+                    case SSC_KERNEL_DECODE_STATE_STALL_ON_OUTPUT_BUFFER:
+                        return SSC_BLOCK_DECODE_STATE_STALL_ON_OUTPUT_BUFFER;
 
-                            case SSC_KERNEL_DECODE_STATE_INFO_NEW_BLOCK:
-                                state->process = SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER;
-                                break;
+                    case SSC_KERNEL_DECODE_STATE_INFO_NEW_BLOCK:
+                        state->process = SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER;
+                        break;
 
-                            case SSC_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK:
-                                state->process = SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_MODE_MARKER;
-                                break;
+                    case SSC_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK:
+                        state->process = SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_MODE_MARKER;
+                        break;
 
-                            case SSC_KERNEL_DECODE_STATE_FINISHED:
-                                state->process = SSC_BLOCK_DECODE_PROCESS_READ_LAST_BLOCK_FOOTER;
-                                break;
+                    case SSC_KERNEL_DECODE_STATE_FINISHED:
+                        state->process = SSC_BLOCK_DECODE_PROCESS_READ_LAST_BLOCK_FOOTER;
+                        break;
 
-                            case SSC_KERNEL_DECODE_STATE_READY:
-                                break;
-
-                            default:
-                                return SSC_BLOCK_DECODE_STATE_ERROR;
-                        }
+                    case SSC_KERNEL_DECODE_STATE_READY:
                         break;
 
                     default:

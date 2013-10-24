@@ -27,61 +27,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 18/10/13 23:50
+ * 24/10/13 12:05
  */
 
-#ifndef SSC_DECODE_H
-#define SSC_DECODE_H
+#ifndef SSC_DICTIONARY_H
+#define SSC_DICTIONARY_H
 
-#include "block_header.h"
-#include "block_footer.h"
-#include "byte_buffer.h"
-#include "main_header.h"
-#include "main_footer.h"
-#include "block_mode_marker.h"
-#include "block_decode.h"
-#include "kernel_chameleon_decode.h"
+#include "globals.h"
+#include "kernel_chameleon.h"
 
-typedef enum {
-    SSC_DECODE_STATE_READY = 0,
-    SSC_DECODE_STATE_STALL_ON_OUTPUT_BUFFER,
-    SSC_DECODE_STATE_STALL_ON_INPUT_BUFFER,
-    SSC_DECODE_STATE_ERROR
-} SSC_DECODE_STATE;
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#include "kernel_chameleon_dictionary_le.data"
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#include "kernel_chameleon_dictionary_be.data"
+#else
+#error Unable to load dictionary due to unsupported endian
+#endif
 
-typedef enum {
-    SSC_DECODE_PROCESS_READ_BLOCKS,
-    SSC_DECODE_PROCESS_READ_BLOCKS_IN_TO_WORKBUFFER,
-    SSC_DECODE_PROCESS_READ_BLOCKS_WORKBUFFER_TO_OUT,
-    SSC_DECODE_PROCESS_READ_FOOTER,
-    SSC_DECODE_PROCESS_FINISHED
-} SSC_DECODE_PROCESS;
+#include <string.h>
+
+#define SSC_DICTIONARY_VALUE_NOT_SET                  0x76EFE1F1
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    uint_fast64_t memorySize;
-} ssc_decode_work_buffer_data;
+    uint32_t as_uint32_t;
+} ssc_dictionary_entry;
 
 typedef struct {
-    SSC_DECODE_PROCESS process;
-
-    uint_fast64_t totalRead;
-    uint_fast64_t totalWritten;
-
-    ssc_main_header header;
-    ssc_main_footer footer;
-
-    ssc_block_decode_state blockDecodeStateA;
-    ssc_block_decode_state blockDecodeStateB;
-
-    ssc_byte_buffer* workBuffer;
-    ssc_decode_work_buffer_data workBufferData;
-} ssc_decode_state;
+    ssc_dictionary_entry entries[1 << SSC_CHAMELEON_HASH_BITS];
+} ssc_dictionary;
 #pragma pack(pop)
 
-SSC_DECODE_STATE ssc_decode_init(ssc_byte_buffer*, ssc_byte_buffer*, const uint_fast64_t, ssc_decode_state *);
-SSC_DECODE_STATE ssc_decode_process(ssc_byte_buffer *, ssc_byte_buffer *, ssc_decode_state *, const ssc_bool);
-SSC_DECODE_STATE ssc_decode_finish(ssc_byte_buffer *, ssc_decode_state*);
+void CHAMELEON_NAME(ssc_dictionary_reset)(ssc_dictionary *);
 
 #endif

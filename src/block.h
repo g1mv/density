@@ -46,9 +46,4 @@ typedef enum {
     SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK = 1
 } SSC_BLOCK_TYPE;
 
-typedef enum {
-    SSC_BLOCK_MODE_COPY = 0,
-    SSC_BLOCK_MODE_HASH = 1
-} SSC_BLOCK_MODE;
-
 #endif

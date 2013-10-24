@@ -46,6 +46,6 @@ typedef struct {
 #pragma pack(pop)
 
 uint_fast32_t ssc_block_mode_marker_read(ssc_byte_buffer*, ssc_mode_marker *);
-uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer*, SSC_BLOCK_MODE);
+uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer*, SSC_COMPRESSION_MODE);
 
 #endif
