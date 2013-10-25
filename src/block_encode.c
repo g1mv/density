@@ -73,7 +73,7 @@ SSC_FORCE_INLINE void ssc_block_encode_update_totals(ssc_byte_buffer *restrict i
     state->totalWritten += out->position - outPositionBefore;
 }
 
-SSC_FORCE_INLINE SSC_BLOCK_ENCODE_STATE ssc_block_encode_init(ssc_block_encode_state *restrict state, const SSC_COMPRESSION_MODE mode, const SSC_BLOCK_TYPE blockType, void *kernelState, SSC_KERNEL_ENCODE_STATE (*kernelInit)(void *), SSC_KERNEL_ENCODE_STATE (*kernelProcess)(ssc_byte_buffer *, ssc_byte_buffer *, void *, const ssc_bool), SSC_KERNEL_ENCODE_STATE (*kernelFinish)(void *)) {
+SSC_FORCE_INLINE SSC_BLOCK_ENCODE_STATE ssc_block_encode_init(ssc_block_encode_state *restrict state, const SSC_BLOCK_MODE mode, const SSC_BLOCK_TYPE blockType, void *kernelState, SSC_KERNEL_ENCODE_STATE (*kernelInit)(void *), SSC_KERNEL_ENCODE_STATE (*kernelProcess)(ssc_byte_buffer *, ssc_byte_buffer *, void *, const ssc_bool), SSC_KERNEL_ENCODE_STATE (*kernelFinish)(void *)) {
     state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER;
     state->blockType = blockType;
     state->targetMode = mode;
@@ -97,6 +97,9 @@ SSC_FORCE_INLINE SSC_BLOCK_ENCODE_STATE ssc_block_encode_process(ssc_byte_buffer
     SSC_KERNEL_ENCODE_STATE hashEncodeState;
     uint_fast64_t inPositionBefore;
     uint_fast64_t outPositionBefore;
+    uint_fast64_t blockRemaining;
+    uint_fast64_t inRemaining;
+    uint_fast64_t outRemaining;
 
     while (true) {
         switch (state->process) {
@@ -126,29 +129,80 @@ SSC_FORCE_INLINE SSC_BLOCK_ENCODE_STATE ssc_block_encode_process(ssc_byte_buffer
                 inPositionBefore = in->position;
                 outPositionBefore = out->position;
 
-                hashEncodeState = state->kernelEncodeProcess(in, out, state->kernelEncodeState, flush);
-                ssc_block_encode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
+                switch (state->currentMode) {
+                    case SSC_BLOCK_MODE_COPY:
+                        blockRemaining = SSC_PREFERRED_BUFFER_SIZE - (state->totalRead - state->currentBlockData.inStart);
+                        inRemaining = in->size - in->position;
+                        outRemaining = out->size - out->position;
 
-                switch (hashEncodeState) {
-                    case SSC_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER:
-                        return SSC_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
+                        if (inRemaining <= outRemaining) {
+                            if (blockRemaining <= inRemaining)
+                                goto copy_until_end_of_block;
+                            else {
+                                memcpy(out->pointer + out->position, in->pointer + in->position, (size_t) inRemaining);
+                                in->position += inRemaining;
+                                out->position += inRemaining;
+                                ssc_block_encode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
+                                if (flush)
+                                    state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER;
+                                else
+                                    return SSC_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
+                            }
+                        } else {
+                            if (blockRemaining <= outRemaining)
+                                goto copy_until_end_of_block;
+                            else {
+                                memcpy(out->pointer + out->position, in->pointer + in->position, (size_t) outRemaining);
+                                in->position += outRemaining;
+                                out->position += outRemaining;
+                                ssc_block_encode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
+                                return SSC_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
+                            }
+                        }
+                        goto exit;
 
-                    case SSC_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER:
-                        return SSC_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
+                    copy_until_end_of_block:
+                        memcpy(out->pointer + out->position, in->pointer + in->position, (size_t) blockRemaining);
+                        in->position += blockRemaining;
+                        out->position += blockRemaining;
+                        ssc_block_encode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
+                        if (flush && inRemaining == blockRemaining)
+                            state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER;
+                        else
+                            state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER;
 
-                    case SSC_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK:
-                        state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER;
+                    exit:
                         break;
 
-                    case SSC_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK:
-                        state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER;
-                        break;
+                    case SSC_BLOCK_MODE_KERNEL:
+                        hashEncodeState = state->kernelEncodeProcess(in, out, state->kernelEncodeState, flush);
+                        ssc_block_encode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
 
-                    case SSC_KERNEL_ENCODE_STATE_FINISHED:
-                        state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER;
-                        break;
+                        switch (hashEncodeState) {
+                            case SSC_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER:
+                                return SSC_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
 
-                    case SSC_KERNEL_ENCODE_STATE_READY:
+                            case SSC_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER:
+                                return SSC_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
+
+                            case SSC_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK:
+                                state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER;
+                                break;
+
+                            case SSC_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK:
+                                state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER;
+                                break;
+
+                            case SSC_KERNEL_ENCODE_STATE_FINISHED:
+                                state->process = SSC_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER;
+                                break;
+
+                            case SSC_KERNEL_ENCODE_STATE_READY:
+                                break;
+
+                            default:
+                                return SSC_BLOCK_ENCODE_STATE_ERROR;
+                        }
                         break;
 
                     default:

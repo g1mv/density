@@ -33,14 +33,14 @@
 #include "block_mode_marker.h"
 
 SSC_FORCE_INLINE uint_fast32_t ssc_block_mode_marker_read(ssc_byte_buffer *restrict in, ssc_mode_marker *restrict modeMarker) {
-    modeMarker->activeCompressionMode = *(in->pointer + in->position);
+    modeMarker->activeBlockMode = *(in->pointer + in->position);
 
     in->position += sizeof(ssc_mode_marker);
 
     return sizeof(ssc_mode_marker);
 }
 
-SSC_FORCE_INLINE uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer *out, SSC_COMPRESSION_MODE mode) {
+SSC_FORCE_INLINE uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer *out, const SSC_BLOCK_MODE mode) {
     *(out->pointer + out->position) = (ssc_byte) mode;
 
     out->position += sizeof(ssc_mode_marker);

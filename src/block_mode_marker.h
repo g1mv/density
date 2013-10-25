@@ -40,12 +40,12 @@
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    ssc_byte activeCompressionMode;
+    ssc_byte activeBlockMode;
     ssc_byte reserved;    // To ensure 2-byte-wise length of output data // todo
 } ssc_mode_marker;
 #pragma pack(pop)
 
 uint_fast32_t ssc_block_mode_marker_read(ssc_byte_buffer*, ssc_mode_marker *);
-uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer*, SSC_COMPRESSION_MODE);
+uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer*, const SSC_BLOCK_MODE);
 
 #endif

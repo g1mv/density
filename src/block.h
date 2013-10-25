@@ -33,6 +33,8 @@
 #ifndef SSC_BLOCK_H
 #define SSC_BLOCK_H
 
+#include <string.h>
+
 #define SSC_MAX_BLOCK_SIGNATURES_SHIFT                        32
 
 #define SSC_PREFERRED_BLOCK_SIGNATURES_SHIFT                  11
@@ -45,5 +47,10 @@ typedef enum {
     SSC_BLOCK_TYPE_DEFAULT = 0,
     SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK = 1
 } SSC_BLOCK_TYPE;
+
+typedef enum {
+    SSC_BLOCK_MODE_COPY = 0,
+    SSC_BLOCK_MODE_KERNEL = 1
+} SSC_BLOCK_MODE;
 
 #endif

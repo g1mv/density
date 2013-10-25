@@ -65,8 +65,8 @@ typedef struct {
 
 typedef struct {
     SSC_BLOCK_ENCODE_PROCESS process;
-    SSC_COMPRESSION_MODE targetMode;
-    SSC_COMPRESSION_MODE currentMode;
+    SSC_BLOCK_MODE targetMode;
+    SSC_BLOCK_MODE currentMode;
     SSC_BLOCK_TYPE blockType;
 
     uint_fast64_t totalRead;
@@ -81,7 +81,7 @@ typedef struct {
 } ssc_block_encode_state;
 #pragma pack(pop)
 
-SSC_BLOCK_ENCODE_STATE ssc_block_encode_init(ssc_block_encode_state *, const SSC_COMPRESSION_MODE, const SSC_BLOCK_TYPE, void*, SSC_KERNEL_ENCODE_STATE (*)(void*), SSC_KERNEL_ENCODE_STATE (*)(ssc_byte_buffer *, ssc_byte_buffer *, void*, const ssc_bool), SSC_KERNEL_ENCODE_STATE (*)(void*));
+SSC_BLOCK_ENCODE_STATE ssc_block_encode_init(ssc_block_encode_state *, const SSC_BLOCK_MODE, const SSC_BLOCK_TYPE, void*, SSC_KERNEL_ENCODE_STATE (*)(void*), SSC_KERNEL_ENCODE_STATE (*)(ssc_byte_buffer *, ssc_byte_buffer *, void*, const ssc_bool), SSC_KERNEL_ENCODE_STATE (*)(void*));
 SSC_BLOCK_ENCODE_STATE ssc_block_encode_process(ssc_byte_buffer *, ssc_byte_buffer *, ssc_block_encode_state *, const ssc_bool);
 SSC_BLOCK_ENCODE_STATE ssc_block_encode_finish(ssc_block_encode_state *);
 

@@ -66,15 +66,16 @@ SSC_FORCE_INLINE SSC_ENCODE_STATE ssc_encode_init(ssc_byte_buffer *restrict out,
 
     switch (mode) {
         case SSC_COMPRESSION_MODE_COPY:
+            ssc_block_encode_init(&state->blockEncodeStateA, SSC_BLOCK_MODE_COPY, blockType, NULL, NULL, NULL, NULL);
             break;
 
         case SSC_COMPRESSION_MODE_CHAMELEON:
-            ssc_block_encode_init(&state->blockEncodeStateA, SSC_COMPRESSION_MODE_CHAMELEON, blockType, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_1p, (void*)ssc_chameleon_encode_process_1p, (void*)ssc_chameleon_encode_finish_1p);
+            ssc_block_encode_init(&state->blockEncodeStateA, SSC_BLOCK_MODE_KERNEL, blockType, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_1p, (void*)ssc_chameleon_encode_process_1p, (void*)ssc_chameleon_encode_finish_1p);
             break;
 
         case SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON:
-            ssc_block_encode_init(&state->blockEncodeStateA, SSC_COMPRESSION_MODE_CHAMELEON, SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_1p, (void*)ssc_chameleon_encode_process_1p, (void*)ssc_chameleon_encode_finish_1p);
-            ssc_block_encode_init(&state->blockEncodeStateB, SSC_COMPRESSION_MODE_CHAMELEON, blockType, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_2p, (void*)ssc_chameleon_encode_process_2p, (void*)ssc_chameleon_encode_finish_2p);
+            ssc_block_encode_init(&state->blockEncodeStateA, SSC_BLOCK_MODE_KERNEL, SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_1p, (void*)ssc_chameleon_encode_process_1p, (void*)ssc_chameleon_encode_finish_1p);
+            ssc_block_encode_init(&state->blockEncodeStateB, SSC_BLOCK_MODE_KERNEL, blockType, malloc(sizeof(ssc_chameleon_encode_state)), (void*)ssc_chameleon_encode_init_2p, (void*)ssc_chameleon_encode_process_2p, (void*)ssc_chameleon_encode_finish_2p);
             break;
     }
 
