@@ -33,9 +33,77 @@
 #ifndef SSC_API_H
 #define SSC_API_H
 
-#include "stream.h"
-#include "buffers.h"
-#include "globals.h"
+#include <stdint.h>
+#include <stdbool.h>
+
+
+
+/***********************************************************************************************************************
+ *                                                                                                                     *
+ * SSC structures useful for the API                                                                                   *
+ *                                                                                                                     *
+ ***********************************************************************************************************************/
+
+typedef uint8_t ssc_byte;
+typedef bool ssc_bool;
+
+typedef enum {
+    SSC_COMPRESSION_MODE_COPY = 0,
+    SSC_COMPRESSION_MODE_CHAMELEON = 1,
+    SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON = 2,
+} SSC_COMPRESSION_MODE;
+
+typedef enum {
+    SSC_ENCODE_OUTPUT_TYPE_DEFAULT = 0,
+    SSC_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER = 1,
+    SSC_ENCODE_OUTPUT_TYPE_WITHOUT_FOOTER = 2,
+    SSC_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER_NOR_FOOTER = 3
+} SSC_ENCODE_OUTPUT_TYPE;
+
+typedef enum {
+    SSC_BLOCK_TYPE_DEFAULT = 0,
+    SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK = 1
+} SSC_BLOCK_TYPE;
+
+typedef enum {
+    SSC_BUFFERS_STATE_OK = 0,                                       // ready to continue
+    SSC_BUFFERS_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                // output buffer size is too small
+    SSC_BUFFERS_STATE_ERROR_INVALID_STATE                           // error during processing
+} SSC_BUFFERS_STATE;
+
+typedef enum {
+    SSC_STREAM_STATE_READY = 0,                                     // ready to continue
+    SSC_STREAM_STATE_STALL_ON_INPUT_BUFFER,                         // input buffer has been completely read
+    SSC_STREAM_STATE_STALL_ON_OUTPUT_BUFFER,                        // there is not enought space left in the output buffer to continue
+    SSC_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32,    // size of input buffer is no a multiple of 32
+    SSC_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // output buffer size is too small
+    SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE                   // error during processing
+} SSC_STREAM_STATE;
+
+typedef struct {
+    ssc_byte version[3];
+    ssc_byte compressionMode;
+    ssc_byte blockType;
+    ssc_byte parameters[7];
+} ssc_main_header;
+
+typedef struct {
+    ssc_byte* pointer;
+    uint_fast64_t position;
+    uint_fast64_t size;
+} ssc_byte_buffer;
+
+typedef struct {
+    ssc_byte_buffer in;
+    uint_fast64_t* in_total_read;
+
+    ssc_byte_buffer out;
+    uint_fast64_t* out_total_written;
+
+    void* internal_state;
+} ssc_stream;
+
+
 
 /***********************************************************************************************************************
  *                                                                                                                     *
@@ -44,7 +112,7 @@
  ***********************************************************************************************************************/
 
 /*
- * Rewind a SSC byte buffer
+ * Rewind an SSC byte buffer
  *
  * @param byte_buffer the SSC byte buffer to rewind (its position is set to zero)
  */
@@ -54,36 +122,7 @@ void ssc_byte_buffer_rewind(ssc_byte_buffer* byte_buffer);
 
 /***********************************************************************************************************************
  *                                                                                                                     *
- * SSC header utilities                                                                                                *
- *                                                                                                                     *
- ***********************************************************************************************************************/
-
-/*
- * Restore file attributes if any were stored in the SSC header.
- * Returns true if attributes were properly restored, or false if restoring failed or there were no attributes stored in the header.
- *
- * @param header a pointer to a SSC header
- * @param file_name the file name to restore the attributes to
- */
-bool ssc_header_restore_file_attributes(ssc_main_header *header, const char *file_name);
-
-
-
-/***********************************************************************************************************************
- *                                                                                                                     *
  * SSC stream API functions                                                                                            *
- *                                                                                                                     *
- * For a simple example of how to use the stream API, please have a look at client.c                                   *
- *                                                                                                                     *
- * SSC_STREAM_STATE can have the following values :                                                                    *
- *                                                                                                                     *
- * SSC_STREAM_STATE_READY, ready to continue                                                                           *
- * SSC_STREAM_STATE_FINISHED_ENCODING, processing is finished                                                          *
- * SSC_STREAM_STATE_STALL_ON_INPUT_BUFFER, input buffer has been completely read                                       *
- * SSC_STREAM_STATE_STALL_ON_OUTPUT_BUFFER, there is not enought space left in the output buffer to continue           *
- * SSC_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32, size of input buffer is no a multiple of 32            *
- * SSC_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL, output buffer size is too small                                     *
- * SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE, error during processing                                              *
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
@@ -98,7 +137,7 @@ bool ssc_header_restore_file_attributes(ssc_main_header *header, const char *fil
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-SSC_STREAM_STATE ssc_stream_prepare(ssc_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+SSC_STREAM_STATE ssc_stream_prepare(ssc_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(), void (*mem_free)(void *));
 
 /*
  * Initialize compression
@@ -128,7 +167,7 @@ SSC_STREAM_STATE ssc_stream_decompress_init(ssc_stream *stream);
 
 /*
  * Stream compression function, has to be called repetitively.
- * When the dataset in the input buffer is the last, last_input_data has to be true. Otherwise it should be false at all times.
+ * When the dataset in the input buffer is the last, flush has to be true. Otherwise it should be false at all times.
  *
  * @param stream the stream
  *      Please note that the input buffer size, if flush is false, *must* be a multiple of 32 otherwise an error will be returned.
@@ -144,7 +183,7 @@ SSC_STREAM_STATE ssc_stream_compress(ssc_stream *stream, const ssc_bool flush);
 
 /*
  * Stream decompression function, has to be called repetitively.
- * When the dataset in the input buffer is the last, last_input_data has to be true. Otherwise it should be false at all times.
+ * When the dataset in the input buffer is the last, flush has to be true. Otherwise it should be false at all times.
  *
  * @param stream the stream
  * @param flush a boolean indicating flush behaviour
@@ -182,12 +221,6 @@ SSC_STREAM_STATE ssc_stream_decompress_utilities_get_header(ssc_stream* stream, 
  *                                                                                                                     *
  * SSC buffers API functions                                                                                           *
  *                                                                                                                     *
- * Here are the different values for SSC_BUFFERS_STATE :                                                               *
- *                                                                                                                     *
- * SSC_BUFFERS_STATE_OK                                                                                                *
- * SSC_BUFFERS_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL, the provided output buffer is too small                            *
- * SSC_BUFFERS_STATE_ERROR_INVALID_STATE, an error occurred during processing                                          *
- *                                                                                                                     *
  ***********************************************************************************************************************/
 
 /*
@@ -213,7 +246,7 @@ SSC_BUFFERS_STATE ssc_buffers_max_compressed_length(uint_fast64_t * result, uint
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-SSC_BUFFERS_STATE ssc_buffers_compress(uint_fast64_t* total_written, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, const SSC_COMPRESSION_MODE compression_mode, const SSC_ENCODE_OUTPUT_TYPE output_type, const SSC_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+SSC_BUFFERS_STATE ssc_buffers_compress(uint_fast64_t* total_written, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, const SSC_COMPRESSION_MODE compression_mode, const SSC_ENCODE_OUTPUT_TYPE output_type, const SSC_BLOCK_TYPE block_type, void *(*mem_alloc)(), void (*mem_free)(void *));
 
 /*
  * Buffers decompression function
@@ -227,6 +260,6 @@ SSC_BUFFERS_STATE ssc_buffers_compress(uint_fast64_t* total_written, uint8_t *in
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-SSC_BUFFERS_STATE ssc_buffers_decompress(uint_fast64_t * total_written, ssc_main_header* header, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+SSC_BUFFERS_STATE ssc_buffers_decompress(uint_fast64_t * total_written, ssc_main_header* header, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, void *(*mem_alloc)(), void (*mem_free)(void *));
 
 #endif

@@ -36,17 +36,20 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_prepare(ssc_stream *restrict stream
     ssc_byte_buffer_encapsulate(&stream->in, in, availableIn);
     ssc_byte_buffer_encapsulate(&stream->out, out, availableOut);
 
-    if (mem_alloc == NULL)
-        stream->internal_state.mem_alloc = malloc;
-    else
-        stream->internal_state.mem_alloc = mem_alloc;
+    if (mem_alloc == NULL) {
+        stream->internal_state = (ssc_stream_state *) malloc(sizeof(ssc_stream_state));
+        ((ssc_stream_state *) stream->internal_state)->mem_alloc = malloc;
+    } else {
+        stream->internal_state = (ssc_stream_state *) mem_alloc(sizeof(ssc_stream_state));
+        ((ssc_stream_state *) stream->internal_state)->mem_alloc = mem_alloc;
+    }
 
     if (mem_free == NULL)
-        stream->internal_state.mem_free = free;
+        ((ssc_stream_state *) stream->internal_state)->mem_free = free;
     else
-        stream->internal_state.mem_free = mem_free;
+        ((ssc_stream_state *) stream->internal_state)->mem_free = mem_free;
 
-    stream->internal_state.process = SSC_STREAM_PROCESS_PREPARED;
+    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_PREPARED;
 
     return SSC_STREAM_STATE_READY;
 }
@@ -59,28 +62,28 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_check_conformity(ssc_stream *stream
 }
 
 SSC_FORCE_INLINE void ssc_stream_malloc_work_buffer(ssc_stream *stream, uint_fast64_t workSize) {
-    if (stream->internal_state.workBuffer.size ^ workSize) {
-        stream->internal_state.mem_free(stream->internal_state.workBuffer.pointer);
-        ssc_byte_buffer_encapsulate(&stream->internal_state.workBuffer, stream->internal_state.mem_alloc((size_t) workSize), workSize);
+    if (((ssc_stream_state *) stream->internal_state)->workBuffer.size ^ workSize) {
+        ((ssc_stream_state *) stream->internal_state)->mem_free(((ssc_stream_state *) stream->internal_state)->workBuffer.pointer);
+        ssc_byte_buffer_encapsulate(&((ssc_stream_state *) stream->internal_state)->workBuffer, ((ssc_stream_state *) stream->internal_state)->mem_alloc((size_t) workSize), workSize);
     } else
-        ssc_byte_buffer_rewind(&stream->internal_state.workBuffer);
+        ssc_byte_buffer_rewind(&((ssc_stream_state *) stream->internal_state)->workBuffer);
 }
 
 SSC_FORCE_INLINE void ssc_stream_free_work_buffer(ssc_stream *stream) {
-    stream->internal_state.mem_free(stream->internal_state.workBuffer.pointer);
-    stream->internal_state.workBuffer.pointer = NULL;
+    ((ssc_stream_state *) stream->internal_state)->mem_free(((ssc_stream_state *) stream->internal_state)->workBuffer.pointer);
+    ((ssc_stream_state *) stream->internal_state)->workBuffer.pointer = NULL;
 }
 
 SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress_init(ssc_stream *restrict stream, const SSC_COMPRESSION_MODE compressionMode, const SSC_ENCODE_OUTPUT_TYPE outputType, const SSC_BLOCK_TYPE blockType) {
-    if (stream->internal_state.process ^ SSC_STREAM_PROCESS_PREPARED)
+    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_PREPARED)
         return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
     SSC_STREAM_STATE streamState = ssc_stream_check_conformity(stream);
     if (streamState)
         return streamState;
 
-    uint_fast64_t workBufferSize = /* todo SSC_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD*/ + 0x20 + ssc_metadata_max_compressed_length(stream->in.size, SSC_COMPRESSION_MODE_CHAMELEON, false);
-    SSC_ENCODE_STATE encodeState = ssc_encode_init(&stream->out, &stream->internal_state.workBuffer, workBufferSize, &stream->internal_state.internal_encode_state, compressionMode, outputType, blockType);
+    uint_fast64_t workBufferSize = /* todo SSC_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD*/ +0x20 + ssc_metadata_max_compressed_length(stream->in.size, SSC_COMPRESSION_MODE_CHAMELEON, false);
+    SSC_ENCODE_STATE encodeState = ssc_encode_init(&stream->out, &((ssc_stream_state *) stream->internal_state)->workBuffer, workBufferSize, &((ssc_stream_state *) stream->internal_state)->internal_encode_state, compressionMode, outputType, blockType);
     switch (encodeState) {
         case SSC_ENCODE_STATE_READY:
             break;
@@ -92,13 +95,13 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress_init(ssc_stream *restrict 
             return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    stream->in_total_read = &stream->internal_state.internal_encode_state.totalRead;
-    stream->out_total_written = &stream->internal_state.internal_encode_state.totalWritten;
+    stream->in_total_read = &((ssc_stream_state *) stream->internal_state)->internal_encode_state.totalRead;
+    stream->out_total_written = &((ssc_stream_state *) stream->internal_state)->internal_encode_state.totalWritten;
 
     if (compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON)
         ssc_stream_malloc_work_buffer(stream, workBufferSize);
 
-    stream->internal_state.process = SSC_STREAM_PROCESS_COMPRESSION_INITED;
+    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_COMPRESSION_INITED;
 
     return SSC_STREAM_STATE_READY;
 }
@@ -106,7 +109,7 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress_init(ssc_stream *restrict 
 SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress(ssc_stream *stream, const ssc_bool flush) {
     SSC_ENCODE_STATE encodeState;
 
-    if (stream->internal_state.process ^ SSC_STREAM_PROCESS_COMPRESSION_INITED)
+    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_COMPRESSION_INITED)
         return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
     SSC_STREAM_STATE streamState = ssc_stream_check_conformity(stream);
@@ -116,7 +119,7 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress(ssc_stream *stream, const 
     if (!flush) if (stream->in.size & 0x1F)
         return SSC_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32;
 
-    encodeState = ssc_encode_process(&stream->in, &stream->out, &stream->internal_state.internal_encode_state, flush);
+    encodeState = ssc_encode_process(&stream->in, &stream->out, &((ssc_stream_state *) stream->internal_state)->internal_encode_state, flush);
     switch (encodeState) {
         case SSC_ENCODE_STATE_READY:
             break;
@@ -131,20 +134,20 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress(ssc_stream *stream, const 
             return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    stream->internal_state.process = SSC_STREAM_PROCESS_COMPRESSION_DATA_FINISHED;
+    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_COMPRESSION_DATA_FINISHED;
 
     return SSC_STREAM_STATE_READY;
 }
 
 SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress_finish(ssc_stream *stream) {
-    if (stream->internal_state.process ^ SSC_STREAM_PROCESS_COMPRESSION_DATA_FINISHED)
+    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_COMPRESSION_DATA_FINISHED)
         return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
     SSC_STREAM_STATE streamState = ssc_stream_check_conformity(stream);
     if (streamState)
         return streamState;
 
-    SSC_ENCODE_STATE encodeState = ssc_encode_finish(&stream->out, &stream->internal_state.internal_encode_state);
+    SSC_ENCODE_STATE encodeState = ssc_encode_finish(&stream->out, &((ssc_stream_state *) stream->internal_state)->internal_encode_state);
     switch (encodeState) {
         case SSC_ENCODE_STATE_READY:
             break;
@@ -156,16 +159,16 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress_finish(ssc_stream *stream)
             return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    if (stream->internal_state.internal_encode_state.compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON)
+    if (((ssc_stream_state *) stream->internal_state)->internal_encode_state.compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON)
         ssc_stream_free_work_buffer(stream);
 
-    stream->internal_state.process = SSC_STREAM_PROCESS_COMPRESSION_FINISHED;
+    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_COMPRESSION_FINISHED;
 
     return SSC_STREAM_STATE_READY;
 }
 
 SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress_init(ssc_stream *stream) {
-    if (stream->internal_state.process ^ SSC_STREAM_PROCESS_PREPARED)
+    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_PREPARED)
         return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
     SSC_STREAM_STATE streamState = ssc_stream_check_conformity(stream);
@@ -173,7 +176,7 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress_init(ssc_stream *stream)
         return streamState;
 
     uint_fast64_t workBufferSize = 0x20 + ssc_metadata_max_decompressed_length(stream->in.size, SSC_COMPRESSION_MODE_CHAMELEON, false);
-    SSC_DECODE_STATE decodeState = ssc_decode_init(&stream->in, &stream->internal_state.workBuffer, workBufferSize, &stream->internal_state.internal_decode_state);
+    SSC_DECODE_STATE decodeState = ssc_decode_init(&stream->in, &((ssc_stream_state *) stream->internal_state)->workBuffer, workBufferSize, &((ssc_stream_state *) stream->internal_state)->internal_decode_state);
     switch (decodeState) {
         case SSC_DECODE_STATE_READY:
             break;
@@ -185,26 +188,26 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress_init(ssc_stream *stream)
             return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    stream->in_total_read = &stream->internal_state.internal_decode_state.totalRead;
-    stream->out_total_written = &stream->internal_state.internal_decode_state.totalWritten;
+    stream->in_total_read = &((ssc_stream_state *) stream->internal_state)->internal_decode_state.totalRead;
+    stream->out_total_written = &((ssc_stream_state *) stream->internal_state)->internal_decode_state.totalWritten;
 
-    if (stream->internal_state.internal_decode_state.header.compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON)
+    if (((ssc_stream_state *) stream->internal_state)->internal_decode_state.header.compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON)
         ssc_stream_malloc_work_buffer(stream, workBufferSize);
 
-    stream->internal_state.process = SSC_STREAM_PROCESS_DECOMPRESSION_INITED;
+    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_DECOMPRESSION_INITED;
 
     return SSC_STREAM_STATE_READY;
 }
 
 SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress(ssc_stream *stream, const ssc_bool flush) {
-    if (stream->internal_state.process ^ SSC_STREAM_PROCESS_DECOMPRESSION_INITED)
+    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_DECOMPRESSION_INITED)
         return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
     SSC_STREAM_STATE streamState = ssc_stream_check_conformity(stream);
     if (streamState)
         return streamState;
 
-    SSC_DECODE_STATE decodeState = ssc_decode_process(&stream->in, &stream->out, &stream->internal_state.internal_decode_state, flush);
+    SSC_DECODE_STATE decodeState = ssc_decode_process(&stream->in, &stream->out, &((ssc_stream_state *) stream->internal_state)->internal_decode_state, flush);
     switch (decodeState) {
         case SSC_DECODE_STATE_READY:
             break;
@@ -219,16 +222,16 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress(ssc_stream *stream, cons
             return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    stream->internal_state.process = SSC_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED;
+    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED;
 
     return SSC_STREAM_STATE_READY;
 }
 
 SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress_finish(ssc_stream *stream) {
-    if (stream->internal_state.process ^ SSC_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED)
+    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED)
         return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
-    SSC_DECODE_STATE decodeState = ssc_decode_finish(&stream->in, &stream->internal_state.internal_decode_state);
+    SSC_DECODE_STATE decodeState = ssc_decode_finish(&stream->in, &((ssc_stream_state *) stream->internal_state)->internal_decode_state);
     switch (decodeState) {
         case SSC_DECODE_STATE_READY:
             break;
@@ -240,20 +243,20 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress_finish(ssc_stream *strea
             return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    if (stream->internal_state.internal_decode_state.header.compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON)
+    if (((ssc_stream_state *) stream->internal_state)->internal_decode_state.header.compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON)
         ssc_stream_free_work_buffer(stream);
 
-    stream->internal_state.process = SSC_STREAM_PROCESS_DECOMPRESSION_FINISHED;
+    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_DECOMPRESSION_FINISHED;
 
     return SSC_STREAM_STATE_READY;
 }
 
 SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress_utilities_get_header(ssc_stream *restrict stream, ssc_main_header *restrict header) {
-    switch (stream->internal_state.process) {
+    switch (((ssc_stream_state *) stream->internal_state)->process) {
         case  SSC_STREAM_PROCESS_DECOMPRESSION_INITED:
         case SSC_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED:
         case SSC_STREAM_PROCESS_DECOMPRESSION_FINISHED:
-            *header = stream->internal_state.internal_decode_state.header;
+            *header = ((ssc_stream_state *) stream->internal_state)->internal_decode_state.header;
             return SSC_STREAM_STATE_READY;
         default:
             return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;

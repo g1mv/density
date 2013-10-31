@@ -42,6 +42,7 @@
 #include "block_mode_marker.h"
 #include "block_encode.h"
 #include "kernel_chameleon_encode.h"
+#include "api.h"
 
 typedef enum {
     SSC_ENCODE_STATE_READY = 0,
@@ -57,13 +58,6 @@ typedef enum {
     SSC_ENCODE_PROCESS_WRITE_FOOTER,
     SSC_ENCODE_PROCESS_FINISHED
 } SSC_ENCODE_PROCESS;
-
-typedef enum {
-    SSC_ENCODE_OUTPUT_TYPE_DEFAULT = 0,
-    SSC_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER = 1,
-    SSC_ENCODE_OUTPUT_TYPE_WITHOUT_FOOTER = 2,
-    SSC_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER_NOR_FOOTER = 3
-} SSC_ENCODE_OUTPUT_TYPE;
 
 #pragma pack(push)
 #pragma pack(4)

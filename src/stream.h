@@ -46,15 +46,6 @@
 #define SSC_STREAM_MINIMUM_OUT_BUFFER_SIZE                        (1 << 9)
 
 typedef enum {
-    SSC_STREAM_STATE_READY = 0,
-    SSC_STREAM_STATE_STALL_ON_INPUT_BUFFER,
-    SSC_STREAM_STATE_STALL_ON_OUTPUT_BUFFER,
-    SSC_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32,
-    SSC_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,
-    SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE
-} SSC_STREAM_STATE;
-
-typedef enum {
     SSC_STREAM_PROCESS_PREPARED,
     SSC_STREAM_PROCESS_COMPRESSION_INITED,
     SSC_STREAM_PROCESS_COMPRESSION_DATA_FINISHED,
@@ -75,16 +66,6 @@ typedef struct {
     ssc_encode_state internal_encode_state;
     ssc_decode_state internal_decode_state;
 } ssc_stream_state;
-
-typedef struct {
-    ssc_byte_buffer in;
-    uint_fast64_t* in_total_read;
-
-    ssc_byte_buffer out;
-    uint_fast64_t* out_total_written;
-
-    ssc_stream_state internal_state;
-} ssc_stream;
 
 SSC_STREAM_STATE ssc_stream_prepare(ssc_stream *, uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
 

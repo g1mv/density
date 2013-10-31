@@ -38,7 +38,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stddef.h>
-#include <stdbool.h>
 
 #if defined(__INTEL_COMPILER)
 #define SSC_FORCE_INLINE __forceinline
@@ -79,14 +78,5 @@
 #define SSC_MAJOR_VERSION               0
 #define SSC_MINOR_VERSION               9
 #define SSC_REVISION                    11
-
-typedef uint8_t ssc_byte;
-typedef bool ssc_bool;
-
-typedef enum {
-    SSC_COMPRESSION_MODE_COPY = 0,
-    SSC_COMPRESSION_MODE_CHAMELEON = 1,
-    SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON = 2,
-} SSC_COMPRESSION_MODE;
 
 #endif

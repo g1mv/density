@@ -43,12 +43,6 @@
 
 #pragma pack(push)
 #pragma pack(4)
-typedef struct {
-    ssc_byte version[3];
-    ssc_byte compressionMode;
-    ssc_byte blockType;
-    ssc_byte parameters[7];
-} ssc_main_header;
 #pragma pack(pop)
 
 uint_fast32_t ssc_main_header_read(ssc_byte_buffer*, ssc_main_header*);

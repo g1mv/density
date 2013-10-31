@@ -37,12 +37,6 @@
 #include "stream.h"
 #include "metadata.h"
 
-typedef enum {
-    SSC_BUFFERS_STATE_OK = 0,
-    SSC_BUFFERS_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,
-    SSC_BUFFERS_STATE_ERROR_INVALID_STATE
-} SSC_BUFFERS_STATE;
-
 SSC_BUFFERS_STATE ssc_buffers_max_compressed_length(uint_fast64_t *, uint_fast64_t, const SSC_COMPRESSION_MODE);
 SSC_BUFFERS_STATE ssc_buffers_compress(uint_fast64_t*, uint8_t *, uint_fast64_t, uint8_t *, uint_fast64_t, const SSC_COMPRESSION_MODE, const SSC_ENCODE_OUTPUT_TYPE, const SSC_BLOCK_TYPE, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 SSC_BUFFERS_STATE ssc_buffers_decompress(uint_fast64_t *, ssc_main_header*, uint8_t *, uint_fast64_t, uint8_t *, uint_fast64_t, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
