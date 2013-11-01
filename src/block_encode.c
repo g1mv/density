@@ -82,19 +82,25 @@ SSC_FORCE_INLINE SSC_BLOCK_ENCODE_STATE ssc_block_encode_init(ssc_block_encode_s
     state->totalRead = 0;
     state->totalWritten = 0;
 
-    state->kernelEncodeState = kernelState;
-    state->kernelEncodeInit = kernelInit;
-    state->kernelEncodeProcess = kernelProcess;
-    state->kernelEncodeFinish = kernelFinish;
+    switch (mode) {
+        case SSC_BLOCK_MODE_KERNEL:
+            state->kernelEncodeState = kernelState;
+            state->kernelEncodeInit = kernelInit;
+            state->kernelEncodeProcess = kernelProcess;
+            state->kernelEncodeFinish = kernelFinish;
 
-    state->kernelEncodeInit(state->kernelEncodeState);
+            state->kernelEncodeInit(state->kernelEncodeState);
+            break;
+        default:
+            break;
+    }
 
     return SSC_BLOCK_ENCODE_STATE_READY;
 }
 
 SSC_FORCE_INLINE SSC_BLOCK_ENCODE_STATE ssc_block_encode_process(ssc_byte_buffer *restrict in, ssc_byte_buffer *restrict out, ssc_block_encode_state *restrict state, const ssc_bool flush) {
     SSC_BLOCK_ENCODE_STATE encodeState;
-    SSC_KERNEL_ENCODE_STATE hashEncodeState;
+    SSC_KERNEL_ENCODE_STATE kernelEncodeState;
     uint_fast64_t inPositionBefore;
     uint_fast64_t outPositionBefore;
     uint_fast64_t blockRemaining;
@@ -131,7 +137,7 @@ SSC_FORCE_INLINE SSC_BLOCK_ENCODE_STATE ssc_block_encode_process(ssc_byte_buffer
 
                 switch (state->currentMode) {
                     case SSC_BLOCK_MODE_COPY:
-                        blockRemaining = SSC_PREFERRED_BUFFER_SIZE - (state->totalRead - state->currentBlockData.inStart);
+                        blockRemaining = (uint_fast64_t)SSC_PREFERRED_BUFFER_SIZE - (state->totalRead - state->currentBlockData.inStart);
                         inRemaining = in->size - in->position;
                         outRemaining = out->size - out->position;
 
@@ -175,10 +181,10 @@ SSC_FORCE_INLINE SSC_BLOCK_ENCODE_STATE ssc_block_encode_process(ssc_byte_buffer
                         break;
 
                     case SSC_BLOCK_MODE_KERNEL:
-                        hashEncodeState = state->kernelEncodeProcess(in, out, state->kernelEncodeState, flush);
+                        kernelEncodeState = state->kernelEncodeProcess(in, out, state->kernelEncodeState, flush);
                         ssc_block_encode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
 
-                        switch (hashEncodeState) {
+                        switch (kernelEncodeState) {
                             case SSC_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER:
                                 return SSC_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
 

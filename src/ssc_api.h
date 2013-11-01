@@ -111,8 +111,19 @@ typedef struct {
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
+/*
+ * Returns the major ssc version
+ */
 uint8_t ssc_version_major();
+
+/*
+ * Returns the minor ssc version
+ */
 uint8_t ssc_version_minor();
+
+/*
+ * Returns the ssc revision
+ */
 uint8_t ssc_version_revision();
 
 

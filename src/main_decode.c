@@ -74,12 +74,12 @@ SSC_FORCE_INLINE SSC_DECODE_STATE ssc_decode_init(ssc_byte_buffer *in, ssc_byte_
             break;
 
         case SSC_COMPRESSION_MODE_CHAMELEON:
-            ssc_block_decode_init(&state->blockDecodeStateA, SSC_BLOCK_MODE_KERNEL, (SSC_BLOCK_TYPE) state->header.blockType, sizeof(ssc_main_footer), malloc(sizeof(ssc_chameleon_decode_state)), (void*)ssc_chameleon_decode_init_1p, (void*)ssc_chameleon_decode_process_1p, (void*)ssc_chameleon_decode_finish_1p);
+            ssc_block_decode_init(&state->blockDecodeStateA, SSC_BLOCK_MODE_KERNEL, (SSC_BLOCK_TYPE) state->header.blockType, sizeof(ssc_main_footer), malloc(sizeof(ssc_chameleon_decode_state)), (void *) ssc_chameleon_decode_init_1p, (void *) ssc_chameleon_decode_process_1p, (void *) ssc_chameleon_decode_finish_1p);
             break;
 
         case SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON:
-            ssc_block_decode_init(&state->blockDecodeStateA, SSC_BLOCK_MODE_KERNEL, (SSC_BLOCK_TYPE) state->header.blockType, sizeof(ssc_main_footer), malloc(sizeof(ssc_chameleon_decode_state)), (void*)ssc_chameleon_decode_init_2p, (void*)ssc_chameleon_decode_process_2p, (void*)ssc_chameleon_decode_finish_2p);
-            ssc_block_decode_init(&state->blockDecodeStateB, SSC_BLOCK_MODE_KERNEL, SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK, 0, malloc(sizeof(ssc_chameleon_decode_state)), (void*)ssc_chameleon_decode_init_1p, (void*)ssc_chameleon_decode_process_1p, (void*)ssc_chameleon_decode_finish_1p);
+            ssc_block_decode_init(&state->blockDecodeStateA, SSC_BLOCK_MODE_KERNEL, (SSC_BLOCK_TYPE) state->header.blockType, sizeof(ssc_main_footer), malloc(sizeof(ssc_chameleon_decode_state)), (void *) ssc_chameleon_decode_init_2p, (void *) ssc_chameleon_decode_process_2p, (void *) ssc_chameleon_decode_finish_2p);
+            ssc_block_decode_init(&state->blockDecodeStateB, SSC_BLOCK_MODE_KERNEL, SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK, 0, malloc(sizeof(ssc_chameleon_decode_state)), (void *) ssc_chameleon_decode_init_1p, (void *) ssc_chameleon_decode_process_1p, (void *) ssc_chameleon_decode_finish_1p);
             break;
 
         default:
@@ -188,11 +188,18 @@ SSC_FORCE_INLINE SSC_DECODE_STATE ssc_decode_finish(ssc_byte_buffer *in, ssc_dec
     if (state->process ^ SSC_DECODE_PROCESS_READ_FOOTER)
         return SSC_DECODE_STATE_ERROR;
 
-    ssc_block_decode_finish(&state->blockDecodeStateA);
-    free(state->blockDecodeStateA.kernelDecodeState);
-    if (state->header.compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON) {
-        ssc_block_decode_finish(&state->blockDecodeStateB);
-        free(state->blockDecodeStateB.kernelDecodeState);
+    switch (state->header.compressionMode) {
+        case SSC_COMPRESSION_MODE_CHAMELEON:
+            ssc_block_decode_finish(&state->blockDecodeStateA);
+            free(state->blockDecodeStateA.kernelDecodeState);
+
+        case SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON:
+            ssc_block_decode_finish(&state->blockDecodeStateB);
+            free(state->blockDecodeStateB.kernelDecodeState);
+            break;
+
+        default:
+            break;
     }
 
     return ssc_decode_read_footer(in, state);

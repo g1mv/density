@@ -80,12 +80,18 @@ SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_init(ssc_block_decode_s
     state->totalWritten = 0;
     state->endDataOverhead = (state->blockType == SSC_BLOCK_TYPE_DEFAULT ? sizeof(ssc_block_footer) : 0) + endDataOverhead;
 
-    state->kernelDecodeState = kernelState;
-    state->kernelDecodeInit = kernelInit;
-    state->kernelDecodeProcess = kernelProcess;
-    state->kernelDecodeFinish = kernelFinish;
+    switch (mode) {
+        case SSC_BLOCK_MODE_KERNEL:
+            state->kernelDecodeState = kernelState;
+            state->kernelDecodeInit = kernelInit;
+            state->kernelDecodeProcess = kernelProcess;
+            state->kernelDecodeFinish = kernelFinish;
 
-    state->kernelDecodeInit(state->kernelDecodeState, state->endDataOverhead);
+            state->kernelDecodeInit(state->kernelDecodeState, state->endDataOverhead);
+            break;
+        default:
+            break;
+    }
 
     return SSC_BLOCK_DECODE_STATE_READY;
 }
@@ -129,7 +135,7 @@ SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_process(ssc_byte_buffer
                 outPositionBefore = out->position;
                 switch (state->mode) {
                     case SSC_BLOCK_MODE_COPY:
-                        blockRemaining = SSC_PREFERRED_BUFFER_SIZE - (state->totalWritten - state->currentBlockData.outStart);
+                        blockRemaining = (uint_fast64_t) SSC_PREFERRED_BUFFER_SIZE - (state->totalWritten - state->currentBlockData.outStart);
                         inRemaining = in->size - in->position;
                         outRemaining = out->size - out->position;
 

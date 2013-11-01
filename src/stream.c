@@ -82,7 +82,7 @@ SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress_init(ssc_stream *restrict 
     if (streamState)
         return streamState;
 
-    uint_fast64_t workBufferSize = /* todo SSC_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD*/ +0x20 + ssc_metadata_max_compressed_length(stream->in.size, SSC_COMPRESSION_MODE_CHAMELEON, false);
+    uint_fast64_t workBufferSize = /* todo SSC_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD*/ + 0x20 + ssc_metadata_max_compressed_length(stream->in.size, SSC_COMPRESSION_MODE_CHAMELEON, false);
     SSC_ENCODE_STATE encodeState = ssc_encode_init(&stream->out, &((ssc_stream_state *) stream->internal_state)->workBuffer, workBufferSize, &((ssc_stream_state *) stream->internal_state)->internal_encode_state, compressionMode, outputType, blockType);
     switch (encodeState) {
         case SSC_ENCODE_STATE_READY:
