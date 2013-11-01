@@ -97,7 +97,7 @@ SSC_BUFFERS_STATE ssc_buffers_decompress(uint_fast64_t *restrict written, ssc_ma
         return ssc_buffers_translate_state(returnState);
 
     if (header)
-        *header = stream->internal_state.internal_decode_state.header;
+        *header = ((ssc_stream_state *) stream->internal_state)->internal_decode_state.header;
 
     if ((returnState = ssc_stream_decompress(stream, true)))
         return ssc_buffers_translate_state(returnState);

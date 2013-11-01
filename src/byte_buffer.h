@@ -34,14 +34,9 @@
 #define SSC_BYTE_BUFFER_H
 
 #include "globals.h"
+#include "ssc_api.h"
 
 #define SSC_PREFERRED_BUFFER_SIZE             (1 << 19)
-
-typedef struct {
-    ssc_byte* pointer;
-    uint_fast64_t position;
-    uint_fast64_t size;
-} ssc_byte_buffer;
 
 void ssc_byte_buffer_encapsulate(ssc_byte_buffer *, ssc_byte*, const uint_fast64_t);
 void ssc_byte_buffer_rewind(ssc_byte_buffer *);

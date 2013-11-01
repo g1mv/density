@@ -40,16 +40,7 @@
 #include "globals.h"
 #include "byte_buffer.h"
 #include "block.h"
-
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    ssc_byte version[3];
-    ssc_byte compressionMode;
-    ssc_byte blockType;
-    ssc_byte parameters[7];
-} ssc_main_header;
-#pragma pack(pop)
+#include "ssc_api.h"
 
 uint_fast32_t ssc_main_header_read(ssc_byte_buffer*, ssc_main_header*);
 uint_fast32_t ssc_main_header_write(ssc_byte_buffer*, const SSC_COMPRESSION_MODE, const SSC_BLOCK_TYPE);

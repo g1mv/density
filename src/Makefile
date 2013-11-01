@@ -44,9 +44,17 @@ CFLAGS = -std=c99 -fPIC
 
 ifeq ($(OS),Windows_NT)
     EXTENSION = .dll
+    DESTINATION = c:/windows/system/
     ARROW = ^-^>
 else
-    EXTENSION = .so
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        EXTENSION = .so
+    endif
+    ifeq ($(UNAME_S),Darwin)
+        EXTENSION = .dylib
+    endif
+    DESTINATION = /usr/lib/
     ARROW = \-\>
 endif
 
@@ -81,6 +89,12 @@ ALL_OBJ = $(OBJ_CHAMELEON_1P) $(OBJ_CHAMELEON_2P) $(OBJ)
 .PHONY: header footer kernels blocks
 
 all: header $(TARGET)$(EXTENSION) footer
+
+install:
+	@echo ${bold}Installing${normal} ...
+	@sudo cp $(TARGET)$(EXTENSION) ${DESTINATION}$(TARGET)$(EXTENSION)
+	@echo ${TARGET}$(EXTENSION) $(ARROW) ${DESTINATION}$(TARGET)$(EXTENSION)
+	@echo Installed successfully.
 
 header:
 	@echo ${bold}Compiling${normal} ...

@@ -80,13 +80,4 @@
 #define SSC_MINOR_VERSION               9
 #define SSC_REVISION                    11
 
-typedef uint8_t ssc_byte;
-typedef bool ssc_bool;
-
-typedef enum {
-    SSC_COMPRESSION_MODE_COPY = 0,
-    SSC_COMPRESSION_MODE_CHAMELEON = 1,
-    SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON = 2,
-} SSC_COMPRESSION_MODE;
-
 #endif
