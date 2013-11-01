@@ -44,6 +44,7 @@ CFLAGS = -std=c99 -fPIC
 
 ifeq ($(OS),Windows_NT)
     EXTENSION = .dll
+    COPY = copy
     DESTINATION = c:/windows/system/
     ARROW = ^-^>
 else
@@ -54,6 +55,7 @@ else
     ifeq ($(UNAME_S),Darwin)
         EXTENSION = .dylib
     endif
+    COPY = sudo cp
     DESTINATION = /usr/lib/
     ARROW = \-\>
 endif
@@ -92,7 +94,7 @@ all: header $(TARGET)$(EXTENSION) footer
 
 install:
 	@echo ${bold}Installing${normal} ...
-	@sudo cp $(TARGET)$(EXTENSION) ${DESTINATION}$(TARGET)$(EXTENSION)
+	@$(COPY) $(TARGET)$(EXTENSION) ${DESTINATION}$(TARGET)$(EXTENSION)
 	@echo ${TARGET}$(EXTENSION) $(ARROW) ${DESTINATION}$(TARGET)$(EXTENSION)
 	@echo Installed successfully.
 
