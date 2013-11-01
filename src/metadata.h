@@ -39,6 +39,7 @@
 #include "block_header.h"
 #include "block_mode_marker.h"
 #include "block_footer.h"
+#include "api.h"
 
 uint_fast64_t ssc_metadata_structure_overhead();
 uint_fast64_t ssc_metadata_block_structure_overhead(const uint_fast64_t);

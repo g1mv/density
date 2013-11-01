@@ -41,6 +41,7 @@
 #include "block_mode_marker.h"
 #include "block_decode.h"
 #include "kernel_chameleon_decode.h"
+#include "api.h"
 
 typedef enum {
     SSC_DECODE_STATE_READY = 0,

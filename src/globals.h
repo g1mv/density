@@ -38,7 +38,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stddef.h>
-#include <stdbool.h>
 
 #if defined(__INTEL_COMPILER)
 #define SSC_FORCE_INLINE __forceinline
