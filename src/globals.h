@@ -77,6 +77,6 @@
 
 #define SSC_MAJOR_VERSION               0
 #define SSC_MINOR_VERSION               9
-#define SSC_REVISION                    11
+#define SSC_REVISION                    12
 
 #endif

@@ -166,10 +166,7 @@ SSC_STREAM_STATE ssc_stream_prepare(ssc_stream *stream, uint8_t* input_buffer, c
  * Initialize compression
  *
  * @param stream the stream
- * @param compression_mode the compression mode, can take the following values :
- *      SSC_COMPRESSION_MODE_COPY
- *      SSC_COMPRESSION_MODE_FASTEST
- *      SSC_COMPRESSION_MODE_DUAL_PASS
+ * @param compression_mode the compression mode
  * @param output_type the format of data output by encoding.
  *      EXPERTS ONLY ! If unsure, use SSC_ENCODE_OUTPUT_TYPE_DEFAULT.
  *      Any other option will create output data which is *NOT* directly decompressible by the API. This can be used for parallelizing SSC.
