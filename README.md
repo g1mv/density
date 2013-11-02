@@ -15,7 +15,7 @@ Here is a benchmark of <b>libssc</b>'s fastest mode compared to other libraries,
 
 API
 ---
-<b>libssc</b> features a *stream API* and a *buffer API* which are very simple to use, yet powerful enough to keep users' creativity unleashed. The stream API is described here, and the buffers API here.
+<b>libssc</b> features a *stream API* and a *buffer API* which are very simple to use, yet powerful enough to keep users' creativity unleashed. They are <a href=http://www.libssc.net/apis.html>described here</a>.
 
 Output
 ------
