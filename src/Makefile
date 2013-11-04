@@ -83,25 +83,31 @@ OBJ_CHAMELEON_2P = $(SRC_CHAMELEON:.c=_2p.o)
 SRC = $(filter-out $(SRC_CHAMELEON), $(wildcard *.c))
 OBJ = $(SRC:.c=.o)
 
-#$(OBJ_ARGONAUT_POST_PROCESSING) $(OBJ_BLOCKS)
 ALL_OBJ = $(OBJ_CHAMELEON_1P) $(OBJ_CHAMELEON_2P) $(OBJ)
 
-.PHONY: header footer
+.PHONY: compile-header compile link-header link
 
-all: header $(TARGET)$(DYN_EXT) footer
+all: compile-header compile link-header link
 
-header:
-	@echo ${bold}Compiling${normal} ...
+compile-header:
+	@echo ${bold}Compiling libssc${normal} ...
 
-footer:
-	@echo Build completed successfully.
+link-header:
+	@echo ${bold}Linking libssc${normal} ...
+
+compile: compile-header $(ALL_OBJ)
+	@echo Done.
+	@echo
+
+link: compile link-header $(TARGET)$(STAT_EXT) $(TARGET)$(DYN_EXT)
+	@echo Done.
 	@echo
 
 $(TARGET)$(DYN_EXT): $(ALL_OBJ)
-	@echo
-	@echo ${bold}Linking${normal} ...
 	@echo $^ $(ARROW) ${bold}$(TARGET)$(DYN_EXT)${normal}
 	$(CC) -shared -o $(TARGET)$(DYN_EXT) $^ $(CFLAGS)
+
+$(TARGET)$(STAT_EXT): $(ALL_OBJ)
 	@echo $^ $(ARROW) ${bold}$(TARGET)$(STAT_EXT)${normal}
 	@ar r $(TARGET)$(STAT_EXT) $^
 	@ranlib $(TARGET)$(STAT_EXT)
