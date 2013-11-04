@@ -125,7 +125,7 @@ $(TARGET)$(STAT_EXT): $(ALL_OBJ)
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 clean:
-	@echo ${bold}Cleaning build directories${normal} ...
+	@echo ${bold}Cleaning libssc build directories${normal} ...
 	@rm -f $(ALL_OBJ)
 	@rm -f $(TARGET)$(DYN_EXT)
 	@echo Done.
