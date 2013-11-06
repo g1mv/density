@@ -114,17 +114,17 @@ typedef struct {
 /*
  * Returns the major ssc version
  */
-uint8_t ssc_version_major();
+uint8_t ssc_version_major(void);
 
 /*
  * Returns the minor ssc version
  */
-uint8_t ssc_version_minor();
+uint8_t ssc_version_minor(void);
 
 /*
  * Returns the ssc revision
  */
-uint8_t ssc_version_revision();
+uint8_t ssc_version_revision(void);
 
 
 
@@ -160,7 +160,7 @@ void ssc_byte_buffer_rewind(ssc_byte_buffer* byte_buffer);
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-SSC_STREAM_STATE ssc_stream_prepare(ssc_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(), void (*mem_free)(void *));
+SSC_STREAM_STATE ssc_stream_prepare(ssc_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 /*
  * Initialize compression
@@ -266,7 +266,7 @@ SSC_BUFFERS_STATE ssc_buffers_max_compressed_length(uint_fast64_t * result, uint
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-SSC_BUFFERS_STATE ssc_buffers_compress(uint_fast64_t* total_written, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, const SSC_COMPRESSION_MODE compression_mode, const SSC_ENCODE_OUTPUT_TYPE output_type, const SSC_BLOCK_TYPE block_type, void *(*mem_alloc)(), void (*mem_free)(void *));
+SSC_BUFFERS_STATE ssc_buffers_compress(uint_fast64_t* total_written, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, const SSC_COMPRESSION_MODE compression_mode, const SSC_ENCODE_OUTPUT_TYPE output_type, const SSC_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 /*
  * Buffers decompression function
@@ -280,6 +280,6 @@ SSC_BUFFERS_STATE ssc_buffers_compress(uint_fast64_t* total_written, uint8_t *in
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-SSC_BUFFERS_STATE ssc_buffers_decompress(uint_fast64_t * total_written, ssc_main_header* header, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, void *(*mem_alloc)(), void (*mem_free)(void *));
+SSC_BUFFERS_STATE ssc_buffers_decompress(uint_fast64_t * total_written, ssc_main_header* header, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 #endif
