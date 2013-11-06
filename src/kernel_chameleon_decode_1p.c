@@ -34,6 +34,8 @@
 #define SSC_CHAMELEON_HASH_OFFSET_BASIS                             (uint32_t)2885564586
 #define SSC_CHAMELEON_DICTIONARY_RESET                              ssc_dictionary_reset_1p
 
+#include "kernel_chameleon_decode.c"
+
 #undef SSC_CHAMELEON_SUFFIX
 #undef SSC_CHAMELEON_HASH_OFFSET_BASIS
 #undef SSC_CHAMELEON_DICTIONARY_RESET
