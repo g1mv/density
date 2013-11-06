@@ -27,13 +27,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 06/11/13 20:05
+ * 06/11/13 22:14
  */
 
-#define SSC_CHAMELEON_SUFFIX                                        2p
-#define SSC_CHAMELEON_HASH_OFFSET_BASIS                             (uint32_t)2166115717
-#define SSC_CHAMELEON_DICTIONARY_RESET                              ssc_dictionary_reset_2p
+#define SSC_CHAMELEON_SUFFIX                                        1p
+#define SSC_CHAMELEON_HASH_OFFSET_BASIS                             (uint32_t)2885564586
+#define SSC_CHAMELEON_DICTIONARY_RESET                              ssc_dictionary_reset_1p
 
+#include "kernel_chameleon_encode.c"
 #include "kernel_chameleon_decode.c"
 
 #undef SSC_CHAMELEON_SUFFIX
