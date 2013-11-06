@@ -32,12 +32,13 @@
 
 #include "kernel_chameleon_dictionary.h"
 
-#ifdef SSC_CHAMELEON_1P
-const ssc_dictionary CHAMELEON_NAME(ssc_dictionary) = {.entries = SSC_DICTIONARY_CHAMELEON_1P};
-#else
-const ssc_dictionary CHAMELEON_NAME(ssc_dictionary) = {.entries = SSC_DICTIONARY_CHAMELEON_2P};
-#endif
+const ssc_dictionary ssc_dictionary_1p = {.entries = SSC_DICTIONARY_CHAMELEON_1P};
+const ssc_dictionary ssc_dictionary_2p = {.entries = SSC_DICTIONARY_CHAMELEON_2P};
 
-SSC_FORCE_INLINE void CHAMELEON_NAME(ssc_dictionary_reset)(ssc_dictionary * dictionary) {
-    memcpy(dictionary, &CHAMELEON_NAME(ssc_dictionary), sizeof(ssc_dictionary));
+SSC_FORCE_INLINE void ssc_dictionary_reset_1p(ssc_dictionary * dictionary) {
+    memcpy(dictionary, &ssc_dictionary_1p, sizeof(ssc_dictionary));
+}
+
+SSC_FORCE_INLINE void ssc_dictionary_reset_2p(ssc_dictionary * dictionary) {
+    memcpy(dictionary, &ssc_dictionary_2p, sizeof(ssc_dictionary));
 }

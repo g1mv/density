@@ -46,8 +46,6 @@
 
 #include <string.h>
 
-#define SSC_DICTIONARY_VALUE_NOT_SET                  0x76EFE1F1
-
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
@@ -59,6 +57,7 @@ typedef struct {
 } ssc_dictionary;
 #pragma pack(pop)
 
-void CHAMELEON_NAME(ssc_dictionary_reset)(ssc_dictionary *);
+void ssc_dictionary_reset_1p(ssc_dictionary *);
+void ssc_dictionary_reset_2p(ssc_dictionary *);
 
 #endif

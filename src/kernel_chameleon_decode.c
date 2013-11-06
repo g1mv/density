@@ -30,6 +30,8 @@
  * 24/10/13 12:28
  */
 
+#ifdef SSC_CHAMELEON_DICTIONARY_RESET
+
 #include "kernel_chameleon_decode.h"
 
 SSC_FORCE_INLINE SSC_KERNEL_DECODE_STATE ssc_hash_decode_checkSignaturesCount(ssc_chameleon_decode_state *restrict state) {
@@ -291,3 +293,5 @@ SSC_FORCE_INLINE SSC_KERNEL_DECODE_STATE CHAMELEON_NAME(ssc_chameleon_decode_pro
 SSC_FORCE_INLINE SSC_KERNEL_DECODE_STATE CHAMELEON_NAME(ssc_chameleon_decode_finish)(ssc_chameleon_decode_state *state) {
     return SSC_KERNEL_DECODE_STATE_READY;
 }
+
+#endif

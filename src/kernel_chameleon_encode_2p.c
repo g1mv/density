@@ -27,26 +27,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/10/13 11:57
+ * 06/11/13 19:43
  */
 
-#ifndef SSC_CHAMELEON_H
-#define SSC_CHAMELEON_H
+#define SSC_CHAMELEON_SUFFIX                                        2p
+#define SSC_CHAMELEON_HASH_OFFSET_BASIS                             (uint32_t)2166115717
+#define SSC_CHAMELEON_DICTIONARY_RESET                              ssc_dictionary_reset_2p
 
-#include "globals.h"
-
-#define PASTER(x,y) x ## _ ## y
-#define EVALUATOR(x,y)  PASTER(x,y)
-#define CHAMELEON_NAME(function) EVALUATOR(function, SSC_CHAMELEON_SUFFIX)
-
-#define SSC_CHAMELEON_HASH_BITS                                     16
-#define SSC_CHAMELEON_HASH_PRIME                                    16777619
-
-typedef uint64_t                                                    ssc_hash_signature;
-
-#define SSC_CHAMELEON_HASH_ALGORITHM(hash, value)                   hash = SSC_CHAMELEON_HASH_OFFSET_BASIS;\
-                                                                    hash ^= value;\
-                                                                    hash *= SSC_CHAMELEON_HASH_PRIME;\
-                                                                    hash = (hash >> (32 - SSC_CHAMELEON_HASH_BITS)) ^ (hash & ((1 << SSC_CHAMELEON_HASH_BITS) - 1));
-
-#endif
+#undef SSC_CHAMELEON_SUFFIX
+#undef SSC_CHAMELEON_HASH_OFFSET_BASIS
+#undef SSC_CHAMELEON_DICTIONARY_RESET

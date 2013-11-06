@@ -30,6 +30,8 @@
  * 24/10/13 12:01
  */
 
+#ifdef SSC_CHAMELEON_DICTIONARY_RESET
+
 #include "kernel_chameleon_encode.h"
 
 SSC_FORCE_INLINE void ssc_hash_encode_writeToSignature(ssc_chameleon_encode_state *state) {
@@ -231,3 +233,5 @@ SSC_FORCE_INLINE SSC_KERNEL_ENCODE_STATE CHAMELEON_NAME(ssc_chameleon_encode_pro
 SSC_FORCE_INLINE SSC_KERNEL_ENCODE_STATE CHAMELEON_NAME(ssc_chameleon_encode_finish)(ssc_chameleon_encode_state *state) {
     return SSC_KERNEL_ENCODE_STATE_READY;
 }
+
+#endif
