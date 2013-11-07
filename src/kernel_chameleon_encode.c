@@ -30,7 +30,7 @@
  * 24/10/13 12:01
  */
 
-#ifdef SSC_CHAMELEON_DICTIONARY_RESET
+#ifdef SSC_CHAMELEON_CODE_INCLUSION
 
 #include "kernel_chameleon_encode.h"
 
