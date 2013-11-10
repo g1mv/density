@@ -192,13 +192,13 @@ SSC_FORCE_INLINE SSC_ENCODE_STATE ssc_encode_finish(ssc_byte_buffer *restrict ou
         return SSC_ENCODE_STATE_ERROR;
 
     switch (state->compressionMode) {
-        case SSC_COMPRESSION_MODE_CHAMELEON:
-            ssc_block_encode_finish(&state->blockEncodeStateA);
-            free(state->blockEncodeStateA.kernelEncodeState);
-
         case SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON:
             ssc_block_encode_finish(&state->blockEncodeStateB);
             free(state->blockEncodeStateB.kernelEncodeState);
+
+        case SSC_COMPRESSION_MODE_CHAMELEON:
+            ssc_block_encode_finish(&state->blockEncodeStateA);
+            free(state->blockEncodeStateA.kernelEncodeState);
             break;
 
         default:

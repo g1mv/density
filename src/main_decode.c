@@ -189,13 +189,13 @@ SSC_FORCE_INLINE SSC_DECODE_STATE ssc_decode_finish(ssc_byte_buffer *in, ssc_dec
         return SSC_DECODE_STATE_ERROR;
 
     switch (state->header.compressionMode) {
-        case SSC_COMPRESSION_MODE_CHAMELEON:
-            ssc_block_decode_finish(&state->blockDecodeStateA);
-            free(state->blockDecodeStateA.kernelDecodeState);
-
         case SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON:
             ssc_block_decode_finish(&state->blockDecodeStateB);
             free(state->blockDecodeStateB.kernelDecodeState);
+
+        case SSC_COMPRESSION_MODE_CHAMELEON:
+            ssc_block_decode_finish(&state->blockDecodeStateA);
+            free(state->blockDecodeStateA.kernelDecodeState);
             break;
 
         default:
