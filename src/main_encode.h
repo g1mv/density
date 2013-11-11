@@ -71,6 +71,7 @@ typedef struct {
     SSC_ENCODE_PROCESS process;
     SSC_COMPRESSION_MODE compressionMode;
     SSC_BLOCK_TYPE blockType;
+    SSC_ENCODE_OUTPUT_TYPE encodeOutputType;
     const struct stat* fileAttributes;
 
     uint_fast64_t totalRead;

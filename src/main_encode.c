@@ -59,9 +59,10 @@ SSC_FORCE_INLINE void ssc_encode_update_totals(ssc_byte_buffer *restrict in, ssc
     state->totalWritten += out->position - outPositionBefore;
 }
 
-SSC_FORCE_INLINE SSC_ENCODE_STATE ssc_encode_init(ssc_byte_buffer *restrict out, ssc_byte_buffer *restrict workBuffer, const uint_fast64_t workBufferSize, ssc_encode_state *restrict state, const SSC_COMPRESSION_MODE mode, const SSC_ENCODE_OUTPUT_TYPE encodeType, const SSC_BLOCK_TYPE blockType) {
+SSC_FORCE_INLINE SSC_ENCODE_STATE ssc_encode_init(ssc_byte_buffer *restrict out, ssc_byte_buffer *restrict workBuffer, const uint_fast64_t workBufferSize, ssc_encode_state *restrict state, const SSC_COMPRESSION_MODE mode, const SSC_ENCODE_OUTPUT_TYPE encodeOutputType, const SSC_BLOCK_TYPE blockType) {
     state->compressionMode = mode;
     state->blockType = blockType;
+    state->encodeOutputType = encodeOutputType;
 
     state->totalRead = 0;
     state->totalWritten = 0;
@@ -84,7 +85,7 @@ SSC_FORCE_INLINE SSC_ENCODE_STATE ssc_encode_init(ssc_byte_buffer *restrict out,
     state->workBuffer = workBuffer;
     state->workBufferData.memorySize = workBufferSize;
 
-    switch (encodeType) {
+    switch (state->encodeOutputType) {
         case SSC_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER:
         case SSC_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER_NOR_FOOTER:
             state->process = SSC_ENCODE_PROCESS_WRITE_BLOCKS;
@@ -205,5 +206,11 @@ SSC_FORCE_INLINE SSC_ENCODE_STATE ssc_encode_finish(ssc_byte_buffer *restrict ou
             break;
     }
 
-    return ssc_encode_write_footer(out, state);
+    switch (state->encodeOutputType) {
+        case SSC_ENCODE_OUTPUT_TYPE_WITHOUT_FOOTER:
+        case SSC_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER_NOR_FOOTER:
+            return SSC_ENCODE_STATE_READY;
+        default:
+            return ssc_encode_write_footer(out, state);
+    }
 }
