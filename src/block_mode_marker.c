@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -32,18 +32,18 @@
 
 #include "block_mode_marker.h"
 
-SSC_FORCE_INLINE uint_fast32_t ssc_block_mode_marker_read(ssc_byte_buffer *restrict in, ssc_mode_marker *restrict modeMarker) {
+DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_read(density_byte_buffer *restrict in, density_mode_marker *restrict modeMarker) {
     modeMarker->activeBlockMode = *(in->pointer + in->position);
 
-    in->position += sizeof(ssc_mode_marker);
+    in->position += sizeof(density_mode_marker);
 
-    return sizeof(ssc_mode_marker);
+    return sizeof(density_mode_marker);
 }
 
-SSC_FORCE_INLINE uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer *out, const SSC_BLOCK_MODE mode) {
-    *(out->pointer + out->position) = (ssc_byte) mode;
+DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_write(density_byte_buffer *out, const DENSITY_BLOCK_MODE mode) {
+    *(out->pointer + out->position) = (density_byte) mode;
 
-    out->position += sizeof(ssc_mode_marker);
+    out->position += sizeof(density_mode_marker);
 
-    return sizeof(ssc_mode_marker);
+    return sizeof(density_mode_marker);
 }

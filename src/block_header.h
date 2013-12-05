@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,8 +30,8 @@
  * 18/10/13 23:52
  */
 
-#ifndef SSC_BLOCK_HEADER_H
-#define SSC_BLOCK_HEADER_H
+#ifndef DENSITY_BLOCK_HEADER_H
+#define DENSITY_BLOCK_HEADER_H
 
 #include <stdio.h>
 #include <time.h>
@@ -42,10 +42,10 @@
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-} ssc_block_header;
+} density_block_header;
 #pragma pack(pop)
 
-uint_fast32_t ssc_block_header_read(ssc_byte_buffer*, ssc_block_header*);
-uint_fast32_t ssc_block_header_write(ssc_byte_buffer*);
+uint_fast32_t density_block_header_read(density_byte_buffer*, density_block_header*);
+uint_fast32_t density_block_header_write(density_byte_buffer*);
 
 #endif

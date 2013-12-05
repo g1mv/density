@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -28,17 +28,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * 24/10/13 12:06
+ *
+ * ----------------
+ * Kernel Chameleon
+ * ----------------
+ *
+ * Author(s)
+ * Guillaume Voirin
+ *
+ * Description
+ * Hash based superfast kernel
  */
 
 #include "kernel_chameleon_dictionary.h"
 
-const ssc_dictionary ssc_dictionary_1p = {.entries = SSC_DICTIONARY_CHAMELEON_1P};
-const ssc_dictionary ssc_dictionary_2p = {.entries = SSC_DICTIONARY_CHAMELEON_2P};
+const density_dictionary density_empty_dictionary = {.entries = 0};
 
-SSC_FORCE_INLINE void ssc_dictionary_reset_1p(ssc_dictionary * dictionary) {
-    memcpy(dictionary, &ssc_dictionary_1p, sizeof(ssc_dictionary));
-}
-
-SSC_FORCE_INLINE void ssc_dictionary_reset_2p(ssc_dictionary * dictionary) {
-    memcpy(dictionary, &ssc_dictionary_2p, sizeof(ssc_dictionary));
+DENSITY_FORCE_INLINE void density_dictionary_reset(density_dictionary * dictionary) {
+    memcpy(dictionary, &density_empty_dictionary, sizeof(density_dictionary));
 }

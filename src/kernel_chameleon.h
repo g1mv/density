@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -28,25 +28,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * 24/10/13 11:57
+ *
+ * ----------------
+ * Kernel Chameleon
+ * ----------------
+ *
+ * Author(s)
+ * Guillaume Voirin
+ *
+ * Description
+ * Hash based superfast kernel
  */
 
-#ifndef SSC_CHAMELEON_H
-#define SSC_CHAMELEON_H
+#ifndef DENSITY_CHAMELEON_H
+#define DENSITY_CHAMELEON_H
 
 #include "globals.h"
 
-#define PASTER(x,y) x ## _ ## y
-#define EVALUATOR(x,y)  PASTER(x,y)
-#define CHAMELEON_NAME(function) EVALUATOR(function, SSC_CHAMELEON_SUFFIX)
+#define DENSITY_CHAMELEON_HASH_BITS                                     16
+#define DENSITY_CHAMELEON_HASH_OFFSET_BASIS                             (uint32_t)2233294llu
 
-#define SSC_CHAMELEON_HASH_BITS                                     16
-#define SSC_CHAMELEON_HASH_PRIME                                    16777619
+typedef uint64_t                                                        density_hash_signature;
 
-typedef uint64_t                                                    ssc_hash_signature;
-
-#define SSC_CHAMELEON_HASH_ALGORITHM(hash, value)                   hash = SSC_CHAMELEON_HASH_OFFSET_BASIS;\
-                                                                    hash ^= value;\
-                                                                    hash *= SSC_CHAMELEON_HASH_PRIME;\
-                                                                    hash = (hash >> (32 - SSC_CHAMELEON_HASH_BITS)) ^ (hash & ((1 << SSC_CHAMELEON_HASH_BITS) - 1));
+#define DENSITY_CHAMELEON_HASH_ALGORITHM(hash, value)                   hash = value * DENSITY_CHAMELEON_HASH_OFFSET_BASIS;\
+                                                                        hash = (hash >> (32 - DENSITY_CHAMELEON_HASH_BITS));
 
 #endif

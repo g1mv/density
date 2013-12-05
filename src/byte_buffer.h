@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,15 +30,15 @@
  * 11/10/13 12:54
  */
 
-#ifndef SSC_BYTE_BUFFER_H
-#define SSC_BYTE_BUFFER_H
+#ifndef DENSITY_BYTE_BUFFER_H
+#define DENSITY_BYTE_BUFFER_H
 
 #include "globals.h"
-#include "ssc_api.h"
+#include "density_api.h"
 
-#define SSC_PREFERRED_BUFFER_SIZE             (1 << 19)
+#define DENSITY_PREFERRED_BUFFER_SIZE             (1 << 19)
 
-void ssc_byte_buffer_encapsulate(ssc_byte_buffer *, ssc_byte*, const uint_fast64_t);
-void ssc_byte_buffer_rewind(ssc_byte_buffer *);
+void density_byte_buffer_encapsulate(density_byte_buffer *, density_byte*, const uint_fast64_t);
+void density_byte_buffer_rewind(density_byte_buffer *);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,8 +30,8 @@
  * 19/10/13 00:02
  */
 
-#ifndef SSC_BLOCK_ENCODE_H
-#define SSC_BLOCK_ENCODE_H
+#ifndef DENSITY_BLOCK_ENCODE_H
+#define DENSITY_BLOCK_ENCODE_H
 
 #include "block_footer.h"
 #include "block_header.h"
@@ -41,48 +41,48 @@
 #include "kernel_encode.h"
 
 typedef enum {
-    SSC_BLOCK_ENCODE_STATE_READY = 0,
-    SSC_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER,
-    SSC_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER,
-    SSC_BLOCK_ENCODE_STATE_ERROR
-} SSC_BLOCK_ENCODE_STATE;
+    DENSITY_BLOCK_ENCODE_STATE_READY = 0,
+    DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER,
+    DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER,
+    DENSITY_BLOCK_ENCODE_STATE_ERROR
+} DENSITY_BLOCK_ENCODE_STATE;
 
 typedef enum {
-    SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER,
-    SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER,
-    SSC_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER,
-    SSC_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER,
-    SSC_BLOCK_ENCODE_PROCESS_WRITE_DATA,
-    SSC_BLOCK_ENCODE_PROCESS_FINISHED
-} SSC_BLOCK_ENCODE_PROCESS;
+    DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER,
+    DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER,
+    DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER,
+    DENSITY_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER,
+    DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA,
+    DENSITY_BLOCK_ENCODE_PROCESS_FINISHED
+} DENSITY_BLOCK_ENCODE_PROCESS;
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
     uint_fast64_t inStart;
     uint_fast64_t outStart;
-} ssc_block_encode_current_block_data;
+} density_block_encode_current_block_data;
 
 typedef struct {
-    SSC_BLOCK_ENCODE_PROCESS process;
-    SSC_BLOCK_MODE targetMode;
-    SSC_BLOCK_MODE currentMode;
-    SSC_BLOCK_TYPE blockType;
+    DENSITY_BLOCK_ENCODE_PROCESS process;
+    DENSITY_BLOCK_MODE targetMode;
+    DENSITY_BLOCK_MODE currentMode;
+    DENSITY_BLOCK_TYPE blockType;
 
     uint_fast64_t totalRead;
     uint_fast64_t totalWritten;
 
-    ssc_block_encode_current_block_data currentBlockData;
+    density_block_encode_current_block_data currentBlockData;
 
     void*kernelEncodeState;
-    SSC_KERNEL_ENCODE_STATE (*kernelEncodeInit)(void*);
-    SSC_KERNEL_ENCODE_STATE (*kernelEncodeProcess)(ssc_byte_buffer *, ssc_byte_buffer *, void*, const ssc_bool);
-    SSC_KERNEL_ENCODE_STATE (*kernelEncodeFinish)(void*);
-} ssc_block_encode_state;
+    DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeInit)(void*);
+    DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeProcess)(density_byte_buffer *, density_byte_buffer *, void*, const density_bool);
+    DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeFinish)(void*);
+} density_block_encode_state;
 #pragma pack(pop)
 
-SSC_BLOCK_ENCODE_STATE ssc_block_encode_init(ssc_block_encode_state *, const SSC_BLOCK_MODE, const SSC_BLOCK_TYPE, void*, SSC_KERNEL_ENCODE_STATE (*)(void*), SSC_KERNEL_ENCODE_STATE (*)(ssc_byte_buffer *, ssc_byte_buffer *, void*, const ssc_bool), SSC_KERNEL_ENCODE_STATE (*)(void*));
-SSC_BLOCK_ENCODE_STATE ssc_block_encode_process(ssc_byte_buffer *, ssc_byte_buffer *, ssc_block_encode_state *, const ssc_bool);
-SSC_BLOCK_ENCODE_STATE ssc_block_encode_finish(ssc_block_encode_state *);
+DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *, const DENSITY_BLOCK_MODE, const DENSITY_BLOCK_TYPE, void*, DENSITY_KERNEL_ENCODE_STATE (*)(void*), DENSITY_KERNEL_ENCODE_STATE (*)(density_byte_buffer *, density_byte_buffer *, void*, const density_bool), DENSITY_KERNEL_ENCODE_STATE (*)(void*));
+DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(density_byte_buffer *, density_byte_buffer *, density_block_encode_state *, const density_bool);
+DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(density_block_encode_state *);
 
 #endif

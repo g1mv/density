@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,8 +30,8 @@
  * 18/10/13 23:59
  */
 
-#ifndef SSC_BLOCK_MODE_MARKER_H
-#define SSC_BLOCK_MODE_MARKER_H
+#ifndef DENSITY_BLOCK_MODE_MARKER_H
+#define DENSITY_BLOCK_MODE_MARKER_H
 
 #include "globals.h"
 #include "byte_buffer.h"
@@ -40,12 +40,12 @@
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    ssc_byte activeBlockMode;
-    ssc_byte reserved;    // To ensure 2-byte-wise length of output data // todo
-} ssc_mode_marker;
+    density_byte activeBlockMode;
+    density_byte reserved;    // To ensure 2-byte-wise length of output data // todo
+} density_mode_marker;
 #pragma pack(pop)
 
-uint_fast32_t ssc_block_mode_marker_read(ssc_byte_buffer*, ssc_mode_marker *);
-uint_fast32_t ssc_block_mode_marker_write(ssc_byte_buffer*, const SSC_BLOCK_MODE);
+uint_fast32_t density_block_mode_marker_read(density_byte_buffer*, density_mode_marker *);
+uint_fast32_t density_block_mode_marker_write(density_byte_buffer*, const DENSITY_BLOCK_MODE);
 
 #endif

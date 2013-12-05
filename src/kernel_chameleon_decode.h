@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -28,10 +28,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * 24/10/13 12:27
+ *
+ * ----------------
+ * Kernel Chameleon
+ * ----------------
+ *
+ * Author(s)
+ * Guillaume Voirin
+ *
+ * Description
+ * Hash based superfast kernel
  */
 
-#ifndef SSC_HASH_DECODE_H
-#define SSC_HASH_DECODE_H
+#ifndef DENSITY_HASH_DECODE_H
+#define DENSITY_HASH_DECODE_H
 
 #include "byte_buffer.h"
 #include "kernel_chameleon_dictionary.h"
@@ -39,25 +49,25 @@
 #include "block.h"
 #include "kernel_decode.h"
 
-#define SSC_HASH_DECODE_MINIMUM_INPUT_LOOKAHEAD               (sizeof(ssc_hash_signature) + sizeof(uint32_t) * 8 * sizeof(ssc_hash_signature))
-#define SSC_HASH_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 8 * sizeof(ssc_hash_signature))
+#define DENSITY_HASH_DECODE_MINIMUM_INPUT_LOOKAHEAD               (sizeof(density_hash_signature) + sizeof(uint32_t) * 8 * sizeof(density_hash_signature))
+#define DENSITY_HASH_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 8 * sizeof(density_hash_signature))
 
 typedef enum {
-    SSC_CHAMELEON_DECODE_PROCESS_SIGNATURES_AND_DATA_FAST,
-    SSC_CHAMELEON_DECODE_PROCESS_SIGNATURE_SAFE,
-    SSC_CHAMELEON_DECODE_PROCESS_DATA_FAST,
-    SSC_CHAMELEON_DECODE_PROCESS_DATA_SAFE,
-    SSC_CHAMELEON_DECODE_PROCESS_FINISH
-} SSC_CHAMELEON_DECODE_PROCESS;
+    DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURES_AND_DATA_FAST,
+    DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURE_SAFE,
+    DENSITY_CHAMELEON_DECODE_PROCESS_DATA_FAST,
+    DENSITY_CHAMELEON_DECODE_PROCESS_DATA_SAFE,
+    DENSITY_CHAMELEON_DECODE_PROCESS_FINISH
+} DENSITY_CHAMELEON_DECODE_PROCESS;
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    SSC_CHAMELEON_DECODE_PROCESS process;
+    DENSITY_CHAMELEON_DECODE_PROCESS process;
 
     uint_fast64_t resetCycle;
 
-    ssc_hash_signature signature;
+    density_hash_signature signature;
     uint_fast32_t shift;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
@@ -65,27 +75,23 @@ typedef struct {
     uint_fast64_t endDataOverhead;
 
     union {
-        ssc_byte as_bytes[8];
+        density_byte as_bytes[8];
         uint64_t as_uint64_t;
     } partialSignature;
     union {
-        ssc_byte as_bytes[4];
+        density_byte as_bytes[4];
         uint32_t as_uint32_t;
     } partialUncompressedChunk;
 
     uint_fast64_t signatureBytes;
     uint_fast64_t uncompressedChunkBytes;
 
-    ssc_dictionary dictionary;
-} ssc_chameleon_decode_state;
+    density_dictionary dictionary;
+} density_chameleon_decode_state;
 #pragma pack(pop)
 
-SSC_KERNEL_DECODE_STATE ssc_chameleon_decode_init_1p(ssc_chameleon_decode_state *, const uint_fast32_t);
-SSC_KERNEL_DECODE_STATE ssc_chameleon_decode_process_1p(ssc_byte_buffer *, ssc_byte_buffer *, ssc_chameleon_decode_state *, const ssc_bool);
-SSC_KERNEL_DECODE_STATE ssc_chameleon_decode_finish_1p(ssc_chameleon_decode_state *);
-
-SSC_KERNEL_DECODE_STATE ssc_chameleon_decode_init_2p(ssc_chameleon_decode_state *, const uint_fast32_t);
-SSC_KERNEL_DECODE_STATE ssc_chameleon_decode_process_2p(ssc_byte_buffer *, ssc_byte_buffer *, ssc_chameleon_decode_state *, const ssc_bool);
-SSC_KERNEL_DECODE_STATE ssc_chameleon_decode_finish_2p(ssc_chameleon_decode_state *);
+DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *, const uint_fast32_t);
+DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_process(density_byte_buffer *, density_byte_buffer *, density_chameleon_decode_state *, const density_bool);
+DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish(density_chameleon_decode_state *);
 
 #endif

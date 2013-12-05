@@ -1,5 +1,5 @@
 #
-# Centaurean libssc
+# Centaurean Density
 # http://www.libssc.net
 #
 # Copyright (c) 2013, Guillaume Voirin
@@ -38,9 +38,9 @@ else
     normal = `tput sgr0`
 endif
 
-TARGET = libssc
+TARGET = density
 
-CFLAGS = -std=c99 -fPIC
+CFLAGS = -flto -std=c99 -fPIC
 
 ifeq ($(OS),Windows_NT)
     DYN_EXT = .dll
@@ -86,10 +86,10 @@ ALL_OBJ = $(OBJ)
 all: compile-header compile link-header link
 
 compile-header:
-	@echo ${bold}Compiling libssc${normal} ...
+	@echo ${bold}Compiling Density${normal} ...
 
 link-header:
-	@echo ${bold}Linking libssc${normal} ...
+	@echo ${bold}Linking Density${normal} ...
 
 compile: compile-header $(ALL_OBJ)
 	@echo Done.
@@ -113,7 +113,7 @@ $(TARGET)$(STAT_EXT): $(ALL_OBJ)
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 clean:
-	@echo ${bold}Cleaning libssc build directories${normal} ...
+	@echo ${bold}Cleaning Density build directories${normal} ...
 	@rm -f $(ALL_OBJ)
 	@rm -f $(TARGET)$(DYN_EXT)
 	@echo Done.

@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -32,14 +32,14 @@
 
 #include "globals.h"
 
-uint8_t ssc_version_major() {
-    return SSC_MAJOR_VERSION;
+uint8_t density_version_major() {
+    return DENSITY_MAJOR_VERSION;
 }
 
-uint8_t ssc_version_minor() {
-    return SSC_MINOR_VERSION;
+uint8_t density_version_minor() {
+    return DENSITY_MINOR_VERSION;
 }
 
-uint8_t ssc_version_revision() {
-    return SSC_REVISION;
+uint8_t density_version_revision() {
+    return DENSITY_REVISION;
 }

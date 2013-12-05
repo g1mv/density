@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -32,16 +32,16 @@
 
 #include "byte_buffer.h"
 
-SSC_FORCE_INLINE void ssc_byte_buffer_encapsulate_with_position(ssc_byte_buffer * restrict buffer, ssc_byte* restrict pointer, const uint_fast64_t position, const uint_fast64_t size) {
+DENSITY_FORCE_INLINE void density_byte_buffer_encapsulate_with_position(density_byte_buffer * restrict buffer, density_byte* restrict pointer, const uint_fast64_t position, const uint_fast64_t size) {
     buffer->pointer = pointer;
     buffer->position = position;
     buffer->size = size;
 }
 
-SSC_FORCE_INLINE void ssc_byte_buffer_encapsulate(ssc_byte_buffer * restrict buffer, ssc_byte* restrict pointer, const uint_fast64_t size) {
-    ssc_byte_buffer_encapsulate_with_position(buffer, pointer, 0, size);
+DENSITY_FORCE_INLINE void density_byte_buffer_encapsulate(density_byte_buffer * restrict buffer, density_byte* restrict pointer, const uint_fast64_t size) {
+    density_byte_buffer_encapsulate_with_position(buffer, pointer, 0, size);
 }
 
-SSC_FORCE_INLINE void ssc_byte_buffer_rewind(ssc_byte_buffer * buffer) {
+DENSITY_FORCE_INLINE void density_byte_buffer_rewind(density_byte_buffer * buffer) {
     buffer->position = 0;
 }

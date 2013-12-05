@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -32,14 +32,14 @@
 
 #include "main_footer.h"
 
-SSC_FORCE_INLINE uint_fast32_t ssc_main_footer_read(ssc_byte_buffer *restrict in, ssc_main_footer *restrict footer) {
-    in->position += sizeof(ssc_main_footer);
+DENSITY_FORCE_INLINE uint_fast32_t density_main_footer_read(density_byte_buffer *restrict in, density_main_footer *restrict footer) {
+    in->position += sizeof(density_main_footer);
 
-    return sizeof(ssc_main_footer);
+    return sizeof(density_main_footer);
 }
 
-SSC_FORCE_INLINE uint_fast32_t ssc_main_footer_write(ssc_byte_buffer *out) {
-    out->position += sizeof(ssc_main_footer);
+DENSITY_FORCE_INLINE uint_fast32_t density_main_footer_write(density_byte_buffer *out) {
+    out->position += sizeof(density_main_footer);
 
-    return sizeof(ssc_main_footer);
+    return sizeof(density_main_footer);
 }

@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,8 +30,8 @@
  * 18/10/13 23:30
  */
 
-#ifndef SSC_ENCODE_H
-#define SSC_ENCODE_H
+#ifndef DENSITY_ENCODE_H
+#define DENSITY_ENCODE_H
 
 #include <string.h>
 
@@ -42,22 +42,22 @@
 #include "block_mode_marker.h"
 #include "block_encode.h"
 #include "kernel_chameleon_encode.h"
-#include "ssc_api.h"
+#include "density_api.h"
 
 typedef enum {
-    SSC_ENCODE_STATE_READY = 0,
-    SSC_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER,
-    SSC_ENCODE_STATE_STALL_ON_INPUT_BUFFER,
-    SSC_ENCODE_STATE_ERROR
-} SSC_ENCODE_STATE;
+    DENSITY_ENCODE_STATE_READY = 0,
+    DENSITY_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER,
+    DENSITY_ENCODE_STATE_STALL_ON_INPUT_BUFFER,
+    DENSITY_ENCODE_STATE_ERROR
+} DENSITY_ENCODE_STATE;
 
 typedef enum {
-    SSC_ENCODE_PROCESS_WRITE_BLOCKS,
-    SSC_ENCODE_PROCESS_WRITE_BLOCKS_IN_TO_WORKBUFFER,
-    SSC_ENCODE_PROCESS_WRITE_BLOCKS_WORKBUFFER_TO_OUT,
-    SSC_ENCODE_PROCESS_WRITE_FOOTER,
-    SSC_ENCODE_PROCESS_FINISHED
-} SSC_ENCODE_PROCESS;
+    DENSITY_ENCODE_PROCESS_WRITE_BLOCKS,
+    DENSITY_ENCODE_PROCESS_WRITE_BLOCKS_IN_TO_WORKBUFFER,
+    DENSITY_ENCODE_PROCESS_WRITE_BLOCKS_WORKBUFFER_TO_OUT,
+    DENSITY_ENCODE_PROCESS_WRITE_FOOTER,
+    DENSITY_ENCODE_PROCESS_FINISHED
+} DENSITY_ENCODE_PROCESS;
 
 #pragma pack(push)
 #pragma pack(4)
@@ -65,28 +65,28 @@ typedef enum {
 typedef struct {
     uint_fast64_t memorySize;
     uint_fast64_t outstandingBytes;
-} ssc_encode_work_buffer_data;
+} density_encode_work_buffer_data;
 
 typedef struct {
-    SSC_ENCODE_PROCESS process;
-    SSC_COMPRESSION_MODE compressionMode;
-    SSC_BLOCK_TYPE blockType;
-    SSC_ENCODE_OUTPUT_TYPE encodeOutputType;
+    DENSITY_ENCODE_PROCESS process;
+    DENSITY_COMPRESSION_MODE compressionMode;
+    DENSITY_BLOCK_TYPE blockType;
+    DENSITY_ENCODE_OUTPUT_TYPE encodeOutputType;
     const struct stat* fileAttributes;
 
     uint_fast64_t totalRead;
     uint_fast64_t totalWritten;
 
-    ssc_block_encode_state blockEncodeStateA;
-    ssc_block_encode_state blockEncodeStateB;
+    density_block_encode_state blockEncodeStateA;
+    density_block_encode_state blockEncodeStateB;
 
-    ssc_byte_buffer* workBuffer;
-    ssc_encode_work_buffer_data workBufferData;
-} ssc_encode_state;
+    density_byte_buffer* workBuffer;
+    density_encode_work_buffer_data workBufferData;
+} density_encode_state;
 #pragma pack(pop)
 
-SSC_ENCODE_STATE ssc_encode_init(ssc_byte_buffer *, ssc_byte_buffer *, const uint_fast64_t, ssc_encode_state *, const SSC_COMPRESSION_MODE, const SSC_ENCODE_OUTPUT_TYPE, const SSC_BLOCK_TYPE);
-SSC_ENCODE_STATE ssc_encode_process(ssc_byte_buffer *, ssc_byte_buffer *, ssc_encode_state *, const ssc_bool);
-SSC_ENCODE_STATE ssc_encode_finish(ssc_byte_buffer *, ssc_encode_state *);
+DENSITY_ENCODE_STATE density_encode_init(density_byte_buffer *, density_byte_buffer *, const uint_fast64_t, density_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_ENCODE_OUTPUT_TYPE, const DENSITY_BLOCK_TYPE);
+DENSITY_ENCODE_STATE density_encode_process(density_byte_buffer *, density_byte_buffer *, density_encode_state *, const density_bool);
+DENSITY_ENCODE_STATE density_encode_finish(density_byte_buffer *, density_encode_state *);
 
 #endif

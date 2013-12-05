@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,8 +30,8 @@
  * 11/10/13 02:06
  */
 
-#ifndef SSC_FILE_HEADER_H
-#define SSC_FILE_HEADER_H
+#ifndef DENSITY_FILE_HEADER_H
+#define DENSITY_FILE_HEADER_H
 
 #include <stdio.h>
 #include <time.h>
@@ -40,9 +40,9 @@
 #include "globals.h"
 #include "byte_buffer.h"
 #include "block.h"
-#include "ssc_api.h"
+#include "density_api.h"
 
-uint_fast32_t ssc_main_header_read(ssc_byte_buffer*, ssc_main_header*);
-uint_fast32_t ssc_main_header_write(ssc_byte_buffer*, const SSC_COMPRESSION_MODE, const SSC_BLOCK_TYPE);
+uint_fast32_t density_main_header_read(density_byte_buffer*, density_main_header*);
+uint_fast32_t density_main_header_write(density_byte_buffer*, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -32,56 +32,56 @@
 
 #include "block_decode.h"
 
-SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_read_block_header(ssc_byte_buffer *restrict in, ssc_block_decode_state *restrict state) {
-    if (in->position + sizeof(ssc_block_header) > in->size)
-        return SSC_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
+DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_header(density_byte_buffer *restrict in, density_block_decode_state *restrict state) {
+    if (in->position + sizeof(density_block_header) > in->size)
+        return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
     state->currentBlockData.inStart = state->totalRead;
     state->currentBlockData.outStart = state->totalWritten;
 
-    state->totalRead += ssc_block_header_read(in, &state->lastBlockHeader);
+    state->totalRead += density_block_header_read(in, &state->lastBlockHeader);
 
-    state->process = SSC_BLOCK_DECODE_PROCESS_READ_DATA;
+    state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_DATA;
 
-    return SSC_BLOCK_DECODE_STATE_READY;
+    return DENSITY_BLOCK_DECODE_STATE_READY;
 }
 
-SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_read_block_footer(ssc_byte_buffer *restrict in, ssc_block_decode_state *restrict state) {
-    if (in->position + sizeof(ssc_block_footer) > in->size)
-        return SSC_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
+DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_footer(density_byte_buffer *restrict in, density_block_decode_state *restrict state) {
+    if (in->position + sizeof(density_block_footer) > in->size)
+        return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
-    state->totalRead += ssc_block_footer_read(in, &state->lastBlockFooter);
+    state->totalRead += density_block_footer_read(in, &state->lastBlockFooter);
 
-    return SSC_BLOCK_DECODE_STATE_READY;
+    return DENSITY_BLOCK_DECODE_STATE_READY;
 }
 
-SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_read_block_mode_marker(ssc_byte_buffer *restrict in, ssc_block_decode_state *restrict state) {
-    if (in->position + sizeof(ssc_mode_marker) > in->size)
-        return SSC_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
+DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_mode_marker(density_byte_buffer *restrict in, density_block_decode_state *restrict state) {
+    if (in->position + sizeof(density_mode_marker) > in->size)
+        return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
-    state->totalRead += ssc_block_mode_marker_read(in, &state->lastModeMarker);
+    state->totalRead += density_block_mode_marker_read(in, &state->lastModeMarker);
 
-    state->process = SSC_BLOCK_DECODE_PROCESS_READ_DATA;
+    state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_DATA;
 
-    return SSC_BLOCK_DECODE_STATE_READY;
+    return DENSITY_BLOCK_DECODE_STATE_READY;
 }
 
-SSC_FORCE_INLINE void ssc_block_decode_update_totals(ssc_byte_buffer *restrict in, ssc_byte_buffer *restrict out, ssc_block_decode_state *restrict state, const uint_fast64_t inPositionBefore, const uint_fast64_t outPositionBefore) {
+DENSITY_FORCE_INLINE void density_block_decode_update_totals(density_byte_buffer *restrict in, density_byte_buffer *restrict out, density_block_decode_state *restrict state, const uint_fast64_t inPositionBefore, const uint_fast64_t outPositionBefore) {
     state->totalRead += in->position - inPositionBefore;
     state->totalWritten += out->position - outPositionBefore;
 }
 
-SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_init(ssc_block_decode_state *restrict state, const SSC_BLOCK_MODE mode, const SSC_BLOCK_TYPE blockType, const uint_fast32_t endDataOverhead, void *kernelState, SSC_KERNEL_DECODE_STATE (*kernelInit)(void *, const uint32_t), SSC_KERNEL_DECODE_STATE (*kernelProcess)(ssc_byte_buffer *, ssc_byte_buffer *, void *, const ssc_bool), SSC_KERNEL_DECODE_STATE (*kernelFinish)(void *)) {
-    state->process = SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER;
+DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *restrict state, const DENSITY_BLOCK_MODE mode, const DENSITY_BLOCK_TYPE blockType, const uint_fast32_t endDataOverhead, void *kernelState, DENSITY_KERNEL_DECODE_STATE (*kernelInit)(void *, const uint32_t), DENSITY_KERNEL_DECODE_STATE (*kernelProcess)(density_byte_buffer *, density_byte_buffer *, void *, const density_bool), DENSITY_KERNEL_DECODE_STATE (*kernelFinish)(void *)) {
+    state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER;
     state->mode = mode;
     state->blockType = blockType;
 
     state->totalRead = 0;
     state->totalWritten = 0;
-    state->endDataOverhead = (state->blockType == SSC_BLOCK_TYPE_DEFAULT ? sizeof(ssc_block_footer) : 0) + endDataOverhead;
+    state->endDataOverhead = (state->blockType == DENSITY_BLOCK_TYPE_DEFAULT ? sizeof(density_block_footer) : 0) + endDataOverhead;
 
     switch (mode) {
-        case SSC_BLOCK_MODE_KERNEL:
+        case DENSITY_BLOCK_MODE_KERNEL:
             state->kernelDecodeState = kernelState;
             state->kernelDecodeInit = kernelInit;
             state->kernelDecodeProcess = kernelProcess;
@@ -93,12 +93,12 @@ SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_init(ssc_block_decode_s
             break;
     }
 
-    return SSC_BLOCK_DECODE_STATE_READY;
+    return DENSITY_BLOCK_DECODE_STATE_READY;
 }
 
-SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_process(ssc_byte_buffer *restrict in, ssc_byte_buffer *restrict out, ssc_block_decode_state *restrict state, const ssc_bool flush) {
-    SSC_BLOCK_DECODE_STATE decodeState;
-    SSC_KERNEL_DECODE_STATE hashDecodeState;
+DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_process(density_byte_buffer *restrict in, density_byte_buffer *restrict out, density_block_decode_state *restrict state, const density_bool flush) {
+    DENSITY_BLOCK_DECODE_STATE decodeState;
+    DENSITY_KERNEL_DECODE_STATE hashDecodeState;
     uint_fast64_t inPositionBefore;
     uint_fast64_t outPositionBefore;
     uint_fast64_t blockRemaining;
@@ -108,34 +108,34 @@ SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_process(ssc_byte_buffer
 
     while (true) {
         switch (state->process) {
-            case SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER:
-                if ((decodeState = ssc_block_decode_read_block_header(in, state)))
+            case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER:
+                if ((decodeState = density_block_decode_read_block_header(in, state)))
                     return decodeState;
                 break;
 
-            case SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_MODE_MARKER:
-                if ((decodeState = ssc_block_decode_read_block_mode_marker(in, state)))
+            case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_MODE_MARKER:
+                if ((decodeState = density_block_decode_read_block_mode_marker(in, state)))
                     return decodeState;
                 break;
 
-            case SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER:
-                if (state->blockType == SSC_BLOCK_TYPE_DEFAULT) if ((decodeState = ssc_block_decode_read_block_footer(in, state)))
+            case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER:
+                if (state->blockType == DENSITY_BLOCK_TYPE_DEFAULT) if ((decodeState = density_block_decode_read_block_footer(in, state)))
                     return decodeState;
-                state->process = SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER;
+                state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER;
                 break;
 
-            case SSC_BLOCK_DECODE_PROCESS_READ_LAST_BLOCK_FOOTER:
-                if (state->blockType == SSC_BLOCK_TYPE_DEFAULT) if ((decodeState = ssc_block_decode_read_block_footer(in, state)))
+            case DENSITY_BLOCK_DECODE_PROCESS_READ_LAST_BLOCK_FOOTER:
+                if (state->blockType == DENSITY_BLOCK_TYPE_DEFAULT) if ((decodeState = density_block_decode_read_block_footer(in, state)))
                     return decodeState;
-                state->process = SSC_BLOCK_DECODE_PROCESS_FINISHED;
-                return SSC_BLOCK_DECODE_STATE_READY;
+                state->process = DENSITY_BLOCK_DECODE_PROCESS_FINISHED;
+                return DENSITY_BLOCK_DECODE_STATE_READY;
 
-            case SSC_BLOCK_DECODE_PROCESS_READ_DATA:
+            case DENSITY_BLOCK_DECODE_PROCESS_READ_DATA:
                 inPositionBefore = in->position;
                 outPositionBefore = out->position;
                 switch (state->mode) {
-                    case SSC_BLOCK_MODE_COPY:
-                        blockRemaining = (uint_fast64_t) SSC_PREFERRED_BUFFER_SIZE - (state->totalWritten - state->currentBlockData.outStart);
+                    case DENSITY_BLOCK_MODE_COPY:
+                        blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_BUFFER_SIZE - (state->totalWritten - state->currentBlockData.outStart);
                         inRemaining = in->size - in->position;
                         outRemaining = out->size - out->position;
 
@@ -144,15 +144,15 @@ SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_process(ssc_byte_buffer
                                 goto copy_until_end_of_block;
                             else {
                                 if (flush && inRemaining <= state->endDataOverhead) {
-                                    state->process = SSC_BLOCK_DECODE_PROCESS_READ_LAST_BLOCK_FOOTER;
+                                    state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_LAST_BLOCK_FOOTER;
                                 } else if (!inRemaining) {
-                                    return SSC_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
+                                    return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
                                 } else {
                                     positionIncrement = inRemaining - (flush ? state->endDataOverhead : 0);
                                     memcpy(out->pointer + out->position, in->pointer + in->position, (size_t) positionIncrement);
                                     in->position += positionIncrement;
                                     out->position += positionIncrement;
-                                    ssc_block_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
+                                    density_block_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
                                 }
                             }
                         } else {
@@ -163,9 +163,9 @@ SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_process(ssc_byte_buffer
                                     memcpy(out->pointer + out->position, in->pointer + in->position, (size_t) outRemaining);
                                     in->position += outRemaining;
                                     out->position += outRemaining;
-                                    ssc_block_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
+                                    density_block_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
                                 } else
-                                    return SSC_BLOCK_DECODE_STATE_STALL_ON_OUTPUT_BUFFER;
+                                    return DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT_BUFFER;
                             }
                         }
                         goto exit;
@@ -174,59 +174,59 @@ SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_process(ssc_byte_buffer
                         memcpy(out->pointer + out->position, in->pointer + in->position, (size_t) blockRemaining);
                         in->position += blockRemaining;
                         out->position += blockRemaining;
-                        ssc_block_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
-                        state->process = SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER;
+                        density_block_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
+                        state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER;
 
                     exit:
                         break;
 
-                    case SSC_BLOCK_MODE_KERNEL:
+                    case DENSITY_BLOCK_MODE_KERNEL:
                         hashDecodeState = state->kernelDecodeProcess(in, out, state->kernelDecodeState, flush);
-                        ssc_block_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
+                        density_block_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
 
                         switch (hashDecodeState) {
-                            case SSC_KERNEL_DECODE_STATE_STALL_ON_INPUT_BUFFER:
-                                return SSC_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
+                            case DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT_BUFFER:
+                                return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
-                            case SSC_KERNEL_DECODE_STATE_STALL_ON_OUTPUT_BUFFER:
-                                return SSC_BLOCK_DECODE_STATE_STALL_ON_OUTPUT_BUFFER;
+                            case DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT_BUFFER:
+                                return DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT_BUFFER;
 
-                            case SSC_KERNEL_DECODE_STATE_INFO_NEW_BLOCK:
-                                state->process = SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER;
+                            case DENSITY_KERNEL_DECODE_STATE_INFO_NEW_BLOCK:
+                                state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER;
                                 break;
 
-                            case SSC_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK:
-                                state->process = SSC_BLOCK_DECODE_PROCESS_READ_BLOCK_MODE_MARKER;
+                            case DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK:
+                                state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_MODE_MARKER;
                                 break;
 
-                            case SSC_KERNEL_DECODE_STATE_FINISHED:
-                                state->process = SSC_BLOCK_DECODE_PROCESS_READ_LAST_BLOCK_FOOTER;
+                            case DENSITY_KERNEL_DECODE_STATE_FINISHED:
+                                state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_LAST_BLOCK_FOOTER;
                                 break;
 
-                            case SSC_KERNEL_DECODE_STATE_READY:
+                            case DENSITY_KERNEL_DECODE_STATE_READY:
                                 break;
 
                             default:
-                                return SSC_BLOCK_DECODE_STATE_ERROR;
+                                return DENSITY_BLOCK_DECODE_STATE_ERROR;
                         }
                         break;
 
                     default:
-                        return SSC_BLOCK_DECODE_STATE_ERROR;
+                        return DENSITY_BLOCK_DECODE_STATE_ERROR;
                 }
                 break;
 
             default:
-                return SSC_BLOCK_DECODE_STATE_ERROR;
+                return DENSITY_BLOCK_DECODE_STATE_ERROR;
         }
     }
 }
 
-SSC_FORCE_INLINE SSC_BLOCK_DECODE_STATE ssc_block_decode_finish(ssc_block_decode_state *restrict state) {
-    if (state->process ^ SSC_BLOCK_DECODE_PROCESS_FINISHED)
-        return SSC_BLOCK_DECODE_STATE_ERROR;
+DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(density_block_decode_state *restrict state) {
+    if (state->process ^ DENSITY_BLOCK_DECODE_PROCESS_FINISHED)
+        return DENSITY_BLOCK_DECODE_STATE_ERROR;
 
     state->kernelDecodeFinish(state->kernelDecodeState);
 
-    return SSC_BLOCK_DECODE_STATE_READY;
+    return DENSITY_BLOCK_DECODE_STATE_READY;
 }

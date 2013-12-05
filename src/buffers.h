@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,15 +30,15 @@
  * 18/10/13 22:37
  */
 
-#ifndef SSC_BUFFERS_H
-#define SSC_BUFFERS_H
+#ifndef DENSITY_BUFFERS_H
+#define DENSITY_BUFFERS_H
 
 #include "globals.h"
 #include "stream.h"
 #include "metadata.h"
 
-SSC_BUFFERS_STATE ssc_buffers_max_compressed_length(uint_fast64_t *, uint_fast64_t, const SSC_COMPRESSION_MODE);
-SSC_BUFFERS_STATE ssc_buffers_compress(uint_fast64_t*, uint8_t *, uint_fast64_t, uint8_t *, uint_fast64_t, const SSC_COMPRESSION_MODE, const SSC_ENCODE_OUTPUT_TYPE, const SSC_BLOCK_TYPE, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
-SSC_BUFFERS_STATE ssc_buffers_decompress(uint_fast64_t *, ssc_main_header*, uint8_t *, uint_fast64_t, uint8_t *, uint_fast64_t, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+DENSITY_BUFFERS_STATE density_buffers_max_compressed_length(uint_fast64_t *, uint_fast64_t, const DENSITY_COMPRESSION_MODE);
+DENSITY_BUFFERS_STATE density_buffers_compress(uint_fast64_t*, uint8_t *, uint_fast64_t, uint8_t *, uint_fast64_t, const DENSITY_COMPRESSION_MODE, const DENSITY_ENCODE_OUTPUT_TYPE, const DENSITY_BLOCK_TYPE, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+DENSITY_BUFFERS_STATE density_buffers_decompress(uint_fast64_t *, density_main_header*, uint8_t *, uint_fast64_t, uint8_t *, uint_fast64_t, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 #endif

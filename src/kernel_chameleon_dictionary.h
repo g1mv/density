@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -28,21 +28,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * 24/10/13 12:05
+ *
+ * ----------------
+ * Kernel Chameleon
+ * ----------------
+ *
+ * Author(s)
+ * Guillaume Voirin
+ *
+ * Description
+ * Hash based superfast kernel
  */
 
-#ifndef SSC_DICTIONARY_H
-#define SSC_DICTIONARY_H
+#ifndef DENSITY_DICTIONARY_H
+#define DENSITY_DICTIONARY_H
 
 #include "globals.h"
 #include "kernel_chameleon.h"
-
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#include "kernel_chameleon_dictionary_le.data"
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#include "kernel_chameleon_dictionary_be.data"
-#else
-#error Unable to load dictionary due to unsupported endian
-#endif
 
 #include <string.h>
 
@@ -50,14 +52,13 @@
 #pragma pack(4)
 typedef struct {
     uint32_t as_uint32_t;
-} ssc_dictionary_entry;
+} density_dictionary_entry;
 
 typedef struct {
-    ssc_dictionary_entry entries[1 << SSC_CHAMELEON_HASH_BITS];
-} ssc_dictionary;
+    density_dictionary_entry entries[1 << DENSITY_CHAMELEON_HASH_BITS];
+} density_dictionary;
 #pragma pack(pop)
 
-void ssc_dictionary_reset_1p(ssc_dictionary *);
-void ssc_dictionary_reset_2p(ssc_dictionary *);
+void density_dictionary_reset(density_dictionary *);
 
 #endif

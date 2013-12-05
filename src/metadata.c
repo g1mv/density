@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -32,40 +32,40 @@
 
 #include "metadata.h"
 
-SSC_FORCE_INLINE uint_fast64_t ssc_metadata_structure_overhead() {
-    return sizeof(ssc_main_header) + sizeof(ssc_main_footer);
+DENSITY_FORCE_INLINE uint_fast64_t density_metadata_structure_overhead() {
+    return sizeof(density_main_header) + sizeof(density_main_footer);
 }
 
-SSC_FORCE_INLINE uint_fast64_t ssc_metadata_block_structure_overhead(const uint_fast64_t length) {
-    return (1 + length / (SSC_PREFERRED_BLOCK_SIGNATURES * sizeof(uint16_t) * 8 * 8/*sizeof(ssc_hash_signature)*/)) * (sizeof(ssc_block_header) + sizeof(ssc_mode_marker) + sizeof(ssc_block_footer));
+DENSITY_FORCE_INLINE uint_fast64_t density_metadata_block_structure_overhead(const uint_fast64_t length) {
+    return (1 + length / (DENSITY_PREFERRED_BLOCK_SIGNATURES * sizeof(uint16_t) * 8 * 8/*sizeof(density_hash_signature)*/)) * (sizeof(density_block_header) + sizeof(density_mode_marker) + sizeof(density_block_footer));
 }
 
-SSC_FORCE_INLINE uint_fast64_t ssc_metadata_max_compressed_length(const uint_fast64_t length, const SSC_COMPRESSION_MODE mode, const bool includeStructure) {
-    uint_fast64_t headerFooterLength = (includeStructure ? ssc_metadata_structure_overhead() : 0);
+DENSITY_FORCE_INLINE uint_fast64_t density_metadata_max_compressed_length(const uint_fast64_t length, const DENSITY_COMPRESSION_MODE mode, const bool includeStructure) {
+    uint_fast64_t headerFooterLength = (includeStructure ? density_metadata_structure_overhead() : 0);
     switch(mode) {
         default:
             return headerFooterLength + length;
 
-        case SSC_COMPRESSION_MODE_CHAMELEON:
-            return headerFooterLength + ssc_metadata_block_structure_overhead(length) + length;
+        case DENSITY_COMPRESSION_MODE_CHAMELEON:
+            return headerFooterLength + density_metadata_block_structure_overhead(length) + length;
 
-        case SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON:
-            return headerFooterLength + ssc_metadata_block_structure_overhead(ssc_metadata_block_structure_overhead(length) + length) + length;
+        case DENSITY_COMPRESSION_MODE_JADE:
+            return headerFooterLength + density_metadata_block_structure_overhead(density_metadata_block_structure_overhead(length) + length) + length;
     }
 }
 
-SSC_FORCE_INLINE uint_fast64_t ssc_metadata_max_decompressed_length(const uint_fast64_t length, const SSC_COMPRESSION_MODE mode, const bool includeStructure) {
-    uint_fast64_t headerFooterLength = (includeStructure ? ssc_metadata_structure_overhead() : 0);
+DENSITY_FORCE_INLINE uint_fast64_t density_metadata_max_decompressed_length(const uint_fast64_t length, const DENSITY_COMPRESSION_MODE mode, const bool includeStructure) {
+    uint_fast64_t headerFooterLength = (includeStructure ? density_metadata_structure_overhead() : 0);
     uint_fast64_t intermediate;
     switch(mode) {
         default:
             return length - headerFooterLength;
 
-        case SSC_COMPRESSION_MODE_CHAMELEON:
-            return (length - ssc_metadata_block_structure_overhead(length)) << (1 - headerFooterLength);
+        case DENSITY_COMPRESSION_MODE_CHAMELEON:
+            return (length - density_metadata_block_structure_overhead(length)) << (1 - headerFooterLength);
 
-        case SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON:
-            intermediate = (length - ssc_metadata_block_structure_overhead(length)) << 1;
-            return (intermediate - ssc_metadata_block_structure_overhead(intermediate)) << (1 - headerFooterLength);
+        case DENSITY_COMPRESSION_MODE_JADE:
+            intermediate = (length - density_metadata_block_structure_overhead(length)) << 1;
+            return (intermediate - density_metadata_block_structure_overhead(intermediate)) << (1 - headerFooterLength);
     }
 }

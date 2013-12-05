@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,8 +30,8 @@
  * 11/10/13 02:01
  */
 
-#ifndef SSC_GLOBALS_H
-#define SSC_GLOBALS_H
+#ifndef DENSITY_GLOBALS_H
+#define DENSITY_GLOBALS_H
 
 #include <stdint.h>
 #include <stdio.h>
@@ -40,43 +40,43 @@
 #include <stddef.h>
 
 #if defined(__INTEL_COMPILER)
-#define SSC_FORCE_INLINE __forceinline
+#define DENSITY_FORCE_INLINE __forceinline
 #elif defined(__GNUC__)
-#define SSC_FORCE_INLINE inline __attribute__((always_inline))
+#define DENSITY_FORCE_INLINE inline __attribute__((always_inline))
 #elif defined(_MSC_VER)
-#define SSC_FORCE_INLINE __forceinline
+#define DENSITY_FORCE_INLINE __forceinline
 #else
 #warning Impossible to force functions inlining. Expect performance issues.
 #endif
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#define SSC_LITTLE_ENDIAN_64(b)   ((uint64_t)b)
-#define SSC_LITTLE_ENDIAN_32(b)   ((uint32_t)b)
-#define SSC_LITTLE_ENDIAN_16(b)   ((uint16_t)b)
+#define DENSITY_LITTLE_ENDIAN_64(b)   ((uint64_t)b)
+#define DENSITY_LITTLE_ENDIAN_32(b)   ((uint32_t)b)
+#define DENSITY_LITTLE_ENDIAN_16(b)   ((uint16_t)b)
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #if __GNUC__ * 100 + __GNUC_MINOR__ >= 403
-#define SSC_LITTLE_ENDIAN_64(b)   __builtin_bswap64(b)
-#define SSC_LITTLE_ENDIAN_32(b)   __builtin_bswap32(b)
-#define SSC_LITTLE_ENDIAN_16(b)   __builtin_bswap16(b)
+#define DENSITY_LITTLE_ENDIAN_64(b)   __builtin_bswap64(b)
+#define DENSITY_LITTLE_ENDIAN_32(b)   __builtin_bswap32(b)
+#define DENSITY_LITTLE_ENDIAN_16(b)   __builtin_bswap16(b)
 #else
 #warning Using bulk byte swap routines. Expect performance issues.
-#define SSC_LITTLE_ENDIAN_64(b)   ((((b) & 0xFF00000000000000ull) >> 56) | (((b) & 0x00FF000000000000ull) >> 40) | (((b) & 0x0000FF0000000000ull) >> 24) | (((b) & 0x000000FF00000000ull) >> 8) | (((b) & 0x00000000FF000000ull) << 8) | (((b) & 0x0000000000FF0000ull) << 24ull) | (((b) & 0x000000000000FF00ull) << 40) | (((b) & 0x00000000000000FFull) << 56))
-#define SSC_LITTLE_ENDIAN_32(b)   ((((b) & 0xFF000000) >> 24) | (((b) & 0x00FF0000) >> 8) | (((b) & 0x0000FF00) << 8) | (((b) & 0x000000FF) << 24))
-#define SSC_LITTLE_ENDIAN_16(b)   ((((b) & 0xFF00) >> 8) | (((b) & 0x00FF) << 8))
+#define DENSITY_LITTLE_ENDIAN_64(b)   ((((b) & 0xFF00000000000000ull) >> 56) | (((b) & 0x00FF000000000000ull) >> 40) | (((b) & 0x0000FF0000000000ull) >> 24) | (((b) & 0x000000FF00000000ull) >> 8) | (((b) & 0x00000000FF000000ull) << 8) | (((b) & 0x0000000000FF0000ull) << 24ull) | (((b) & 0x000000000000FF00ull) << 40) | (((b) & 0x00000000000000FFull) << 56))
+#define DENSITY_LITTLE_ENDIAN_32(b)   ((((b) & 0xFF000000) >> 24) | (((b) & 0x00FF0000) >> 8) | (((b) & 0x0000FF00) << 8) | (((b) & 0x000000FF) << 24))
+#define DENSITY_LITTLE_ENDIAN_16(b)   ((((b) & 0xFF00) >> 8) | (((b) & 0x00FF) << 8))
 #endif
 #else
 #error Unknow endianness
 #endif
 
-#define SSC_DICTIONARY_MAX_RESET_CYCLE_SHIFT          32
-#define SSC_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT    6
-#define SSC_DICTIONARY_PREFERRED_RESET_CYCLE          (1 << SSC_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT)
+#define DENSITY_DICTIONARY_MAX_RESET_CYCLE_SHIFT          32
+#define DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT    6
+#define DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE          (1 << DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT)
 
-#define ssc_likely(x)                         __builtin_expect(!!(x), 1)
-#define ssc_unlikely(x)                       __builtin_expect(!!(x), 0)
+#define density_likely(x)                         __builtin_expect(!!(x), 1)
+#define density_unlikely(x)                       __builtin_expect(!!(x), 0)
 
-#define SSC_MAJOR_VERSION               0
-#define SSC_MINOR_VERSION               9
-#define SSC_REVISION                    12
+#define DENSITY_MAJOR_VERSION               0
+#define DENSITY_MINOR_VERSION               9
+#define DENSITY_REVISION                    12
 
 #endif

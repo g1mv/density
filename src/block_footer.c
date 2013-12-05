@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -32,18 +32,18 @@
 
 #include "block_footer.h"
 
-SSC_FORCE_INLINE uint_fast32_t ssc_block_footer_read(ssc_byte_buffer *restrict in, ssc_block_footer *restrict blockFooter) {
+DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_read(density_byte_buffer *restrict in, density_block_footer *restrict blockFooter) {
     blockFooter->hashsum = *(uint32_t *) (in->pointer + in->position);
 
-    in->position += sizeof(ssc_block_footer);
+    in->position += sizeof(density_block_footer);
 
-    return sizeof(ssc_block_footer);
+    return sizeof(density_block_footer);
 }
 
-SSC_FORCE_INLINE uint_fast32_t ssc_block_footer_write(ssc_byte_buffer *out, const uint_fast32_t hashsum) {
-    *(uint32_t *) (out->pointer + out->position) = SSC_LITTLE_ENDIAN_32(hashsum);
+DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_write(density_byte_buffer *out, const uint_fast32_t hashsum) {
+    *(uint32_t *) (out->pointer + out->position) = DENSITY_LITTLE_ENDIAN_32(hashsum);
 
-    out->position += sizeof(ssc_block_footer);
+    out->position += sizeof(density_block_footer);
 
-    return sizeof(ssc_block_footer);
+    return sizeof(density_block_footer);
 }

@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -32,14 +32,14 @@
 
 #include "block_header.h"
 
-SSC_FORCE_INLINE uint_fast32_t ssc_block_header_read(ssc_byte_buffer *restrict in, ssc_block_header *restrict blockHeader) {
-    in->position += sizeof(ssc_block_header);
+DENSITY_FORCE_INLINE uint_fast32_t density_block_header_read(density_byte_buffer *restrict in, density_block_header *restrict blockHeader) {
+    in->position += sizeof(density_block_header);
 
-    return sizeof(ssc_block_header);
+    return sizeof(density_block_header);
 }
 
-SSC_FORCE_INLINE uint_fast32_t ssc_block_header_write(ssc_byte_buffer *out) {
-    out->position += sizeof(ssc_block_header);
+DENSITY_FORCE_INLINE uint_fast32_t density_block_header_write(density_byte_buffer *out) {
+    out->position += sizeof(density_block_header);
 
-    return sizeof(ssc_block_header);
+    return sizeof(density_block_header);
 }

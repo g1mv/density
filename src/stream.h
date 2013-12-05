@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,8 +30,8 @@
  * 18/10/13 22:34
  */
 
-#ifndef SSC_API_STREAM_H
-#define SSC_API_STREAM_H
+#ifndef DENSITY_API_STREAM_H
+#define DENSITY_API_STREAM_H
 
 #include <stdint.h>
 
@@ -43,40 +43,40 @@
 #include "main_encode.h"
 #include "main_decode.h"
 
-#define SSC_STREAM_MINIMUM_OUT_BUFFER_SIZE                        (1 << 9)
+#define DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE                        (1 << 9)
 
 typedef enum {
-    SSC_STREAM_PROCESS_PREPARED,
-    SSC_STREAM_PROCESS_COMPRESSION_INITED,
-    SSC_STREAM_PROCESS_COMPRESSION_DATA_FINISHED,
-    SSC_STREAM_PROCESS_COMPRESSION_FINISHED,
-    SSC_STREAM_PROCESS_DECOMPRESSION_INITED,
-    SSC_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED,
-    SSC_STREAM_PROCESS_DECOMPRESSION_FINISHED,
-} SSC_STREAM_PROCESS;
+    DENSITY_STREAM_PROCESS_PREPARED,
+    DENSITY_STREAM_PROCESS_COMPRESSION_INITED,
+    DENSITY_STREAM_PROCESS_COMPRESSION_DATA_FINISHED,
+    DENSITY_STREAM_PROCESS_COMPRESSION_FINISHED,
+    DENSITY_STREAM_PROCESS_DECOMPRESSION_INITED,
+    DENSITY_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED,
+    DENSITY_STREAM_PROCESS_DECOMPRESSION_FINISHED,
+} DENSITY_STREAM_PROCESS;
 
 typedef struct {
-    SSC_STREAM_PROCESS process;
+    DENSITY_STREAM_PROCESS process;
 
-    ssc_byte_buffer workBuffer;
+    density_byte_buffer workBuffer;
 
     void *(*mem_alloc)(size_t);
     void (*mem_free)(void *);
 
-    ssc_encode_state internal_encode_state;
-    ssc_decode_state internal_decode_state;
-} ssc_stream_state;
+    density_encode_state internal_encode_state;
+    density_decode_state internal_decode_state;
+} density_stream_state;
 
-SSC_STREAM_STATE ssc_stream_prepare(ssc_stream *, uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
+DENSITY_STREAM_STATE density_stream_prepare(density_stream *, uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
 
-SSC_STREAM_STATE ssc_stream_compress_init(ssc_stream *, const SSC_COMPRESSION_MODE, const SSC_ENCODE_OUTPUT_TYPE, const SSC_BLOCK_TYPE);
-SSC_STREAM_STATE ssc_stream_compress(ssc_stream *, const ssc_bool);
-SSC_STREAM_STATE ssc_stream_compress_finish(ssc_stream *);
+DENSITY_STREAM_STATE density_stream_compress_init(density_stream *, const DENSITY_COMPRESSION_MODE, const DENSITY_ENCODE_OUTPUT_TYPE, const DENSITY_BLOCK_TYPE);
+DENSITY_STREAM_STATE density_stream_compress(density_stream *, const density_bool);
+DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *);
 
-SSC_STREAM_STATE ssc_stream_decompress_init(ssc_stream *);
-SSC_STREAM_STATE ssc_stream_decompress(ssc_stream *, const ssc_bool);
-SSC_STREAM_STATE ssc_stream_decompress_finish(ssc_stream *);
+DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *);
+DENSITY_STREAM_STATE density_stream_decompress(density_stream *, const density_bool);
+DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *);
 
-SSC_STREAM_STATE ssc_stream_decompress_utilities_get_header(ssc_stream*, ssc_main_header*);
+DENSITY_STREAM_STATE density_stream_decompress_utilities_get_header(density_stream*, density_main_header*);
 
 #endif

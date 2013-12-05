@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,8 +30,8 @@
  * 18/10/13 22:41
  */
 
-#ifndef SSC_API_H
-#define SSC_API_H
+#ifndef DENSITY_API_H
+#define DENSITY_API_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -40,68 +40,81 @@
 
 /***********************************************************************************************************************
  *                                                                                                                     *
- * SSC structures useful for the API                                                                                   *
+ * Compilation switches (compression only)                                                                             *
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
-typedef uint8_t ssc_byte;
-typedef bool ssc_bool;
+#define DENSITY_YES                             1
+#define DENSITY_NO                              0
+
+#define DENSITY_ENABLE_PARALLELIZATION          DENSITY_NO          // No disables compression dictionary resets and improves compression ratio
+
+
+
+/***********************************************************************************************************************
+ *                                                                                                                     *
+ * Structures useful for the API                                                                                       *
+ *                                                                                                                     *
+ ***********************************************************************************************************************/
+
+typedef uint8_t density_byte;
+typedef bool density_bool;
 
 typedef enum {
-    SSC_COMPRESSION_MODE_COPY = 0,
-    SSC_COMPRESSION_MODE_CHAMELEON = 1,
-    SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON = 2,
-} SSC_COMPRESSION_MODE;
+    DENSITY_COMPRESSION_MODE_COPY = 0,
+    DENSITY_COMPRESSION_MODE_CHAMELEON = 1,
+    DENSITY_COMPRESSION_MODE_JADE = 2,
+} DENSITY_COMPRESSION_MODE;
 
 typedef enum {
-    SSC_ENCODE_OUTPUT_TYPE_DEFAULT = 0,
-    SSC_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER = 1,
-    SSC_ENCODE_OUTPUT_TYPE_WITHOUT_FOOTER = 2,
-    SSC_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER_NOR_FOOTER = 3
-} SSC_ENCODE_OUTPUT_TYPE;
+    DENSITY_ENCODE_OUTPUT_TYPE_DEFAULT = 0,
+    DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER = 1,
+    DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_FOOTER = 2,
+    DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER_NOR_FOOTER = 3
+} DENSITY_ENCODE_OUTPUT_TYPE;
 
 typedef enum {
-    SSC_BLOCK_TYPE_DEFAULT = 0,
-    SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK = 1
-} SSC_BLOCK_TYPE;
+    DENSITY_BLOCK_TYPE_DEFAULT = 0,
+    DENSITY_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK = 1
+} DENSITY_BLOCK_TYPE;
 
 typedef enum {
-    SSC_BUFFERS_STATE_OK = 0,                                       // ready to continue
-    SSC_BUFFERS_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                // output buffer size is too small
-    SSC_BUFFERS_STATE_ERROR_INVALID_STATE                           // error during processing
-} SSC_BUFFERS_STATE;
+    DENSITY_BUFFERS_STATE_OK = 0,                                       // ready to continue
+    DENSITY_BUFFERS_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                // output buffer size is too small
+    DENSITY_BUFFERS_STATE_ERROR_INVALID_STATE                           // error during processing
+} DENSITY_BUFFERS_STATE;
 
 typedef enum {
-    SSC_STREAM_STATE_READY = 0,                                     // ready to continue
-    SSC_STREAM_STATE_STALL_ON_INPUT_BUFFER,                         // input buffer has been completely read
-    SSC_STREAM_STATE_STALL_ON_OUTPUT_BUFFER,                        // there is not enought space left in the output buffer to continue
-    SSC_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32,    // size of input buffer is no a multiple of 32
-    SSC_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // output buffer size is too small
-    SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE                   // error during processing
-} SSC_STREAM_STATE;
+    DENSITY_STREAM_STATE_READY = 0,                                     // ready to continue
+    DENSITY_STREAM_STATE_STALL_ON_INPUT_BUFFER,                         // input buffer has been completely read
+    DENSITY_STREAM_STATE_STALL_ON_OUTPUT_BUFFER,                        // there is not enought space left in the output buffer to continue
+    DENSITY_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32,    // size of input buffer is not a multiple of 32
+    DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // output buffer size is too small
+    DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE                   // error during processing
+} DENSITY_STREAM_STATE;
 
 typedef struct {
-    ssc_byte version[3];
-    ssc_byte compressionMode;
-    ssc_byte blockType;
-    ssc_byte parameters[7];
-} ssc_main_header;
+    density_byte version[3];
+    density_byte compressionMode;
+    density_byte blockType;
+    density_byte parameters[7];
+} density_main_header;
 
 typedef struct {
-    ssc_byte* pointer;
+    density_byte* pointer;
     uint_fast64_t position;
     uint_fast64_t size;
-} ssc_byte_buffer;
+} density_byte_buffer;
 
 typedef struct {
-    ssc_byte_buffer in;
+    density_byte_buffer in;
     uint_fast64_t* in_total_read;
 
-    ssc_byte_buffer out;
+    density_byte_buffer out;
     uint_fast64_t* out_total_written;
 
     void* internal_state;
-} ssc_stream;
+} density_stream;
 
 
 
@@ -114,17 +127,17 @@ typedef struct {
 /*
  * Returns the major ssc version
  */
-uint8_t ssc_version_major(void);
+uint8_t density_version_major(void);
 
 /*
  * Returns the minor ssc version
  */
-uint8_t ssc_version_minor(void);
+uint8_t density_version_minor(void);
 
 /*
  * Returns the ssc revision
  */
-uint8_t ssc_version_revision(void);
+uint8_t density_version_revision(void);
 
 
 
@@ -139,7 +152,7 @@ uint8_t ssc_version_revision(void);
  *
  * @param byte_buffer the SSC byte buffer to rewind (its position is set to zero)
  */
-void ssc_byte_buffer_rewind(ssc_byte_buffer* byte_buffer);
+void density_byte_buffer_rewind(density_byte_buffer* byte_buffer);
 
 
 
@@ -156,11 +169,11 @@ void ssc_byte_buffer_rewind(ssc_byte_buffer* byte_buffer);
  * @param input_buffer a buffer of bytes
  * @param input_size the size in bytes of input_buffer
  * @param output_buffer a buffer of bytes
- * @param output_size the size of output_buffer, must be at least SSC_STREAM_MINIMUM_OUT_BUFFER_SIZE
+ * @param output_size the size of output_buffer, must be at least DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-SSC_STREAM_STATE ssc_stream_prepare(ssc_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 /*
  * Initialize compression
@@ -168,22 +181,22 @@ SSC_STREAM_STATE ssc_stream_prepare(ssc_stream *stream, uint8_t* input_buffer, c
  * @param stream the stream
  * @param compression_mode the compression mode
  * @param output_type the format of data output by encoding.
- *      EXPERTS ONLY ! If unsure, use SSC_ENCODE_OUTPUT_TYPE_DEFAULT.
+ *      EXPERTS ONLY ! If unsure, use DENSITY_ENCODE_OUTPUT_TYPE_DEFAULT.
  *      Any other option will create output data which is *NOT* directly decompressible by the API. This can be used for parallelizing SSC.
  * @param block_type the type of data blocks SSC will generate.
- *      EXPERTS ONLY ! If you're unsure use SSC_BLOCK_TYPE_DEFAULT.
- *      The option SSC_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK basically makes the block footer size zero, and removes data integrity checks in the encoded output.
- *      It can be useful in network streaming situations, where data integrity is already checked by the protocol (TCP/IP for example), and the flush option in ssc_stream_compress is often set,
+ *      EXPERTS ONLY ! If you're unsure use DENSITY_BLOCK_TYPE_DEFAULT.
+ *      The option DENSITY_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK basically makes the block footer size zero, and removes data integrity checks in the encoded output.
+ *      It can be useful in network streaming situations, where data integrity is already checked by the protocol (TCP/IP for example), and the flush option in density_stream_compress is often set,
  *      as the absence of block footer will enhance compression ratio.
  */
-SSC_STREAM_STATE ssc_stream_compress_init(ssc_stream *stream, const SSC_COMPRESSION_MODE compression_mode, const SSC_ENCODE_OUTPUT_TYPE output_type, const SSC_BLOCK_TYPE block_type);
+DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_ENCODE_OUTPUT_TYPE output_type, const DENSITY_BLOCK_TYPE block_type);
 
 /*
  * Stream decompression initialization
  *
  * @param stream the stream
  */
-SSC_STREAM_STATE ssc_stream_decompress_init(ssc_stream *stream);
+DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream);
 
 /*
  * Stream compression function, has to be called repetitively.
@@ -195,11 +208,11 @@ SSC_STREAM_STATE ssc_stream_decompress_init(ssc_stream *stream);
  *      If set to true, this will ensure that every byte from the input buffer will have its counterpart in the output buffer.
  *      flush has to be true when the presented data is the last (end of a file for example).
  *      It can also be set to true multiple times to handle network streaming for example. In that case, please also check
- *      the block_type parameter of ssc_stream_compress_init to enable a better compression ratio. It is also worth noting that
+ *      the block_type parameter of density_stream_compress_init to enable a better compression ratio. It is also worth noting that
  *      the *best* input buffer size for compression ratio matters should be a multiple of 256, any other size will also work but will
  *      incur a less than optimal compression ratio.
  */
-SSC_STREAM_STATE ssc_stream_compress(ssc_stream *stream, const ssc_bool flush);
+DENSITY_STREAM_STATE density_stream_compress(density_stream *stream, const density_bool flush);
 
 /*
  * Stream decompression function, has to be called repetitively.
@@ -211,29 +224,29 @@ SSC_STREAM_STATE ssc_stream_compress(ssc_stream *stream, const ssc_bool flush);
  *      flush has to be true when the presented data is the last (end of a file for example)
  *      It can also be set to true multiple times to handle network streaming for example.
  */
-SSC_STREAM_STATE ssc_stream_decompress(ssc_stream *stream, const ssc_bool flush);
+DENSITY_STREAM_STATE density_stream_decompress(density_stream *stream, const density_bool flush);
 
 /*
  * Call once processing is finished, to clear up the environment and release eventual allocated memory.
  *
  * @param stream the stream
  */
-SSC_STREAM_STATE ssc_stream_compress_finish(ssc_stream *stream);
+DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *stream);
 
 /*
  * Call once processing is finished, to clear up the environment and release eventual allocated memory.
  *
  * @param stream the stream
  */
-SSC_STREAM_STATE ssc_stream_decompress_finish(ssc_stream *stream);
+DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream);
 
 /*
- * Returns the header that was read during ssc_stream_decompress_init.
+ * Returns the header that was read during density_stream_decompress_init.
  *
  * @param stream the stream
  * @param header the header returned
  */
-SSC_STREAM_STATE ssc_stream_decompress_utilities_get_header(ssc_stream* stream, ssc_main_header* header);
+DENSITY_STREAM_STATE density_stream_decompress_utilities_get_header(density_stream* stream, density_main_header* header);
 
 
 
@@ -250,7 +263,7 @@ SSC_STREAM_STATE ssc_stream_decompress_utilities_get_header(ssc_stream* stream, 
  * @param in_length, the length of the input data to compress
  * @param compression_mode the compression mode to be used
  */
-SSC_BUFFERS_STATE ssc_buffers_max_compressed_length(uint_fast64_t * result, uint_fast64_t in_length, const SSC_COMPRESSION_MODE compression_mode);
+DENSITY_BUFFERS_STATE density_buffers_max_compressed_length(uint_fast64_t * result, uint_fast64_t in_length, const DENSITY_COMPRESSION_MODE compression_mode);
 
 /*
  * Buffers compression function
@@ -261,12 +274,12 @@ SSC_BUFFERS_STATE ssc_buffers_max_compressed_length(uint_fast64_t * result, uint
  * @param out the output buffer
  * @param out_size the size of the output buffer in bytes
  * @param compression_mode the compression mode to use
- * @param output_type the output type to use (if unsure, SSC_ENCODE_OUTPUT_TYPE_DEFAULT), see the ssc_stream_compress documentation
- * @param block_type the block type to use (if unsure, SSC_BLOCK_TYPE_DEFAULT), see the ssc_stream_compress documentation
+ * @param output_type the output type to use (if unsure, DENSITY_ENCODE_OUTPUT_TYPE_DEFAULT), see the density_stream_compress documentation
+ * @param block_type the block type to use (if unsure, DENSITY_BLOCK_TYPE_DEFAULT), see the density_stream_compress documentation
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-SSC_BUFFERS_STATE ssc_buffers_compress(uint_fast64_t* total_written, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, const SSC_COMPRESSION_MODE compression_mode, const SSC_ENCODE_OUTPUT_TYPE output_type, const SSC_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+DENSITY_BUFFERS_STATE density_buffers_compress(uint_fast64_t* total_written, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_ENCODE_OUTPUT_TYPE output_type, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 /*
  * Buffers decompression function
@@ -280,6 +293,6 @@ SSC_BUFFERS_STATE ssc_buffers_compress(uint_fast64_t* total_written, uint8_t *in
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-SSC_BUFFERS_STATE ssc_buffers_decompress(uint_fast64_t * total_written, ssc_main_header* header, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+DENSITY_BUFFERS_STATE density_buffers_decompress(uint_fast64_t * total_written, density_main_header* header, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 #endif

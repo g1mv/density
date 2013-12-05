@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -32,24 +32,24 @@
 
 #include "main_header.h"
 
-SSC_FORCE_INLINE uint_fast32_t ssc_main_header_read(ssc_byte_buffer *restrict in, ssc_main_header *restrict header) {
-    ssc_byte *pointer = in->pointer + in->position;
+DENSITY_FORCE_INLINE uint_fast32_t density_main_header_read(density_byte_buffer *restrict in, density_main_header *restrict header) {
+    density_byte *pointer = in->pointer + in->position;
     header->version[0] = *(pointer);
     header->version[1] = *(pointer + 1);
     header->version[2] = *(pointer + 2);
     header->compressionMode = *(pointer + 3);
     header->blockType = *(pointer + 4);
-    in->position += sizeof(ssc_main_header);
-    return sizeof(ssc_main_header);
+    in->position += sizeof(density_main_header);
+    return sizeof(density_main_header);
 }
 
-SSC_FORCE_INLINE uint_fast32_t ssc_main_header_write(ssc_byte_buffer *restrict out, const SSC_COMPRESSION_MODE compressionMode, const SSC_BLOCK_TYPE blockType) {
-    ssc_byte *pointer = out->pointer + out->position;
-    *(pointer) = SSC_MAJOR_VERSION;
-    *(pointer + 1) = SSC_MINOR_VERSION;
-    *(pointer + 2) = SSC_REVISION;
+DENSITY_FORCE_INLINE uint_fast32_t density_main_header_write(density_byte_buffer *restrict out, const DENSITY_COMPRESSION_MODE compressionMode, const DENSITY_BLOCK_TYPE blockType) {
+    density_byte *pointer = out->pointer + out->position;
+    *(pointer) = DENSITY_MAJOR_VERSION;
+    *(pointer + 1) = DENSITY_MINOR_VERSION;
+    *(pointer + 2) = DENSITY_REVISION;
     *(pointer + 3) = compressionMode;
     *(pointer + 4) = blockType;
-    out->position += sizeof(ssc_main_header);
-    return sizeof(ssc_main_header);
+    out->position += sizeof(density_main_header);
+    return sizeof(density_main_header);
 }

@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,8 +30,8 @@
  * 18/10/13 23:50
  */
 
-#ifndef SSC_DECODE_H
-#define SSC_DECODE_H
+#ifndef DENSITY_DECODE_H
+#define DENSITY_DECODE_H
 
 #include "block_header.h"
 #include "block_footer.h"
@@ -41,48 +41,48 @@
 #include "block_mode_marker.h"
 #include "block_decode.h"
 #include "kernel_chameleon_decode.h"
-#include "ssc_api.h"
+#include "density_api.h"
 
 typedef enum {
-    SSC_DECODE_STATE_READY = 0,
-    SSC_DECODE_STATE_STALL_ON_OUTPUT_BUFFER,
-    SSC_DECODE_STATE_STALL_ON_INPUT_BUFFER,
-    SSC_DECODE_STATE_ERROR
-} SSC_DECODE_STATE;
+    DENSITY_DECODE_STATE_READY = 0,
+    DENSITY_DECODE_STATE_STALL_ON_OUTPUT_BUFFER,
+    DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER,
+    DENSITY_DECODE_STATE_ERROR
+} DENSITY_DECODE_STATE;
 
 typedef enum {
-    SSC_DECODE_PROCESS_READ_BLOCKS,
-    SSC_DECODE_PROCESS_READ_BLOCKS_IN_TO_WORKBUFFER,
-    SSC_DECODE_PROCESS_READ_BLOCKS_WORKBUFFER_TO_OUT,
-    SSC_DECODE_PROCESS_READ_FOOTER,
-    SSC_DECODE_PROCESS_FINISHED
-} SSC_DECODE_PROCESS;
+    DENSITY_DECODE_PROCESS_READ_BLOCKS,
+    DENSITY_DECODE_PROCESS_READ_BLOCKS_IN_TO_WORKBUFFER,
+    DENSITY_DECODE_PROCESS_READ_BLOCKS_WORKBUFFER_TO_OUT,
+    DENSITY_DECODE_PROCESS_READ_FOOTER,
+    DENSITY_DECODE_PROCESS_FINISHED
+} DENSITY_DECODE_PROCESS;
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
     uint_fast64_t memorySize;
-} ssc_decode_work_buffer_data;
+} density_decode_work_buffer_data;
 
 typedef struct {
-    SSC_DECODE_PROCESS process;
+    DENSITY_DECODE_PROCESS process;
 
     uint_fast64_t totalRead;
     uint_fast64_t totalWritten;
 
-    ssc_main_header header;
-    ssc_main_footer footer;
+    density_main_header header;
+    density_main_footer footer;
 
-    ssc_block_decode_state blockDecodeStateA;
-    ssc_block_decode_state blockDecodeStateB;
+    density_block_decode_state blockDecodeStateA;
+    density_block_decode_state blockDecodeStateB;
 
-    ssc_byte_buffer* workBuffer;
-    ssc_decode_work_buffer_data workBufferData;
-} ssc_decode_state;
+    density_byte_buffer* workBuffer;
+    density_decode_work_buffer_data workBufferData;
+} density_decode_state;
 #pragma pack(pop)
 
-SSC_DECODE_STATE ssc_decode_init(ssc_byte_buffer*, ssc_byte_buffer*, const uint_fast64_t, ssc_decode_state *);
-SSC_DECODE_STATE ssc_decode_process(ssc_byte_buffer *, ssc_byte_buffer *, ssc_decode_state *, const ssc_bool);
-SSC_DECODE_STATE ssc_decode_finish(ssc_byte_buffer *, ssc_decode_state*);
+DENSITY_DECODE_STATE density_decode_init(density_byte_buffer*, density_byte_buffer*, const uint_fast64_t, density_decode_state *);
+DENSITY_DECODE_STATE density_decode_process(density_byte_buffer *, density_byte_buffer *, density_decode_state *, const density_bool);
+DENSITY_DECODE_STATE density_decode_finish(density_byte_buffer *, density_decode_state*);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,16 +30,16 @@
  * 18/10/13 22:30
  */
 
-#ifndef SSC_FOOTER_H
-#define SSC_FOOTER_H
+#ifndef DENSITY_FOOTER_H
+#define DENSITY_FOOTER_H
 
 #include "globals.h"
 #include "byte_buffer.h"
 
 typedef struct {
-} ssc_main_footer;
+} density_main_footer;
 
-uint_fast32_t ssc_main_footer_read(ssc_byte_buffer*, ssc_main_footer*);
-uint_fast32_t ssc_main_footer_write(ssc_byte_buffer*);
+uint_fast32_t density_main_footer_read(density_byte_buffer*, density_main_footer*);
+uint_fast32_t density_main_footer_write(density_byte_buffer*);
 
 #endif

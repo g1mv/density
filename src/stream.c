@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -32,233 +32,233 @@
 
 #include "stream.h"
 
-SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_prepare(ssc_stream *restrict stream, uint8_t *restrict in, const uint_fast64_t availableIn, uint8_t *restrict out, const uint_fast64_t availableOut, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
-    ssc_byte_buffer_encapsulate(&stream->in, in, availableIn);
-    ssc_byte_buffer_encapsulate(&stream->out, out, availableOut);
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream *restrict stream, uint8_t *restrict in, const uint_fast64_t availableIn, uint8_t *restrict out, const uint_fast64_t availableOut, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
+    density_byte_buffer_encapsulate(&stream->in, in, availableIn);
+    density_byte_buffer_encapsulate(&stream->out, out, availableOut);
 
     if (mem_alloc == NULL) {
-        stream->internal_state = (ssc_stream_state *) malloc(sizeof(ssc_stream_state));
-        ((ssc_stream_state *) stream->internal_state)->mem_alloc = malloc;
+        stream->internal_state = (density_stream_state *) malloc(sizeof(density_stream_state));
+        ((density_stream_state *) stream->internal_state)->mem_alloc = malloc;
     } else {
-        stream->internal_state = (ssc_stream_state *) mem_alloc(sizeof(ssc_stream_state));
-        ((ssc_stream_state *) stream->internal_state)->mem_alloc = mem_alloc;
+        stream->internal_state = (density_stream_state *) mem_alloc(sizeof(density_stream_state));
+        ((density_stream_state *) stream->internal_state)->mem_alloc = mem_alloc;
     }
 
     if (mem_free == NULL)
-        ((ssc_stream_state *) stream->internal_state)->mem_free = free;
+        ((density_stream_state *) stream->internal_state)->mem_free = free;
     else
-        ((ssc_stream_state *) stream->internal_state)->mem_free = mem_free;
+        ((density_stream_state *) stream->internal_state)->mem_free = mem_free;
 
-    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_PREPARED;
+    ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_PREPARED;
 
-    return SSC_STREAM_STATE_READY;
+    return DENSITY_STREAM_STATE_READY;
 }
 
-SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_check_conformity(ssc_stream *stream) {
-    if (stream->out.size < SSC_STREAM_MINIMUM_OUT_BUFFER_SIZE)
-        return SSC_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL;
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_check_conformity(density_stream *stream) {
+    if (stream->out.size < DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE)
+        return DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL;
 
-    return SSC_STREAM_STATE_READY;
+    return DENSITY_STREAM_STATE_READY;
 }
 
-SSC_FORCE_INLINE void ssc_stream_malloc_work_buffer(ssc_stream *stream, uint_fast64_t workSize) {
-    if (((ssc_stream_state *) stream->internal_state)->workBuffer.size ^ workSize) {
-        ((ssc_stream_state *) stream->internal_state)->mem_free(((ssc_stream_state *) stream->internal_state)->workBuffer.pointer);
-        ssc_byte_buffer_encapsulate(&((ssc_stream_state *) stream->internal_state)->workBuffer, ((ssc_stream_state *) stream->internal_state)->mem_alloc((size_t) workSize), workSize);
+DENSITY_FORCE_INLINE void density_stream_malloc_work_buffer(density_stream *stream, uint_fast64_t workSize) {
+    if (((density_stream_state *) stream->internal_state)->workBuffer.size ^ workSize) {
+        ((density_stream_state *) stream->internal_state)->mem_free(((density_stream_state *) stream->internal_state)->workBuffer.pointer);
+        density_byte_buffer_encapsulate(&((density_stream_state *) stream->internal_state)->workBuffer, ((density_stream_state *) stream->internal_state)->mem_alloc((size_t) workSize), workSize);
     } else
-        ssc_byte_buffer_rewind(&((ssc_stream_state *) stream->internal_state)->workBuffer);
+        density_byte_buffer_rewind(&((density_stream_state *) stream->internal_state)->workBuffer);
 }
 
-SSC_FORCE_INLINE void ssc_stream_free_work_buffer(ssc_stream *stream) {
-    ((ssc_stream_state *) stream->internal_state)->mem_free(((ssc_stream_state *) stream->internal_state)->workBuffer.pointer);
-    ((ssc_stream_state *) stream->internal_state)->workBuffer.pointer = NULL;
+DENSITY_FORCE_INLINE void density_stream_free_work_buffer(density_stream *stream) {
+    ((density_stream_state *) stream->internal_state)->mem_free(((density_stream_state *) stream->internal_state)->workBuffer.pointer);
+    ((density_stream_state *) stream->internal_state)->workBuffer.pointer = NULL;
 }
 
-SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress_init(ssc_stream *restrict stream, const SSC_COMPRESSION_MODE compressionMode, const SSC_ENCODE_OUTPUT_TYPE outputType, const SSC_BLOCK_TYPE blockType) {
-    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_PREPARED)
-        return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_init(density_stream *restrict stream, const DENSITY_COMPRESSION_MODE compressionMode, const DENSITY_ENCODE_OUTPUT_TYPE outputType, const DENSITY_BLOCK_TYPE blockType) {
+    if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_PREPARED)
+        return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
-    SSC_STREAM_STATE streamState = ssc_stream_check_conformity(stream);
+    DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
     if (streamState)
         return streamState;
 
-    uint_fast64_t workBufferSize = /* todo SSC_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD*/ + 0x20 + ssc_metadata_max_compressed_length(stream->in.size, SSC_COMPRESSION_MODE_CHAMELEON, false);
-    SSC_ENCODE_STATE encodeState = ssc_encode_init(&stream->out, &((ssc_stream_state *) stream->internal_state)->workBuffer, workBufferSize, &((ssc_stream_state *) stream->internal_state)->internal_encode_state, compressionMode, outputType, blockType);
+    uint_fast64_t workBufferSize = /* todo DENSITY_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD*/ + 0x20 + density_metadata_max_compressed_length(stream->in.size, DENSITY_COMPRESSION_MODE_CHAMELEON, false);
+    DENSITY_ENCODE_STATE encodeState = density_encode_init(&stream->out, &((density_stream_state *) stream->internal_state)->workBuffer, workBufferSize, &((density_stream_state *) stream->internal_state)->internal_encode_state, compressionMode, outputType, blockType);
     switch (encodeState) {
-        case SSC_ENCODE_STATE_READY:
+        case DENSITY_ENCODE_STATE_READY:
             break;
 
-        case SSC_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER:
-            return SSC_STREAM_STATE_STALL_ON_OUTPUT_BUFFER;
+        case DENSITY_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER:
+            return DENSITY_STREAM_STATE_STALL_ON_OUTPUT_BUFFER;
 
         default:
-            return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+            return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    stream->in_total_read = &((ssc_stream_state *) stream->internal_state)->internal_encode_state.totalRead;
-    stream->out_total_written = &((ssc_stream_state *) stream->internal_state)->internal_encode_state.totalWritten;
+    stream->in_total_read = &((density_stream_state *) stream->internal_state)->internal_encode_state.totalRead;
+    stream->out_total_written = &((density_stream_state *) stream->internal_state)->internal_encode_state.totalWritten;
 
-    if (compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON)
-        ssc_stream_malloc_work_buffer(stream, workBufferSize);
+    if (compressionMode == DENSITY_COMPRESSION_MODE_JADE)
+        density_stream_malloc_work_buffer(stream, workBufferSize);
 
-    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_COMPRESSION_INITED;
+    ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_COMPRESSION_INITED;
 
-    return SSC_STREAM_STATE_READY;
+    return DENSITY_STREAM_STATE_READY;
 }
 
-SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress(ssc_stream *stream, const ssc_bool flush) {
-    SSC_ENCODE_STATE encodeState;
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress(density_stream *stream, const density_bool flush) {
+    DENSITY_ENCODE_STATE encodeState;
 
-    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_COMPRESSION_INITED)
-        return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+    if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_COMPRESSION_INITED)
+        return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
-    SSC_STREAM_STATE streamState = ssc_stream_check_conformity(stream);
+    DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
     if (streamState)
         return streamState;
 
     if (!flush) if (stream->in.size & 0x1F)
-        return SSC_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32;
+        return DENSITY_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32;
 
-    encodeState = ssc_encode_process(&stream->in, &stream->out, &((ssc_stream_state *) stream->internal_state)->internal_encode_state, flush);
+    encodeState = density_encode_process(&stream->in, &stream->out, &((density_stream_state *) stream->internal_state)->internal_encode_state, flush);
     switch (encodeState) {
-        case SSC_ENCODE_STATE_READY:
+        case DENSITY_ENCODE_STATE_READY:
             break;
 
-        case SSC_ENCODE_STATE_STALL_ON_INPUT_BUFFER:
-            return SSC_STREAM_STATE_STALL_ON_INPUT_BUFFER;
+        case DENSITY_ENCODE_STATE_STALL_ON_INPUT_BUFFER:
+            return DENSITY_STREAM_STATE_STALL_ON_INPUT_BUFFER;
 
-        case SSC_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER:
-            return SSC_STREAM_STATE_STALL_ON_OUTPUT_BUFFER;
+        case DENSITY_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER:
+            return DENSITY_STREAM_STATE_STALL_ON_OUTPUT_BUFFER;
 
         default:
-            return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+            return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_COMPRESSION_DATA_FINISHED;
+    ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_COMPRESSION_DATA_FINISHED;
 
-    return SSC_STREAM_STATE_READY;
+    return DENSITY_STREAM_STATE_READY;
 }
 
-SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_compress_finish(ssc_stream *stream) {
-    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_COMPRESSION_DATA_FINISHED)
-        return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *stream) {
+    if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_COMPRESSION_DATA_FINISHED)
+        return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
-    SSC_STREAM_STATE streamState = ssc_stream_check_conformity(stream);
+    DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
     if (streamState)
         return streamState;
 
-    SSC_ENCODE_STATE encodeState = ssc_encode_finish(&stream->out, &((ssc_stream_state *) stream->internal_state)->internal_encode_state);
+    DENSITY_ENCODE_STATE encodeState = density_encode_finish(&stream->out, &((density_stream_state *) stream->internal_state)->internal_encode_state);
     switch (encodeState) {
-        case SSC_ENCODE_STATE_READY:
+        case DENSITY_ENCODE_STATE_READY:
             break;
 
-        case SSC_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER:
-            return SSC_STREAM_STATE_STALL_ON_OUTPUT_BUFFER;
+        case DENSITY_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER:
+            return DENSITY_STREAM_STATE_STALL_ON_OUTPUT_BUFFER;
 
         default:
-            return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+            return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    if (((ssc_stream_state *) stream->internal_state)->internal_encode_state.compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON)
-        ssc_stream_free_work_buffer(stream);
+    if (((density_stream_state *) stream->internal_state)->internal_encode_state.compressionMode == DENSITY_COMPRESSION_MODE_JADE)
+        density_stream_free_work_buffer(stream);
 
-    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_COMPRESSION_FINISHED;
+    ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_COMPRESSION_FINISHED;
 
-    return SSC_STREAM_STATE_READY;
+    return DENSITY_STREAM_STATE_READY;
 }
 
-SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress_init(ssc_stream *stream) {
-    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_PREPARED)
-        return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream) {
+    if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_PREPARED)
+        return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
-    SSC_STREAM_STATE streamState = ssc_stream_check_conformity(stream);
+    DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
     if (streamState)
         return streamState;
 
-    uint_fast64_t workBufferSize = 0x20 + ssc_metadata_max_decompressed_length(stream->in.size, SSC_COMPRESSION_MODE_CHAMELEON, false);
-    SSC_DECODE_STATE decodeState = ssc_decode_init(&stream->in, &((ssc_stream_state *) stream->internal_state)->workBuffer, workBufferSize, &((ssc_stream_state *) stream->internal_state)->internal_decode_state);
+    uint_fast64_t workBufferSize = 0x20 + density_metadata_max_decompressed_length(stream->in.size, DENSITY_COMPRESSION_MODE_CHAMELEON, false);
+    DENSITY_DECODE_STATE decodeState = density_decode_init(&stream->in, &((density_stream_state *) stream->internal_state)->workBuffer, workBufferSize, &((density_stream_state *) stream->internal_state)->internal_decode_state);
     switch (decodeState) {
-        case SSC_DECODE_STATE_READY:
+        case DENSITY_DECODE_STATE_READY:
             break;
 
-        case SSC_DECODE_STATE_STALL_ON_INPUT_BUFFER:
-            return SSC_STREAM_STATE_STALL_ON_INPUT_BUFFER;
+        case DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER:
+            return DENSITY_STREAM_STATE_STALL_ON_INPUT_BUFFER;
 
         default:
-            return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+            return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    stream->in_total_read = &((ssc_stream_state *) stream->internal_state)->internal_decode_state.totalRead;
-    stream->out_total_written = &((ssc_stream_state *) stream->internal_state)->internal_decode_state.totalWritten;
+    stream->in_total_read = &((density_stream_state *) stream->internal_state)->internal_decode_state.totalRead;
+    stream->out_total_written = &((density_stream_state *) stream->internal_state)->internal_decode_state.totalWritten;
 
-    if (((ssc_stream_state *) stream->internal_state)->internal_decode_state.header.compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON)
-        ssc_stream_malloc_work_buffer(stream, workBufferSize);
+    if (((density_stream_state *) stream->internal_state)->internal_decode_state.header.compressionMode == DENSITY_COMPRESSION_MODE_JADE)
+        density_stream_malloc_work_buffer(stream, workBufferSize);
 
-    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_DECOMPRESSION_INITED;
+    ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_DECOMPRESSION_INITED;
 
-    return SSC_STREAM_STATE_READY;
+    return DENSITY_STREAM_STATE_READY;
 }
 
-SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress(ssc_stream *stream, const ssc_bool flush) {
-    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_DECOMPRESSION_INITED)
-        return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress(density_stream *stream, const density_bool flush) {
+    if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_DECOMPRESSION_INITED)
+        return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
-    SSC_STREAM_STATE streamState = ssc_stream_check_conformity(stream);
+    DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
     if (streamState)
         return streamState;
 
-    SSC_DECODE_STATE decodeState = ssc_decode_process(&stream->in, &stream->out, &((ssc_stream_state *) stream->internal_state)->internal_decode_state, flush);
+    DENSITY_DECODE_STATE decodeState = density_decode_process(&stream->in, &stream->out, &((density_stream_state *) stream->internal_state)->internal_decode_state, flush);
     switch (decodeState) {
-        case SSC_DECODE_STATE_READY:
+        case DENSITY_DECODE_STATE_READY:
             break;
 
-        case SSC_DECODE_STATE_STALL_ON_INPUT_BUFFER:
-            return SSC_STREAM_STATE_STALL_ON_INPUT_BUFFER;
+        case DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER:
+            return DENSITY_STREAM_STATE_STALL_ON_INPUT_BUFFER;
 
-        case SSC_DECODE_STATE_STALL_ON_OUTPUT_BUFFER:
-            return SSC_STREAM_STATE_STALL_ON_OUTPUT_BUFFER;
+        case DENSITY_DECODE_STATE_STALL_ON_OUTPUT_BUFFER:
+            return DENSITY_STREAM_STATE_STALL_ON_OUTPUT_BUFFER;
 
         default:
-            return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+            return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED;
+    ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED;
 
-    return SSC_STREAM_STATE_READY;
+    return DENSITY_STREAM_STATE_READY;
 }
 
-SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress_finish(ssc_stream *stream) {
-    if (((ssc_stream_state *) stream->internal_state)->process ^ SSC_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED)
-        return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream) {
+    if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED)
+        return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
-    SSC_DECODE_STATE decodeState = ssc_decode_finish(&stream->in, &((ssc_stream_state *) stream->internal_state)->internal_decode_state);
+    DENSITY_DECODE_STATE decodeState = density_decode_finish(&stream->in, &((density_stream_state *) stream->internal_state)->internal_decode_state);
     switch (decodeState) {
-        case SSC_DECODE_STATE_READY:
+        case DENSITY_DECODE_STATE_READY:
             break;
 
-        case SSC_DECODE_STATE_STALL_ON_INPUT_BUFFER:
-            return SSC_STREAM_STATE_STALL_ON_INPUT_BUFFER;
+        case DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER:
+            return DENSITY_STREAM_STATE_STALL_ON_INPUT_BUFFER;
 
         default:
-            return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+            return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    if (((ssc_stream_state *) stream->internal_state)->internal_decode_state.header.compressionMode == SSC_COMPRESSION_MODE_DUAL_PASS_CHAMELEON)
-        ssc_stream_free_work_buffer(stream);
+    if (((density_stream_state *) stream->internal_state)->internal_decode_state.header.compressionMode == DENSITY_COMPRESSION_MODE_JADE)
+        density_stream_free_work_buffer(stream);
 
-    ((ssc_stream_state *) stream->internal_state)->process = SSC_STREAM_PROCESS_DECOMPRESSION_FINISHED;
+    ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_DECOMPRESSION_FINISHED;
 
-    return SSC_STREAM_STATE_READY;
+    return DENSITY_STREAM_STATE_READY;
 }
 
-SSC_FORCE_INLINE SSC_STREAM_STATE ssc_stream_decompress_utilities_get_header(ssc_stream *restrict stream, ssc_main_header *restrict header) {
-    switch (((ssc_stream_state *) stream->internal_state)->process) {
-        case  SSC_STREAM_PROCESS_DECOMPRESSION_INITED:
-        case SSC_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED:
-        case SSC_STREAM_PROCESS_DECOMPRESSION_FINISHED:
-            *header = ((ssc_stream_state *) stream->internal_state)->internal_decode_state.header;
-            return SSC_STREAM_STATE_READY;
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_utilities_get_header(density_stream *restrict stream, density_main_header *restrict header) {
+    switch (((density_stream_state *) stream->internal_state)->process) {
+        case  DENSITY_STREAM_PROCESS_DECOMPRESSION_INITED:
+        case DENSITY_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED:
+        case DENSITY_STREAM_PROCESS_DECOMPRESSION_FINISHED:
+            *header = ((density_stream_state *) stream->internal_state)->internal_decode_state.header;
+            return DENSITY_STREAM_STATE_READY;
         default:
-            return SSC_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+            return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Centaurean libssc
+ * Centaurean Density
  * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
@@ -30,8 +30,8 @@
  * 18/10/13 22:11
  */
 
-#ifndef SSC_METADATA_H
-#define SSC_METADATA_H
+#ifndef DENSITY_METADATA_H
+#define DENSITY_METADATA_H
 
 #include "globals.h"
 #include "main_header.h"
@@ -39,11 +39,11 @@
 #include "block_header.h"
 #include "block_mode_marker.h"
 #include "block_footer.h"
-#include "ssc_api.h"
+#include "density_api.h"
 
-uint_fast64_t ssc_metadata_structure_overhead();
-uint_fast64_t ssc_metadata_block_structure_overhead(const uint_fast64_t);
-uint_fast64_t ssc_metadata_max_compressed_length(const uint_fast64_t, const SSC_COMPRESSION_MODE, const bool);
-uint_fast64_t ssc_metadata_max_decompressed_length(const uint_fast64_t, const SSC_COMPRESSION_MODE, const bool);
+uint_fast64_t density_metadata_structure_overhead();
+uint_fast64_t density_metadata_block_structure_overhead(const uint_fast64_t);
+uint_fast64_t density_metadata_max_compressed_length(const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const bool);
+uint_fast64_t density_metadata_max_decompressed_length(const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const bool);
 
 #endif
