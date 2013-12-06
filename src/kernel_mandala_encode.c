@@ -65,12 +65,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_prepare_
             state->signaturesCount = 0;
             state->efficiencyChecked = 0;
 
+#if DENSITY_ENABLE_PARALLELIZATION == DENSITY_YES
             if (state->resetCycle)
                 state->resetCycle--;
             else {
                 density_mandala_dictionary_reset(&state->dictionary);
                 state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
             }
+#endif
 
             return DENSITY_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK;
         default:
@@ -169,7 +171,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_init(den
     state->signaturesCount = 0;
     state->efficiencyChecked = 0;
     density_mandala_dictionary_reset(&state->dictionary);
+
+#if DENSITY_ENABLE_PARALLELIZATION == DENSITY_YES
     state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
+#endif
 
     state->process = DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
 
