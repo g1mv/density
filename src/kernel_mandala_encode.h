@@ -27,72 +27,64 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/10/13 12:27
+ * 06/12/13 20:20
  *
- * -------------------
- * Chameleon algorithm
- * -------------------
+ * -----------------
+ * Mandala algorithm
+ * -----------------
  *
  * Author(s)
- * Guillaume Voirin
+ * Guillaume Voirin & Piotr Tarsa
  *
  * Description
- * Hash based superfast kernel
+ * Very fast two level dictionary hash algorithm with predictions derived from Chameleon
  */
 
-#ifndef DENSITY_CHAMELEON_DECODE_H
-#define DENSITY_CHAMELEON_DECODE_H
+#ifndef DENSITY_MANDALA_ENCODE_H
+#define DENSITY_MANDALA_ENCODE_H
 
 #include "byte_buffer.h"
-#include "kernel_chameleon_dictionary.h"
-#include "kernel_chameleon.h"
+#include "kernel_mandala_dictionary.h"
+#include "kernel_mandala.h"
 #include "block.h"
-#include "kernel_decode.h"
+#include "kernel_encode.h"
 #include "density_api.h"
 
-#define DENSITY_HASH_DECODE_MINIMUM_INPUT_LOOKAHEAD               (sizeof(density_chameleon_signature) + sizeof(uint32_t) * 8 * sizeof(density_chameleon_signature))
-#define DENSITY_HASH_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 8 * sizeof(density_chameleon_signature))
+#define DENSITY_MANDALA_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (sizeof(density_mandala_signature) + sizeof(uint32_t) * 8 * sizeof(density_mandala_signature))
 
 typedef enum {
-    DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURES_AND_DATA_FAST,
-    DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURE_SAFE,
-    DENSITY_CHAMELEON_DECODE_PROCESS_DATA_FAST,
-    DENSITY_CHAMELEON_DECODE_PROCESS_DATA_SAFE,
-    DENSITY_CHAMELEON_DECODE_PROCESS_FINISH
-} DENSITY_CHAMELEON_DECODE_PROCESS;
+    DENSITY_MANDALA_ENCODE_PROCESS_CHECK_STATE,
+    DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
+    DENSITY_MANDALA_ENCODE_PROCESS_DATA,
+    DENSITY_MANDALA_ENCODE_PROCESS_FINISH
+} DENSITY_MANDALA_ENCODE_PROCESS;
+
+typedef enum {
+    DENSITY_MANDALA_ENCODE_FLAG_MAP_A = 0x0,
+    DENSITY_MANDALA_ENCODE_FLAG_PREDICTED = 0x1,
+    DENSITY_MANDALA_ENCODE_FLAG_MAP_B = 0x2,
+    DENSITY_MANDALA_ENCODE_FLAG_CHUNK = 0x3,
+} DENSITY_MANDALA_ENCODE_FLAG;
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_CHAMELEON_DECODE_PROCESS process;
+    DENSITY_MANDALA_ENCODE_PROCESS process;
 
     uint_fast64_t resetCycle;
 
-    density_chameleon_signature signature;
     uint_fast32_t shift;
+    density_mandala_signature * signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
-    uint_fast64_t endDataOverhead;
+    uint_fast16_t lastHash;
 
-    union {
-        density_byte as_bytes[8];
-        uint64_t as_uint64_t;
-    } partialSignature;
-    union {
-        density_byte as_bytes[4];
-        uint32_t as_uint32_t;
-    } partialUncompressedChunk;
-
-    uint_fast64_t signatureBytes;
-    uint_fast64_t uncompressedChunkBytes;
-
-    density_chameleon_dictionary dictionary;
-} density_chameleon_decode_state;
+    density_mandala_dictionary dictionary;
+} density_mandala_encode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *, const uint_fast32_t);
-DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_process(density_byte_buffer *, density_byte_buffer *, density_chameleon_decode_state *, const density_bool);
-DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish(density_chameleon_decode_state *);
-
+DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_init(density_mandala_encode_state *);
+DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(density_byte_buffer *, density_byte_buffer *, density_mandala_encode_state *, const density_bool);
+DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_finish(density_mandala_encode_state *);
 #endif

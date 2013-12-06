@@ -42,6 +42,7 @@
 #include "block_mode_marker.h"
 #include "block_encode.h"
 #include "kernel_chameleon_encode.h"
+#include "kernel_mandala_encode.h"
 #include "density_api.h"
 
 typedef enum {
@@ -53,8 +54,6 @@ typedef enum {
 
 typedef enum {
     DENSITY_ENCODE_PROCESS_WRITE_BLOCKS,
-    DENSITY_ENCODE_PROCESS_WRITE_BLOCKS_IN_TO_WORKBUFFER,
-    DENSITY_ENCODE_PROCESS_WRITE_BLOCKS_WORKBUFFER_TO_OUT,
     DENSITY_ENCODE_PROCESS_WRITE_FOOTER,
     DENSITY_ENCODE_PROCESS_FINISHED
 } DENSITY_ENCODE_PROCESS;
@@ -77,8 +76,7 @@ typedef struct {
     uint_fast64_t totalRead;
     uint_fast64_t totalWritten;
 
-    density_block_encode_state blockEncodeStateA;
-    density_block_encode_state blockEncodeStateB;
+    density_block_encode_state blockEncodeState;
 
     density_byte_buffer* workBuffer;
     density_encode_work_buffer_data workBufferData;

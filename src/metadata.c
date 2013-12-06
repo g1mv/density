@@ -46,10 +46,10 @@ DENSITY_FORCE_INLINE uint_fast64_t density_metadata_max_compressed_length(const 
         default:
             return headerFooterLength + length;
 
-        case DENSITY_COMPRESSION_MODE_CHAMELEON:
+        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
             return headerFooterLength + density_metadata_block_structure_overhead(length) + length;
 
-        case DENSITY_COMPRESSION_MODE_JADE:
+        case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
             return headerFooterLength + density_metadata_block_structure_overhead(density_metadata_block_structure_overhead(length) + length) + length;
     }
 }
@@ -61,10 +61,10 @@ DENSITY_FORCE_INLINE uint_fast64_t density_metadata_max_decompressed_length(cons
         default:
             return length - headerFooterLength;
 
-        case DENSITY_COMPRESSION_MODE_CHAMELEON:
+        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
             return (length - density_metadata_block_structure_overhead(length)) << (1 - headerFooterLength);
 
-        case DENSITY_COMPRESSION_MODE_JADE:
+        case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
             intermediate = (length - density_metadata_block_structure_overhead(length)) << 1;
             return (intermediate - density_metadata_block_structure_overhead(intermediate)) << (1 - headerFooterLength);
     }

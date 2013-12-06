@@ -27,23 +27,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/10/13 12:06
+ * 06/12/13 20:10
  *
- * -------------------
- * Chameleon algorithm
- * -------------------
+ * -----------------
+ * Mandala algorithm
+ * -----------------
  *
  * Author(s)
- * Guillaume Voirin
+ * Guillaume Voirin & Piotr Tarsa
  *
  * Description
- * Hash based superfast kernel
+ * Very fast two level dictionary hash algorithm with predictions derived from Chameleon
  */
 
-#include "kernel_chameleon_dictionary.h"
+#ifndef DENSITY_MANDALA_H
+#define DENSITY_MANDALA_H
 
-const density_chameleon_dictionary density_chameleon_empty_dictionary = {.entries = {{0}}};
+#include "globals.h"
 
-DENSITY_FORCE_INLINE void density_chameleon_dictionary_reset(density_chameleon_dictionary *dictionary) {
-    memcpy(dictionary, &density_chameleon_empty_dictionary, sizeof(density_chameleon_dictionary));
-}
+#define DENSITY_MANDALA_HASH_BITS                                     16
+#define DENSITY_MANDALA_HASH_OFFSET_BASIS                             (uint32_t)2233294llu
+
+typedef uint64_t                                                      density_mandala_signature;
+
+#define DENSITY_MANDALA_HASH_ALGORITHM(hash, value)                   hash = value * DENSITY_MANDALA_HASH_OFFSET_BASIS;\
+                                                                      hash = (hash >> (32 - DENSITY_MANDALA_HASH_BITS));
+
+#endif

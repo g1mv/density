@@ -73,13 +73,11 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_byte_buffe
             density_block_decode_init(&state->blockDecodeStateA, DENSITY_BLOCK_MODE_COPY, (DENSITY_BLOCK_TYPE) state->header.blockType, sizeof(density_main_footer), NULL, NULL, NULL, NULL);
             break;
 
-        case DENSITY_COMPRESSION_MODE_CHAMELEON:
+        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
             density_block_decode_init(&state->blockDecodeStateA, DENSITY_BLOCK_MODE_KERNEL, (DENSITY_BLOCK_TYPE) state->header.blockType, sizeof(density_main_footer), malloc(sizeof(density_chameleon_decode_state)), (void *) density_chameleon_decode_init, (void *) density_chameleon_decode_process, (void *) density_chameleon_decode_finish);
             break;
 
-        case DENSITY_COMPRESSION_MODE_JADE:
-            //density_block_decode_init(&state->blockDecodeStateA, DENSITY_BLOCK_MODE_KERNEL, (DENSITY_BLOCK_TYPE) state->header.blockType, sizeof(density_main_footer), malloc(sizeof(density_chameleon_decode_state)), (void *) density_chameleon_decode_init_2p, (void *) density_chameleon_decode_process_2p, (void *) density_chameleon_decode_finish_2p);
-            //density_block_decode_init(&state->blockDecodeStateB, DENSITY_BLOCK_MODE_KERNEL, DENSITY_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK, 0, malloc(sizeof(density_chameleon_decode_state)), (void *) density_chameleon_decode_init_1p, (void *) density_chameleon_decode_process_1p, (void *) density_chameleon_decode_finish_1p);
+        case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
             break;
 
         default:
@@ -103,62 +101,9 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_process(density_byte_bu
 
         switch (state->process) {
             case DENSITY_DECODE_PROCESS_READ_BLOCKS:
-                switch (state->header.compressionMode) {
-                    case DENSITY_COMPRESSION_MODE_COPY:
-                    case DENSITY_COMPRESSION_MODE_CHAMELEON:
-                        blockDecodeState = density_block_decode_process(in, out, &state->blockDecodeStateA, flush);
-                        density_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
+                blockDecodeState = density_block_decode_process(in, out, &state->blockDecodeStateA, flush);
+                density_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
 
-                        switch (blockDecodeState) {
-                            case DENSITY_BLOCK_DECODE_STATE_READY:
-                                state->process = DENSITY_DECODE_PROCESS_READ_FOOTER;
-                                return DENSITY_DECODE_STATE_READY;
-
-                            case DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT_BUFFER:
-                                return DENSITY_DECODE_STATE_STALL_ON_OUTPUT_BUFFER;
-
-                            case DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER:
-                                return DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER;
-
-                            case DENSITY_BLOCK_DECODE_STATE_ERROR:
-                                return DENSITY_DECODE_STATE_ERROR;
-                        }
-                        break;
-
-                    case DENSITY_COMPRESSION_MODE_JADE:
-                        state->process = DENSITY_DECODE_PROCESS_READ_BLOCKS_IN_TO_WORKBUFFER;
-                        break;
-
-                    default:
-                        return DENSITY_DECODE_STATE_ERROR;
-                }
-                break;
-
-            case DENSITY_DECODE_PROCESS_READ_BLOCKS_IN_TO_WORKBUFFER:
-                state->workBuffer->size = state->workBufferData.memorySize;
-                blockDecodeState = density_block_decode_process(in, state->workBuffer, &state->blockDecodeStateA, flush);
-                state->totalRead += in->position - inPositionBefore;
-                switch (blockDecodeState) {
-                    case DENSITY_BLOCK_DECODE_STATE_READY:
-                    case DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT_BUFFER:
-                        break;
-
-                    case DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER:
-                        return DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER;
-
-                    default:
-                        return DENSITY_DECODE_STATE_ERROR;
-                }
-
-                state->workBuffer->size = state->workBuffer->position;
-                density_byte_buffer_rewind(state->workBuffer);
-
-                state->process = DENSITY_DECODE_PROCESS_READ_BLOCKS_WORKBUFFER_TO_OUT;
-                break;
-
-            case DENSITY_DECODE_PROCESS_READ_BLOCKS_WORKBUFFER_TO_OUT:
-                blockDecodeState = density_block_decode_process(state->workBuffer, out, &state->blockDecodeStateB, flush && in->position == in->size);
-                state->totalWritten += out->position - outPositionBefore;
                 switch (blockDecodeState) {
                     case DENSITY_BLOCK_DECODE_STATE_READY:
                         state->process = DENSITY_DECODE_PROCESS_READ_FOOTER;
@@ -168,14 +113,11 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_process(density_byte_bu
                         return DENSITY_DECODE_STATE_STALL_ON_OUTPUT_BUFFER;
 
                     case DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER:
-                        break;
+                        return DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
-                    default:
+                    case DENSITY_BLOCK_DECODE_STATE_ERROR:
                         return DENSITY_DECODE_STATE_ERROR;
                 }
-                density_byte_buffer_rewind(state->workBuffer);
-
-                state->process = DENSITY_DECODE_PROCESS_READ_BLOCKS_IN_TO_WORKBUFFER;
                 break;
 
             default:
@@ -189,11 +131,11 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_byte_buf
         return DENSITY_DECODE_STATE_ERROR;
 
     switch (state->header.compressionMode) {
-        case DENSITY_COMPRESSION_MODE_JADE:
+        case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
             density_block_decode_finish(&state->blockDecodeStateB);
             free(state->blockDecodeStateB.kernelDecodeState);
 
-        case DENSITY_COMPRESSION_MODE_CHAMELEON:
+        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
             density_block_decode_finish(&state->blockDecodeStateA);
             free(state->blockDecodeStateA.kernelDecodeState);
             break;

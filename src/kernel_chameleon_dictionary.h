@@ -40,8 +40,8 @@
  * Hash based superfast kernel
  */
 
-#ifndef DENSITY_DICTIONARY_H
-#define DENSITY_DICTIONARY_H
+#ifndef DENSITY_CHAMELEON_DICTIONARY_H
+#define DENSITY_CHAMELEON_DICTIONARY_H
 
 #include "globals.h"
 #include "kernel_chameleon.h"
@@ -52,13 +52,13 @@
 #pragma pack(4)
 typedef struct {
     uint32_t as_uint32_t;
-} density_dictionary_entry;
+} density_chameleon_dictionary_entry;
 
 typedef struct {
-    density_dictionary_entry entries[1 << DENSITY_CHAMELEON_HASH_BITS];
-} density_dictionary;
+    density_chameleon_dictionary_entry entries[1 << DENSITY_CHAMELEON_HASH_BITS];
+} density_chameleon_dictionary;
 #pragma pack(pop)
 
-void density_dictionary_reset(density_dictionary *);
+void density_chameleon_dictionary_reset(density_chameleon_dictionary *);
 
 #endif

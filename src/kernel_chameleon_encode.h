@@ -40,16 +40,17 @@
  * Hash based superfast kernel
  */
 
-#ifndef DENSITY_HASH_ENCODE_H
-#define DENSITY_HASH_ENCODE_H
+#ifndef DENSITY_CHAMELEON_ENCODE_H
+#define DENSITY_CHAMELEON_ENCODE_H
 
 #include "byte_buffer.h"
 #include "kernel_chameleon_dictionary.h"
 #include "kernel_chameleon.h"
 #include "block.h"
 #include "kernel_encode.h"
+#include "density_api.h"
 
-#define DENSITY_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (sizeof(density_hash_signature) + sizeof(uint32_t) * 8 * sizeof(density_hash_signature))
+#define DENSITY_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (sizeof(density_chameleon_signature) + sizeof(uint32_t) * 8 * sizeof(density_chameleon_signature))
 
 typedef enum {
     DENSITY_HASH_ENCODE_PROCESS_CHECK_STATE,
@@ -66,11 +67,11 @@ typedef struct {
     uint_fast64_t resetCycle;
 
     uint_fast32_t shift;
-    density_hash_signature * signature;
+    density_chameleon_signature * signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
-    density_dictionary dictionary;
+    density_chameleon_dictionary dictionary;
 } density_chameleon_encode_state;
 #pragma pack(pop)
 

@@ -69,7 +69,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_prepar
             if (state->resetCycle)
                 state->resetCycle--;
             else {
-                density_dictionary_reset(&state->dictionary);
+                density_chameleon_dictionary_reset();
                 state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
             }
 #endif
@@ -81,9 +81,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_prepar
     state->signaturesCount++;
 
     state->shift = 0;
-    state->signature = (density_hash_signature *) (out->pointer + out->position);
+    state->signature = (density_chameleon_signature *) (out->pointer + out->position);
     *state->signature = 0;
-    out->position += sizeof(density_hash_signature);
+    out->position += sizeof(density_chameleon_signature);
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
@@ -107,7 +107,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_check_
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(density_byte_buffer *restrict out, uint32_t *restrict hash, const uint32_t chunk, density_chameleon_encode_state *restrict state) {
     DENSITY_CHAMELEON_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(chunk));
-    density_dictionary_entry *found = &state->dictionary.entries[*hash];
+    density_chameleon_dictionary_entry *found = &state->dictionary.entries[*hash];
 
     if (chunk ^ found->as_uint32_t) {
         found->as_uint32_t = chunk;
@@ -153,7 +153,7 @@ DENSITY_FORCE_INLINE density_bool density_chameleon_encode_attempt_copy(density_
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *state) {
     state->signaturesCount = 0;
     state->efficiencyChecked = 0;
-    density_dictionary_reset(&state->dictionary);
+    density_chameleon_dictionary_reset(&state->dictionary);
 
 #if DENSITY_ENABLE_PARALLELIZATION == DENSITY_YES
     state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
@@ -221,7 +221,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_proces
                 }
                 if (in->size - in->position < sizeof(uint32_t))
                     goto finish;
-                else if ((returnState = density_chameleon_encode_prepare_new_block(out, state, sizeof(density_hash_signature))))
+                else if ((returnState = density_chameleon_encode_prepare_new_block(out, state, sizeof(density_chameleon_signature))))
                     return returnState;
             }
         finish:

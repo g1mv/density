@@ -57,7 +57,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_check_
             if (state->resetCycle)
                 state->resetCycle--;
             else {
-                density_dictionary_reset(&state->dictionary);
+                density_chameleon_dictionary_reset(&state->dictionary);
                 state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
             }
 
@@ -69,21 +69,21 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_check_
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_read_signature_fast(density_byte_buffer *restrict in, density_chameleon_decode_state *restrict state) {
-    state->signature = DENSITY_LITTLE_ENDIAN_64(*(density_hash_signature *) (in->pointer + in->position));
-    in->position += sizeof(density_hash_signature);
+    state->signature = DENSITY_LITTLE_ENDIAN_64(*(density_chameleon_signature *) (in->pointer + in->position));
+    in->position += sizeof(density_chameleon_signature);
     state->shift = 0;
     state->signaturesCount++;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_read_signature_safe(density_byte_buffer *restrict in, density_chameleon_decode_state *restrict state) {
     if (state->signatureBytes) {
-        memcpy(&state->partialSignature.as_bytes[state->signatureBytes], in->pointer + in->position, (uint32_t) (sizeof(density_hash_signature) - state->signatureBytes));
+        memcpy(&state->partialSignature.as_bytes[state->signatureBytes], in->pointer + in->position, (uint32_t) (sizeof(density_chameleon_signature) - state->signatureBytes));
         state->signature = DENSITY_LITTLE_ENDIAN_64(state->partialSignature.as_uint64_t);
-        in->position += sizeof(density_hash_signature) - state->signatureBytes;
+        in->position += sizeof(density_chameleon_signature) - state->signatureBytes;
         state->signatureBytes = 0;
         state->shift = 0;
         state->signaturesCount++;
-    } else if (in->position + sizeof(density_hash_signature) > in->size) {
+    } else if (in->position + sizeof(density_chameleon_signature) > in->size) {
         state->signatureBytes = in->size - in->position;
         memcpy(&state->partialSignature.as_bytes[0], in->pointer + in->position, (uint32_t) state->signatureBytes);
         in->position = in->size;
@@ -199,7 +199,7 @@ DENSITY_FORCE_INLINE density_bool density_chameleon_decode_attempt_copy(density_
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *state, const uint_fast32_t endDataOverhead) {
     state->signaturesCount = 0;
     state->efficiencyChecked = 0;
-    density_dictionary_reset(&state->dictionary);
+    density_chameleon_dictionary_reset(&state->dictionary);
     state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
 
     state->endDataOverhead = endDataOverhead;
@@ -236,7 +236,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_proces
             break;
 
         case DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURE_SAFE:
-            if (flush && (in->size - in->position < sizeof(density_hash_signature) + sizeof(uint16_t) + state->endDataOverhead)) {
+            if (flush && (in->size - in->position < sizeof(density_chameleon_signature) + sizeof(uint16_t) + state->endDataOverhead)) {
                 state->process = DENSITY_CHAMELEON_DECODE_PROCESS_FINISH;
                 return DENSITY_KERNEL_DECODE_STATE_READY;
             }

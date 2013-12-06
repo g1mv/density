@@ -27,23 +27,44 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/10/13 12:06
+ * 06/12/13 20:20
  *
- * -------------------
- * Chameleon algorithm
- * -------------------
+ * -----------------
+ * Mandala algorithm
+ * -----------------
  *
  * Author(s)
- * Guillaume Voirin
+ * Guillaume Voirin & Piotr Tarsa
  *
  * Description
- * Hash based superfast kernel
+ * Very fast two level dictionary hash algorithm with predictions derived from Chameleon
  */
 
-#include "kernel_chameleon_dictionary.h"
+#ifndef DENSITY_MANDALA_DICTIONARY_H
+#define DENSITY_MANDALA_DICTIONARY_H
 
-const density_chameleon_dictionary density_chameleon_empty_dictionary = {.entries = {{0}}};
+#include "globals.h"
+#include "kernel_mandala.h"
 
-DENSITY_FORCE_INLINE void density_chameleon_dictionary_reset(density_chameleon_dictionary *dictionary) {
-    memcpy(dictionary, &density_chameleon_empty_dictionary, sizeof(density_chameleon_dictionary));
-}
+#include <string.h>
+
+#pragma pack(push)
+#pragma pack(4)
+typedef struct {
+    uint32_t chunk_a;
+    uint32_t chunk_b;
+} density_mandala_dictionary_entry;
+
+typedef struct {
+    uint32_t next_chunk_prediction;
+} density_mandala_dictionary_prediction_entry;
+
+typedef struct {
+    density_mandala_dictionary_entry entries[1 << DENSITY_MANDALA_HASH_BITS];
+    density_mandala_dictionary_prediction_entry prediction_entries[1 << DENSITY_MANDALA_HASH_BITS];
+} density_mandala_dictionary;
+#pragma pack(pop)
+
+void density_mandala_dictionary_reset(density_mandala_dictionary *);
+
+#endif
