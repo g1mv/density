@@ -29,9 +29,9 @@
  *
  * 24/10/13 11:57
  *
- * ----------------
- * Kernel Chameleon
- * ----------------
+ * -------------------
+ * Chameleon algorithm
+ * -------------------
  *
  * Author(s)
  * Guillaume Voirin
