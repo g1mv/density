@@ -71,8 +71,7 @@ typedef struct {
     density_main_header header;
     density_main_footer footer;
 
-    density_block_decode_state blockDecodeStateA;
-    density_block_decode_state blockDecodeStateB;
+    density_block_decode_state blockDecodeState;
 
     density_byte_buffer* workBuffer;
     density_decode_work_buffer_data workBufferData;

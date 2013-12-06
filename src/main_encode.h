@@ -60,7 +60,6 @@ typedef enum {
 
 #pragma pack(push)
 #pragma pack(4)
-
 typedef struct {
     uint_fast64_t memorySize;
     uint_fast64_t outstandingBytes;

@@ -70,11 +70,11 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_byte_buffe
 
     switch (state->header.compressionMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
-            density_block_decode_init(&state->blockDecodeStateA, DENSITY_BLOCK_MODE_COPY, (DENSITY_BLOCK_TYPE) state->header.blockType, sizeof(density_main_footer), NULL, NULL, NULL, NULL);
+            density_block_decode_init(&state->blockDecodeState, DENSITY_BLOCK_MODE_COPY, (DENSITY_BLOCK_TYPE) state->header.blockType, sizeof(density_main_footer), NULL, NULL, NULL, NULL);
             break;
 
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            density_block_decode_init(&state->blockDecodeStateA, DENSITY_BLOCK_MODE_KERNEL, (DENSITY_BLOCK_TYPE) state->header.blockType, sizeof(density_main_footer), malloc(sizeof(density_chameleon_decode_state)), (void *) density_chameleon_decode_init, (void *) density_chameleon_decode_process, (void *) density_chameleon_decode_finish);
+            density_block_decode_init(&state->blockDecodeState, DENSITY_BLOCK_MODE_KERNEL, (DENSITY_BLOCK_TYPE) state->header.blockType, sizeof(density_main_footer), malloc(sizeof(density_chameleon_decode_state)), (void *) density_chameleon_decode_init, (void *) density_chameleon_decode_process, (void *) density_chameleon_decode_finish);
             break;
 
         case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
@@ -101,7 +101,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_process(density_byte_bu
 
         switch (state->process) {
             case DENSITY_DECODE_PROCESS_READ_BLOCKS:
-                blockDecodeState = density_block_decode_process(in, out, &state->blockDecodeStateA, flush);
+                blockDecodeState = density_block_decode_process(in, out, &state->blockDecodeState, flush);
                 density_decode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
 
                 switch (blockDecodeState) {
@@ -131,16 +131,12 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_byte_buf
         return DENSITY_DECODE_STATE_ERROR;
 
     switch (state->header.compressionMode) {
-        case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
-            density_block_decode_finish(&state->blockDecodeStateB);
-            free(state->blockDecodeStateB.kernelDecodeState);
-
-        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            density_block_decode_finish(&state->blockDecodeStateA);
-            free(state->blockDecodeStateA.kernelDecodeState);
+        default:
+            density_block_decode_finish(&state->blockDecodeState);
+            free(state->blockDecodeState.kernelDecodeState);
             break;
 
-        default:
+        case DENSITY_COMPRESSION_MODE_COPY:
             break;
     }
 

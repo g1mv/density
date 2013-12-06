@@ -134,8 +134,15 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_finish(density_byte_buf
     if (state->process ^ DENSITY_ENCODE_PROCESS_WRITE_FOOTER)
         return DENSITY_ENCODE_STATE_ERROR;
 
-    density_block_encode_finish(&state->blockEncodeState);
-    free(state->blockEncodeState.kernelEncodeState);
+    switch(state->compressionMode) {
+        default:
+            density_block_encode_finish(&state->blockEncodeState);
+            free(state->blockEncodeState.kernelEncodeState);
+            break;
+
+        case DENSITY_COMPRESSION_MODE_COPY:
+            break;
+    }
 
     switch (state->encodeOutputType) {
         case DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_FOOTER:
