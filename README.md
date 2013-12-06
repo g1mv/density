@@ -1,4 +1,4 @@
-density <a href="http://www.centaurean.com"><img src="http://www.centaurean.com/images/centaurean.png" width="140" align="right" title="Centaurean"/></a>
+DENSITY <a href="http://www.centaurean.com"><img src="http://www.centaurean.com/images/centaurean.png" width="140" align="right" title="Centaurean"/></a>
 ========
 Superfast compression library
 
