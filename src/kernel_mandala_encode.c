@@ -244,6 +244,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(
         finish:
             remaining = in->size - in->position;
             if (remaining > 0) {
+                if (state->shift ^ 64)
+                    density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_SIGNATURE_FLAG_CHUNK);
                 if (density_mandala_encode_attempt_copy(out, in->pointer + in->position, (uint32_t) remaining))
                     return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
                 in->position += remaining;

@@ -42,7 +42,6 @@
  */
 
 #include "kernel_mandala_decode.h"
-#include "kernel_mandala_dictionary.h"
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_check_signatures_count(density_mandala_decode_state *restrict state) {
     switch (state->signaturesCount) {
@@ -99,7 +98,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_read_sig
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE void density_mandala_decode_read_compressed_chunk_fast(uint32_t * restrict hash, density_byte_buffer *restrict in) {
+DENSITY_FORCE_INLINE void density_mandala_decode_read_compressed_chunk_fast(uint32_t *restrict hash, density_byte_buffer *restrict in) {
     *hash = *(uint16_t *) (in->pointer + in->position);
     in->position += sizeof(uint16_t);
 }
@@ -113,7 +112,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_read_com
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE void density_mandala_decode_read_uncompressed_chunk_fast(uint32_t * restrict chunk, density_byte_buffer *restrict in) {
+DENSITY_FORCE_INLINE void density_mandala_decode_read_uncompressed_chunk_fast(uint32_t *restrict chunk, density_byte_buffer *restrict in) {
     *chunk = *(uint32_t *) (in->pointer + in->position);
     in->position += sizeof(uint32_t);
 }
@@ -157,7 +156,7 @@ DENSITY_FORCE_INLINE void density_mandala_decode_compressed_chunk_a(const uint32
 }
 
 DENSITY_FORCE_INLINE void density_mandala_decode_compressed_chunk_b(const uint32_t *restrict hash, density_byte_buffer *restrict out, density_mandala_decode_state *restrict state) {
-    density_mandala_dictionary_entry* entry = &state->dictionary.entries[DENSITY_LITTLE_ENDIAN_16(*hash)];
+    density_mandala_dictionary_entry *entry = &state->dictionary.entries[DENSITY_LITTLE_ENDIAN_16(*hash)];
     uint32_t swapped_chunk = entry->chunk_b;
 
     entry->chunk_b = entry->chunk_a;
@@ -166,8 +165,8 @@ DENSITY_FORCE_INLINE void density_mandala_decode_compressed_chunk_b(const uint32
     density_mandala_write_decompressed_chunk(&swapped_chunk, out, state);
 }
 
-DENSITY_FORCE_INLINE void density_mandala_decode_uncompressed_chunk(uint32_t *restrict hash, const uint32_t * restrict chunk, density_byte_buffer *restrict out, density_mandala_decode_state *restrict state) {
-    density_mandala_dictionary_entry* entry;
+DENSITY_FORCE_INLINE void density_mandala_decode_uncompressed_chunk(uint32_t *restrict hash, const uint32_t *restrict chunk, density_byte_buffer *restrict out, density_mandala_decode_state *restrict state) {
+    density_mandala_dictionary_entry *entry;
 
     DENSITY_MANDALA_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(*chunk));
     entry = &state->dictionary.entries[*hash];
@@ -181,7 +180,7 @@ DENSITY_FORCE_INLINE void density_mandala_decode_kernel_fast(density_byte_buffer
     uint32_t hash = 0;
     uint32_t chunk;
 
-    switch(mode) {
+    switch (mode) {
         case DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED:
             density_mandala_decode_predicted_chunk(&hash, out, state);
             break;
@@ -210,7 +209,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_kernel_s
 
     uint32_t hash = 0;
     uint32_t chunk;
-    switch(mode) {
+    switch (mode) {
         case DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED:
             density_mandala_decode_predicted_chunk(&hash, out, state);
             break;
@@ -321,7 +320,18 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(
         case DENSITY_MANDALA_DECODE_PROCESS_DATA_SAFE:
             while (state->shift ^ 64) {
                 DENSITY_MANDALA_SIGNATURE_FLAG flag = density_mandala_decode_test_compressed(state);
-                size_t overhead = ((flag == DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED || flag == 0) ? 0 : sizeof(uint32_t));
+                size_t overhead = 0;
+                switch (flag) {
+                    case DENSITY_MANDALA_SIGNATURE_FLAG_MAP_A:
+                    case DENSITY_MANDALA_SIGNATURE_FLAG_MAP_B:
+                        overhead = sizeof(uint16_t);
+                        break;
+                    case  DENSITY_MANDALA_SIGNATURE_FLAG_CHUNK:
+                        overhead = sizeof(uint32_t);
+                        break;
+                    default:
+                        break;
+                }
                 if (flush && (in->size - in->position < overhead + state->endDataOverhead)) {
                     state->process = DENSITY_MANDALA_DECODE_PROCESS_FINISH;
                     return DENSITY_KERNEL_DECODE_STATE_READY;
