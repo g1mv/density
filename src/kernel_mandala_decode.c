@@ -321,7 +321,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(
         case DENSITY_MANDALA_DECODE_PROCESS_DATA_SAFE:
             while (state->shift ^ 64) {
                 DENSITY_MANDALA_SIGNATURE_FLAG flag = density_mandala_decode_test_compressed(state);
-                size_t overhead = (flag == DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED ? 0 : sizeof(uint32_t));
+                size_t overhead = ((flag == DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED || flag == 0) ? 0 : sizeof(uint32_t));
                 if (flush && (in->size - in->position < overhead + state->endDataOverhead)) {
                     state->process = DENSITY_MANDALA_DECODE_PROCESS_FINISH;
                     return DENSITY_KERNEL_DECODE_STATE_READY;
