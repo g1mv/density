@@ -43,6 +43,6 @@
 #include "density_api.h"
 
 uint_fast32_t density_main_header_read(density_byte_buffer*, density_main_header*);
-uint_fast32_t density_main_header_write(density_byte_buffer*, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE);
+uint_fast32_t density_main_header_write(density_byte_buffer*, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters);
 
 #endif

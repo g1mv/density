@@ -59,6 +59,12 @@
 
 typedef uint8_t density_byte;
 typedef bool density_bool;
+typedef struct {
+    union {
+        uint64_t as_uint64_t;
+        density_byte as_bytes[8];
+    };
+} density_main_header_parameters;
 
 typedef enum {
     DENSITY_COMPRESSION_MODE_COPY = 0,
@@ -97,7 +103,8 @@ typedef struct {
     density_byte version[3];
     density_byte compressionMode;
     density_byte blockType;
-    density_byte parameters[7];
+    density_byte reserved;
+    density_main_header_parameters parameters;
 } density_main_header;
 
 typedef struct {

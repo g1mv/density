@@ -57,8 +57,11 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_check_
             if (state->resetCycle)
                 state->resetCycle--;
             else {
-                density_chameleon_dictionary_reset(&state->dictionary);
-                state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
+                density_byte resetDictionaryCycleShift = state->parameters.as_bytes[0];
+                if (resetDictionaryCycleShift) {
+                    density_chameleon_dictionary_reset(&state->dictionary);
+                    state->resetCycle = (uint_fast64_t) (1 << resetDictionaryCycleShift) - 1;
+                }
             }
 
             return DENSITY_KERNEL_DECODE_STATE_INFO_NEW_BLOCK;
@@ -196,11 +199,15 @@ DENSITY_FORCE_INLINE density_bool density_chameleon_decode_attempt_copy(density_
     return true;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *state, const uint_fast32_t endDataOverhead) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *restrict state, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead) {
     state->signaturesCount = 0;
     state->efficiencyChecked = 0;
     density_chameleon_dictionary_reset(&state->dictionary);
-    state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
+
+    state->parameters = parameters;
+    density_byte resetDictionaryCycleShift = state->parameters.as_bytes[0];
+    if (resetDictionaryCycleShift)
+        state->resetCycle = (uint_fast64_t) (1 << resetDictionaryCycleShift) - 1;
 
     state->endDataOverhead = endDataOverhead;
 

@@ -31,6 +31,7 @@
  */
 
 #include "main_decode.h"
+#include "density_api.h"
 
 DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_header(density_byte_buffer *restrict in, density_decode_state *restrict state) {
     if (in->position + sizeof(density_main_header) > in->size)
@@ -70,15 +71,15 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_byte_buffe
 
     switch (state->header.compressionMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
-            density_block_decode_init(&state->blockDecodeState, DENSITY_BLOCK_MODE_COPY, (DENSITY_BLOCK_TYPE) state->header.blockType, sizeof(density_main_footer), NULL, NULL, NULL, NULL);
+            density_block_decode_init(&state->blockDecodeState, DENSITY_BLOCK_MODE_COPY, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, sizeof(density_main_footer), NULL, NULL, NULL, NULL);
             break;
 
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            density_block_decode_init(&state->blockDecodeState, DENSITY_BLOCK_MODE_KERNEL, (DENSITY_BLOCK_TYPE) state->header.blockType, sizeof(density_main_footer), malloc(sizeof(density_chameleon_decode_state)), (void *) density_chameleon_decode_init, (void *) density_chameleon_decode_process, (void *) density_chameleon_decode_finish);
+            density_block_decode_init(&state->blockDecodeState, DENSITY_BLOCK_MODE_KERNEL, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, sizeof(density_main_footer), malloc(sizeof(density_chameleon_decode_state)), (void *) density_chameleon_decode_init, (void *) density_chameleon_decode_process, (void *) density_chameleon_decode_finish);
             break;
 
         case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
-            density_block_decode_init(&state->blockDecodeState, DENSITY_BLOCK_MODE_KERNEL, (DENSITY_BLOCK_TYPE) state->header.blockType, sizeof(density_main_footer), malloc(sizeof(density_mandala_decode_state)), (void *) density_mandala_decode_init, (void *) density_mandala_decode_process, (void *) density_mandala_decode_finish);
+            density_block_decode_init(&state->blockDecodeState, DENSITY_BLOCK_MODE_KERNEL, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, sizeof(density_main_footer), malloc(sizeof(density_mandala_decode_state)), (void *) density_mandala_decode_init, (void *) density_mandala_decode_process, (void *) density_mandala_decode_finish);
             break;
 
         default:

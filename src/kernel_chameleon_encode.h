@@ -64,7 +64,9 @@ typedef enum {
 typedef struct {
     DENSITY_CHAMELEON_ENCODE_PROCESS process;
 
+#if DENSITY_ENABLE_PARALLELIZATION == DENSITY_YES
     uint_fast64_t resetCycle;
+#endif
 
     uint_fast32_t shift;
     density_chameleon_signature * signature;

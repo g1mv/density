@@ -71,7 +71,7 @@ DENSITY_FORCE_INLINE void density_block_decode_update_totals(density_byte_buffer
     state->totalWritten += out->position - outPositionBefore;
 }
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *restrict state, const DENSITY_BLOCK_MODE mode, const DENSITY_BLOCK_TYPE blockType, const uint_fast32_t endDataOverhead, void *kernelState, DENSITY_KERNEL_DECODE_STATE (*kernelInit)(void *, const uint32_t), DENSITY_KERNEL_DECODE_STATE (*kernelProcess)(density_byte_buffer *, density_byte_buffer *, void *, const density_bool), DENSITY_KERNEL_DECODE_STATE (*kernelFinish)(void *)) {
+DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *restrict state, const DENSITY_BLOCK_MODE mode, const DENSITY_BLOCK_TYPE blockType, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead, void *kernelState, DENSITY_KERNEL_DECODE_STATE (*kernelInit)(void *, const density_main_header_parameters, const uint32_t), DENSITY_KERNEL_DECODE_STATE (*kernelProcess)(density_byte_buffer *, density_byte_buffer *, void *, const density_bool), DENSITY_KERNEL_DECODE_STATE (*kernelFinish)(void *)) {
     state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER;
     state->mode = mode;
     state->blockType = blockType;
@@ -87,7 +87,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(densit
             state->kernelDecodeProcess = kernelProcess;
             state->kernelDecodeFinish = kernelFinish;
 
-            state->kernelDecodeInit(state->kernelDecodeState, state->endDataOverhead);
+            state->kernelDecodeInit(state->kernelDecodeState, parameters, state->endDataOverhead);
             break;
         default:
             break;

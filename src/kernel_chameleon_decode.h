@@ -66,6 +66,7 @@ typedef enum {
 typedef struct {
     DENSITY_CHAMELEON_DECODE_PROCESS process;
 
+    density_main_header_parameters parameters;
     uint_fast64_t resetCycle;
 
     density_chameleon_signature signature;
@@ -91,7 +92,7 @@ typedef struct {
 } density_chameleon_decode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *, const uint_fast32_t);
+DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *, const density_main_header_parameters, const uint_fast32_t);
 DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_process(density_byte_buffer *, density_byte_buffer *, density_chameleon_decode_state *, const density_bool);
 DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish(density_chameleon_decode_state *);
 

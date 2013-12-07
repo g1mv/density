@@ -36,7 +36,13 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_write_header(density_by
     if (out->position + sizeof(density_main_header) > out->size)
         return DENSITY_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
 
-    state->totalWritten += density_main_header_write(out, compressionMode, blockType);
+#if DENSITY_ENABLE_PARALLELIZATION == DENSITY_YES
+    density_byte parameters[] = {.as_bytes = {DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT, 0, 0, 0, 0, 0, 0, 0}};
+#else
+    density_main_header_parameters parameters = {.as_bytes = {0, 0, 0, 0, 0, 0, 0, 0}};
+#endif
+
+    state->totalWritten += density_main_header_write(out, compressionMode, blockType, parameters);
 
     state->process = DENSITY_ENCODE_PROCESS_WRITE_BLOCKS;
 

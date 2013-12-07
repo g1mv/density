@@ -80,13 +80,13 @@ typedef struct {
     density_block_decode_current_block_data currentBlockData;
 
     void* kernelDecodeState;
-    DENSITY_KERNEL_DECODE_STATE (*kernelDecodeInit)(void*, const uint32_t);
+    DENSITY_KERNEL_DECODE_STATE (*kernelDecodeInit)(void*, const density_main_header_parameters, const uint32_t);
     DENSITY_KERNEL_DECODE_STATE (*kernelDecodeProcess)(density_byte_buffer *, density_byte_buffer *, void*, const density_bool);
     DENSITY_KERNEL_DECODE_STATE (*kernelDecodeFinish)(void*);
 } density_block_decode_state;
 #pragma pack(pop)
 
-DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *, const DENSITY_BLOCK_MODE, const DENSITY_BLOCK_TYPE, const uint_fast32_t, void*, DENSITY_KERNEL_DECODE_STATE (*)(void*, const uint32_t), DENSITY_KERNEL_DECODE_STATE (*)(density_byte_buffer *, density_byte_buffer *, void*, const density_bool), DENSITY_KERNEL_DECODE_STATE (*)(void*));
+DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *, const DENSITY_BLOCK_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters, const uint_fast32_t, void*, DENSITY_KERNEL_DECODE_STATE (*)(void*, const density_main_header_parameters, const uint32_t), DENSITY_KERNEL_DECODE_STATE (*)(density_byte_buffer *, density_byte_buffer *, void*, const density_bool), DENSITY_KERNEL_DECODE_STATE (*)(void*));
 DENSITY_BLOCK_DECODE_STATE density_block_decode_process(density_byte_buffer *, density_byte_buffer *, density_block_decode_state *, const density_bool);
 DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(density_block_decode_state *);
 
