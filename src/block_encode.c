@@ -61,7 +61,16 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_mode_
     if (out->position + sizeof(density_mode_marker) > out->size)
         return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
 
-    state->totalWritten += density_block_mode_marker_write(out, state->targetMode);
+    switch (state->currentMode) {
+        default:
+            if (state->totalWritten > state->totalRead)
+                state->currentMode = DENSITY_BLOCK_MODE_COPY;
+
+        case DENSITY_BLOCK_MODE_COPY:
+            break;
+    }
+
+    state->totalWritten += density_block_mode_marker_write(out, state->currentMode);
 
     state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA;
 
@@ -137,7 +146,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(den
 
                 switch (state->currentMode) {
                     case DENSITY_BLOCK_MODE_COPY:
-                        blockRemaining = (uint_fast64_t)DENSITY_PREFERRED_BUFFER_SIZE - (state->totalRead - state->currentBlockData.inStart);
+                        blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_BUFFER_SIZE - (state->totalRead - state->currentBlockData.inStart);
                         inRemaining = in->size - in->position;
                         outRemaining = out->size - out->position;
 
