@@ -82,7 +82,7 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_init(density_s
     if (streamState)
         return streamState;
 
-    uint_fast64_t workBufferSize = /* todo DENSITY_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD*/ + 0x20 + density_metadata_max_compressed_length(stream->in.size, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, false);
+    uint_fast64_t workBufferSize = /* todo DENSITY_CHAMELEON_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD*/ + 0x20 + density_metadata_max_compressed_length(stream->in.size, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, false);
     DENSITY_ENCODE_STATE encodeState = density_encode_init(&stream->out, &((density_stream_state *) stream->internal_state)->workBuffer, workBufferSize, &((density_stream_state *) stream->internal_state)->internal_encode_state, compressionMode, outputType, blockType);
     switch (encodeState) {
         case DENSITY_ENCODE_STATE_READY:

@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 06/12/13 20:20
+ * 07/12/13 15:40
  *
  * -----------------
  * Mandala algorithm
@@ -40,44 +40,61 @@
  * Very fast two level dictionary hash algorithm with predictions derived from Chameleon
  */
 
-#ifndef DENSITY_MANDALA_ENCODE_H
-#define DENSITY_MANDALA_ENCODE_H
+#ifndef DENSITY_MANDALA_DECODE_H
+#define DENSITY_MANDALA_DECODE_H
 
 #include "byte_buffer.h"
 #include "kernel_mandala_dictionary.h"
 #include "kernel_mandala.h"
 #include "block.h"
-#include "kernel_encode.h"
+#include "kernel_decode.h"
 #include "density_api.h"
 
-#define DENSITY_MANDALA_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (sizeof(density_mandala_signature) + sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
+#define DENSITY_MANDALA_DECODE_MINIMUM_INPUT_LOOKAHEAD               (sizeof(density_mandala_signature) + sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
+#define DENSITY_MANDALA_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
 
 typedef enum {
-    DENSITY_MANDALA_ENCODE_PROCESS_CHECK_STATE,
-    DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
-    DENSITY_MANDALA_ENCODE_PROCESS_DATA,
-    DENSITY_MANDALA_ENCODE_PROCESS_FINISH
-} DENSITY_MANDALA_ENCODE_PROCESS;
+    DENSITY_MANDALA_DECODE_PROCESS_SIGNATURES_AND_DATA_FAST,
+    DENSITY_MANDALA_DECODE_PROCESS_SIGNATURE_SAFE,
+    DENSITY_MANDALA_DECODE_PROCESS_DATA_FAST,
+    DENSITY_MANDALA_DECODE_PROCESS_DATA_SAFE,
+    DENSITY_MANDALA_DECODE_PROCESS_FINISH
+} DENSITY_MANDALA_DECODE_PROCESS;
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_MANDALA_ENCODE_PROCESS process;
+    DENSITY_MANDALA_DECODE_PROCESS process;
 
     uint_fast64_t resetCycle;
 
+    density_mandala_signature signature;
     uint_fast32_t shift;
-    density_mandala_signature * signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
-    uint_fast16_t lastHash;
+    uint_fast64_t endDataOverhead;
+
+    union {
+        density_byte as_bytes[8];
+        uint64_t as_uint64_t;
+    } partialSignature;
+    union {
+        density_byte as_bytes[4];
+        uint32_t as_uint32_t;
+    } partialUncompressedChunk;
+
+    uint_fast64_t signatureBytes;
+    uint_fast64_t uncompressedChunkBytes;
+
+    uint32_t lastHash;
 
     density_mandala_dictionary dictionary;
-} density_mandala_encode_state;
+} density_mandala_decode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_init(density_mandala_encode_state *);
-DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(density_byte_buffer *, density_byte_buffer *, density_mandala_encode_state *, const density_bool);
-DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_finish(density_mandala_encode_state *);
+DENSITY_KERNEL_DECODE_STATE density_mandala_decode_init(density_mandala_decode_state *, const uint_fast32_t);
+DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(density_byte_buffer *, density_byte_buffer *, density_mandala_decode_state *, const density_bool);
+DENSITY_KERNEL_DECODE_STATE density_mandala_decode_finish(density_mandala_decode_state *);
+
 #endif

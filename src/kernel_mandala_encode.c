@@ -115,24 +115,24 @@ DENSITY_FORCE_INLINE void density_mandala_encode_kernel(density_byte_buffer *res
         if (*found_a ^ chunk) {
             uint32_t *found_b = &found->chunk_b;
             if (*found_b ^ chunk) {
-                density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_ENCODE_FLAG_CHUNK);
+                density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_SIGNATURE_FLAG_CHUNK);
                 *(uint32_t *) (out->pointer + out->position) = chunk;
                 out->position += sizeof(uint32_t);
             } else {
-                density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_ENCODE_FLAG_MAP_B);
+                density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_SIGNATURE_FLAG_MAP_B);
                 *(uint16_t *) (out->pointer + out->position) = DENSITY_LITTLE_ENDIAN_16(*hash);
                 out->position += sizeof(uint16_t);
             }
             *found_b = *found_a;
             *found_a = chunk;
         } else {
-//density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_ENCODE_FLAG_MAP_A);
+            //density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_SIGNATURE_FLAG_MAP_A);
             *(uint16_t *) (out->pointer + out->position) = DENSITY_LITTLE_ENDIAN_16(*hash);
             out->position += sizeof(uint16_t);
         }
         *predictedChunk = chunk;
     } else {
-        density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_ENCODE_FLAG_PREDICTED);
+        density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED);
     }
     state->lastHash = (uint16_t) (*hash & 0xFFFF);
 

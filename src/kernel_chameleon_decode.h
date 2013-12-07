@@ -50,8 +50,8 @@
 #include "kernel_decode.h"
 #include "density_api.h"
 
-#define DENSITY_HASH_DECODE_MINIMUM_INPUT_LOOKAHEAD               (sizeof(density_chameleon_signature) + sizeof(uint32_t) * 8 * sizeof(density_chameleon_signature))
-#define DENSITY_HASH_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 8 * sizeof(density_chameleon_signature))
+#define DENSITY_CHAMELEON_DECODE_MINIMUM_INPUT_LOOKAHEAD               (sizeof(density_chameleon_signature) + sizeof(uint32_t) * 8 * sizeof(density_chameleon_signature))
+#define DENSITY_CHAMELEON_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 8 * sizeof(density_chameleon_signature))
 
 typedef enum {
     DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURES_AND_DATA_FAST,

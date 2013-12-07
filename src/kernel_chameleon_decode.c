@@ -218,10 +218,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_proces
     uint_fast64_t limitIn = 0;
     uint_fast64_t limitOut = 0;
 
-    if (in->size > DENSITY_HASH_DECODE_MINIMUM_INPUT_LOOKAHEAD + state->endDataOverhead)
-        limitIn = in->size - DENSITY_HASH_DECODE_MINIMUM_INPUT_LOOKAHEAD - state->endDataOverhead;
-    if (out->size > DENSITY_HASH_DECODE_MINIMUM_OUTPUT_LOOKAHEAD)
-        limitOut = out->size - DENSITY_HASH_DECODE_MINIMUM_OUTPUT_LOOKAHEAD;
+    if (in->size > DENSITY_CHAMELEON_DECODE_MINIMUM_INPUT_LOOKAHEAD + state->endDataOverhead)
+        limitIn = in->size - DENSITY_CHAMELEON_DECODE_MINIMUM_INPUT_LOOKAHEAD - state->endDataOverhead;
+    if (out->size > DENSITY_CHAMELEON_DECODE_MINIMUM_OUTPUT_LOOKAHEAD)
+        limitOut = out->size - DENSITY_CHAMELEON_DECODE_MINIMUM_OUTPUT_LOOKAHEAD;
 
     switch (state->process) {
         case DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURES_AND_DATA_FAST:

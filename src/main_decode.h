@@ -41,6 +41,7 @@
 #include "block_mode_marker.h"
 #include "block_decode.h"
 #include "kernel_chameleon_decode.h"
+#include "kernel_mandala_decode.h"
 #include "density_api.h"
 
 typedef enum {

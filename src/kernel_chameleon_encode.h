@@ -50,19 +50,19 @@
 #include "kernel_encode.h"
 #include "density_api.h"
 
-#define DENSITY_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (sizeof(density_chameleon_signature) + sizeof(uint32_t) * 8 * sizeof(density_chameleon_signature))
+#define DENSITY_CHAMELEON_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (sizeof(density_chameleon_signature) + sizeof(uint32_t) * 8 * sizeof(density_chameleon_signature))
 
 typedef enum {
-    DENSITY_HASH_ENCODE_PROCESS_CHECK_STATE,
-    DENSITY_HASH_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
-    DENSITY_HASH_ENCODE_PROCESS_DATA,
-    DENSITY_HASH_ENCODE_PROCESS_FINISH
-} DENSITY_HASH_ENCODE_PROCESS;
+    DENSITY_CHAMELEON_ENCODE_PROCESS_CHECK_STATE,
+    DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
+    DENSITY_CHAMELEON_ENCODE_PROCESS_DATA,
+    DENSITY_CHAMELEON_ENCODE_PROCESS_FINISH
+} DENSITY_CHAMELEON_ENCODE_PROCESS;
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_HASH_ENCODE_PROCESS process;
+    DENSITY_CHAMELEON_ENCODE_PROCESS process;
 
     uint_fast64_t resetCycle;
 

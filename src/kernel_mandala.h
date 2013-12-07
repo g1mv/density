@@ -46,11 +46,17 @@
 #include "globals.h"
 
 #define DENSITY_MANDALA_HASH_BITS                                     16
-#define DENSITY_MANDALA_HASH_OFFSET_BASIS                             (uint32_t)2233294llu
-
-typedef uint64_t                                                      density_mandala_signature;
+#define DENSITY_MANDALA_HASH_OFFSET_BASIS                             (uint32_t)2165430005lu
 
 #define DENSITY_MANDALA_HASH_ALGORITHM(hash, value)                   hash = value * DENSITY_MANDALA_HASH_OFFSET_BASIS;\
                                                                       hash = (hash >> (32 - DENSITY_MANDALA_HASH_BITS));
+typedef enum {
+    DENSITY_MANDALA_SIGNATURE_FLAG_MAP_A = 0x0,
+    DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED = 0x1,
+    DENSITY_MANDALA_SIGNATURE_FLAG_MAP_B = 0x2,
+    DENSITY_MANDALA_SIGNATURE_FLAG_CHUNK = 0x3,
+} DENSITY_MANDALA_SIGNATURE_FLAG;
+
+typedef uint64_t                                                      density_mandala_signature;
 
 #endif

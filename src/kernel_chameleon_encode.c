@@ -93,8 +93,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_check_
 
     switch (state->shift) {
         case 64:
-            if ((returnState = density_chameleon_encode_prepare_new_block(out, state, DENSITY_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD))) {
-                state->process = DENSITY_HASH_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
+            if ((returnState = density_chameleon_encode_prepare_new_block(out, state, DENSITY_CHAMELEON_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD))) {
+                state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
                 return returnState;
             }
             break;
@@ -159,7 +159,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(d
     state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
 #endif
 
-    state->process = DENSITY_HASH_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
+    state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
@@ -176,29 +176,29 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_proces
     const uint_fast64_t limit = in->size & ~0x1F;
 
     switch (state->process) {
-        case DENSITY_HASH_ENCODE_PROCESS_CHECK_STATE:
+        case DENSITY_CHAMELEON_ENCODE_PROCESS_CHECK_STATE:
             if ((returnState = density_chameleon_encode_check_state(out, state)))
                 return returnState;
-            state->process = DENSITY_HASH_ENCODE_PROCESS_DATA;
+            state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_DATA;
             break;
 
-        case DENSITY_HASH_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
-            if ((returnState = density_chameleon_encode_prepare_new_block(out, state, DENSITY_HASH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD)))
+        case DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
+            if ((returnState = density_chameleon_encode_prepare_new_block(out, state, DENSITY_CHAMELEON_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD)))
                 return returnState;
-            state->process = DENSITY_HASH_ENCODE_PROCESS_DATA;
+            state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_DATA;
             break;
 
-        case DENSITY_HASH_ENCODE_PROCESS_DATA:
+        case DENSITY_CHAMELEON_ENCODE_PROCESS_DATA:
             if (in->size - in->position < 4 * sizeof(uint64_t))
                 goto finish;
             while (true) {
                 density_chameleon_encode_process_span(&chunk, in, out, &hash, state);
                 if (in->position == limit) {
                     if (flush) {
-                        state->process = DENSITY_HASH_ENCODE_PROCESS_FINISH;
+                        state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_FINISH;
                         return DENSITY_KERNEL_ENCODE_STATE_READY;
                     } else {
-                        state->process = DENSITY_HASH_ENCODE_PROCESS_CHECK_STATE;
+                        state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_CHECK_STATE;
                         return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
                     }
                 }
@@ -207,7 +207,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_proces
                     return returnState;
             }
 
-        case DENSITY_HASH_ENCODE_PROCESS_FINISH:
+        case DENSITY_CHAMELEON_ENCODE_PROCESS_FINISH:
             while (true) {
                 while (state->shift ^ 64) {
                     if (in->size - in->position < sizeof(uint32_t))
@@ -232,7 +232,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_proces
                 in->position += remaining;
             }
         exit:
-            state->process = DENSITY_HASH_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
+            state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
             return DENSITY_KERNEL_ENCODE_STATE_FINISHED;
 
         default:
