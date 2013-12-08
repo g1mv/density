@@ -41,6 +41,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_
 
     state->totalRead += density_block_header_read(in, &state->lastBlockHeader);
 
+    state->currentMode = state->targetMode;
     state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_DATA;
 
     return DENSITY_BLOCK_DECODE_STATE_READY;
@@ -61,6 +62,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_
 
     state->totalRead += density_block_mode_marker_read(in, &state->lastModeMarker);
 
+    state->currentMode = (DENSITY_BLOCK_MODE)state->lastModeMarker.activeBlockMode;
     state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_DATA;
 
     return DENSITY_BLOCK_DECODE_STATE_READY;
@@ -73,7 +75,8 @@ DENSITY_FORCE_INLINE void density_block_decode_update_totals(density_byte_buffer
 
 DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *restrict state, const DENSITY_BLOCK_MODE mode, const DENSITY_BLOCK_TYPE blockType, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead, void *kernelState, DENSITY_KERNEL_DECODE_STATE (*kernelInit)(void *, const density_main_header_parameters, const uint32_t), DENSITY_KERNEL_DECODE_STATE (*kernelProcess)(density_byte_buffer *, density_byte_buffer *, void *, const density_bool), DENSITY_KERNEL_DECODE_STATE (*kernelFinish)(void *)) {
     state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER;
-    state->mode = mode;
+    state->targetMode = mode;
+    state->currentMode = mode;
     state->blockType = blockType;
 
     state->totalRead = 0;
@@ -133,7 +136,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_process(den
             case DENSITY_BLOCK_DECODE_PROCESS_READ_DATA:
                 inPositionBefore = in->position;
                 outPositionBefore = out->position;
-                switch (state->mode) {
+                switch (state->currentMode) {
                     case DENSITY_BLOCK_MODE_COPY:
                         blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_BUFFER_SIZE - (state->totalWritten - state->currentBlockData.outStart);
                         inRemaining = in->size - in->position;

@@ -62,11 +62,12 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_mode_
         return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
 
     switch (state->currentMode) {
+        case DENSITY_BLOCK_MODE_COPY:
+            break;
+
         default:
             if (state->totalWritten > state->totalRead)
                 state->currentMode = DENSITY_BLOCK_MODE_COPY;
-
-        case DENSITY_BLOCK_MODE_COPY:
             break;
     }
 
@@ -183,8 +184,10 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(den
                         density_block_encode_update_totals(in, out, state, inPositionBefore, outPositionBefore);
                         if (flush && inRemaining == blockRemaining)
                             state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER;
-                        else
+                        else {
                             state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER;
+                            return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
+                        }
 
                     exit:
                         break;

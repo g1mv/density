@@ -235,13 +235,13 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_kernel_s
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE const DENSITY_MANDALA_SIGNATURE_FLAG density_mandala_decode_test_compressed(density_mandala_decode_state *state) {
+DENSITY_FORCE_INLINE const DENSITY_MANDALA_SIGNATURE_FLAG density_mandala_decode_get_signature_flag(density_mandala_decode_state *state) {
     return (DENSITY_MANDALA_SIGNATURE_FLAG const) ((state->signature >> state->shift) & 0x3);
 }
 
 DENSITY_FORCE_INLINE void density_mandala_decode_process_data_fast(density_byte_buffer *restrict in, density_byte_buffer *restrict out, density_mandala_decode_state *restrict state) {
     while (state->shift ^ 64) {
-        density_mandala_decode_kernel_fast(in, out, density_mandala_decode_test_compressed(state), state);
+        density_mandala_decode_kernel_fast(in, out, density_mandala_decode_get_signature_flag(state), state);
         state->shift += 2;
     }
 }
@@ -319,7 +319,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(
 
         case DENSITY_MANDALA_DECODE_PROCESS_DATA_SAFE:
             while (state->shift ^ 64) {
-                DENSITY_MANDALA_SIGNATURE_FLAG flag = density_mandala_decode_test_compressed(state);
+                DENSITY_MANDALA_SIGNATURE_FLAG flag = density_mandala_decode_get_signature_flag(state);
                 size_t overhead = 0;
                 switch (flag) {
                     case DENSITY_MANDALA_SIGNATURE_FLAG_MAP_A:
