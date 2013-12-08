@@ -258,8 +258,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(
             return DENSITY_KERNEL_ENCODE_STATE_ERROR;
     }
 
-    return
-            DENSITY_KERNEL_ENCODE_STATE_READY;
+    return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_finish(density_mandala_encode_state *state) {

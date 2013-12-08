@@ -186,7 +186,10 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(den
                             state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER;
                         else {
                             state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER;
-                            return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
+                            if (in->position == in->size)
+                                return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
+                            else if (out->position == out->size)
+                                return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
                         }
 
                     exit:
