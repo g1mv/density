@@ -34,10 +34,11 @@
  * -----------------
  *
  * Author(s)
- * Guillaume Voirin & Piotr Tarsa
+ * Guillaume Voirin (https://github.com/gpnuma)
+ * Piotr Tarsa (https://github.com/tarsa)
  *
  * Description
- * Very fast two level dictionary hash algorithm with predictions derived from Chameleon
+ * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
 #include "kernel_mandala_dictionary.h"

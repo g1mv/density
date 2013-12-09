@@ -34,7 +34,7 @@
  * -------------------
  *
  * Author(s)
- * Guillaume Voirin
+ * Guillaume Voirin (https://github.com/gpnuma)
  *
  * Description
  * Hash based superfast kernel
