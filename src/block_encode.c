@@ -147,7 +147,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(den
 
                 switch (state->currentMode) {
                     case DENSITY_BLOCK_MODE_COPY:
-                        blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_BUFFER_SIZE - (state->totalRead - state->currentBlockData.inStart);
+                        blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalRead - state->currentBlockData.inStart);
                         inRemaining = in->size - in->position;
                         outRemaining = out->size - out->position;
 
