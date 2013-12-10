@@ -61,19 +61,6 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_check_conformity(densit
     return DENSITY_STREAM_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE void density_stream_malloc_work_buffer(density_stream *stream, uint_fast64_t workSize) {
-    if (((density_stream_state *) stream->internal_state)->workBuffer.size ^ workSize) {
-        ((density_stream_state *) stream->internal_state)->mem_free(((density_stream_state *) stream->internal_state)->workBuffer.pointer);
-        density_byte_buffer_encapsulate(&((density_stream_state *) stream->internal_state)->workBuffer, ((density_stream_state *) stream->internal_state)->mem_alloc((size_t) workSize), workSize);
-    } else
-        density_byte_buffer_rewind(&((density_stream_state *) stream->internal_state)->workBuffer);
-}
-
-DENSITY_FORCE_INLINE void density_stream_free_work_buffer(density_stream *stream) {
-    ((density_stream_state *) stream->internal_state)->mem_free(((density_stream_state *) stream->internal_state)->workBuffer.pointer);
-    ((density_stream_state *) stream->internal_state)->workBuffer.pointer = NULL;
-}
-
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_init(density_stream *restrict stream, const DENSITY_COMPRESSION_MODE compressionMode, const DENSITY_ENCODE_OUTPUT_TYPE outputType, const DENSITY_BLOCK_TYPE blockType) {
     if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_PREPARED)
         return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
@@ -82,8 +69,7 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_init(density_s
     if (streamState)
         return streamState;
 
-    uint_fast64_t workBufferSize = /* todo DENSITY_CHAMELEON_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD*/ + 0x20 + density_metadata_max_compressed_length(stream->in.size, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, false);
-    DENSITY_ENCODE_STATE encodeState = density_encode_init(&stream->out, &((density_stream_state *) stream->internal_state)->workBuffer, workBufferSize, &((density_stream_state *) stream->internal_state)->internal_encode_state, compressionMode, outputType, blockType);
+    DENSITY_ENCODE_STATE encodeState = density_encode_init(&stream->out, &((density_stream_state *) stream->internal_state)->internal_encode_state, compressionMode, outputType, blockType);
     switch (encodeState) {
         case DENSITY_ENCODE_STATE_READY:
             break;
@@ -97,9 +83,6 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_init(density_s
 
     stream->in_total_read = &((density_stream_state *) stream->internal_state)->internal_encode_state.totalRead;
     stream->out_total_written = &((density_stream_state *) stream->internal_state)->internal_encode_state.totalWritten;
-
-    if (compressionMode == DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM)
-        density_stream_malloc_work_buffer(stream, workBufferSize);
 
     ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_COMPRESSION_INITED;
 
@@ -159,9 +142,6 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_finish(density
             return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    if (((density_stream_state *) stream->internal_state)->internal_encode_state.compressionMode == DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM)
-        density_stream_free_work_buffer(stream);
-
     ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_COMPRESSION_FINISHED;
 
     return DENSITY_STREAM_STATE_READY;
@@ -175,8 +155,7 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_init(density
     if (streamState)
         return streamState;
 
-    uint_fast64_t workBufferSize = 0x20 + density_metadata_max_decompressed_length(stream->in.size, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, false);
-    DENSITY_DECODE_STATE decodeState = density_decode_init(&stream->in, &((density_stream_state *) stream->internal_state)->workBuffer, workBufferSize, &((density_stream_state *) stream->internal_state)->internal_decode_state);
+    DENSITY_DECODE_STATE decodeState = density_decode_init(&stream->in, &((density_stream_state *) stream->internal_state)->internal_decode_state);
     switch (decodeState) {
         case DENSITY_DECODE_STATE_READY:
             break;
@@ -190,9 +169,6 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_init(density
 
     stream->in_total_read = &((density_stream_state *) stream->internal_state)->internal_decode_state.totalRead;
     stream->out_total_written = &((density_stream_state *) stream->internal_state)->internal_decode_state.totalWritten;
-
-    if (((density_stream_state *) stream->internal_state)->internal_decode_state.header.compressionMode == DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM)
-        density_stream_malloc_work_buffer(stream, workBufferSize);
 
     ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_DECOMPRESSION_INITED;
 
@@ -242,9 +218,6 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_finish(densi
         default:
             return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
-
-    if (((density_stream_state *) stream->internal_state)->internal_decode_state.header.compressionMode == DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM)
-        density_stream_free_work_buffer(stream);
 
     ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_DECOMPRESSION_FINISHED;
 

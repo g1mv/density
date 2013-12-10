@@ -31,7 +31,6 @@
  */
 
 #include "main_decode.h"
-#include "density_api.h"
 
 DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_header(density_byte_buffer *restrict in, density_decode_state *restrict state) {
     if (in->position + sizeof(density_main_header) > in->size)
@@ -60,7 +59,7 @@ DENSITY_FORCE_INLINE void density_decode_update_totals(density_byte_buffer *rest
     state->totalWritten += out->position - outPositionBefore;
 }
 
-DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_byte_buffer *in, density_byte_buffer *workBuffer, const uint_fast64_t workBufferSize, density_decode_state *restrict state) {
+DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_byte_buffer *in, density_decode_state *restrict state) {
     DENSITY_DECODE_STATE decodeState;
 
     state->totalRead = 0;
@@ -85,9 +84,6 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_byte_buffe
         default:
             return DENSITY_DECODE_STATE_ERROR;
     }
-
-    state->workBuffer = workBuffer;
-    state->workBufferData.memorySize = workBufferSize;
 
     return DENSITY_DECODE_STATE_READY;
 }

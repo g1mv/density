@@ -58,8 +58,6 @@ typedef enum {
 typedef struct {
     DENSITY_STREAM_PROCESS process;
 
-    density_byte_buffer workBuffer;
-
     void *(*mem_alloc)(size_t);
     void (*mem_free)(void *);
 

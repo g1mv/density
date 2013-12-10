@@ -65,7 +65,7 @@ DENSITY_FORCE_INLINE void density_encode_update_totals(density_byte_buffer *rest
     state->totalWritten += out->position - outPositionBefore;
 }
 
-DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_byte_buffer *restrict out, density_byte_buffer *restrict workBuffer, const uint_fast64_t workBufferSize, density_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_ENCODE_OUTPUT_TYPE encodeOutputType, const DENSITY_BLOCK_TYPE blockType) {
+DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_byte_buffer *restrict out, density_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_ENCODE_OUTPUT_TYPE encodeOutputType, const DENSITY_BLOCK_TYPE blockType) {
     state->compressionMode = mode;
     state->blockType = blockType;
     state->encodeOutputType = encodeOutputType;
@@ -86,9 +86,6 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_byte_buffe
             density_block_encode_init(&state->blockEncodeState, DENSITY_BLOCK_MODE_KERNEL, blockType, malloc(sizeof(density_mandala_encode_state)), (void *) density_mandala_encode_init, (void *) density_mandala_encode_process, (void *) density_mandala_encode_finish);
             break;
     }
-
-    state->workBuffer = workBuffer;
-    state->workBufferData.memorySize = workBufferSize;
 
     switch (state->encodeOutputType) {
         case DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER:

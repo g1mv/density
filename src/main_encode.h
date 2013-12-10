@@ -61,11 +61,6 @@ typedef enum {
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    uint_fast64_t memorySize;
-    uint_fast64_t outstandingBytes;
-} density_encode_work_buffer_data;
-
-typedef struct {
     DENSITY_ENCODE_PROCESS process;
     DENSITY_COMPRESSION_MODE compressionMode;
     DENSITY_BLOCK_TYPE blockType;
@@ -76,13 +71,10 @@ typedef struct {
     uint_fast64_t totalWritten;
 
     density_block_encode_state blockEncodeState;
-
-    density_byte_buffer* workBuffer;
-    density_encode_work_buffer_data workBufferData;
 } density_encode_state;
 #pragma pack(pop)
 
-DENSITY_ENCODE_STATE density_encode_init(density_byte_buffer *, density_byte_buffer *, const uint_fast64_t, density_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_ENCODE_OUTPUT_TYPE, const DENSITY_BLOCK_TYPE);
+DENSITY_ENCODE_STATE density_encode_init(density_byte_buffer *, density_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_ENCODE_OUTPUT_TYPE, const DENSITY_BLOCK_TYPE);
 DENSITY_ENCODE_STATE density_encode_process(density_byte_buffer *, density_byte_buffer *, density_encode_state *, const density_bool);
 DENSITY_ENCODE_STATE density_encode_finish(density_byte_buffer *, density_encode_state *);
 

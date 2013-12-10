@@ -60,10 +60,6 @@ typedef enum {
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    uint_fast64_t memorySize;
-} density_decode_work_buffer_data;
-
-typedef struct {
     DENSITY_DECODE_PROCESS process;
 
     uint_fast64_t totalRead;
@@ -73,13 +69,10 @@ typedef struct {
     density_main_footer footer;
 
     density_block_decode_state blockDecodeState;
-
-    density_byte_buffer* workBuffer;
-    density_decode_work_buffer_data workBufferData;
 } density_decode_state;
 #pragma pack(pop)
 
-DENSITY_DECODE_STATE density_decode_init(density_byte_buffer*, density_byte_buffer*, const uint_fast64_t, density_decode_state *);
+DENSITY_DECODE_STATE density_decode_init(density_byte_buffer*, density_decode_state *);
 DENSITY_DECODE_STATE density_decode_process(density_byte_buffer *, density_byte_buffer *, density_decode_state *, const density_bool);
 DENSITY_DECODE_STATE density_decode_finish(density_byte_buffer *, density_decode_state*);
 
