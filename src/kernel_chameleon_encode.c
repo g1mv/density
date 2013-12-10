@@ -55,13 +55,13 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_prepar
         return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
 
     switch (state->signaturesCount) {
-        case DENSITY_PREFERRED_EFFICIENCY_CHECK_SIGNATURES:
+        case DENSITY_CHAMELEON_PREFERRED_EFFICIENCY_CHECK_SIGNATURES:
             if (state->efficiencyChecked ^ 0x1) {
                 state->efficiencyChecked = 1;
                 return DENSITY_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK;
             }
             break;
-        case DENSITY_PREFERRED_BLOCK_SIGNATURES:
+        case DENSITY_CHAMELEON_PREFERRED_BLOCK_SIGNATURES:
             state->signaturesCount = 0;
             state->efficiencyChecked = 0;
 

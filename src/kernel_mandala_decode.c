@@ -45,13 +45,13 @@
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_check_signatures_count(density_mandala_decode_state *restrict state) {
     switch (state->signaturesCount) {
-        case DENSITY_PREFERRED_EFFICIENCY_CHECK_SIGNATURES:
+        case DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES:
             if (state->efficiencyChecked ^ 0x1) {
                 state->efficiencyChecked = 1;
                 return DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK;
             }
             break;
-        case DENSITY_PREFERRED_BLOCK_SIGNATURES:
+        case DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES:
             state->signaturesCount = 0;
             state->efficiencyChecked = 0;
 
