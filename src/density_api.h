@@ -44,10 +44,10 @@
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
-#define DENSITY_YES                             1
-#define DENSITY_NO                              0
+#define DENSITY_YES                                                 1
+#define DENSITY_NO                                                  0
 
-#define DENSITY_ENABLE_PARALLELIZATION          DENSITY_NO          // No disables compression dictionary resets and improves compression ratio
+#define DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT         DENSITY_NO          // No disables compression dictionary resets and improves compression ratio
 
 
 
