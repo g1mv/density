@@ -57,6 +57,7 @@
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
+
 typedef uint8_t density_byte;
 typedef bool density_bool;
 typedef struct {
@@ -99,11 +100,13 @@ typedef enum {
     DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE                   // error during processing
 } DENSITY_STREAM_STATE;
 
+#pragma pack(push)
+#pragma pack(4)
 typedef struct {
     density_byte version[3];
     density_byte compressionMode;
     density_byte blockType;
-    density_byte reserved;
+    density_byte reserved[3];
     density_main_header_parameters parameters;
 } density_main_header;
 
@@ -122,6 +125,7 @@ typedef struct {
 
     void* internal_state;
 } density_stream;
+#pragma pack(pop)
 
 
 

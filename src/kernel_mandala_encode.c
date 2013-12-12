@@ -135,7 +135,7 @@ DENSITY_FORCE_INLINE void density_mandala_encode_kernel(density_byte_buffer *res
     } else {
         density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED);
     }
-    state->lastHash = (uint16_t) (*hash & 0xFFFF);
+    state->lastHash = (uint16_t)*hash;
 
     state->shift += 2;
 }

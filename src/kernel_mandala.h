@@ -46,17 +46,18 @@
 
 #include "globals.h"
 
-#define DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES_SHIFT                  12
-#define DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES                        (1 << DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES_SHIFT)
+#define DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES_SHIFT                    12
+#define DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES                          (1 << DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES_SHIFT)
 
-#define DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT       8
-#define DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES             (1 << DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT)
+#define DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT         8
+#define DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES               (1 << DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT)
 
-#define DENSITY_MANDALA_HASH_BITS                                     16
-#define DENSITY_MANDALA_HASH_OFFSET_BASIS                             (uint32_t)2165430005lu
+#define DENSITY_MANDALA_HASH_BITS                                           16
+#define DENSITY_MANDALA_HASH_MULTIPLIER                                     (uint32_t)2165430005lu
 
-#define DENSITY_MANDALA_HASH_ALGORITHM(hash, value)                   hash = value * DENSITY_MANDALA_HASH_OFFSET_BASIS;\
-                                                                      hash = (hash >> (32 - DENSITY_MANDALA_HASH_BITS));
+#define DENSITY_MANDALA_HASH_ALGORITHM(hash32, value32)                     hash32 = value32 * DENSITY_MANDALA_HASH_MULTIPLIER;\
+                                                                            hash32 = (hash32 >> (32 - DENSITY_MANDALA_HASH_BITS));
+
 typedef enum {
     DENSITY_MANDALA_SIGNATURE_FLAG_MAP_A = 0x0,
     DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED = 0x1,
@@ -64,6 +65,6 @@ typedef enum {
     DENSITY_MANDALA_SIGNATURE_FLAG_CHUNK = 0x3,
 } DENSITY_MANDALA_SIGNATURE_FLAG;
 
-typedef uint64_t                                                      density_mandala_signature;
+typedef uint64_t                                                            density_mandala_signature;
 
 #endif
