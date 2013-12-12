@@ -131,7 +131,7 @@ typedef struct {
 
 /***********************************************************************************************************************
  *                                                                                                                     *
- * SSC version information                                                                                             *
+ * Density version information                                                                                         *
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
@@ -154,14 +154,14 @@ uint8_t density_version_revision(void);
 
 /***********************************************************************************************************************
  *                                                                                                                     *
- * SSC byte buffer utilities                                                                                           *
+ * Density byte buffer utilities                                                                                       *
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
 /*
- * Rewind an SSC byte buffer
+ * Rewind an Density byte buffer
  *
- * @param byte_buffer the SSC byte buffer to rewind (its position is set to zero)
+ * @param byte_buffer the Density byte buffer to rewind (its position is set to zero)
  */
 void density_byte_buffer_rewind(density_byte_buffer* byte_buffer);
 
@@ -169,7 +169,7 @@ void density_byte_buffer_rewind(density_byte_buffer* byte_buffer);
 
 /***********************************************************************************************************************
  *                                                                                                                     *
- * SSC stream API functions                                                                                            *
+ * Density stream API functions                                                                                        *
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
@@ -193,8 +193,8 @@ DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, uint8_t* inp
  * @param compression_mode the compression mode
  * @param output_type the format of data output by encoding.
  *      EXPERTS ONLY ! If unsure, use DENSITY_ENCODE_OUTPUT_TYPE_DEFAULT.
- *      Any other option will create output data which is *NOT* directly decompressible by the API. This can be used for parallelizing SSC.
- * @param block_type the type of data blocks SSC will generate.
+ *      Any other option will create output data which is *NOT* directly decompressible by the API. This can be used for parallelizing Density.
+ * @param block_type the type of data blocks Density will generate.
  *      EXPERTS ONLY ! If you're unsure use DENSITY_BLOCK_TYPE_DEFAULT.
  *      The option DENSITY_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK basically makes the block footer size zero, and removes data integrity checks in the encoded output.
  *      It can be useful in network streaming situations, where data integrity is already checked by the protocol (TCP/IP for example), and the flush option in density_stream_compress is often set,
@@ -263,7 +263,7 @@ DENSITY_STREAM_STATE density_stream_decompress_utilities_get_header(density_stre
 
 /***********************************************************************************************************************
  *                                                                                                                     *
- * SSC buffers API functions                                                                                           *
+ * Density buffers API functions                                                                                       *
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
