@@ -52,7 +52,7 @@
 #define DENSITY_CHAMELEON_PREFERRED_EFFICIENCY_CHECK_SIGNATURES             (1 << DENSITY_CHAMELEON_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT)
 
 #define DENSITY_CHAMELEON_HASH_BITS                                         16
-#define DENSITY_CHAMELEON_HASH_MULTIPLIER                                   (uint32_t)2165430005lu
+#define DENSITY_CHAMELEON_HASH_MULTIPLIER                                   (uint32_t)2225496326lu
 
 #define DENSITY_CHAMELEON_HASH_ALGORITHM(hash32, value32)                   hash32 = value32 * DENSITY_CHAMELEON_HASH_MULTIPLIER;\
                                                                             hash32 = (hash32 >> (32 - DENSITY_CHAMELEON_HASH_BITS));
