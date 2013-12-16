@@ -77,6 +77,6 @@
 
 #define DENSITY_MAJOR_VERSION               0
 #define DENSITY_MINOR_VERSION               9
-#define DENSITY_REVISION                    12
+#define DENSITY_REVISION                    13
 
 #endif
