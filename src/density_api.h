@@ -161,7 +161,7 @@ uint8_t density_version_revision(void);
 /*
  * Rewind an Density byte buffer
  *
- * @param byte_buffer the Density byte buffer to rewind (its position is set to zero)
+ * @param byte_buffer the Density byte buffer to rewind (its available is set to zero)
  */
 void density_byte_buffer_rewind(density_byte_buffer* byte_buffer);
 
