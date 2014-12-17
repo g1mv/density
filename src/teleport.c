@@ -34,7 +34,6 @@
 
 DENSITY_FORCE_INLINE void density_teleport_open(density_teleport restrict *teleport) {
     teleport->source = DENSITY_TELEPORT_SOURCE_STAGING;
-    teleport->state = DENSITY_TELEPORT_STATE_STAGING;
     teleport->staging = (density_memory_location *) malloc(sizeof(density_memory_location));
     teleport->staging->pointer = (density_byte *) malloc(DENSITY_TELEPORT_BUFFER_SIZE * sizeof(density_byte));
     teleport->staging->available = DENSITY_TELEPORT_BUFFER_SIZE;
@@ -46,32 +45,48 @@ DENSITY_FORCE_INLINE void density_teleport_close(density_teleport *teleport) {
     free(teleport->staging);
 }
 
-DENSITY_FORCE_INLINE uint_fast64_t density_teleport_get(density_teleport restrict *teleport, uint_fast64_t minimumBytes, density_memory_location restrict *outBuffer) {
-    uint_fast64_t stagingFree;
-    switch (teleport->source) {
-        case DENSITY_TELEPORT_SOURCE_STAGING:
-            stagingFree = DENSITY_TELEPORT_BUFFER_SIZE - teleport->stagingPosition;
-            if (teleport->memory->available > stagingFree) {
-                memcpy(teleport->staging->pointer + teleport->stagingPosition, teleport->memory, stagingFree);
-                teleport->staging->available = DENSITY_TELEPORT_BUFFER_SIZE;
-                outBuffer = teleport->staging;
-            }
-            break;
-        default:
-            if (teleport->memory->available < minimumBytes) {
-                teleport->source = DENSITY_TELEPORT_SOURCE_STAGING;
-                teleport->stagingPosition = 0;
-            }
-            break;
-    }
-
-    if (teleport->staging->available) if (teleport->staging->available >= minimumBytes)
-        return teleport->staging;
-    if (teleport->memory->available >= minimumBytes)
-        return teleport->memory;
-
+DENSITY_FORCE_INLINE void density_teleport_put(density_teleport restrict *teleport, density_memory_location *data) {
+    teleport->memory = data;
 }
 
-DENSITY_FORCE_INLINE void density_teleport_put(density_teleport restrict *teleport, density_memory_location *data) {
-
+DENSITY_FORCE_INLINE DENSITY_TELEPORT_STATE density_teleport_get(density_teleport restrict *teleport, uint_fast8_t bytes, density_memory_location restrict *out) {
+    switch (teleport->source) {
+        case DENSITY_TELEPORT_SOURCE_STAGING:
+            if (teleport->staging->available >= bytes) {
+                out->pointer = teleport->staging->pointer;
+                out->available = teleport->staging->available;
+                return DENSITY_TELEPORT_STATE_CONTINUE;
+            } else {
+                if (teleport->memory->available + teleport->staging->available >= bytes) {
+                    memcpy(teleport->staging->pointer + teleport->stagingPosition, teleport->memory->pointer, bytes - teleport->staging->available);
+                    teleport->stagingPosition += bytes - teleport->staging->available;
+                    out->pointer = teleport->staging->pointer;
+                    out->available = teleport->staging->available;
+                    return DENSITY_TELEPORT_STATE_CONTINUE;
+                } else {
+                    if (teleport->memory->available) {
+                        memcpy(teleport->staging->pointer + teleport->stagingPosition, teleport->memory->pointer, teleport->memory->available);
+                        teleport->stagingPosition += bytes - teleport->staging->available;
+                        return DENSITY_TELEPORT_STATE_STALE_ON_INPUT_BUFFER;
+                    } else {
+                        return DENSITY_TELEPORT_STATE_STALE_ON_INPUT_BUFFER;
+                    }
+                }
+            }
+        case DENSITY_TELEPORT_SOURCE_DIRECT_ACCESS:
+            if (teleport->memory->available >= bytes) {
+                out->pointer = teleport->memory->pointer;
+                out->available = teleport->memory->available;
+                return DENSITY_TELEPORT_STATE_CONTINUE;
+            } else {
+                if (teleport->memory->available) {
+                    teleport->source = DENSITY_TELEPORT_SOURCE_STAGING;
+                    memcpy(teleport->staging->pointer, teleport->memory->pointer, teleport->memory->available);
+                    teleport->stagingPosition += teleport->memory->available;
+                    return DENSITY_TELEPORT_STATE_STALE_ON_INPUT_BUFFER;
+                } else {
+                    return DENSITY_TELEPORT_STATE_STALE_ON_INPUT_BUFFER;
+                }
+            }
+    }
 }
