@@ -181,8 +181,8 @@ void density_byte_buffer_rewind(density_byte_buffer* byte_buffer);
  * @param input_size the size in bytes of input_buffer
  * @param output_buffer a buffer of bytes
  * @param output_size the size of output_buffer, must be at least DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE
- * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
- * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
+ * @param mem_alloc a pointer to a directMemoryLocation allocation function. If NULL, the standard malloc(size_t) is used.
+ * @param mem_free a pointer to a directMemoryLocation freeing function. If NULL, the standard free(void*) is used.
  */
 DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
@@ -238,14 +238,14 @@ DENSITY_STREAM_STATE density_stream_compress(density_stream *stream, const densi
 DENSITY_STREAM_STATE density_stream_decompress(density_stream *stream, const density_bool flush);
 
 /*
- * Call once processing is finished, to clear up the environment and release eventual allocated memory.
+ * Call once processing is finished, to clear up the environment and release eventual allocated directMemoryLocation.
  *
  * @param stream the stream
  */
 DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *stream);
 
 /*
- * Call once processing is finished, to clear up the environment and release eventual allocated memory.
+ * Call once processing is finished, to clear up the environment and release eventual allocated directMemoryLocation.
  *
  * @param stream the stream
  */
@@ -287,8 +287,8 @@ DENSITY_BUFFERS_STATE density_buffers_max_compressed_length(uint_fast64_t * resu
  * @param compression_mode the compression mode to use
  * @param output_type the output type to use (if unsure, DENSITY_ENCODE_OUTPUT_TYPE_DEFAULT), see the density_stream_compress documentation
  * @param block_type the block type to use (if unsure, DENSITY_BLOCK_TYPE_DEFAULT), see the density_stream_compress documentation
- * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
- * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
+ * @param mem_alloc a pointer to a directMemoryLocation allocation function. If NULL, the standard malloc(size_t) is used.
+ * @param mem_free a pointer to a directMemoryLocation freeing function. If NULL, the standard free(void*) is used.
  */
 DENSITY_BUFFERS_STATE density_buffers_compress(uint_fast64_t* total_written, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_ENCODE_OUTPUT_TYPE output_type, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
@@ -301,8 +301,8 @@ DENSITY_BUFFERS_STATE density_buffers_compress(uint_fast64_t* total_written, uin
  * @param in_size the size of the input buffer in bytes
  * @param out the output buffer
  * @param out_size the size of the output buffer in bytes
- * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
- * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
+ * @param mem_alloc a pointer to a directMemoryLocation allocation function. If NULL, the standard malloc(size_t) is used.
+ * @param mem_free a pointer to a directMemoryLocation freeing function. If NULL, the standard free(void*) is used.
  */
 DENSITY_BUFFERS_STATE density_buffers_decompress(uint_fast64_t * total_written, density_main_header* header, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 

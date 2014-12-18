@@ -35,35 +35,33 @@
 #include "globals.h"
 #include "density_api.h"
 
-#define DENSITY_TELEPORT_BUFFER_SIZE    256
+#define DENSITY_TELEPORT_BUFFER_SIZE    16384
+
+typedef enum {
+    DENSITY_TELEPORT_SOURCE_INDIRECT_ACCESS,
+    DENSITY_TELEPORT_SOURCE_DIRECT_ACCESS
+} DENSITY_TELEPORT_SOURCE;
 
 typedef struct {
     density_byte *pointer;
     uint_fast64_t available;
 } density_memory_location;
 
-typedef enum {
-    DENSITY_TELEPORT_SOURCE_STAGING,
-    DENSITY_TELEPORT_SOURCE_DIRECT_ACCESS
-} DENSITY_TELEPORT_SOURCE;
-
-typedef enum {
-    DENSITY_TELEPORT_STATE_STALE_ON_INPUT_BUFFER,
-    DENSITY_TELEPORT_STATE_STALE_ON_OUTPUT_BUFFER,
-    DENSITY_TELEPORT_STATE_CONTINUE
-} DENSITY_TELEPORT_STATE;
+typedef struct {
+    density_byte *pointer;
+    uint_fast64_t position;
+} density_staging_memory_location;
 
 typedef struct {
-    DENSITY_TELEPORT_STATE state;
     DENSITY_TELEPORT_SOURCE source;
-    density_memory_location *staging;
-    uint_fast64_t stagingPosition;
-    density_memory_location *memory;
+    density_staging_memory_location *stagingMemoryLocation;
+    density_memory_location *indirectMemoryLocation;
+    density_memory_location *directMemoryLocation;
 } density_teleport;
 
 void density_teleport_open(density_teleport *);
 
-DENSITY_TELEPORT_STATE density_teleport_get(density_teleport *, uint_fast8_t, density_memory_location *);
+density_memory_location *density_teleport_get(density_teleport *, uint_fast64_t);
 
 void density_teleport_put(density_teleport *, density_memory_location *data);
 
