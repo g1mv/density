@@ -32,6 +32,8 @@
 #ifndef DENSITY_TELEPORT_H
 #define DENSITY_TELEPORT_H
 
+#include <string.h>
+
 #include "globals.h"
 #include "density_api.h"
 

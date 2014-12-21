@@ -35,13 +35,11 @@
 
 #include <stdint.h>
 
-#include "byte_buffer.h"
-#include "main_header.h"
 #include "block.h"
-#include "metadata.h"
 #include "globals.h"
 #include "main_encode.h"
 #include "main_decode.h"
+#include "density_api.h"
 
 #define DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE                        (1 << 9)
 

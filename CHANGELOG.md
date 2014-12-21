@@ -4,7 +4,7 @@
 
 * Mandala kernel addition, replacing dual pass chameleon
 * Simplified, faster hash function
-* Fixed directMemoryLocation freeing issue during main encoding/decoding finish
+* Fixed memory freeing issue during main encoding/decoding finish
 * Implemented no footer encode output type
 * Namespace migration, kernel structure reorganization
 * Corrected copy mode problem

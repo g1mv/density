@@ -29,7 +29,6 @@
  * 16/12/14 17:12
  */
 
-#include <string.h>
 #include "teleport.h"
 
 DENSITY_FORCE_INLINE void density_teleport_open(density_teleport restrict *teleport) {
@@ -37,7 +36,7 @@ DENSITY_FORCE_INLINE void density_teleport_open(density_teleport restrict *telep
     teleport->stagingMemoryLocation = (density_staging_memory_location *) malloc(sizeof(density_staging_memory_location));
     teleport->stagingMemoryLocation->pointer = (density_byte *) malloc(DENSITY_TELEPORT_BUFFER_SIZE * sizeof(density_byte));
     teleport->indirectMemoryLocation = (density_memory_location *) malloc(sizeof(density_memory_location));
-    teleport->indirectMemoryLocation->pointer = teleport->stagingMemoryLocation->pointer;
+    //teleport->indirectMemoryLocation->pointer = teleport->stagingMemoryLocation->pointer;
 }
 
 DENSITY_FORCE_INLINE void density_teleport_close(density_teleport *teleport) {
@@ -46,7 +45,7 @@ DENSITY_FORCE_INLINE void density_teleport_close(density_teleport *teleport) {
     free(teleport->stagingMemoryLocation);
 }
 
-DENSITY_FORCE_INLINE void density_teleport_put(density_teleport restrict *teleport, density_memory_location *data) {
+DENSITY_FORCE_INLINE void density_teleport_put(density_teleport restrict *teleport, density_memory_location restrict *data) {
     teleport->directMemoryLocation = data;
 }
 
@@ -57,6 +56,7 @@ DENSITY_FORCE_INLINE density_memory_location *density_teleport_get(density_telep
             missingBytes = bytes - teleport->stagingMemoryLocation->position;
             if (teleport->directMemoryLocation->available >= missingBytes) {
                 memcpy(teleport->stagingMemoryLocation->pointer + teleport->stagingMemoryLocation->position, teleport->directMemoryLocation->pointer, missingBytes);
+                teleport->indirectMemoryLocation->pointer = teleport->stagingMemoryLocation->pointer;
                 teleport->indirectMemoryLocation->available = bytes;
                 teleport->source = DENSITY_TELEPORT_SOURCE_DIRECT_ACCESS;
                 return teleport->indirectMemoryLocation;
