@@ -26,19 +26,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 01/11/13 13:39
+ * 11/10/13 18:00
  */
 
-/*#include "globals.h"
+/*#ifndef DENSITY_BLOCK_H
+#define DENSITY_BLOCK_H
 
-uint8_t density_version_major() {
-    return DENSITY_MAJOR_VERSION;
-}
+#include <string.h>
 
-uint8_t density_version_minor() {
-    return DENSITY_MINOR_VERSION;
-}
+#define DENSITY_PREFERRED_COPY_BLOCK_SIZE                         (1 << 19)
 
-uint8_t density_version_revision() {
-    return DENSITY_REVISION;
-}*/
+typedef enum {
+    DENSITY_BLOCK_MODE_COPY = 0,
+    DENSITY_BLOCK_MODE_KERNEL = 1
+} DENSITY_BLOCK_MODE;
+
+#endif*/

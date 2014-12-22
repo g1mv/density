@@ -26,19 +26,48 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 01/11/13 13:39
+ * 11/10/13 17:56
  */
 
-/*#include "globals.h"
+DENSITY_FORCE_INLINE uint_fast32_t
+density_main_header_read(density_memory_location
+*restrict in,
+density_main_header *restrict header
+) {
+density_byte *pointer = in->pointer;
+header->version[0] = *(pointer);
+header->version[1] = *(pointer + 1);
+header->version[2] = *(pointer + 2);
+header->
+compressionMode = *(pointer + 3);
+header->
+blockType = *(pointer + 4);
+header->
+parameters = *(density_main_header_parameters *) (pointer + 6);
 
-uint8_t density_version_major() {
-    return DENSITY_MAJOR_VERSION;
+in->pointer += sizeof(density_main_header);
+in->available_bytes -= sizeof(density_main_header);
+return sizeof(density_main_header);
 }
 
-uint8_t density_version_minor() {
-    return DENSITY_MINOR_VERSION;
-}
+DENSITY_FORCE_INLINE uint_fast32_t
+density_main_header_write(density_memory_location
+*restrict out,
+const DENSITY_COMPRESSION_MODE compressionMode,
+const DENSITY_BLOCK_TYPE blockType,
+const density_main_header_parameters parameters
+) {
+density_byte *pointer = out->pointer;
+*(pointer) = DENSITY_MAJOR_VERSION;
+*(pointer + 1) = DENSITY_MINOR_VERSION;
+*(pointer + 2) = DENSITY_REVISION;
+*(pointer + 3) =
+compressionMode;
+*(pointer + 4) =
+blockType;
+*(uint64_t * )(pointer + 6) = DENSITY_LITTLE_ENDIAN_64(parameters.as_uint64_t);
 
-uint8_t density_version_revision() {
-    return DENSITY_REVISION;
-}*/
+out->pointer += sizeof(density_main_header);
+out->available_bytes -= sizeof(density_main_header);
+return sizeof(density_main_header);
+}

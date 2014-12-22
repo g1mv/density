@@ -26,19 +26,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 01/11/13 13:39
+ * 18/10/13 23:58
  */
 
-/*#include "globals.h"
+/*#include "block_footer.h"
 
-uint8_t density_version_major() {
-    return DENSITY_MAJOR_VERSION;
+DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_read(density_memory_location *restrict in, density_block_footer *restrict blockFooter) {
+    blockFooter->hashsum = *(uint32_t *) in->pointer;
+
+    in->pointer += sizeof(density_block_footer);
+    in->available_bytes -= sizeof(density_block_footer);
+
+    return sizeof(density_block_footer);
 }
 
-uint8_t density_version_minor() {
-    return DENSITY_MINOR_VERSION;
-}
+DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_write(density_memory_location *out, const uint_fast32_t hashsum) {
+    *(uint32_t *) out->pointer = DENSITY_LITTLE_ENDIAN_32(hashsum);
 
-uint8_t density_version_revision() {
-    return DENSITY_REVISION;
+    out->pointer += sizeof(density_block_footer);
+    out->available_bytes -= sizeof(density_block_footer);
+
+    return sizeof(density_block_footer);
 }*/

@@ -46,7 +46,7 @@ typedef enum {
 
 typedef struct {
     density_byte *pointer;
-    uint_fast64_t available;
+    uint_fast64_t available_bytes;
 } density_memory_location;
 
 typedef struct {
@@ -61,12 +61,12 @@ typedef struct {
     density_memory_location *directMemoryLocation;
 } density_teleport;
 
-void density_teleport_open(density_teleport *);
+density_teleport *density_teleport_allocate(uint_fast64_t);
 
 density_memory_location *density_teleport_get(density_teleport *, uint_fast64_t);
 
 void density_teleport_put(density_teleport *, density_memory_location *data);
 
-void density_teleport_close(density_teleport *);
+void density_teleport_free(density_teleport *);
 
 #endif

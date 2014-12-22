@@ -26,19 +26,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 01/11/13 13:39
+ * 18/10/13 23:53
  */
 
-/*#include "globals.h"
+/*#include "block_header.h"
 
-uint8_t density_version_major() {
-    return DENSITY_MAJOR_VERSION;
+DENSITY_FORCE_INLINE uint_fast32_t density_block_header_read(density_memory_location *restrict in, density_block_header *restrict blockHeader) {
+    in->pointer += sizeof(density_block_header);
+    in->available_bytes -= sizeof(density_block_header);
+
+    return sizeof(density_block_header);
 }
 
-uint8_t density_version_minor() {
-    return DENSITY_MINOR_VERSION;
-}
+DENSITY_FORCE_INLINE uint_fast32_t density_block_header_write(density_memory_location *restrict out) {
+    out->pointer += sizeof(density_block_header);
+    out->available_bytes -= sizeof(density_block_header);
 
-uint8_t density_version_revision() {
-    return DENSITY_REVISION;
+    return sizeof(density_block_header);
 }*/

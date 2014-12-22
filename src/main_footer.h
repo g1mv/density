@@ -26,52 +26,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 18/10/13 22:34
+ * 18/10/13 22:30
  */
 
-#ifndef DENSITY_API_STREAM_H
-#define DENSITY_API_STREAM_H
+#ifndef DENSITY_FOOTER_H
+#define DENSITY_FOOTER_H
 
-#include <stdint.h>
-
-#include "block.h"
 #include "globals.h"
-#include "main_encode.h"
-#include "main_decode.h"
 #include "density_api.h"
-
-#define DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE                        (1 << 9)
-
-typedef enum {
-    DENSITY_STREAM_PROCESS_PREPARED,
-    DENSITY_STREAM_PROCESS_COMPRESSION_INITED,
-    DENSITY_STREAM_PROCESS_COMPRESSION_DATA_FINISHED,
-    DENSITY_STREAM_PROCESS_COMPRESSION_FINISHED,
-    DENSITY_STREAM_PROCESS_DECOMPRESSION_INITED,
-    DENSITY_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED,
-    DENSITY_STREAM_PROCESS_DECOMPRESSION_FINISHED,
-} DENSITY_STREAM_PROCESS;
+#include "teleport.h"
 
 typedef struct {
-    DENSITY_STREAM_PROCESS process;
+} density_main_footer;
 
-    void *(*mem_alloc)(size_t);
-    void (*mem_free)(void *);
+uint_fast32_t density_main_footer_read(density_memory_location *, density_main_footer *);
 
-    density_encode_state internal_encode_state;
-    density_decode_state internal_decode_state;
-} density_stream_state;
-
-DENSITY_STREAM_STATE density_stream_prepare(density_stream *, uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
-
-DENSITY_STREAM_STATE density_stream_compress_init(density_stream *, const DENSITY_COMPRESSION_MODE, const DENSITY_ENCODE_OUTPUT_TYPE, const DENSITY_BLOCK_TYPE);
-DENSITY_STREAM_STATE density_stream_compress(density_stream *, const density_bool);
-DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *);
-
-DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *);
-DENSITY_STREAM_STATE density_stream_decompress(density_stream *, const density_bool);
-DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *);
-
-DENSITY_STREAM_STATE density_stream_decompress_utilities_get_header(density_stream*, density_main_header*);
+uint_fast32_t density_main_footer_write(density_memory_location *);
 
 #endif

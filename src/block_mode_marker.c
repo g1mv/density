@@ -26,19 +26,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 01/11/13 13:39
+ * 19/10/13 00:01
  */
 
-/*#include "globals.h"
+/*#include "block_mode_marker.h"
 
-uint8_t density_version_major() {
-    return DENSITY_MAJOR_VERSION;
+DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_read(density_memory_location *restrict in, density_mode_marker *restrict modeMarker) {
+    modeMarker->activeBlockMode = *(in->pointer);
+
+    in->pointer += sizeof(density_mode_marker);
+    in->available_bytes -= sizeof(density_mode_marker);
+
+    return sizeof(density_mode_marker);
 }
 
-uint8_t density_version_minor() {
-    return DENSITY_MINOR_VERSION;
-}
+DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_write(density_memory_location *out, const DENSITY_BLOCK_TYPE mode) {
+    *(out->pointer) = (density_byte) mode;
+    *(out->pointer + 1) = 0x0;
 
-uint8_t density_version_revision() {
-    return DENSITY_REVISION;
+    out->pointer += sizeof(density_mode_marker);
+    out->available_bytes -= sizeof(density_mode_marker);
+
+    return sizeof(density_mode_marker);
 }*/

@@ -1,6 +1,5 @@
 /*
  * Centaurean Density
- * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
  * All rights reserved.

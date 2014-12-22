@@ -1,6 +1,5 @@
 /*
  * Centaurean Density
- * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
  * All rights reserved.
@@ -29,8 +28,6 @@
  *
  * 18/10/13 22:36
  */
-
-#include "stream.h"
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream *restrict stream, uint8_t *restrict in, const uint_fast64_t availableIn, uint8_t *restrict out, const uint_fast64_t availableOut, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
     density_byte_buffer_encapsulate(&stream->in, in, availableIn);

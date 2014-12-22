@@ -26,19 +26,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 01/11/13 13:39
+ * 11/10/13 02:06
  */
 
-/*#include "globals.h"
+#ifndef DENSITY_FILE_HEADER_H
+#define DENSITY_FILE_HEADER_H
 
-uint8_t density_version_major() {
-    return DENSITY_MAJOR_VERSION;
-}
+#include <stdio.h>
+#include <time.h>
+#include <utime.h>
 
-uint8_t density_version_minor() {
-    return DENSITY_MINOR_VERSION;
-}
+#include "globals.h"
+#include "block.h"
+#include "density_api.h"
+#include "teleport.h"
 
-uint8_t density_version_revision() {
-    return DENSITY_REVISION;
-}*/
+uint_fast32_t density_main_header_read(density_memory_location *, density_main_header *);
+
+uint_fast32_t density_main_header_write(density_memory_location *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters);
+
+#endif

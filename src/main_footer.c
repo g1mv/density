@@ -26,19 +26,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 01/11/13 13:39
+ * 18/10/13 22:30
  */
 
-/*#include "globals.h"
+DENSITY_FORCE_INLINE uint_fast32_t
+density_main_footer_read(density_memory_location
+*restrict in,
+density_main_footer *restrict footer
+) {
+in->pointer += sizeof(density_main_footer);
+in->available_bytes -= sizeof(density_main_footer);
 
-uint8_t density_version_major() {
-    return DENSITY_MAJOR_VERSION;
+return sizeof(density_main_footer);
 }
 
-uint8_t density_version_minor() {
-    return DENSITY_MINOR_VERSION;
-}
+DENSITY_FORCE_INLINE uint_fast32_t
+density_main_footer_write(density_memory_location
+*out) {
+out->pointer += sizeof(density_main_footer);
+out->available_bytes -= sizeof(density_main_footer);
 
-uint8_t density_version_revision() {
-    return DENSITY_REVISION;
-}*/
+return sizeof(density_main_footer);
+}

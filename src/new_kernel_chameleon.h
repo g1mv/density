@@ -26,19 +26,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 01/11/13 13:39
+ * 24/10/13 11:57
+ *
+ * -------------------
+ * Chameleon algorithm
+ * -------------------
+ *
+ * Author(s)
+ * Guillaume Voirin (https://github.com/gpnuma)
+ *
+ * Description
+ * Hash based superfast kernel
  */
 
-/*#include "globals.h"
+#ifndef DENSITY_CHAMELEON_H
+#define DENSITY_CHAMELEON_H
 
-uint8_t density_version_major() {
-    return DENSITY_MAJOR_VERSION;
-}
+#include "globals.h"
 
-uint8_t density_version_minor() {
-    return DENSITY_MINOR_VERSION;
-}
+#define DENSITY_CHAMELEON_HASH_BITS                                         16
+#define DENSITY_CHAMELEON_HASH_MULTIPLIER                                   (uint32_t)2641295638lu
 
-uint8_t density_version_revision() {
-    return DENSITY_REVISION;
-}*/
+#define DENSITY_CHAMELEON_HASH_ALGORITHM(hash32, value32)                   hash32 = value32 * DENSITY_CHAMELEON_HASH_MULTIPLIER;\
+                                                                            hash32 = (hash32 >> (32 - DENSITY_CHAMELEON_HASH_BITS));
+
+typedef uint64_t density_chameleon_signature;
+
+#endif

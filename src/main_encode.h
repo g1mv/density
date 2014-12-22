@@ -26,52 +26,56 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 18/10/13 22:34
+ * 18/10/13 23:30
  */
 
-#ifndef DENSITY_API_STREAM_H
-#define DENSITY_API_STREAM_H
+#ifndef DENSITY_MAIN_ENCODE_H
+#define DENSITY_MAIN_ENCODE_H
 
-#include <stdint.h>
+#include <string.h>
 
-#include "block.h"
-#include "globals.h"
-#include "main_encode.h"
-#include "main_decode.h"
+#include "block_footer.h"
+#include "block_header.h"
+#include "main_header.h"
+#include "main_footer.h"
+#include "block_mode_marker.h"
+#include "block_encode.h"
+#include "kernel_chameleon_encode.h"
 #include "density_api.h"
 
-#define DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE                        (1 << 9)
+typedef enum {
+    DENSITY_ENCODE_STATE_READY = 0,
+    DENSITY_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER,
+    DENSITY_ENCODE_STATE_STALL_ON_INPUT_BUFFER,
+    DENSITY_ENCODE_STATE_ERROR
+} DENSITY_ENCODE_STATE;
 
 typedef enum {
-    DENSITY_STREAM_PROCESS_PREPARED,
-    DENSITY_STREAM_PROCESS_COMPRESSION_INITED,
-    DENSITY_STREAM_PROCESS_COMPRESSION_DATA_FINISHED,
-    DENSITY_STREAM_PROCESS_COMPRESSION_FINISHED,
-    DENSITY_STREAM_PROCESS_DECOMPRESSION_INITED,
-    DENSITY_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED,
-    DENSITY_STREAM_PROCESS_DECOMPRESSION_FINISHED,
-} DENSITY_STREAM_PROCESS;
+    DENSITY_ENCODE_PROCESS_WRITE_BLOCKS,
+    DENSITY_ENCODE_PROCESS_WRITE_FOOTER,
+    DENSITY_ENCODE_PROCESS_FINISHED
+} DENSITY_ENCODE_PROCESS;
 
+#pragma pack(push)
+#pragma pack(4)
 typedef struct {
-    DENSITY_STREAM_PROCESS process;
+    DENSITY_ENCODE_PROCESS process;
+    DENSITY_COMPRESSION_MODE compressionMode;
+    DENSITY_BLOCK_TYPE blockType;
+    DENSITY_ENCODE_OUTPUT_TYPE encodeOutputType;
+    const struct stat *fileAttributes;
 
-    void *(*mem_alloc)(size_t);
-    void (*mem_free)(void *);
+    uint_fast64_t totalRead;
+    uint_fast64_t totalWritten;
 
-    density_encode_state internal_encode_state;
-    density_decode_state internal_decode_state;
-} density_stream_state;
+    density_block_encode_state blockEncodeState;
+} density_encode_state;
+#pragma pack(pop)
 
-DENSITY_STREAM_STATE density_stream_prepare(density_stream *, uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
+DENSITY_ENCODE_STATE density_encode_init(density_memory_location *, density_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_ENCODE_OUTPUT_TYPE, const DENSITY_BLOCK_TYPE);
 
-DENSITY_STREAM_STATE density_stream_compress_init(density_stream *, const DENSITY_COMPRESSION_MODE, const DENSITY_ENCODE_OUTPUT_TYPE, const DENSITY_BLOCK_TYPE);
-DENSITY_STREAM_STATE density_stream_compress(density_stream *, const density_bool);
-DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *);
+DENSITY_ENCODE_STATE density_encode_process(density_memory_location *, density_memory_location *, density_encode_state *, const density_bool);
 
-DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *);
-DENSITY_STREAM_STATE density_stream_decompress(density_stream *, const density_bool);
-DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *);
-
-DENSITY_STREAM_STATE density_stream_decompress_utilities_get_header(density_stream*, density_main_header*);
+DENSITY_ENCODE_STATE density_encode_finish(density_memory_location *, density_encode_state *);
 
 #endif
