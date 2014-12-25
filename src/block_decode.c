@@ -29,6 +29,8 @@
  * 19/10/13 00:20
  */
 
+#include "block_decode.h"
+
 DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_header(density_memory_location *restrict in, density_block_decode_state *restrict state) {
     if (sizeof(density_block_header) > in->available_bytes)
         return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;

@@ -172,11 +172,11 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(d
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_process(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state, const density_bool flush) {
-    DENSITY_KERNEL_ENCODE_STATE returnState;
-    uint32_t hash;
-    uint64_t chunk;
-    density_byte *pointerOutBefore;
-    density_memory_location *readMemoryLocation;
+    //DENSITY_KERNEL_ENCODE_STATE returnState;
+    //uint32_t hash;
+    //uint64_t chunk;
+    //density_byte *pointerOutBefore;
+    //density_memory_location *readMemoryLocation;
     //const uint_fast64_t limit = in->available_bytes % DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE;
 
     switch (state->process) {
