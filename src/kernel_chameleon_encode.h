@@ -39,7 +39,7 @@
  * Hash based superfast kernel
  */
 
-/*#ifndef DENSITY_CHAMELEON_ENCODE_H
+#ifndef DENSITY_CHAMELEON_ENCODE_H
 #define DENSITY_CHAMELEON_ENCODE_H
 
 #include "kernel_chameleon_dictionary.h"
@@ -49,6 +49,7 @@
 #include "density_api.h"
 #include "globals.h"
 #include "teleport.h"
+#include "memory_location.h"
 
 #define DENSITY_CHAMELEON_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (sizeof(density_chameleon_signature) + sizeof(uint32_t) * bitsizeof(density_chameleon_signature))
 #define DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE                    (8 * sizeof(uint64_t))
@@ -62,6 +63,7 @@ typedef enum {
 #pragma pack(4)
 typedef struct {
     DENSITY_CHAMELEON_ENCODE_PROCESS process;
+    density_teleport_input *teleport;
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
     uint_fast64_t resetCycle;
@@ -82,4 +84,4 @@ DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_process(density_memory_loca
 
 DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_chameleon_encode_state *);
 
-#endif*/
+#endif

@@ -47,7 +47,8 @@
 #elif defined(__clang__)
 #define DENSITY_FORCE_INLINE inline __attribute__((always_inline))
 #else
-#warning Impossible to force functions inlining. Expect performance issues.
+#define DENSITY_FORCE_INLINE inline __attribute__((always_inline))
+//#warning Impossible to force functions inlining. Expect performance issues.
 #endif
 
 //#define DENSITY_FORCE_INLINE __inline__ __attribute__((always_inline))
@@ -78,6 +79,8 @@
 
 #define density_likely(x)                         __builtin_expect(!!(x), 1)
 #define density_unlikely(x)                       __builtin_expect(!!(x), 0)
+
+#define bitsizeof(x) (8 * sizeof(x))
 
 #define DENSITY_MAJOR_VERSION               1
 #define DENSITY_MINOR_VERSION               0

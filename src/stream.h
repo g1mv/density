@@ -29,8 +29,8 @@
  * 18/10/13 22:34
  */
 
-#ifndef DENSITY_API_STREAM_H
-#define DENSITY_API_STREAM_H
+#ifndef DENSITY_STREAM_H
+#define DENSITY_STREAM_H
 
 #include <stdint.h>
 
@@ -39,6 +39,7 @@
 #include "main_encode.h"
 #include "main_decode.h"
 #include "density_api.h"
+#include "memory_location.h"
 
 #define DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE                        (1 << 9)
 

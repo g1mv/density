@@ -29,8 +29,6 @@
  * 18/10/13 00:03
  */
 
-/*#include "block_encode.h"
-
 DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_block_header(density_memory_location* restrict out, density_block_encode_state *restrict state) {
     if (sizeof(density_block_header) > out->available_bytes)
         return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
@@ -249,4 +247,4 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
     state->kernelEncodeFinish(state->kernelEncodeState);
 
     return DENSITY_BLOCK_ENCODE_STATE_READY;
-}*/
+}

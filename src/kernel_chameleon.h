@@ -43,6 +43,9 @@
 #define DENSITY_CHAMELEON_H
 
 #include "globals.h"
+#include "teleport_input.h"
+#include "density_api.h"
+#include "memory_location.h"
 
 #define DENSITY_CHAMELEON_PREFERRED_BLOCK_SIGNATURES_SHIFT                  11
 #define DENSITY_CHAMELEON_PREFERRED_BLOCK_SIGNATURES                        (1 << DENSITY_CHAMELEON_PREFERRED_BLOCK_SIGNATURES_SHIFT)

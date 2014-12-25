@@ -26,53 +26,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/10/13 12:01
- *
- * -------------------
- * Chameleon algorithm
- * -------------------
- *
- * Author(s)
- * Guillaume Voirin (https://github.com/gpnuma)
- *
- * Description
- * Hash based superfast kernel
+ * 23/12/14 17:09
  */
 
-#ifndef DENSITY_CHAMELEON_ENCODE_H
-#define DENSITY_CHAMELEON_ENCODE_H
+#ifndef DENSITY_TELEPORT_OUTPUT_H
+#define DENSITY_TELEPORT_OUTPUT_H
 
-#define DENSITY_CHAMELEON_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (sizeof(density_chameleon_signature) + sizeof(uint32_t) * bitsizeof(density_chameleon_signature))
-#define DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE                    (8 * sizeof(uint64_t))
-#define DENSITY_CHAMELEON_ENCODE_GRANULARITY                          256
+#include "teleport.h"
 
-typedef enum {
-    DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
-    DENSITY_CHAMELEON_ENCODE_PROCESS_COMPRESS,
-} DENSITY_CHAMELEON_ENCODE_PROCESS;
-
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    DENSITY_CHAMELEON_ENCODE_PROCESS process;
-
-#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
-    uint_fast64_t resetCycle;
-#endif
-
-    uint_fast32_t shift;
-    density_chameleon_signature *signature;
-    uint_fast32_t signaturesCount;
-    uint_fast8_t efficiencyChecked;
-
-    density_chameleon_dictionary dictionary;
-} density_chameleon_encode_state;
-#pragma pack(pop)
-
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *);
-
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_process(density_memory_location *, density_memory_location *, density_chameleon_encode_state *, const density_bool);
-
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_chameleon_encode_state *);
+density_memory_location *density_teleport_input_access(density_memory_location *, uint_fast64_t);
 
 #endif

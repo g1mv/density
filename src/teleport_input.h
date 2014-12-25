@@ -26,30 +26,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/10/13 11:57
- *
- * -------------------
- * Chameleon algorithm
- * -------------------
- *
- * Author(s)
- * Guillaume Voirin (https://github.com/gpnuma)
- *
- * Description
- * Hash based superfast kernel
+ * 23/12/14 16:56
  */
 
-#ifndef DENSITY_CHAMELEON_H
-#define DENSITY_CHAMELEON_H
+#ifndef DENSITY_TELEPORT_INPUT_H
+#define DENSITY_TELEPORT_INPUT_H
 
-#include "globals.h"
+#include "teleport.h"
 
-#define DENSITY_CHAMELEON_HASH_BITS                                         16
-#define DENSITY_CHAMELEON_HASH_MULTIPLIER                                   (uint32_t)2641295638lu
+#define DENSITY_TELEPORT_INPUT_BUFFER_SIZE    16384
 
-#define DENSITY_CHAMELEON_HASH_ALGORITHM(hash32, value32)                   hash32 = value32 * DENSITY_CHAMELEON_HASH_MULTIPLIER;\
-                                                                            hash32 = (hash32 >> (32 - DENSITY_CHAMELEON_HASH_BITS));
+typedef enum {
+    DENSITY_TELEPORT_INPUT_SOURCE_INDIRECT_ACCESS,
+    DENSITY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS
+} DENSITY_TELEPORT_INPUT_SOURCE;
 
-typedef uint64_t density_chameleon_signature;
+typedef struct {
+    density_byte *pointer;
+    uint_fast64_t position;
+} density_staging_memory_location;
+
+typedef struct {
+    DENSITY_TELEPORT_INPUT_SOURCE source;
+    density_staging_memory_location *stagingMemoryLocation;
+    density_memory_location *indirectMemoryLocation;
+    density_memory_location *directMemoryLocation;
+} density_teleport_input;
+
+density_teleport_input *density_teleport_input_allocate(uint_fast64_t);
+
+void density_teleport_input_store(density_teleport_input *, density_memory_location *data);
+
+density_memory_location *density_teleport_input_access(density_teleport_input *, uint_fast64_t);
+
+void density_teleport_input_free(density_teleport_input *);
 
 #endif

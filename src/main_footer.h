@@ -35,6 +35,7 @@
 #include "globals.h"
 #include "density_api.h"
 #include "teleport.h"
+#include "memory_location.h"
 
 typedef struct {
 } density_main_footer;

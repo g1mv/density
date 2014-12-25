@@ -29,7 +29,7 @@
  * 19/10/13 00:02
  */
 
-/*#ifndef DENSITY_BLOCK_ENCODE_H
+#ifndef DENSITY_BLOCK_ENCODE_H
 #define DENSITY_BLOCK_ENCODE_H
 
 #include "block_footer.h"
@@ -38,6 +38,7 @@
 #include "main_footer.h"
 #include "block_mode_marker.h"
 #include "kernel_encode.h"
+#include "memory_location.h"
 
 typedef enum {
     DENSITY_BLOCK_ENCODE_STATE_READY = 0,
@@ -84,4 +85,4 @@ DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state 
 DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(density_memory_location*, density_memory_location*, density_block_encode_state *, const density_bool);
 DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(density_block_encode_state *);
 
-#endif*/
+#endif

@@ -30,8 +30,8 @@
  */
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream *restrict stream, uint8_t *restrict in, const uint_fast64_t availableIn, uint8_t *restrict out, const uint_fast64_t availableOut, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
-    density_byte_buffer_encapsulate(&stream->in, in, availableIn);
-    density_byte_buffer_encapsulate(&stream->out, out, availableOut);
+    density_memory_location_encapsulate(&stream->in, in, availableIn);
+    density_memory_location_encapsulate(&stream->out, out, availableOut);
 
     if (mem_alloc == NULL) {
         stream->internal_state = (density_stream_state *) malloc(sizeof(density_stream_state));
@@ -52,7 +52,7 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream 
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_check_conformity(density_stream *stream) {
-    if (stream->out.size < DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE)
+    if (stream->out.available_bytes < DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE)
         return DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL;
 
     return DENSITY_STREAM_STATE_READY;
@@ -96,8 +96,8 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress(density_stream
     if (streamState)
         return streamState;
 
-    if (!flush) if (stream->in.size & 0x1F)
-        return DENSITY_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32;
+    /*if (!flush) if (stream->in.available_bytes & 0x1F)
+        return DENSITY_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32;*/
 
     encodeState = density_encode_process(&stream->in, &stream->out, &((density_stream_state *) stream->internal_state)->internal_encode_state, flush);
     switch (encodeState) {

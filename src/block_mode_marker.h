@@ -29,13 +29,14 @@
  * 18/10/13 23:59
  */
 
-/*#ifndef DENSITY_BLOCK_MODE_MARKER_H
+#ifndef DENSITY_BLOCK_MODE_MARKER_H
 #define DENSITY_BLOCK_MODE_MARKER_H
 
 #include "globals.h"
 #include "block.h"
 #include "density_api.h"
 #include "teleport.h"
+#include "memory_location.h"
 
 #pragma pack(push)
 #pragma pack(4)
@@ -48,4 +49,4 @@ typedef struct {
 uint_fast32_t density_block_mode_marker_read(density_memory_location*, density_mode_marker *);
 uint_fast32_t density_block_mode_marker_write(density_memory_location*, const DENSITY_BLOCK_TYPE);
 
-#endif*/
+#endif

@@ -9,7 +9,7 @@ DENSITY features two APIs to enable quick integration in any project.
 
 Benchmark
 ---------
-<a href=http://quixdb.github.io/squash/benchmarks/core-i3-2105.html>Click here for a benchmark</a> of DENSITY's fastest mode compared to other libraries, on an Intel® Core™ i3-2105	(x86 64), Asus P8H61-H motherboard with Fedora 19. It is possible to run yours using <a href=https://github.com/quixdb/squash>this project</a>.
+<a href=http://quixdb.github.io/squash/benchmarks/core-i3-2105.html>Click here for a benchmark</a> of DENSITY's fastest mode compared to other libraries, on an Intel® Core™ i3-2105 (x86 64), Asus P8H61-H motherboard with Fedora 19. It is possible to run yours using <a href=https://github.com/quixdb/squash>this project</a>.
 
 API
 ---

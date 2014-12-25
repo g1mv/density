@@ -29,8 +29,6 @@
  * 18/10/13 23:58
  */
 
-/*#include "block_footer.h"
-
 DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_read(density_memory_location *restrict in, density_block_footer *restrict blockFooter) {
     blockFooter->hashsum = *(uint32_t *) in->pointer;
 
@@ -47,4 +45,4 @@ DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_write(density_memory_loc
     out->available_bytes -= sizeof(density_block_footer);
 
     return sizeof(density_block_footer);
-}*/
+}

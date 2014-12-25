@@ -32,8 +32,7 @@
 #ifndef DENSITY_API_H
 #define DENSITY_API_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "density_api_data_structures.h"
 
 
 
@@ -47,84 +46,6 @@
 #define DENSITY_NO                                                  0
 
 #define DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT         DENSITY_NO          // No disables compression dictionary resets and improves compression ratio
-
-
-
-/***********************************************************************************************************************
- *                                                                                                                     *
- * Structures useful for the API                                                                                       *
- *                                                                                                                     *
- ***********************************************************************************************************************/
-
-
-typedef uint8_t density_byte;
-typedef bool density_bool;
-typedef struct {
-    union {
-        uint64_t as_uint64_t;
-        density_byte as_bytes[8];
-    };
-} density_main_header_parameters;
-
-typedef enum {
-    DENSITY_COMPRESSION_MODE_COPY = 0,
-    DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM = 1,
-    DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM = 2,
-} DENSITY_COMPRESSION_MODE;
-
-typedef enum {
-    DENSITY_ENCODE_OUTPUT_TYPE_DEFAULT = 0,
-    DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER = 1,
-    DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_FOOTER = 2,
-    DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER_NOR_FOOTER = 3
-} DENSITY_ENCODE_OUTPUT_TYPE;
-
-typedef enum {
-    DENSITY_BLOCK_TYPE_DEFAULT = 0,
-    DENSITY_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK = 1
-} DENSITY_BLOCK_TYPE;
-
-typedef enum {
-    DENSITY_BUFFERS_STATE_OK = 0,                                       // ready to continue
-    DENSITY_BUFFERS_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                // output buffer size is too small
-    DENSITY_BUFFERS_STATE_ERROR_INVALID_STATE                           // error during processing
-} DENSITY_BUFFERS_STATE;
-
-typedef enum {
-    DENSITY_STREAM_STATE_READY = 0,                                     // ready to continue
-    DENSITY_STREAM_STATE_STALL_ON_INPUT_BUFFER,                         // input buffer has been completely read
-    DENSITY_STREAM_STATE_STALL_ON_OUTPUT_BUFFER,                        // there is not enought space left in the output buffer to continue
-    DENSITY_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32,    // size of input buffer is not a multiple of 32
-    DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // output buffer size is too small
-    DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE                   // error during processing
-} DENSITY_STREAM_STATE;
-
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    density_byte version[3];
-    density_byte compressionMode;
-    density_byte blockType;
-    density_byte reserved[3];
-    density_main_header_parameters parameters;
-} density_main_header;
-
-typedef struct {
-    density_byte* pointer;
-    uint_fast64_t position;
-    uint_fast64_t size;
-} density_byte_buffer;
-
-typedef struct {
-    density_byte_buffer in;
-    uint_fast64_t* in_total_read;
-
-    density_byte_buffer out;
-    uint_fast64_t* out_total_written;
-
-    void* internal_state;
-} density_stream;
-#pragma pack(pop)
 
 
 
@@ -162,7 +83,7 @@ uint8_t density_version_revision(void);
  *
  * @param byte_buffer the Density byte buffer to rewind (its available is set to zero)
  */
-void density_byte_buffer_rewind(density_byte_buffer* byte_buffer);
+//void density_byte_buffer_rewind(density_byte_buffer* byte_buffer);
 
 
 
@@ -273,7 +194,7 @@ DENSITY_STREAM_STATE density_stream_decompress_utilities_get_header(density_stre
  * @param in_length, the length of the input data to compress
  * @param compression_mode the compression mode to be used
  */
-DENSITY_BUFFERS_STATE density_buffers_max_compressed_length(uint_fast64_t * result, uint_fast64_t in_length, const DENSITY_COMPRESSION_MODE compression_mode);
+//DENSITY_BUFFERS_STATE density_buffers_max_compressed_length(uint_fast64_t * result, uint_fast64_t in_length, const DENSITY_COMPRESSION_MODE compression_mode);
 
 /*
  * Buffers compression function
@@ -289,7 +210,7 @@ DENSITY_BUFFERS_STATE density_buffers_max_compressed_length(uint_fast64_t * resu
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-DENSITY_BUFFERS_STATE density_buffers_compress(uint_fast64_t* total_written, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_ENCODE_OUTPUT_TYPE output_type, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+//DENSITY_BUFFERS_STATE density_buffers_compress(uint_fast64_t* total_written, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_ENCODE_OUTPUT_TYPE output_type, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 /*
  * Buffers decompression function
@@ -303,6 +224,6 @@ DENSITY_BUFFERS_STATE density_buffers_compress(uint_fast64_t* total_written, uin
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-DENSITY_BUFFERS_STATE density_buffers_decompress(uint_fast64_t * total_written, density_main_header* header, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+//DENSITY_BUFFERS_STATE density_buffers_decompress(uint_fast64_t * total_written, density_main_header* header, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 #endif

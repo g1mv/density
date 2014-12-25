@@ -29,7 +29,7 @@
  * 11/10/13 18:00
  */
 
-/*#ifndef DENSITY_BLOCK_H
+#ifndef DENSITY_BLOCK_H
 #define DENSITY_BLOCK_H
 
 #include <string.h>
@@ -41,4 +41,4 @@ typedef enum {
     DENSITY_BLOCK_MODE_KERNEL = 1
 } DENSITY_BLOCK_MODE;
 
-#endif*/
+#endif

@@ -29,8 +29,6 @@
  * 19/10/13 00:01
  */
 
-/*#include "block_mode_marker.h"
-
 DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_read(density_memory_location *restrict in, density_mode_marker *restrict modeMarker) {
     modeMarker->activeBlockMode = *(in->pointer);
 
@@ -48,4 +46,4 @@ DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_write(density_memor
     out->available_bytes -= sizeof(density_mode_marker);
 
     return sizeof(density_mode_marker);
-}*/
+}

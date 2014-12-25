@@ -40,6 +40,15 @@
 #include "block_decode.h"
 #include "kernel_chameleon_decode.h"
 #include "density_api.h"
+#include "block_footer.h"
+#include "block_header.h"
+#include "main_header.h"
+#include "main_footer.h"
+#include "block_mode_marker.h"
+#include "block_encode.h"
+#include "kernel_chameleon_encode.h"
+#include "density_api.h"
+#include "memory_location.h"
 
 typedef enum {
     DENSITY_DECODE_STATE_READY = 0,

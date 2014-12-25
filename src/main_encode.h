@@ -34,6 +34,7 @@
 
 #include <string.h>
 
+#include "memory_location.h"
 #include "block_footer.h"
 #include "block_header.h"
 #include "main_header.h"

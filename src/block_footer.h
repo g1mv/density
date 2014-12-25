@@ -29,12 +29,13 @@
  * 18/10/13 23:57
  */
 
-/*#ifndef DENSITY_BLOCK_FOOTER_H
+#ifndef DENSITY_BLOCK_FOOTER_H
 #define DENSITY_BLOCK_FOOTER_H
 
 #include "globals.h"
 #include "density_api.h"
 #include "teleport.h"
+#include "memory_location.h"
 
 #pragma pack(push)
 #pragma pack(4)
@@ -46,4 +47,4 @@ typedef struct {
 uint_fast32_t density_block_footer_read(density_memory_location*, density_block_footer*);
 uint_fast32_t density_block_footer_write(density_memory_location*, const uint_fast32_t);
 
-#endif*/
+#endif
