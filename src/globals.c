@@ -29,6 +29,8 @@
  * 01/11/13 13:39
  */
 
+#include "globals.h"
+
 uint8_t density_version_major() {
     return DENSITY_MAJOR_VERSION;
 }

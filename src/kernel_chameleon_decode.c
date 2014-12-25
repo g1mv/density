@@ -40,6 +40,8 @@
  * Hash based superfast kernel
  */
 
+#include "kernel_chameleon_decode.h"
+
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_check_state(density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
     if (out->available_bytes < DENSITY_CHAMELEON_DECODE_MINIMUM_OUTPUT_LOOKAHEAD)
         return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT_BUFFER;

@@ -29,6 +29,7 @@
  * 25/12/14 16:02
  */
 
+#include "memory_location.h"
 
 DENSITY_FORCE_INLINE void density_memory_location_encapsulate(density_memory_location *restrict location, density_byte *restrict pointer, uint_fast64_t bytes) {
     location->pointer = pointer;

@@ -29,6 +29,8 @@
  * 23/12/14 17:01
  */
 
+#include "teleport_input.h"
+
 DENSITY_FORCE_INLINE density_teleport_input *density_teleport_input_allocate(uint_fast64_t size) {
     density_teleport_input *teleport = (density_teleport_input *) malloc(sizeof(density_teleport_input));
     teleport->source = DENSITY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS;

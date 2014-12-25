@@ -39,6 +39,8 @@
  * Hash based superfast kernel
  */
 
+#include "kernel_chameleon_dictionary.h"
+
 const density_chameleon_dictionary density_chameleon_empty_dictionary = {.entries = {{0}}};
 
 DENSITY_FORCE_INLINE void density_chameleon_dictionary_reset(density_chameleon_dictionary *dictionary) {

@@ -29,6 +29,8 @@
  * 18/10/13 22:30
  */
 
+#include "main_footer.h"
+
 DENSITY_FORCE_INLINE uint_fast32_t density_main_footer_read(density_memory_location *restrict in, density_main_footer *restrict footer) {
     in->pointer += sizeof(density_main_footer);
     in->available_bytes -= sizeof(density_main_footer);

@@ -29,6 +29,8 @@
  * 11/10/13 17:56
  */
 
+#include "main_header.h"
+
 DENSITY_FORCE_INLINE uint_fast32_t density_main_header_read(density_memory_location *restrict in, density_main_header *restrict header) {
     density_byte *pointer = in->pointer;
     header->version[0] = *(pointer);

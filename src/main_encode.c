@@ -29,6 +29,8 @@
  * 18/10/13 23:48
  */
 
+#include "main_encode.h"
+
 DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_write_header(density_memory_location *restrict out, density_encode_state *restrict state, const DENSITY_COMPRESSION_MODE compressionMode, const DENSITY_BLOCK_TYPE blockType) {
     if (sizeof(density_main_header) > out->available_bytes)
         return DENSITY_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;

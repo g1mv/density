@@ -29,6 +29,8 @@
  * 23/12/14 17:13
  */
 
+#include "teleport_output.h"
+
 DENSITY_FORCE_INLINE density_memory_location *density_teleport_output_access(density_memory_location *restrict data, uint_fast64_t bytes) {
     if (data->available_bytes < bytes)
         return NULL;
