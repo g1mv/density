@@ -78,10 +78,10 @@ typedef struct {
 } density_decode_state;
 #pragma pack(pop)
 
-DENSITY_DECODE_STATE density_decode_init(density_memory_location *, density_decode_state *);
+DENSITY_DECODE_STATE density_decode_init(density_teleport *, density_decode_state *);
 
-DENSITY_DECODE_STATE density_decode_process(density_memory_location *, density_memory_location *, density_decode_state *, const density_bool);
+DENSITY_DECODE_STATE density_decode_process(density_teleport *, density_memory_location *, density_decode_state *, const density_bool);
 
-DENSITY_DECODE_STATE density_decode_finish(density_memory_location *, density_decode_state *);
+DENSITY_DECODE_STATE density_decode_finish(density_teleport *, density_decode_state *);
 
 #endif

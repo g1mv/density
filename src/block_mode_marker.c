@@ -30,12 +30,13 @@
  */
 
 #include "block_mode_marker.h"
+#include "density_api_data_structures.h"
 
-DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_read(density_memory_location *restrict in, density_mode_marker *restrict modeMarker) {
-    modeMarker->activeBlockMode = *(in->pointer);
+DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_read(density_teleport *restrict in, density_mode_marker *restrict modeMarker) {
+    modeMarker->activeBlockMode = *(in->directMemoryLocation->pointer);
 
-    in->pointer += sizeof(density_mode_marker);
-    in->available_bytes -= sizeof(density_mode_marker);
+    in->directMemoryLocation->pointer += sizeof(density_mode_marker);
+    in->directMemoryLocation->available_bytes -= sizeof(density_mode_marker);
 
     return sizeof(density_mode_marker);
 }

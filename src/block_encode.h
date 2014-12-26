@@ -39,6 +39,7 @@
 #include "block_mode_marker.h"
 #include "kernel_encode.h"
 #include "memory_location.h"
+#include "teleport.h"
 
 typedef enum {
     DENSITY_BLOCK_ENCODE_STATE_READY = 0,
@@ -76,13 +77,13 @@ typedef struct {
 
     void *kernelEncodeState;
     DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeInit)(void*);
-    DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeProcess)(density_memory_location*, density_memory_location*, void*, const density_bool);
+    DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeProcess)(density_teleport *, density_memory_location*, void*, const density_bool);
     DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeFinish)(void*);
 } density_block_encode_state;
 #pragma pack(pop)
 
 DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void*, DENSITY_KERNEL_ENCODE_STATE (*)(void*), DENSITY_KERNEL_ENCODE_STATE (*)(density_memory_location *, density_memory_location *, void*, const density_bool), DENSITY_KERNEL_ENCODE_STATE (*)(void*));
-DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(density_memory_location*, density_memory_location*, density_block_encode_state *, const density_bool);
+DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(density_teleport *, density_memory_location*, density_block_encode_state *, const density_bool);
 DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(density_block_encode_state *);
 
 #endif

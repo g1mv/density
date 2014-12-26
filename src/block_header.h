@@ -39,6 +39,7 @@
 #include "density_api.h"
 #include "teleport.h"
 #include "memory_location.h"
+#include "teleport.h"
 
 #pragma pack(push)
 #pragma pack(4)
@@ -46,7 +47,7 @@ typedef struct {
 } density_block_header;
 #pragma pack(pop)
 
-uint_fast32_t density_block_header_read(density_memory_location*, density_block_header*);
+uint_fast32_t density_block_header_read(density_teleport *, density_block_header*);
 uint_fast32_t density_block_header_write(density_memory_location*);
 
 #endif

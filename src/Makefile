@@ -1,6 +1,5 @@
 #
 # Centaurean Density
-# http://www.libssc.net
 #
 # Copyright (c) 2013, Guillaume Voirin
 # All rights reserved.
@@ -81,9 +80,11 @@ OBJ = $(SRC:.c=.o)
 
 ALL_OBJ = $(OBJ)
 
-.PHONY: compile-header compile link-header link
+.PHONY: compile-header compile link-header link link-tester
 
 all: compile-header compile link-header link
+
+tester: compile-header compile link-header link-tester
 
 compile-header:
 	@echo ${bold}Compiling Density${normal} ...
@@ -99,6 +100,10 @@ link: compile link-header $(TARGET)$(STAT_EXT) $(TARGET)$(DYN_EXT)
 	@echo Done.
 	@echo
 
+link-tester: compile link-header tester.exe
+	@echo Done.
+	@echo
+
 $(TARGET)$(DYN_EXT): $(ALL_OBJ)
 	@echo $^ $(ARROW) ${bold}$(TARGET)$(DYN_EXT)${normal}
 	$(CC) -shared -o $(TARGET)$(DYN_EXT) $^ $(CFLAGS)
@@ -108,6 +113,10 @@ $(TARGET)$(STAT_EXT): $(ALL_OBJ)
 	@ar r $(TARGET)$(STAT_EXT) $^
 	@ranlib $(TARGET)$(STAT_EXT)
 
+tester.exe: $(ALL_OBJ)
+	@echo $^ $(ARROW) tester.exe
+	$(CC) -o tester.exe $^ $(CFLAGS)
+
 %.o: %.c
 	@echo $^ $(ARROW) $@
 	$(CC) -c $(CFLAGS) $< -o $@
@@ -116,5 +125,7 @@ clean:
 	@echo ${bold}Cleaning Density build directories${normal} ...
 	@rm -f $(ALL_OBJ)
 	@rm -f $(TARGET)$(DYN_EXT)
+	@rm -f $(TARGET)$(STAT_EXT)
+	@rm -f tester.exe
 	@echo Done.
 	@echo

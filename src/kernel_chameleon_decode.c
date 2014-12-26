@@ -1,6 +1,5 @@
 /*
  * Centaurean Density
- * http://www.libssc.net
  *
  * Copyright (c) 2013, Guillaume Voirin
  * All rights reserved.
@@ -41,6 +40,7 @@
  */
 
 #include "kernel_chameleon_decode.h"
+#include "density_api_data_structures.h"
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_check_state(density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
     if (out->available_bytes < DENSITY_CHAMELEON_DECODE_MINIMUM_OUTPUT_LOOKAHEAD)
@@ -127,21 +127,18 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_process_data(density_memory_l
     }
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_decode_copy_remaining(density_memory_location *restrict out, density_memory_location *restrict in) {
-    memcpy(out->pointer, in->pointer, in->available_bytes);
-    out->pointer += in->available_bytes;
-    in->pointer += in->available_bytes;
-    out->available_bytes -= in->available_bytes;
-    in->available_bytes = 0;
+DENSITY_FORCE_INLINE void density_chameleon_decode_copy_remaining(density_memory_location *restrict out, density_teleport *restrict in) {
+    memcpy(out->pointer, in->directMemoryLocation->pointer, in->directMemoryLocation->available_bytes);
+    out->pointer += in->directMemoryLocation->available_bytes;
+    in->directMemoryLocation->pointer += in->directMemoryLocation->available_bytes;
+    out->available_bytes -= in->directMemoryLocation->available_bytes;
+    in->directMemoryLocation->available_bytes = 0;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *restrict state, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead) {
     state->signaturesCount = 0;
     state->efficiencyChecked = 0;
     density_chameleon_dictionary_reset(&state->dictionary);
-
-    //state->warperSignature = density_warper_allocate(sizeof(density_chameleon_signature));
-    //state->warperBody = density_warper_allocate(DENSITY_CHAMELEON_DECODE_PROCESS_UNIT_SIZE);
 
     state->parameters = parameters;
     density_byte resetDictionaryCycleShift = state->parameters.as_bytes[0];
@@ -155,7 +152,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(d
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_process(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state, const density_bool flush) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_process(density_teleport *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state, const density_bool flush) {
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
 
@@ -167,12 +164,12 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_proces
             state->process = DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURE;
 
         case DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURE:
-            if (flush && in->available_bytes < DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE) {
+            if (flush && in->directMemoryLocation->available_bytes < DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE) {
                 density_chameleon_decode_copy_remaining(out, in);
                 return DENSITY_KERNEL_DECODE_STATE_FINISHED;
             }
-            //if (!(readMemoryLocation = density_warper_fetch(state->warperSignature, in)))
-            //    return DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT_BUFFER;
+            if (!(readMemoryLocation = density_teleport_access(in, sizeof(density_chameleon_signature))))
+                return DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT_BUFFER;
             density_chameleon_decode_read_signature(readMemoryLocation, state);
             if (readMemoryLocation->available_bytes)
                 readMemoryLocation->available_bytes -= sizeof(density_chameleon_signature);
@@ -180,8 +177,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_proces
             state->process = DENSITY_CHAMELEON_DECODE_PROCESS_DECOMPRESS_BODY;
 
         case DENSITY_CHAMELEON_DECODE_PROCESS_DECOMPRESS_BODY:
-            //if (!(readMemoryLocation = density_warper_fetch_from_sub_span(state->warperBody, in, state->bodyLength)))
-            //    return DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT_BUFFER;
+            if (!(readMemoryLocation = density_teleport_access(in, state->bodyLength)))
+                return DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT_BUFFER;
             density_chameleon_decode_process_data(readMemoryLocation, out, state);
             if (readMemoryLocation->available_bytes)
                 readMemoryLocation->available_bytes -= state->bodyLength;
@@ -192,8 +189,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_proces
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish(density_chameleon_decode_state *state) {
-    //density_warper_free(state->warperSignature);
-    //density_warper_free(state->warperBody);
 
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }

@@ -31,8 +31,8 @@
 
 #include "main_decode.h"
 
-DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_header(density_memory_location *restrict in, density_decode_state *restrict state) {
-    if (sizeof(density_main_header) > in->available_bytes)
+DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_header(density_teleport *restrict in, density_decode_state *restrict state) {
+    if (sizeof(density_main_header) > in->directMemoryLocation->available_bytes)
         return DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
     state->totalRead += density_main_header_read(in, &state->header);
@@ -42,8 +42,8 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_header(density_mem
     return DENSITY_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_footer(density_memory_location *restrict in, density_decode_state *restrict state) {
-    if (sizeof(density_main_footer) > in->available_bytes)
+DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_footer(density_teleport *restrict in, density_decode_state *restrict state) {
+    if (sizeof(density_main_footer) > in->directMemoryLocation->available_bytes)
         return DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
     state->totalRead += density_main_footer_read(in, &state->footer);
@@ -53,12 +53,12 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_footer(density_mem
     return DENSITY_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE void density_decode_update_totals(density_memory_location *restrict in, density_memory_location *restrict out, density_decode_state *restrict state, const uint_fast64_t inAvailableBefore, const uint_fast64_t outAvailableBefore) {
-    state->totalRead += inAvailableBefore - in->available_bytes;
+DENSITY_FORCE_INLINE void density_decode_update_totals(density_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state, const uint_fast64_t inAvailableBefore, const uint_fast64_t outAvailableBefore) {
+    state->totalRead += inAvailableBefore - in->directMemoryLocation->available_bytes;
     state->totalWritten += outAvailableBefore - out->available_bytes;
 }
 
-DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_location *in, density_decode_state *restrict state) {
+DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_teleport *in, density_decode_state *restrict state) {
     DENSITY_DECODE_STATE decodeState;
 
     state->totalRead = 0;
@@ -87,13 +87,13 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_loc
     return DENSITY_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_process(density_memory_location *restrict in, density_memory_location *restrict out, density_decode_state *restrict state, const density_bool flush) {
+DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_process(density_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state, const density_bool flush) {
     DENSITY_BLOCK_DECODE_STATE blockDecodeState;
     uint_fast64_t inAvailableBefore;
     uint_fast64_t outAvailableBefore;
 
     while (true) {
-        inAvailableBefore = in->available_bytes;
+        inAvailableBefore = in->directMemoryLocation->available_bytes;
         outAvailableBefore = out->available_bytes;
 
         switch (state->process) {
@@ -123,7 +123,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_process(density_memory_
     }
 }
 
-DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_location *in, density_decode_state *restrict state) {
+DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_teleport *in, density_decode_state *restrict state) {
     if (state->process ^ DENSITY_DECODE_PROCESS_READ_FOOTER)
         return DENSITY_DECODE_STATE_ERROR;
 

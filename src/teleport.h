@@ -36,5 +36,17 @@
 
 #include "globals.h"
 #include "density_api.h"
+#include "memory_location.h"
+#include "density_api_data_structures.h"
+
+#define DENSITY_TELEPORT_INPUT_BUFFER_SIZE    16384
+
+density_teleport *density_teleport_allocate(uint_fast64_t);
+
+void density_teleport_store(density_teleport *, density_byte *, const uint_fast64_t);
+
+density_memory_location *density_teleport_access(density_teleport *, uint_fast64_t);
+
+void density_teleport_free(density_teleport *);
 
 #endif

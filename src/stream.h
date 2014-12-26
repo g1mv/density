@@ -64,6 +64,8 @@ typedef struct {
 } density_stream_state;
 
 DENSITY_STREAM_STATE density_stream_prepare(density_stream *, uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
+DENSITY_STREAM_STATE density_stream_update_input(density_stream *, uint8_t *, const uint_fast64_t);
+DENSITY_STREAM_STATE density_stream_update_output(density_stream *, uint8_t *, const uint_fast64_t);
 
 DENSITY_STREAM_STATE density_stream_compress_init(density_stream *, const DENSITY_COMPRESSION_MODE, const DENSITY_ENCODE_OUTPUT_TYPE, const DENSITY_BLOCK_TYPE);
 DENSITY_STREAM_STATE density_stream_compress(density_stream *, const density_bool);

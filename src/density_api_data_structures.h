@@ -29,8 +29,8 @@
  * 25/12/14 17:08
  */
 
-#ifndef DENSITY_DATA_STRUCTURES_H
-#define DENSITY_DATA_STRUCTURES_H
+#ifndef DENSITY_API_DATA_STRUCTURES_H
+#define DENSITY_API_DATA_STRUCTURES_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -100,11 +100,28 @@ typedef struct {
     uint_fast64_t available_bytes;
 } density_memory_location;
 
+typedef enum {
+    DENSITY_TELEPORT_INPUT_SOURCE_INDIRECT_ACCESS,
+    DENSITY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS
+} DENSITY_TELEPORT_INPUT_SOURCE;
+
 typedef struct {
-    density_memory_location in;
+    density_byte *pointer;
+    uint_fast64_t position;
+} density_staging_memory_location;
+
+typedef struct {
+    DENSITY_TELEPORT_INPUT_SOURCE source;
+    density_staging_memory_location *stagingMemoryLocation;
+    density_memory_location *indirectMemoryLocation;
+    density_memory_location *directMemoryLocation;
+} density_teleport;
+
+typedef struct {
+    density_teleport* in;
     uint_fast64_t *in_total_read;
 
-    density_memory_location out;
+    density_memory_location* out;
     uint_fast64_t *out_total_written;
 
     void *internal_state;

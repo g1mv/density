@@ -63,7 +63,6 @@ typedef enum {
 #pragma pack(4)
 typedef struct {
     DENSITY_CHAMELEON_ENCODE_PROCESS process;
-    density_teleport_input *teleport;
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
     uint_fast64_t resetCycle;
@@ -80,7 +79,7 @@ typedef struct {
 
 DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *);
 
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_process(density_memory_location *, density_memory_location *, density_chameleon_encode_state *, const density_bool);
+DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_process(density_teleport *, density_memory_location *, density_chameleon_encode_state *, const density_bool);
 
 DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_chameleon_encode_state *);
 

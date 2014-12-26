@@ -40,6 +40,7 @@
 #include "kernel_decode.h"
 #include "teleport.h"
 #include "memory_location.h"
+#include "teleport.h"
 
 typedef enum {
     DENSITY_BLOCK_DECODE_STATE_READY = 0,
@@ -82,13 +83,13 @@ typedef struct {
 
     void* kernelDecodeState;
     DENSITY_KERNEL_DECODE_STATE (*kernelDecodeInit)(void*, const density_main_header_parameters, const uint32_t);
-    DENSITY_KERNEL_DECODE_STATE (*kernelDecodeProcess)(density_memory_location*, density_memory_location*, void*, const density_bool);
+    DENSITY_KERNEL_DECODE_STATE (*kernelDecodeProcess)(density_teleport *, density_memory_location*, void*, const density_bool);
     DENSITY_KERNEL_DECODE_STATE (*kernelDecodeFinish)(void*);
 } density_block_decode_state;
 #pragma pack(pop)
 
 DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *, const DENSITY_BLOCK_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters, const uint_fast32_t, void*, DENSITY_KERNEL_DECODE_STATE (*)(void*, const density_main_header_parameters, const uint32_t), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_location *, density_memory_location *, void*, const density_bool), DENSITY_KERNEL_DECODE_STATE (*)(void*));
-DENSITY_BLOCK_DECODE_STATE density_block_decode_process(density_memory_location *, density_memory_location *, density_block_decode_state *, const density_bool);
+DENSITY_BLOCK_DECODE_STATE density_block_decode_process(density_teleport *, density_memory_location *, density_block_decode_state *, const density_bool);
 DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(density_block_decode_state *);
 
 #endif

@@ -31,8 +31,8 @@
 
 #include "block_decode.h"
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_header(density_memory_location *restrict in, density_block_decode_state *restrict state) {
-    if (sizeof(density_block_header) > in->available_bytes)
+DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_header(density_teleport *restrict in, density_block_decode_state *restrict state) {
+    if (sizeof(density_block_header) > in->directMemoryLocation->available_bytes)
         return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
     state->currentBlockData.inStart = state->totalRead;
@@ -46,8 +46,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_
     return DENSITY_BLOCK_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_footer(density_memory_location *restrict in, density_block_decode_state *restrict state) {
-    if (sizeof(density_block_footer) > in->available_bytes)
+DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_footer(density_teleport *restrict in, density_block_decode_state *restrict state) {
+    if (sizeof(density_block_footer) > in->directMemoryLocation->available_bytes)
         return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
     state->totalRead += density_block_footer_read(in, &state->lastBlockFooter);
@@ -55,8 +55,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_
     return DENSITY_BLOCK_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_mode_marker(density_memory_location *restrict in, density_block_decode_state *restrict state) {
-    if (sizeof(density_mode_marker) > in->available_bytes)
+DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_mode_marker(density_teleport *restrict in, density_block_decode_state *restrict state) {
+    if (sizeof(density_mode_marker) > in->directMemoryLocation->available_bytes)
         return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
     state->totalRead += density_block_mode_marker_read(in, &state->lastModeMarker);
@@ -67,8 +67,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_
     return DENSITY_BLOCK_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE void density_block_decode_update_totals(density_memory_location *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state, const uint_fast64_t inAvailableBefore, const uint_fast64_t outAvailableBefore) {
-    state->totalRead += inAvailableBefore - in->available_bytes;
+DENSITY_FORCE_INLINE void density_block_decode_update_totals(density_teleport *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state, const uint_fast64_t inAvailableBefore, const uint_fast64_t outAvailableBefore) {
+    state->totalRead += inAvailableBefore - in->directMemoryLocation->available_bytes;
     state->totalWritten += outAvailableBefore - out->available_bytes;
 }
 
@@ -98,7 +98,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(densit
     return DENSITY_BLOCK_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_process(density_memory_location *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state, const density_bool flush) {
+DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_process(density_teleport *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state, const density_bool flush) {
     DENSITY_BLOCK_DECODE_STATE decodeState;
     DENSITY_KERNEL_DECODE_STATE hashDecodeState;
     uint_fast64_t inAvailableBefore;
@@ -133,12 +133,12 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_process(den
                 return DENSITY_BLOCK_DECODE_STATE_READY;
 
             case DENSITY_BLOCK_DECODE_PROCESS_READ_DATA:
-                inAvailableBefore = in->available_bytes;
+                inAvailableBefore = in->directMemoryLocation->available_bytes;
                 outAvailableBefore = out->available_bytes;
                 switch (state->currentMode) {
                     case DENSITY_BLOCK_MODE_COPY:
                         blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalWritten - state->currentBlockData.outStart);
-                        inRemaining = in->available_bytes;
+                        inRemaining = in->directMemoryLocation->available_bytes;
                         outRemaining = out->available_bytes;
 
                         if (inRemaining <= outRemaining) {
@@ -151,9 +151,9 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_process(den
                                     return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
                                 } else {
                                     positionIncrement = inRemaining - (flush ? state->endDataOverhead : 0);
-                                    memcpy(out->pointer, in->pointer, (size_t) positionIncrement);
-                                    in->pointer += positionIncrement;
-                                    in->available_bytes -= positionIncrement;
+                                    memcpy(out->pointer, in->directMemoryLocation->pointer, (size_t) positionIncrement);
+                                    in->directMemoryLocation->pointer += positionIncrement;
+                                    in->directMemoryLocation->available_bytes -= positionIncrement;
                                     out->pointer += positionIncrement;
                                     out->available_bytes -= positionIncrement;
                                     density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
@@ -164,10 +164,10 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_process(den
                                 goto copy_until_end_of_block;
                             else {
                                 if (outRemaining) {
-                                    memcpy(out->pointer, in->pointer, (size_t) outRemaining);
-                                    in->pointer += outRemaining;
-                                    in->available_bytes -= outRemaining;
-                                    in->pointer += outRemaining;
+                                    memcpy(out->pointer, in->directMemoryLocation->pointer, (size_t) outRemaining);
+                                    in->directMemoryLocation->pointer += outRemaining;
+                                    in->directMemoryLocation->available_bytes -= outRemaining;
+                                    in->directMemoryLocation->pointer += outRemaining;
                                     out->available_bytes = 0;
                                     density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
                                 } else
@@ -177,9 +177,9 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_process(den
                         goto exit;
 
                     copy_until_end_of_block:
-                        memcpy(out->pointer, in->pointer, (size_t) blockRemaining);
-                        in->pointer += blockRemaining;
-                        in->available_bytes -= blockRemaining;
+                        memcpy(out->pointer, in->directMemoryLocation->pointer, (size_t) blockRemaining);
+                        in->directMemoryLocation->pointer += blockRemaining;
+                        in->directMemoryLocation->available_bytes -= blockRemaining;
                         out->pointer += blockRemaining;
                         out->available_bytes -= blockRemaining;
                         density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);

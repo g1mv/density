@@ -39,7 +39,7 @@
  * Hash based superfast kernel
  */
 
-/*#include "kernel_chameleon_encode.h"
+#include "kernel_chameleon_encode.h"
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_write_to_signature(density_chameleon_encode_state *state) {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -51,7 +51,6 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_write_to_signature(density_ch
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_new_signature(density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
     state->signaturesCount++;
-
     state->shift = 0;
     state->signature = (density_chameleon_signature *) (out->pointer);
     *state->signature = 0;
@@ -80,7 +79,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_prepar
                 state->resetCycle--;
             else {
                 density_chameleon_dictionary_reset();
-                state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
+
+                state-> resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
             }
 #endif
 
@@ -163,10 +163,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(d
     state->efficiencyChecked = 0;
     density_chameleon_dictionary_reset(&state->dictionary);
 
-    state->warper = density_warper_allocate(DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE);
-
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
-    state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
+    state-> resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
 #endif
 
     state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
@@ -174,25 +172,27 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(d
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_process(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state, const density_bool flush) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_process(density_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state, const density_bool flush) {
     DENSITY_KERNEL_ENCODE_STATE returnState;
     uint32_t hash;
     uint64_t chunk;
     density_byte *pointerOutBefore;
     density_memory_location *readMemoryLocation;
-    const uint_fast64_t limit = in->available_bytes % DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE;
+    //const uint_fast64_t limit = in->available_bytes % DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE;
 
     switch (state->process) {
-        case DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
+        case
+            DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
             if ((returnState = density_chameleon_encode_prepare_new_block(out, state)))
                 return returnState;
             state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_COMPRESS;
 
-        case DENSITY_CHAMELEON_ENCODE_PROCESS_COMPRESS:
+        case
+            DENSITY_CHAMELEON_ENCODE_PROCESS_COMPRESS:
             while (true) {
-                if (!(readMemoryLocation = density_warper_fetch_using_limit(state->warper, in, limit))) {
+                if (!(readMemoryLocation = density_teleport_access(in, 64))) {
                     if (flush) {
-                        density_chameleon_encode_copy_remaining(out, in);
+                        density_chameleon_encode_copy_remaining(out, in->directMemoryLocation);
                         return DENSITY_KERNEL_ENCODE_STATE_FINISHED;
                     } else
                         return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
@@ -209,7 +209,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_proces
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_chameleon_encode_state *state) {
-    density_warper_free(state->warper);
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;
-}*/
+}

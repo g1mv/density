@@ -36,11 +36,12 @@
 #include "density_api.h"
 #include "teleport.h"
 #include "memory_location.h"
+#include "teleport.h"
 
 typedef struct {
 } density_main_footer;
 
-uint_fast32_t density_main_footer_read(density_memory_location *, density_main_footer *);
+uint_fast32_t density_main_footer_read(density_teleport *, density_main_footer *);
 
 uint_fast32_t density_main_footer_write(density_memory_location *);
 
