@@ -47,6 +47,10 @@ void density_teleport_store(density_teleport *, density_byte *, const uint_fast6
 
 density_memory_location *density_teleport_access(density_teleport *, uint_fast64_t);
 
+uint_fast64_t density_teleport_available(density_teleport *);
+
 void density_teleport_free(density_teleport *);
+
+void density_teleport_copy(density_teleport*, density_memory_location*, uint_fast64_t);
 
 #endif

@@ -80,11 +80,9 @@ OBJ = $(SRC:.c=.o)
 
 ALL_OBJ = $(OBJ)
 
-.PHONY: compile-header compile link-header link link-tester
+.PHONY: compile-header compile link-header link
 
 all: compile-header compile link-header link
-
-tester: compile-header compile link-header link-tester
 
 compile-header:
 	@echo ${bold}Compiling Density${normal} ...
@@ -100,10 +98,6 @@ link: compile link-header $(TARGET)$(STAT_EXT) $(TARGET)$(DYN_EXT)
 	@echo Done.
 	@echo
 
-link-tester: compile link-header tester.exe
-	@echo Done.
-	@echo
-
 $(TARGET)$(DYN_EXT): $(ALL_OBJ)
 	@echo $^ $(ARROW) ${bold}$(TARGET)$(DYN_EXT)${normal}
 	$(CC) -shared -o $(TARGET)$(DYN_EXT) $^ $(CFLAGS)
@@ -112,10 +106,6 @@ $(TARGET)$(STAT_EXT): $(ALL_OBJ)
 	@echo $^ $(ARROW) ${bold}$(TARGET)$(STAT_EXT)${normal}
 	@ar r $(TARGET)$(STAT_EXT) $^
 	@ranlib $(TARGET)$(STAT_EXT)
-
-tester.exe: $(ALL_OBJ)
-	@echo $^ $(ARROW) tester.exe
-	$(CC) -o tester.exe $^ $(CFLAGS)
 
 %.o: %.c
 	@echo $^ $(ARROW) $@
@@ -126,6 +116,5 @@ clean:
 	@rm -f $(ALL_OBJ)
 	@rm -f $(TARGET)$(DYN_EXT)
 	@rm -f $(TARGET)$(STAT_EXT)
-	@rm -f tester.exe
 	@echo Done.
 	@echo

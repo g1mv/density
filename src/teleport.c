@@ -82,3 +82,38 @@ DENSITY_FORCE_INLINE density_memory_location *density_teleport_access(density_te
             }
     }
 }
+
+DENSITY_FORCE_INLINE uint_fast64_t density_teleport_available(density_teleport *teleport) {
+    return teleport->directMemoryLocation->available_bytes + teleport->stagingMemoryLocation->position;
+}
+
+DENSITY_FORCE_INLINE void density_teleport_copy(density_teleport *in, density_memory_location *out, uint_fast64_t bytes) {
+    if (bytes < in->stagingMemoryLocation->position) {
+        memcpy(out->pointer, in->stagingMemoryLocation->pointer, bytes);
+        in->stagingMemoryLocation->position += bytes;
+        out->pointer += bytes;
+        out->available_bytes -= bytes;
+    } else if (bytes < density_teleport_available(in)) {
+        memcpy(out->pointer, in->stagingMemoryLocation->pointer, in->stagingMemoryLocation->position);
+        out->pointer += in->stagingMemoryLocation->position;
+        out->available_bytes -= in->stagingMemoryLocation->position;
+        uint_fast64_t remaining = bytes - in->stagingMemoryLocation->position;
+        in->stagingMemoryLocation->position = 0;
+        memcpy(out->pointer, in->directMemoryLocation->pointer, remaining);
+        out->pointer += remaining;
+        out->available_bytes -= remaining;
+        in->directMemoryLocation->pointer += remaining;
+        in->directMemoryLocation->available_bytes = 0;
+        in->source = DENSITY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS;
+    } else {
+        memcpy(out->pointer, in->stagingMemoryLocation->pointer, in->stagingMemoryLocation->position);
+        memcpy(out->pointer + in->stagingMemoryLocation->position, in->directMemoryLocation->pointer, in->directMemoryLocation->available_bytes);
+        uint_fast64_t shift = in->stagingMemoryLocation->position + in->directMemoryLocation->available_bytes;
+        out->pointer += shift;
+        out->available_bytes -= shift;
+        in->stagingMemoryLocation->position = 0;
+        in->directMemoryLocation->pointer += in->directMemoryLocation->available_bytes;
+        in->directMemoryLocation->available_bytes = 0;
+        in->source = DENSITY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS;
+    }
+}

@@ -50,6 +50,9 @@
 #include "block_mode_marker.h"
 #include "block_header.h"
 #include "kernel_chameleon_encode.h"
+#include "density_api_data_structures.h"
+#include "block_footer.h"
+#include "main_footer.h"
 
 #define DENSITY_CHAMELEON_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
 #define DENSITY_CHAMELEON_DECODE_PROCESS_UNIT_SIZE                     (sizeof(density_block_header) + sizeof(density_mode_marker) + sizeof(density_chameleon_signature) + bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
