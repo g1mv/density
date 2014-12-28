@@ -30,15 +30,15 @@
  */
 
 #include "memory_teleport.h"
+#include "memory_location.h"
 
 DENSITY_FORCE_INLINE density_memory_teleport *density_memory_teleport_allocate(uint_fast64_t size, void *(*mem_alloc)(size_t)) {
     density_memory_teleport *teleport = (density_memory_teleport *) mem_alloc(sizeof(density_memory_teleport));
-    teleport->source = DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS;
     teleport->stagingMemoryLocation = (density_staging_memory_location *) mem_alloc(sizeof(density_staging_memory_location));
     teleport->stagingMemoryLocation->pointer = (density_byte *) mem_alloc(size * sizeof(density_byte));
-    teleport->stagingMemoryLocation->position = 0;
     teleport->directMemoryLocation = (density_memory_location *) mem_alloc(sizeof(density_memory_location));
     teleport->indirectMemoryLocation = (density_memory_location *) mem_alloc(sizeof(density_memory_location));
+    density_memory_teleport_reset_staging(teleport);
     return teleport;
 }
 
@@ -48,6 +48,11 @@ DENSITY_FORCE_INLINE void density_memory_teleport_free(density_memory_teleport *
     mem_free(teleport->stagingMemoryLocation->pointer);
     mem_free(teleport->stagingMemoryLocation);
     mem_free(teleport);
+}
+
+DENSITY_FORCE_INLINE void density_memory_teleport_reset_staging(density_memory_teleport *teleport) {
+    teleport->source = DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS;
+    teleport->stagingMemoryLocation->position = 0;
 }
 
 DENSITY_FORCE_INLINE void density_memory_teleport_store(density_memory_teleport *restrict teleport, density_byte *in, const uint_fast64_t availableIn) {
@@ -64,7 +69,7 @@ DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(densi
                 memcpy(teleport->stagingMemoryLocation->pointer + teleport->stagingMemoryLocation->position, teleport->directMemoryLocation->pointer, missingBytes);
                 teleport->indirectMemoryLocation->pointer = teleport->stagingMemoryLocation->pointer;
                 teleport->indirectMemoryLocation->available_bytes = bytes;
-                teleport->source = DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS;
+                density_memory_teleport_reset_staging(teleport);
                 return teleport->indirectMemoryLocation;
             } else {
                 memcpy(teleport->stagingMemoryLocation->pointer + teleport->stagingMemoryLocation->position, teleport->directMemoryLocation->pointer, teleport->directMemoryLocation->available_bytes);
@@ -88,32 +93,41 @@ DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available(density_mem
 }
 
 DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *in, density_memory_location *out, uint_fast64_t bytes) {
-    if (bytes < in->stagingMemoryLocation->position) {
-        memcpy(out->pointer, in->stagingMemoryLocation->pointer, bytes);
-        in->stagingMemoryLocation->position += bytes;
-        out->pointer += bytes;
-        out->available_bytes -= bytes;
-    } else if (bytes < density_memory_teleport_available(in)) {
-        memcpy(out->pointer, in->stagingMemoryLocation->pointer, in->stagingMemoryLocation->position);
-        out->pointer += in->stagingMemoryLocation->position;
-        out->available_bytes -= in->stagingMemoryLocation->position;
-        uint_fast64_t remaining = bytes - in->stagingMemoryLocation->position;
-        in->stagingMemoryLocation->position = 0;
-        memcpy(out->pointer, in->directMemoryLocation->pointer, remaining);
-        out->pointer += remaining;
-        out->available_bytes -= remaining;
-        in->directMemoryLocation->pointer += remaining;
-        in->directMemoryLocation->available_bytes = 0;
-        in->source = DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS;
-    } else {
-        memcpy(out->pointer, in->stagingMemoryLocation->pointer, in->stagingMemoryLocation->position);
-        memcpy(out->pointer + in->stagingMemoryLocation->position, in->directMemoryLocation->pointer, in->directMemoryLocation->available_bytes);
-        uint_fast64_t shift = in->stagingMemoryLocation->position + in->directMemoryLocation->available_bytes;
-        out->pointer += shift;
-        out->available_bytes -= shift;
-        in->stagingMemoryLocation->position = 0;
-        in->directMemoryLocation->pointer += in->directMemoryLocation->available_bytes;
-        in->directMemoryLocation->available_bytes = 0;
-        in->source = DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS;
+    uint_fast64_t fromStaging = 0;
+    uint_fast64_t fromDirect = 0;
+    switch (in->source) {
+        case DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_INDIRECT_ACCESS:
+            if (bytes < in->stagingMemoryLocation->position) {
+                fromStaging = bytes;
+            } else {
+                fromStaging = in->stagingMemoryLocation->position;
+                fromDirect = bytes - in->stagingMemoryLocation->position;
+                if (fromDirect > in->directMemoryLocation->available_bytes)
+                    fromDirect = in->directMemoryLocation->available_bytes;
+            }
+
+            memcpy(out->pointer, in->stagingMemoryLocation->pointer, fromStaging);
+            in->stagingMemoryLocation->position -= fromStaging;
+            out->pointer += fromStaging;
+            out->available_bytes -= fromStaging;
+
+            if (fromDirect) {
+                memcpy(out->pointer, in->directMemoryLocation->pointer, fromDirect);
+                in->directMemoryLocation->pointer += fromDirect;
+                out->pointer += fromDirect;
+                out->available_bytes -= fromDirect;
+                density_memory_teleport_reset_staging(in);
+            }
+            return;
+
+        case DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS:
+            if (bytes > in->directMemoryLocation->available_bytes)
+                bytes = in->directMemoryLocation->available_bytes;
+
+            memcpy(out->pointer, in->directMemoryLocation->pointer, bytes);
+            in->directMemoryLocation->pointer += bytes;
+            out->pointer += bytes;
+            out->available_bytes -= bytes;
+            return;
     }
 }

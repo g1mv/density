@@ -32,10 +32,11 @@
 #include "main_decode.h"
 
 DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_header(density_memory_teleport *restrict in, density_decode_state *restrict state) {
-    if (sizeof(density_main_header) > in->directMemoryLocation->available_bytes)
+    density_memory_location *readLocation;
+    if (!(readLocation = density_memory_teleport_read(in, sizeof(density_main_header))))
         return DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
-    state->totalRead += density_main_header_read(in, &state->header);
+    state->totalRead += density_main_header_read(readLocation, &state->header);
 
     state->process = DENSITY_DECODE_PROCESS_READ_BLOCKS;
 
@@ -43,10 +44,11 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_header(density_mem
 }
 
 DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_footer(density_memory_teleport *restrict in, density_decode_state *restrict state) {
-    if (sizeof(density_main_footer) > in->directMemoryLocation->available_bytes)
+    density_memory_location *readLocation;
+    if (!(readLocation = density_memory_teleport_read(in, sizeof(density_main_footer))))
         return DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER;
 
-    state->totalRead += density_main_footer_read(in, &state->footer);
+    state->totalRead += density_main_footer_read(readLocation, &state->footer);
 
     state->process = DENSITY_DECODE_PROCESS_FINISHED;
 
@@ -54,7 +56,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_footer(density_mem
 }
 
 DENSITY_FORCE_INLINE void density_decode_update_totals(density_memory_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state, const uint_fast64_t inAvailableBefore, const uint_fast64_t outAvailableBefore) {
-    state->totalRead += inAvailableBefore - in->directMemoryLocation->available_bytes;
+    state->totalRead += inAvailableBefore - density_memory_teleport_available(in);
     state->totalWritten += outAvailableBefore - out->available_bytes;
 }
 
@@ -93,7 +95,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_process(density_memory_
     uint_fast64_t outAvailableBefore;
 
     while (true) {
-        inAvailableBefore = in->directMemoryLocation->available_bytes;
+        inAvailableBefore = density_memory_teleport_available(in);
         outAvailableBefore = out->available_bytes;
 
         switch (state->process) {

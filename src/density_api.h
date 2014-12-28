@@ -80,21 +80,22 @@ uint8_t density_version_revision(void);
  ***********************************************************************************************************************/
 
 /*
- * Allocate a stream in memory, with a user-defined memory allocation/free function.
- * This function will then be used throughout the library to allocate or free memory.
- * If NULL is specified, the standard malloc and free will be used.
+ * Allocate a stream in memory, with a user-defined memory allocation function.
+ * This function will then be used throughout the library to allocate memory.
+ * If NULL is specified, the standard malloc will be used.
  *
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-density_stream * density_stream_allocate(void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+density_stream * density_stream_allocate(void *(*mem_alloc)(size_t));
 
 /*
- * Free a stream from memory. This method uses the previously declared memory freeing function.
+ * Frees a stream from memory. This method uses a supplied memory freeing function.
+ * If NULL is specified, the standard free will be used.
  *
  * @param stream the stream
  */
-void density_stream_free(density_stream* stream);
+void density_stream_free(density_stream* stream, void (*mem_free)(void *));
 
 /*
  * Prepare a stream with the encapsulated input/output buffers. This function *must* be called upon changing either buffer pointers / sizes.

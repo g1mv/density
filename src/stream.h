@@ -64,8 +64,8 @@ typedef struct {
     density_decode_state internal_decode_state;
 } density_stream_state;
 
-density_stream * density_stream_allocate(void *(*)(size_t), void (*)(void *));
-void density_stream_free(density_stream* stream);
+density_stream * density_stream_allocate(void *(*)(size_t));
+void density_stream_free(density_stream* stream, void (*)(void *));
 
 DENSITY_STREAM_STATE density_stream_prepare(density_stream *, uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t);
 DENSITY_STREAM_STATE density_stream_update_input(density_stream *, uint8_t *, const uint_fast64_t);

@@ -60,7 +60,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_write_footer(density_me
 }
 
 DENSITY_FORCE_INLINE void density_encode_update_totals(density_memory_teleport *restrict in, density_memory_location *restrict out, density_encode_state *restrict state, const uint_fast64_t availableInBefore, const uint_fast64_t availableOutBefore) {
-    state->totalRead += availableInBefore - in->directMemoryLocation->available_bytes;
+    state->totalRead += availableInBefore - density_memory_teleport_available(in);
     state->totalWritten += availableOutBefore - out->available_bytes;
 }
 
@@ -102,7 +102,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_process(density_memory_
     uint_fast64_t availableOutBefore;
 
     while (true) {
-        availableInBefore = in->directMemoryLocation->available_bytes;
+        availableInBefore = density_memory_teleport_available(in);
         availableOutBefore = out->available_bytes;
 
         switch (state->process) {

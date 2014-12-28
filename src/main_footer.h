@@ -41,7 +41,7 @@
 typedef struct {
 } density_main_footer;
 
-uint_fast32_t density_main_footer_read(density_memory_teleport *, density_main_footer *);
+uint_fast32_t density_main_footer_read(density_memory_location *, density_main_footer *);
 
 uint_fast32_t density_main_footer_write(density_memory_location *);
 

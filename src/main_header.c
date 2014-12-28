@@ -31,20 +31,17 @@
 
 #include "main_header.h"
 
-DENSITY_FORCE_INLINE uint_fast32_t density_main_header_read(density_memory_teleport *restrict in, density_main_header *restrict header) {
-    density_byte *pointer = in->directMemoryLocation->pointer;
+DENSITY_FORCE_INLINE uint_fast32_t density_main_header_read(density_memory_location *restrict in, density_main_header *restrict header) {
+    density_byte *pointer = in->pointer;
     header->version[0] = *(pointer);
     header->version[1] = *(pointer + 1);
     header->version[2] = *(pointer + 2);
-    header->
-            compressionMode = *(pointer + 3);
-    header->
-            blockType = *(pointer + 4);
-    header->
-            parameters = *(density_main_header_parameters *) (pointer + 6);
+    header-> compressionMode = *(pointer + 3);
+    header-> blockType = *(pointer + 4);
+    header-> parameters = *(density_main_header_parameters *) (pointer + 6);
 
-    in->directMemoryLocation->pointer += sizeof(density_main_header);
-    in->directMemoryLocation->available_bytes -= sizeof(density_main_header);
+    in->pointer += sizeof(density_main_header);
+    in->available_bytes -= sizeof(density_main_header);
     return sizeof(density_main_header);
 }
 

@@ -43,7 +43,7 @@
 #include "memory_location.h"
 #include "memory_teleport.h"
 
-uint_fast32_t density_main_header_read(density_memory_teleport *, density_main_header *);
+uint_fast32_t density_main_header_read(density_memory_location *, density_main_header *);
 
 uint_fast32_t density_main_header_write(density_memory_location *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters);
 
