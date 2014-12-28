@@ -32,11 +32,14 @@
 #include "stream.h"
 #include "density_api_data_structures.h"
 
-DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream *restrict stream, uint8_t *restrict in, const uint_fast64_t availableIn, uint8_t *restrict out, const uint_fast64_t availableOut, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
+DENSITY_FORCE_INLINE density_stream * density_stream_allocate(void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
+    density_stream *stream;
     if (mem_alloc == NULL) {
+        stream = (density_stream*)malloc(sizeof(density_stream));
         stream->internal_state = (density_stream_state *) malloc(sizeof(density_stream_state));
         ((density_stream_state *) stream->internal_state)->mem_alloc = malloc;
     } else {
+        stream = (density_stream*)mem_alloc(sizeof(density_stream));
         stream->internal_state = (density_stream_state *) mem_alloc(sizeof(density_stream_state));
         ((density_stream_state *) stream->internal_state)->mem_alloc = mem_alloc;
     }
@@ -46,7 +49,21 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream 
     else
         ((density_stream_state *) stream->internal_state)->mem_free = mem_free;
 
-    stream->in = density_teleport_allocate(1024);
+    return stream;
+}
+
+DENSITY_FORCE_INLINE void density_stream_free(density_stream* stream) {
+    void (*mem_free)(void *) = ((density_stream_state *) stream->internal_state)->mem_free;
+
+    density_memory_location_free(stream->out, mem_free);
+    density_memory_teleport_free(stream->in, mem_free);
+    mem_free(stream->internal_state);
+    mem_free(stream);
+}
+
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream *restrict stream, uint8_t *restrict in, const uint_fast64_t availableIn, uint8_t *restrict out, const uint_fast64_t availableOut) {
+    stream->in = density_memory_teleport_allocate(DENSITY_STREAM_MEMORY_TELEPORT_BUFFER_SIZE, ((density_stream_state *) stream->internal_state)->mem_alloc);
+    stream->out = density_memory_location_allocate(((density_stream_state *) stream->internal_state)->mem_alloc);
     density_stream_update_input(stream, in, availableIn);
     density_stream_update_output(stream, out, availableOut);
 
@@ -56,7 +73,7 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream 
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_update_input(density_stream *restrict stream, uint8_t *in, const uint_fast64_t availableIn) {
-    density_teleport_store(stream->in, in, availableIn);
+    density_memory_teleport_store(stream->in, in, availableIn);
 
     return DENSITY_STREAM_STATE_READY;
 }
@@ -68,7 +85,7 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_update_output(density_s
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_check_conformity(density_stream *stream) {
-    if (stream->out->available_bytes < DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE)
+    if (((density_memory_location*)stream->out)->available_bytes < DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE)
         return DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL;
 
     return DENSITY_STREAM_STATE_READY;
@@ -111,9 +128,6 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress(density_stream
     DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
     if (streamState)
         return streamState;
-
-    /*if (!flush) if (stream->in.available_bytes & 0x1F)
-        return DENSITY_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32;*/
 
     encodeState = density_encode_process(stream->in, stream->out, &((density_stream_state *) stream->internal_state)->internal_encode_state, flush);
     switch (encodeState) {

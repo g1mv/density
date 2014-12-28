@@ -31,7 +31,7 @@
 
 #include "main_footer.h"
 
-DENSITY_FORCE_INLINE uint_fast32_t density_main_footer_read(density_teleport *restrict in, density_main_footer *restrict footer) {
+DENSITY_FORCE_INLINE uint_fast32_t density_main_footer_read(density_memory_teleport *restrict in, density_main_footer *restrict footer) {
     in->directMemoryLocation->pointer += sizeof(density_main_footer);
     in->directMemoryLocation->available_bytes -= sizeof(density_main_footer);
 

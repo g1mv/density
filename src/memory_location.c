@@ -31,6 +31,16 @@
 
 #include "memory_location.h"
 
+DENSITY_FORCE_INLINE density_memory_location *density_memory_location_allocate(void *(*mem_alloc)(size_t)) {
+    density_memory_location *location = (density_memory_location *) mem_alloc(sizeof(density_memory_location));
+
+    return location;
+}
+
+DENSITY_FORCE_INLINE void density_memory_location_free(density_memory_location *location, void (*mem_free)(void *)) {
+    mem_free(location);
+}
+
 DENSITY_FORCE_INLINE void density_memory_location_encapsulate(density_memory_location *restrict location, density_byte *restrict pointer, uint_fast64_t bytes) {
     location->pointer = pointer;
     location->available_bytes = bytes;

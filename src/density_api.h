@@ -45,7 +45,8 @@
 #define DENSITY_YES                                                 1
 #define DENSITY_NO                                                  0
 
-#define DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT         DENSITY_NO          // No disables compression dictionary resets and improves compression ratio
+#define DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT         DENSITY_NO
+// No disables compression dictionary resets and improves compression ratio
 
 
 
@@ -74,24 +75,26 @@ uint8_t density_version_revision(void);
 
 /***********************************************************************************************************************
  *                                                                                                                     *
- * Density byte buffer utilities                                                                                       *
+ * Density stream API functions                                                                                        *
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
 /*
- * Rewind an Density byte buffer
+ * Allocate a stream in memory, with a user-defined memory allocation/free function.
+ * This function will then be used throughout the library to allocate or free memory.
+ * If NULL is specified, the standard malloc and free will be used.
  *
- * @param byte_buffer the Density byte buffer to rewind (its available is set to zero)
+ * @param mem_alloc the memory allocation function
+ * @param mem_free the memory freeing function
  */
-//void density_byte_buffer_rewind(density_byte_buffer* byte_buffer);
+density_stream * density_stream_allocate(void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
-
-
-/***********************************************************************************************************************
- *                                                                                                                     *
- * Density stream API functions                                                                                        *
- *                                                                                                                     *
- ***********************************************************************************************************************/
+/*
+ * Free a stream from memory. This method uses the previously declared memory freeing function.
+ *
+ * @param stream the stream
+ */
+void density_stream_free(density_stream* stream);
 
 /*
  * Prepare a stream with the encapsulated input/output buffers. This function *must* be called upon changing either buffer pointers / sizes.
@@ -104,7 +107,7 @@ uint8_t density_version_revision(void);
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size);
 
 /*
  * Initialize compression
@@ -178,52 +181,5 @@ DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream);
  * @param header the header returned
  */
 DENSITY_STREAM_STATE density_stream_decompress_utilities_get_header(density_stream* stream, density_main_header* header);
-
-
-
-/***********************************************************************************************************************
- *                                                                                                                     *
- * Density buffers API functions                                                                                       *
- *                                                                                                                     *
- ***********************************************************************************************************************/
-
-/*
- * Returns the max compressed length possible (with incompressible data)
- *
- * @param result a pointer to return the resulting length to
- * @param in_length, the length of the input data to compress
- * @param compression_mode the compression mode to be used
- */
-//DENSITY_BUFFERS_STATE density_buffers_max_compressed_length(uint_fast64_t * result, uint_fast64_t in_length, const DENSITY_COMPRESSION_MODE compression_mode);
-
-/*
- * Buffers compression function
- *
- * @param total_written a pointer to return the total bytes written to, can be NULL for no return
- * @param in the input buffer to compress
- * @param in_size the size of the input buffer in bytes
- * @param out the output buffer
- * @param out_size the size of the output buffer in bytes
- * @param compression_mode the compression mode to use
- * @param output_type the output type to use (if unsure, DENSITY_ENCODE_OUTPUT_TYPE_DEFAULT), see the density_stream_compress documentation
- * @param block_type the block type to use (if unsure, DENSITY_BLOCK_TYPE_DEFAULT), see the density_stream_compress documentation
- * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
- * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
- */
-//DENSITY_BUFFERS_STATE density_buffers_compress(uint_fast64_t* total_written, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_ENCODE_OUTPUT_TYPE output_type, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
-
-/*
- * Buffers decompression function
- *
- * @param total_written a pointer to return the total bytes written to, can be NULL for no return
- * @param header a pointer to return the header read to, can be NULL for no return
- * @param in the input buffer to decompress
- * @param in_size the size of the input buffer in bytes
- * @param out the output buffer
- * @param out_size the size of the output buffer in bytes
- * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
- * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
- */
-//DENSITY_BUFFERS_STATE density_buffers_decompress(uint_fast64_t * total_written, density_main_header* header, uint8_t *in, uint_fast64_t in_size, uint8_t *out, uint_fast64_t out_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 #endif

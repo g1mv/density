@@ -71,13 +71,13 @@ typedef struct {
 
     density_block_encode_state blockEncodeState;
 
-    density_teleport * teleport;
+    density_memory_teleport * teleport;
 } density_encode_state;
 #pragma pack(pop)
 
 DENSITY_ENCODE_STATE density_encode_init(density_memory_location *, density_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_ENCODE_OUTPUT_TYPE, const DENSITY_BLOCK_TYPE);
 
-DENSITY_ENCODE_STATE density_encode_process(density_teleport *, density_memory_location *, density_encode_state *, const density_bool);
+DENSITY_ENCODE_STATE density_encode_process(density_memory_teleport *, density_memory_location *, density_encode_state *, const density_bool);
 
 DENSITY_ENCODE_STATE density_encode_finish(density_memory_location *, density_encode_state *);
 

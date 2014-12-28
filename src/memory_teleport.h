@@ -29,8 +29,8 @@
  * 16/12/14 17:12
  */
 
-#ifndef DENSITY_TELEPORT_H
-#define DENSITY_TELEPORT_H
+#ifndef DENSITY_MEMORY_TELEPORT_H
+#define DENSITY_MEMORY_TELEPORT_H
 
 #include <string.h>
 
@@ -39,18 +39,33 @@
 #include "memory_location.h"
 #include "density_api_data_structures.h"
 
-#define DENSITY_TELEPORT_INPUT_BUFFER_SIZE    16384
+typedef enum {
+    DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_INDIRECT_ACCESS,
+    DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS
+} DENSITY_MEMORY_TELEPORT_INPUT_SOURCE;
 
-density_teleport *density_teleport_allocate(uint_fast64_t);
+typedef struct {
+    density_byte *pointer;
+    uint_fast64_t position;
+} density_staging_memory_location;
 
-void density_teleport_store(density_teleport *, density_byte *, const uint_fast64_t);
+typedef struct {
+    DENSITY_MEMORY_TELEPORT_INPUT_SOURCE source;
+    density_staging_memory_location *stagingMemoryLocation;
+    density_memory_location *indirectMemoryLocation;
+    density_memory_location *directMemoryLocation;
+} density_memory_teleport;
 
-density_memory_location *density_teleport_access(density_teleport *, uint_fast64_t);
+density_memory_teleport *density_memory_teleport_allocate(uint_fast64_t, void *(*)(size_t));
 
-uint_fast64_t density_teleport_available(density_teleport *);
+void density_memory_teleport_free(density_memory_teleport *, void (*)(void *));
 
-void density_teleport_free(density_teleport *);
+void density_memory_teleport_store(density_memory_teleport *, density_byte *, const uint_fast64_t);
 
-void density_teleport_copy(density_teleport*, density_memory_location*, uint_fast64_t);
+density_memory_location *density_memory_teleport_read(density_memory_teleport *, uint_fast64_t);
+
+uint_fast64_t density_memory_teleport_available(density_memory_teleport *);
+
+void density_memory_teleport_copy(density_memory_teleport *, density_memory_location *, uint_fast64_t);
 
 #endif

@@ -143,7 +143,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(d
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_process(density_teleport *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state, const density_bool flush) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_process(density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state, const density_bool flush) {
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
 
@@ -156,13 +156,13 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_proces
 
         case DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURE:
             if (flush) {
-                uint_fast64_t remaining = density_teleport_available(in) - sizeof(density_block_footer) - sizeof(density_main_footer);
+                uint_fast64_t remaining = density_memory_teleport_available(in) - sizeof(density_block_footer) - sizeof(density_main_footer);
                 if(remaining < DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE) {
-                    density_teleport_copy(in, out, remaining);
+                    density_memory_teleport_copy(in, out, remaining);
                     return DENSITY_KERNEL_DECODE_STATE_FINISHED;
                 }
             }
-            if (!(readMemoryLocation = density_teleport_access(in, sizeof(density_chameleon_signature))))
+            if (!(readMemoryLocation = density_memory_teleport_read(in, sizeof(density_chameleon_signature))))
                 return DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT_BUFFER;
             density_chameleon_decode_read_signature(readMemoryLocation, state);
             if (readMemoryLocation->available_bytes)
@@ -171,7 +171,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_proces
             state->process = DENSITY_CHAMELEON_DECODE_PROCESS_DECOMPRESS_BODY;
 
         case DENSITY_CHAMELEON_DECODE_PROCESS_DECOMPRESS_BODY:
-            if (!(readMemoryLocation = density_teleport_access(in, state->bodyLength)))
+            if (!(readMemoryLocation = density_memory_teleport_read(in, state->bodyLength)))
                 return DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT_BUFFER;
             density_chameleon_decode_process_data(readMemoryLocation, out, state);
             if (readMemoryLocation->available_bytes)

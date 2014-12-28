@@ -35,9 +35,9 @@
 #include "globals.h"
 #include "block.h"
 #include "density_api.h"
-#include "teleport.h"
+#include "memory_teleport.h"
 #include "memory_location.h"
-#include "teleport.h"
+#include "memory_teleport.h"
 
 #pragma pack(push)
 #pragma pack(4)
@@ -47,7 +47,7 @@ typedef struct {
 } density_mode_marker;
 #pragma pack(pop)
 
-uint_fast32_t density_block_mode_marker_read(density_teleport *, density_mode_marker *);
+uint_fast32_t density_block_mode_marker_read(density_memory_location *, density_mode_marker *);
 uint_fast32_t density_block_mode_marker_write(density_memory_location*, const DENSITY_BLOCK_TYPE);
 
 #endif

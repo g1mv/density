@@ -48,7 +48,7 @@
 #include "kernel_encode.h"
 #include "density_api.h"
 #include "globals.h"
-#include "teleport.h"
+#include "memory_teleport.h"
 #include "memory_location.h"
 
 #define DENSITY_CHAMELEON_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (sizeof(density_chameleon_signature) + sizeof(uint32_t) * bitsizeof(density_chameleon_signature))
@@ -79,7 +79,7 @@ typedef struct {
 
 DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *);
 
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_process(density_teleport *, density_memory_location *, density_chameleon_encode_state *, const density_bool);
+DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_process(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *, const density_bool);
 
 DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_chameleon_encode_state *);
 

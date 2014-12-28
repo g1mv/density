@@ -36,20 +36,14 @@
 #include <stdbool.h>
 
 /***********************************************************************************************************************
-*                                                                                                                     *
-* Structures useful for the API                                                                                       *
-*                                                                                                                     *
-***********************************************************************************************************************/
+ *                                                                                                                     *
+ * Structures useful for the API                                                                                       *
+ *                                                                                                                     *
+ ***********************************************************************************************************************/
 
 
 typedef uint8_t density_byte;
 typedef bool density_bool;
-typedef struct {
-    union {
-        uint64_t as_uint64_t;
-        density_byte as_bytes[8];
-    };
-} density_main_header_parameters;
 
 typedef enum {
     DENSITY_COMPRESSION_MODE_COPY = 0,
@@ -69,23 +63,23 @@ typedef enum {
     DENSITY_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK = 1
 } DENSITY_BLOCK_TYPE;
 
-/*typedef enum {
-    DENSITY_BUFFERS_STATE_OK = 0,                                       // ready to continue
-    DENSITY_BUFFERS_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                // output buffer size is too small
-    DENSITY_BUFFERS_STATE_ERROR_INVALID_STATE                           // error during processing
-} DENSITY_BUFFERS_STATE;*/
-
 typedef enum {
     DENSITY_STREAM_STATE_READY = 0,                                     // ready to continue
     DENSITY_STREAM_STATE_STALL_ON_INPUT_BUFFER,                         // input buffer has been completely read
     DENSITY_STREAM_STATE_STALL_ON_OUTPUT_BUFFER,                        // there is not enough space left in the output buffer to continue
-    DENSITY_STREAM_STATE_ERROR_INPUT_BUFFER_SIZE_NOT_MULTIPLE_OF_32,    // size of input buffer is not a multiple of 32
     DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // output buffer size is too small
     DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE                   // error during processing
 } DENSITY_STREAM_STATE;
 
 #pragma pack(push)
 #pragma pack(4)
+
+typedef struct {
+    union {
+        uint64_t as_uint64_t;
+        density_byte as_bytes[8];
+    };
+} density_main_header_parameters;
 
 typedef struct {
     density_byte version[3];
@@ -95,39 +89,17 @@ typedef struct {
     density_main_header_parameters parameters;
 } density_main_header;
 
-typedef struct {
-    density_byte *pointer;
-    uint_fast64_t available_bytes;
-} density_memory_location;
-
-typedef enum {
-    DENSITY_TELEPORT_INPUT_SOURCE_INDIRECT_ACCESS,
-    DENSITY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS
-} DENSITY_TELEPORT_INPUT_SOURCE;
+#pragma pack(pop)
 
 typedef struct {
-    density_byte *pointer;
-    uint_fast64_t position;
-} density_staging_memory_location;
-
-typedef struct {
-    DENSITY_TELEPORT_INPUT_SOURCE source;
-    density_staging_memory_location *stagingMemoryLocation;
-    density_memory_location *indirectMemoryLocation;
-    density_memory_location *directMemoryLocation;
-} density_teleport;
-
-typedef struct {
-    density_teleport* in;
+    void *in;
     uint_fast64_t *in_total_read;
 
-    density_memory_location* out;
+    void *out;
     uint_fast64_t *out_total_written;
 
     void *internal_state;
 } density_stream;
-
-#pragma pack(pop)
 
 #endif
 

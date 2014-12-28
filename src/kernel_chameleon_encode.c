@@ -172,7 +172,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(d
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_process(density_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state, const density_bool flush) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_process(density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state, const density_bool flush) {
     DENSITY_KERNEL_ENCODE_STATE returnState;
     uint32_t hash;
     uint64_t chunk;
@@ -190,7 +190,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_proces
         case
             DENSITY_CHAMELEON_ENCODE_PROCESS_COMPRESS:
             while (true) {
-                if (!(readMemoryLocation = density_teleport_access(in, 64))) {
+                if (!(readMemoryLocation = density_memory_teleport_read(in, 64))) {
                     if (flush) {
                         density_chameleon_encode_copy_remaining(out, in->directMemoryLocation);
                         return DENSITY_KERNEL_ENCODE_STATE_FINISHED;

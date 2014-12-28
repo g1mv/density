@@ -31,7 +31,7 @@
 
 #include "main_header.h"
 
-DENSITY_FORCE_INLINE uint_fast32_t density_main_header_read(density_teleport *restrict in, density_main_header *restrict header) {
+DENSITY_FORCE_INLINE uint_fast32_t density_main_header_read(density_memory_teleport *restrict in, density_main_header *restrict header) {
     density_byte *pointer = in->directMemoryLocation->pointer;
     header->version[0] = *(pointer);
     header->version[1] = *(pointer + 1);

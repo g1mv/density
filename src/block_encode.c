@@ -61,13 +61,13 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_mode_
     if (sizeof(density_mode_marker) > out->available_bytes)
         return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
 
-    switch (state->blockType) {
+    switch (state->blockMode) {
         case DENSITY_BLOCK_MODE_COPY:
             break;
 
         default:
             if (state->totalWritten > state->totalRead)
-                state->blockType = DENSITY_BLOCK_MODE_COPY;
+                state->blockMode = DENSITY_BLOCK_MODE_COPY;
             break;
     }
 
@@ -78,21 +78,22 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_mode_
     return DENSITY_BLOCK_ENCODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE void density_block_encode_update_totals(density_teleport * restrict in, density_memory_location* restrict out, density_block_encode_state *restrict state, const uint_fast64_t availableInBefore, const uint_fast64_t availableOutBefore) {
+DENSITY_FORCE_INLINE void density_block_encode_update_totals(density_memory_teleport * restrict in, density_memory_location* restrict out, density_block_encode_state *restrict state, const uint_fast64_t availableInBefore, const uint_fast64_t availableOutBefore) {
     state->totalRead += availableInBefore - in->directMemoryLocation->available_bytes;
     state->totalWritten += availableOutBefore - out->available_bytes;
 }
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, void *kernelState, DENSITY_KERNEL_ENCODE_STATE (*kernelInit)(void *), DENSITY_KERNEL_ENCODE_STATE (*kernelProcess)(density_memory_location*, density_memory_location*, void *, const density_bool), DENSITY_KERNEL_ENCODE_STATE (*kernelFinish)(void *)) {
+DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, void *kernelState, DENSITY_KERNEL_ENCODE_STATE (*kernelInit)(void *), DENSITY_KERNEL_ENCODE_STATE (*kernelProcess)(density_memory_teleport *, density_memory_location*, void *, const density_bool), DENSITY_KERNEL_ENCODE_STATE (*kernelFinish)(void *)) {
     state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER;
     state->blockType = blockType;
     state->targetMode = mode;
     state->currentMode = mode;
+    state->blockMode = mode ? DENSITY_BLOCK_MODE_KERNEL : DENSITY_BLOCK_MODE_COPY;
 
     state->totalRead = 0;
     state->totalWritten = 0;
 
-    switch (mode) {
+    switch (state->blockMode) {
         case DENSITY_BLOCK_MODE_KERNEL:
             state->kernelEncodeState = kernelState;
             state->kernelEncodeInit = kernelInit;
@@ -108,7 +109,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(densit
     return DENSITY_BLOCK_ENCODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(density_teleport * restrict in, density_memory_location* restrict out, density_block_encode_state *restrict state, const density_bool flush) {
+DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(density_memory_teleport * restrict in, density_memory_location* restrict out, density_block_encode_state *restrict state, const density_bool flush) {
     DENSITY_BLOCK_ENCODE_STATE encodeState;
     DENSITY_KERNEL_ENCODE_STATE kernelEncodeState;
     uint_fast64_t availableInBefore;
@@ -145,7 +146,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(den
                 availableInBefore = in->directMemoryLocation->available_bytes;
                 availableOutBefore = out->available_bytes;
 
-                switch (state->currentMode) {
+                switch (state->blockMode) {
                     case DENSITY_BLOCK_MODE_COPY:
                         blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalRead - state->currentBlockData.inStart);
                         inRemaining = in->directMemoryLocation->available_bytes;

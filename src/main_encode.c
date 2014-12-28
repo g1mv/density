@@ -59,7 +59,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_write_footer(density_me
     return DENSITY_ENCODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE void density_encode_update_totals(density_teleport *restrict in, density_memory_location *restrict out, density_encode_state *restrict state, const uint_fast64_t availableInBefore, const uint_fast64_t availableOutBefore) {
+DENSITY_FORCE_INLINE void density_encode_update_totals(density_memory_teleport *restrict in, density_memory_location *restrict out, density_encode_state *restrict state, const uint_fast64_t availableInBefore, const uint_fast64_t availableOutBefore) {
     state->totalRead += availableInBefore - in->directMemoryLocation->available_bytes;
     state->totalWritten += availableOutBefore - out->available_bytes;
 }
@@ -74,15 +74,15 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_memory_loc
 
     switch (mode) {
         case DENSITY_COMPRESSION_MODE_COPY:
-            density_block_encode_init(&state->blockEncodeState, DENSITY_BLOCK_MODE_COPY, blockType, NULL, NULL, NULL, NULL);
+            density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_COPY, blockType, NULL, NULL, NULL, NULL);
             break;
 
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            density_block_encode_init(&state->blockEncodeState, DENSITY_BLOCK_MODE_KERNEL, blockType, malloc(sizeof(density_chameleon_encode_state)), (void *) density_chameleon_encode_init, (void *) density_chameleon_encode_process, (void *) density_chameleon_encode_finish);
+            density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, blockType, malloc(sizeof(density_chameleon_encode_state)), (void *) density_chameleon_encode_init, (void *) density_chameleon_encode_process, (void *) density_chameleon_encode_finish);
             break;
 
         case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
-            //density_block_encode_init(&state->blockEncodeState, DENSITY_BLOCK_MODE_KERNEL, blockType, malloc(sizeof(density_mandala_encode_state)), (void *) density_mandala_encode_init, (void *) density_mandala_encode_process, (void *) density_mandala_encode_finish);
+            //density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM, blockType, malloc(sizeof(density_mandala_encode_state)), (void *) density_mandala_encode_init, (void *) density_mandala_encode_process, (void *) density_mandala_encode_finish);
             break;
     }
 
@@ -96,7 +96,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_memory_loc
     }
 }
 
-DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_process(density_teleport *restrict in, density_memory_location *restrict out, density_encode_state *restrict state, const density_bool flush) {
+DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_process(density_memory_teleport *restrict in, density_memory_location *restrict out, density_encode_state *restrict state, const density_bool flush) {
     DENSITY_BLOCK_ENCODE_STATE blockEncodeState;
     uint_fast64_t availableInBefore;
     uint_fast64_t availableOutBefore;

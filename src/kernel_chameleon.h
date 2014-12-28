@@ -43,7 +43,7 @@
 #define DENSITY_CHAMELEON_H
 
 #include "globals.h"
-#include "teleport.h"
+#include "memory_teleport.h"
 #include "density_api.h"
 #include "memory_location.h"
 
