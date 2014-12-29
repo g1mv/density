@@ -30,6 +30,8 @@
  */
 
 #include "stream.h"
+#include "density_api_data_structures.h"
+#include "memory_location.h"
 
 DENSITY_FORCE_INLINE density_stream *density_stream_create(void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
     density_stream *stream;
@@ -74,6 +76,10 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_update_output(density_s
     density_memory_location_encapsulate(stream->out, out, availableOut);
 
     return DENSITY_STREAM_STATE_READY;
+}
+
+DENSITY_FORCE_INLINE uint_fast64_t density_stream_output_available(density_stream* stream) {
+    return ((density_memory_location*)stream->out)->available_bytes;
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_check_conformity(density_stream *stream) {

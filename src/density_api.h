@@ -129,6 +129,13 @@ DENSITY_STREAM_STATE density_stream_update_input(density_stream *stream, uint8_t
 DENSITY_STREAM_STATE density_stream_update_output(density_stream *stream, uint8_t *out, const uint_fast64_t availableOut);
 
 /*
+ * Returns the remaining available bytes on the output memory location
+ *
+ * @param stream the stream
+ */
+uint_fast64_t density_stream_output_available(density_stream* stream);
+
+/*
  * Initialize compression
  *
  * @param stream the stream
