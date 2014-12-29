@@ -78,8 +78,8 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_update_output(density_s
     return DENSITY_STREAM_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE uint_fast64_t density_stream_output_available(density_stream* stream) {
-    return ((density_memory_location*)stream->out)->available_bytes;
+DENSITY_FORCE_INLINE uint_fast64_t density_stream_output_available_for_use(density_stream *stream) {
+    return density_memory_location_used((density_memory_location *) stream->out);
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_check_conformity(density_stream *stream) {

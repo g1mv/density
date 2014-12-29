@@ -40,6 +40,7 @@
 typedef struct {
     density_byte *pointer;
     uint_fast64_t available_bytes;
+    uint_fast64_t initial_available_bytes;
 } density_memory_location;
 
 density_memory_location* density_memory_location_allocate(void *(*)(size_t));
@@ -47,5 +48,7 @@ density_memory_location* density_memory_location_allocate(void *(*)(size_t));
 void density_memory_location_free(density_memory_location*, void (*)(void *));
 
 void density_memory_location_encapsulate(density_memory_location *, density_byte *, uint_fast64_t);
+
+uint_fast64_t density_memory_location_used(density_memory_location *);
 
 #endif
