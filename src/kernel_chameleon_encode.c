@@ -170,7 +170,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_proces
     uint64_t chunk;
     density_byte *pointerOutBefore;
     density_memory_location *readMemoryLocation;
-    //const uint_fast64_t limit = in->available_bytes % DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE;
 
     switch (state->process) {
         case

@@ -87,7 +87,7 @@ uint8_t density_version_revision(void);
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-density_stream * density_stream_allocate(void *(*mem_alloc)(size_t));
+density_stream *density_stream_create(void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 /*
  * Frees a stream from memory. This method uses a supplied memory freeing function.
@@ -95,7 +95,7 @@ density_stream * density_stream_allocate(void *(*mem_alloc)(size_t));
  *
  * @param stream the stream
  */
-void density_stream_free(density_stream* stream, void (*mem_free)(void *));
+void density_stream_destroy(density_stream *stream);
 
 /*
  * Prepare a stream with the encapsulated input/output buffers. This function *must* be called upon changing either buffer pointers / sizes.

@@ -62,6 +62,7 @@ DENSITY_FORCE_INLINE void density_memory_teleport_store(density_memory_teleport 
 
 DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(density_memory_teleport *restrict teleport, uint_fast64_t bytes) {
     uint_fast64_t missingBytes;
+    uint_fast64_t availableBytes;
     switch (teleport->source) {
         case DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_INDIRECT_ACCESS:
             missingBytes = bytes - teleport->stagingMemoryLocation->position;
@@ -77,11 +78,14 @@ DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(densi
                 return NULL;
             }
         case DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS:
-            if (teleport->directMemoryLocation->available_bytes >= bytes)
+            availableBytes = teleport->directMemoryLocation->available_bytes;
+            if (availableBytes >= bytes)
                 return teleport->directMemoryLocation;
             else {
-                memcpy(teleport->stagingMemoryLocation->pointer, teleport->directMemoryLocation->pointer, teleport->directMemoryLocation->available_bytes);
-                teleport->stagingMemoryLocation->position += teleport->directMemoryLocation->available_bytes;
+                memcpy(teleport->stagingMemoryLocation->pointer, teleport->directMemoryLocation->pointer, availableBytes);
+                teleport->directMemoryLocation->pointer += availableBytes;
+                teleport->directMemoryLocation->available_bytes = 0;
+                teleport->stagingMemoryLocation->position += availableBytes;
                 teleport->source = DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_INDIRECT_ACCESS;
                 return NULL;
             }
@@ -114,6 +118,7 @@ DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *
             if (fromDirect) {
                 memcpy(out->pointer, in->directMemoryLocation->pointer, fromDirect);
                 in->directMemoryLocation->pointer += fromDirect;
+                in->directMemoryLocation->available_bytes -= fromDirect;
                 out->pointer += fromDirect;
                 out->available_bytes -= fromDirect;
                 density_memory_teleport_reset_staging(in);
@@ -126,6 +131,7 @@ DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *
 
             memcpy(out->pointer, in->directMemoryLocation->pointer, bytes);
             in->directMemoryLocation->pointer += bytes;
+            in->directMemoryLocation->available_bytes -= bytes;
             out->pointer += bytes;
             out->available_bytes -= bytes;
             return;
