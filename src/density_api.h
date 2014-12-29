@@ -111,6 +111,24 @@ void density_stream_destroy(density_stream *stream);
 DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size);
 
 /*
+ * Update the stream's input
+ *
+ * @param stream the stream
+ * @param in a byte array
+ * @param availableIn the size of the byte array
+ */
+DENSITY_STREAM_STATE density_stream_update_input(density_stream *stream, uint8_t *in, const uint_fast64_t availableIn);
+
+/*
+ * Update the stream's output
+ *
+ * @param stream the stream
+ * @param out a byte array
+ * @param availableOut the size of the byte array
+ */
+DENSITY_STREAM_STATE density_stream_update_output(density_stream *stream, uint8_t *out, const uint_fast64_t availableOut);
+
+/*
  * Initialize compression
  *
  * @param stream the stream
