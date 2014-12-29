@@ -57,6 +57,7 @@ DENSITY_FORCE_INLINE void density_stream_destroy(density_stream *stream) {
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream *restrict stream, uint8_t *restrict in, const uint_fast64_t availableIn, uint8_t *restrict out, const uint_fast64_t availableOut) {
+    density_memory_teleport_reset_staging(stream->in);
     density_stream_update_input(stream, in, availableIn);
     density_stream_update_output(stream, out, availableOut);
 
@@ -66,7 +67,6 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream 
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_update_input(density_stream *restrict stream, uint8_t *in, const uint_fast64_t availableIn) {
-    density_memory_teleport_reset_staging(stream->in);
     density_memory_teleport_store(stream->in, in, availableIn);
 
     return DENSITY_STREAM_STATE_READY;
