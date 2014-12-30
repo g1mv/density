@@ -192,8 +192,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_proces
                     return returnState;
                 pointerOutBefore = out->pointer;
                 density_chameleon_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
-                if (readMemoryLocation->available_bytes)
-                    readMemoryLocation->available_bytes -= DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE;
+                readMemoryLocation->available_bytes -= DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE;
                 out->available_bytes -= (out->pointer - pointerOutBefore);
             }
     }
