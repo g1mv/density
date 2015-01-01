@@ -82,9 +82,20 @@ DENSITY_FORCE_INLINE uint_fast64_t density_stream_output_available_for_use(densi
     return density_memory_location_used((density_memory_location *) stream->out);
 }
 
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_check_conformity(density_stream *stream) {
+    if (((density_memory_location *) stream->out)->initial_available_bytes < DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE)
+        return DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL;
+
+    return DENSITY_STREAM_STATE_READY;
+}
+
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_init(density_stream *restrict stream, const DENSITY_COMPRESSION_MODE compressionMode, const DENSITY_ENCODE_OUTPUT_TYPE outputType, const DENSITY_BLOCK_TYPE blockType) {
     if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_PREPARED)
         return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+
+    DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
+    if (streamState)
+        return streamState;
 
     DENSITY_ENCODE_STATE encodeState = density_encode_init(stream->out, &((density_stream_state *) stream->internal_state)->internal_encode_state, compressionMode, outputType, blockType, ((density_stream_state *) stream->internal_state)->mem_alloc);
     switch (encodeState) {
@@ -112,6 +123,10 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress(density_stream
     if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_COMPRESSION_INITED)
         return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
+    DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
+    if (streamState)
+        return streamState;
+
     encodeState = density_encode_process(stream->in, stream->out, &((density_stream_state *) stream->internal_state)->internal_encode_state, flush);
     switch (encodeState) {
         case DENSITY_ENCODE_STATE_READY:
@@ -136,6 +151,10 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_finish(density
     if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_COMPRESSION_DATA_FINISHED)
         return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
+    DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
+    if (streamState)
+        return streamState;
+
     DENSITY_ENCODE_STATE encodeState = density_encode_finish(stream->out, &((density_stream_state *) stream->internal_state)->internal_encode_state, ((density_stream_state *) stream->internal_state)->mem_free);
     switch (encodeState) {
         case DENSITY_ENCODE_STATE_READY:
@@ -156,6 +175,10 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_finish(density
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream) {
     if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_PREPARED)
         return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+
+    DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
+    if (streamState)
+        return streamState;
 
     DENSITY_DECODE_STATE decodeState = density_decode_init(stream->in, &((density_stream_state *) stream->internal_state)->internal_decode_state, ((density_stream_state *) stream->internal_state)->mem_alloc);
     switch (decodeState) {
@@ -180,6 +203,10 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_init(density
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress(density_stream *stream, const density_bool flush) {
     if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_DECOMPRESSION_INITED)
         return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+
+    DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
+    if (streamState)
+        return streamState;
 
     DENSITY_DECODE_STATE decodeState = density_decode_process(stream->in, stream->out, &((density_stream_state *) stream->internal_state)->internal_decode_state, flush);
     switch (decodeState) {
