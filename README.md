@@ -9,7 +9,7 @@ DENSITY features two APIs to enable quick integration in any project.
 
 Benchmark
 ---------
-<a href=http://quixdb.github.io/squash/benchmarks/core-i3-2105.html>Click here for a benchmark</a> of DENSITY's fastest mode compared to other libraries, on an Intel® Core™ i3-2105 (x86 64), Asus P8H61-H motherboard with Fedora 19. It is possible to run yours using <a href=https://github.com/quixdb/squash>this project</a>.
+[Click here for a benchmark](http://quixdb.github.io/squash/benchmarks/core-i3-2105.html) of DENSITY's fastest mode compared to other libraries, on an Intel® Core™ i3-2105 (x86 64), Asus P8H61-H motherboard with Fedora 19. It is possible to run yours using [this project](https://github.com/quixdb/squash).
 
 API
 ---
@@ -70,6 +70,8 @@ When this is done you can start using the **DENSITY API** :
     free(outDecompressed);
 
 And that's it ! We've done a compression/decompression round trip with a few lines !
+
+If you want a more elaborate example you can checkout [the SHARC project](https://github.com/centaurean/sharc)
 
 Output
 ------
