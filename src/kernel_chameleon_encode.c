@@ -181,9 +181,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_proces
         case
             DENSITY_CHAMELEON_ENCODE_PROCESS_COMPRESS:
             while (true) {
-                if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE))) {
+                uint_fast64_t remaining = density_memory_teleport_available(in);
+                if (remaining < DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE) {
                     if (flush) {
-                        density_memory_teleport_copy(in, out, density_memory_teleport_available(in));
+                        density_memory_teleport_copy(in, out, remaining);
                         return DENSITY_KERNEL_ENCODE_STATE_FINISHED;
                     } else
                         return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
@@ -191,6 +192,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_proces
                 if ((returnState = density_chameleon_encode_check_state(out, state)))
                     return returnState;
                 pointerOutBefore = out->pointer;
+                readMemoryLocation = density_memory_teleport_read(in, DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE);
                 density_chameleon_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
                 readMemoryLocation->available_bytes -= DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE;
                 out->available_bytes -= (out->pointer - pointerOutBefore);

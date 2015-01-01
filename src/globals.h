@@ -47,12 +47,8 @@
 #elif defined(__clang__)
 #define DENSITY_FORCE_INLINE inline __attribute__((always_inline))
 #else
-#define DENSITY_FORCE_INLINE inline __attribute__((always_inline))
-//#warning Impossible to force functions inlining. Expect performance issues.
+#warning Impossible to force functions inlining. Expect performance issues.
 #endif
-
-//#define DENSITY_FORCE_INLINE __inline__ __attribute__((always_inline))
-//#define ensure_forceinline __attribute__((always_inline)) // inline or die
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define DENSITY_LITTLE_ENDIAN_64(b)   ((uint64_t)b)
@@ -83,7 +79,7 @@
 #define bitsizeof(x) (8 * sizeof(x))
 
 #define DENSITY_MAJOR_VERSION               0
-#define DENSITY_MINOR_VERSION               9
-#define DENSITY_REVISION                    13
+#define DENSITY_MINOR_VERSION               10
+#define DENSITY_REVISION                    0
 
 #endif

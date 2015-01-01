@@ -127,8 +127,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_process(density_memory_
                 break;
 
             default:
-                return
-                        DENSITY_ENCODE_STATE_ERROR;
+                return DENSITY_ENCODE_STATE_ERROR;
         }
     }
 }

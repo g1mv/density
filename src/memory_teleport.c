@@ -36,9 +36,11 @@ DENSITY_FORCE_INLINE density_memory_teleport *density_memory_teleport_allocate(u
     density_memory_teleport *teleport = (density_memory_teleport *) mem_alloc(sizeof(density_memory_teleport));
     teleport->stagingMemoryLocation = (density_staging_memory_location *) mem_alloc(sizeof(density_staging_memory_location));
     teleport->stagingMemoryLocation->pointer = (density_byte *) mem_alloc(size * sizeof(density_byte));
-    teleport->directMemoryLocation = (density_memory_location *) mem_alloc(sizeof(density_memory_location));
-    teleport->indirectMemoryLocation = (density_memory_location *) mem_alloc(sizeof(density_memory_location));
     density_memory_teleport_reset_staging(teleport);
+    teleport->indirectMemoryLocation = (density_memory_location *) mem_alloc(sizeof(density_memory_location));
+    teleport->indirectMemoryLocation->available_bytes = 0;
+    teleport->directMemoryLocation = (density_memory_location *) mem_alloc(sizeof(density_memory_location));
+    teleport->directMemoryLocation->available_bytes = 0;
     return teleport;
 }
 
@@ -62,11 +64,11 @@ DENSITY_FORCE_INLINE void density_memory_teleport_store(density_memory_teleport 
 
 DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(density_memory_teleport *restrict teleport, uint_fast64_t bytes) {
     uint_fast64_t missingBytes;
-    uint_fast64_t availableBytes;
+    uint_fast64_t availableBytes = teleport->directMemoryLocation->available_bytes;
     switch (teleport->source) {
         case DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_INDIRECT_ACCESS:
             missingBytes = bytes - teleport->stagingMemoryLocation->position;
-            if (teleport->directMemoryLocation->available_bytes >= missingBytes) {
+            if (availableBytes >= missingBytes) {
                 memcpy(teleport->stagingMemoryLocation->pointer + teleport->stagingMemoryLocation->position, teleport->directMemoryLocation->pointer, missingBytes);
                 teleport->indirectMemoryLocation->pointer = teleport->stagingMemoryLocation->pointer;
                 teleport->indirectMemoryLocation->available_bytes = bytes;
@@ -75,14 +77,13 @@ DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(densi
                 density_memory_teleport_reset_staging(teleport);
                 return teleport->indirectMemoryLocation;
             } else {
-                memcpy(teleport->stagingMemoryLocation->pointer + teleport->stagingMemoryLocation->position, teleport->directMemoryLocation->pointer, teleport->directMemoryLocation->available_bytes);
-                teleport->stagingMemoryLocation->position += teleport->directMemoryLocation->available_bytes;
-                teleport->directMemoryLocation->pointer += teleport->directMemoryLocation->available_bytes;
+                memcpy(teleport->stagingMemoryLocation->pointer + teleport->stagingMemoryLocation->position, teleport->directMemoryLocation->pointer, availableBytes);
+                teleport->stagingMemoryLocation->position += availableBytes;
+                teleport->directMemoryLocation->pointer += availableBytes;
                 teleport->directMemoryLocation->available_bytes = 0;
                 return NULL;
             }
         case DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS:
-            availableBytes = teleport->directMemoryLocation->available_bytes;
             if (availableBytes >= bytes)
                 return teleport->directMemoryLocation;
             else {
@@ -97,7 +98,7 @@ DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(densi
 }
 
 DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available(density_memory_teleport *teleport) {
-    return teleport->directMemoryLocation->available_bytes + teleport->stagingMemoryLocation->position;
+    return teleport->directMemoryLocation->available_bytes + teleport->indirectMemoryLocation->available_bytes + teleport->stagingMemoryLocation->position;
 }
 
 DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *in, density_memory_location *out, uint_fast64_t bytes) {
