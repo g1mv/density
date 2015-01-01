@@ -98,7 +98,7 @@ DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(densi
 }
 
 DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available(density_memory_teleport *teleport) {
-    return teleport->directMemoryLocation->available_bytes + teleport->indirectMemoryLocation->available_bytes + teleport->stagingMemoryLocation->position;
+    return teleport->directMemoryLocation->available_bytes + teleport->stagingMemoryLocation->position;
 }
 
 DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *in, density_memory_location *out, uint_fast64_t bytes) {

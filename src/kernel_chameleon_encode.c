@@ -186,8 +186,12 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_proces
                     if (flush) {
                         density_memory_teleport_copy(in, out, remaining);
                         return DENSITY_KERNEL_ENCODE_STATE_FINISHED;
-                    } else
-                        return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
+                    } else {
+                        if(!density_memory_teleport_read(in, DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE))
+                            return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
+                        else
+                            return DENSITY_KERNEL_ENCODE_STATE_ERROR;
+                    }
                 }
                 if ((returnState = density_chameleon_encode_check_state(out, state)))
                     return returnState;
