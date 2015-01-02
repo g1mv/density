@@ -143,7 +143,7 @@ DENSITY_FORCE_INLINE void density_mandala_encode_kernel(density_memory_location 
     state->shift += 2;
 }
 
-DENSITY_FORCE_INLINE void density_mandala_encode_process_chunk(uint64_t *chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_mandala_encode_state *restrict state) {
+DENSITY_FORCE_INLINE void density_mandala_encode_process_chunk(uint64_t *restrict chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_mandala_encode_state *restrict state) {
     *chunk = *(uint64_t *) (in->pointer);
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     density_mandala_encode_kernel(out, hash, (uint32_t) (*chunk & 0xFFFFFFFF), state);
@@ -156,14 +156,14 @@ DENSITY_FORCE_INLINE void density_mandala_encode_process_chunk(uint64_t *chunk, 
     in->available_bytes -= sizeof(uint64_t);
 }
 
-DENSITY_FORCE_INLINE void density_mandala_encode_process_span(uint64_t *chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_mandala_encode_state *restrict state) {
+DENSITY_FORCE_INLINE void density_mandala_encode_process_span(uint64_t *restrict chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_mandala_encode_state *restrict state) {
     density_mandala_encode_process_chunk(chunk, in, out, hash, state);
     density_mandala_encode_process_chunk(chunk, in, out, hash, state);
     density_mandala_encode_process_chunk(chunk, in, out, hash, state);
     density_mandala_encode_process_chunk(chunk, in, out, hash, state);
 }
 
-DENSITY_FORCE_INLINE void density_mandala_encode_process_unit(uint64_t *chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_mandala_encode_state *restrict state) {
+DENSITY_FORCE_INLINE void density_mandala_encode_process_unit(uint64_t *restrict chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_mandala_encode_state *restrict state) {
     density_mandala_encode_process_span(chunk, in, out, hash, state);
     density_mandala_encode_process_span(chunk, in, out, hash, state);
 }
