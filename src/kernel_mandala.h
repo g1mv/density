@@ -26,56 +26,44 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 18/10/13 23:50
+ * 06/12/13 20:10
+ *
+ * -----------------
+ * Mandala algorithm
+ * -----------------
+ *
+ * Author(s)
+ * Guillaume Voirin (https://github.com/gpnuma)
+ * Piotr Tarsa (https://github.com/tarsa)
+ *
+ * Description
+ * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#ifndef DENSITY_MAIN_DECODE_H
-#define DENSITY_MAIN_DECODE_H
+#ifndef DENSITY_MANDALA_H
+#define DENSITY_MANDALA_H
 
-#include "block_header.h"
-#include "block_footer.h"
-#include "main_header.h"
-#include "main_footer.h"
-#include "block_mode_marker.h"
-#include "block_decode.h"
-#include "kernel_chameleon_decode.h"
-#include "kernel_mandala_decode.h"
-#include "density_api.h"
-#include "block_encode.h"
-#include "memory_location.h"
+#include "globals.h"
 
-typedef enum {
-    DENSITY_DECODE_STATE_READY = 0,
-    DENSITY_DECODE_STATE_STALL_ON_OUTPUT_BUFFER,
-    DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER,
-    DENSITY_DECODE_STATE_ERROR
-} DENSITY_DECODE_STATE;
+#define DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES_SHIFT                    12
+#define DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES                          (1 << DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES_SHIFT)
+
+#define DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT         8
+#define DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES               (1 << DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT)
+
+#define DENSITY_MANDALA_HASH_BITS                                           16
+#define DENSITY_MANDALA_HASH_MULTIPLIER                                     (uint32_t)2641295638lu
+
+#define DENSITY_MANDALA_HASH_ALGORITHM(hash32, value32)                     hash32 = value32 * DENSITY_MANDALA_HASH_MULTIPLIER;\
+                                                                            hash32 = (hash32 >> (32 - DENSITY_MANDALA_HASH_BITS));
 
 typedef enum {
-    DENSITY_DECODE_PROCESS_READ_BLOCKS,
-    DENSITY_DECODE_PROCESS_READ_FOOTER,
-    DENSITY_DECODE_PROCESS_FINISHED
-} DENSITY_DECODE_PROCESS;
+    DENSITY_MANDALA_SIGNATURE_FLAG_MAP_A = 0x0,
+    DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED = 0x1,
+    DENSITY_MANDALA_SIGNATURE_FLAG_MAP_B = 0x2,
+    DENSITY_MANDALA_SIGNATURE_FLAG_CHUNK = 0x3,
+} DENSITY_MANDALA_SIGNATURE_FLAG;
 
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    DENSITY_DECODE_PROCESS process;
-
-    uint_fast64_t totalRead;
-    uint_fast64_t totalWritten;
-
-    density_main_header header;
-    density_main_footer footer;
-
-    density_block_decode_state blockDecodeState;
-} density_decode_state;
-#pragma pack(pop)
-
-DENSITY_DECODE_STATE density_decode_init(density_memory_teleport *, density_decode_state *, void *(*mem_alloc)(size_t));
-
-DENSITY_DECODE_STATE density_decode_process(density_memory_teleport *, density_memory_location *, density_decode_state *, const density_bool);
-
-DENSITY_DECODE_STATE density_decode_finish(density_memory_teleport *, density_decode_state *, void (*mem_free)(void *));
+typedef uint64_t                                                            density_mandala_signature;
 
 #endif

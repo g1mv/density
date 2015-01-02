@@ -71,7 +71,7 @@ When this is done you can start using the **DENSITY API** :
 
 And that's it ! We've done a compression/decompression round trip with a few lines !
 
-If you want a more elaborate example you can checkout [the SHARC project](https://github.com/centaurean/sharc)
+If you want a more elaborate example you can checkout [the SHARC project](https://github.com/centaurean/sharc).
 
 Output
 ------

@@ -26,56 +26,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 18/10/13 23:50
+ * 06/12/13 20:23
+ *
+ * -----------------
+ * Mandala algorithm
+ * -----------------
+ *
+ * Author(s)
+ * Guillaume Voirin (https://github.com/gpnuma)
+ * Piotr Tarsa (https://github.com/tarsa)
+ *
+ * Description
+ * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#ifndef DENSITY_MAIN_DECODE_H
-#define DENSITY_MAIN_DECODE_H
+#include "kernel_mandala_dictionary.h"
 
-#include "block_header.h"
-#include "block_footer.h"
-#include "main_header.h"
-#include "main_footer.h"
-#include "block_mode_marker.h"
-#include "block_decode.h"
-#include "kernel_chameleon_decode.h"
-#include "kernel_mandala_decode.h"
-#include "density_api.h"
-#include "block_encode.h"
-#include "memory_location.h"
+const density_mandala_dictionary density_mandala_empty_dictionary = {.entries = {{0}}};
 
-typedef enum {
-    DENSITY_DECODE_STATE_READY = 0,
-    DENSITY_DECODE_STATE_STALL_ON_OUTPUT_BUFFER,
-    DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER,
-    DENSITY_DECODE_STATE_ERROR
-} DENSITY_DECODE_STATE;
-
-typedef enum {
-    DENSITY_DECODE_PROCESS_READ_BLOCKS,
-    DENSITY_DECODE_PROCESS_READ_FOOTER,
-    DENSITY_DECODE_PROCESS_FINISHED
-} DENSITY_DECODE_PROCESS;
-
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    DENSITY_DECODE_PROCESS process;
-
-    uint_fast64_t totalRead;
-    uint_fast64_t totalWritten;
-
-    density_main_header header;
-    density_main_footer footer;
-
-    density_block_decode_state blockDecodeState;
-} density_decode_state;
-#pragma pack(pop)
-
-DENSITY_DECODE_STATE density_decode_init(density_memory_teleport *, density_decode_state *, void *(*mem_alloc)(size_t));
-
-DENSITY_DECODE_STATE density_decode_process(density_memory_teleport *, density_memory_location *, density_decode_state *, const density_bool);
-
-DENSITY_DECODE_STATE density_decode_finish(density_memory_teleport *, density_decode_state *, void (*mem_free)(void *));
-
-#endif
+DENSITY_FORCE_INLINE void density_mandala_dictionary_reset(density_mandala_dictionary *dictionary) {
+    memcpy(dictionary, &density_mandala_empty_dictionary, sizeof(density_mandala_dictionary));
+}

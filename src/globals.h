@@ -80,6 +80,6 @@
 
 #define DENSITY_MAJOR_VERSION               0
 #define DENSITY_MINOR_VERSION               10
-#define DENSITY_REVISION                    0
+#define DENSITY_REVISION                    1
 
 #endif
