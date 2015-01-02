@@ -168,16 +168,6 @@ DENSITY_FORCE_INLINE void density_mandala_encode_process_unit(uint64_t *chunk, d
     density_mandala_encode_process_span(chunk, in, out, hash, state);
 }
 
-DENSITY_FORCE_INLINE density_bool density_mandala_encode_attempt_copy(density_memory_location *restrict out, density_byte *restrict origin, const uint_fast32_t count) {
-    if (count <= out->available_bytes) {
-        memcpy(out->pointer, origin, count);
-        out->pointer += count;
-        out->available_bytes -= count;
-        return false;
-    }
-    return true;
-}
-
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_init(density_mandala_encode_state *state) {
     state->signaturesCount = 0;
     state->efficiencyChecked = 0;
