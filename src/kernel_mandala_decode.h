@@ -52,17 +52,16 @@
 #include "block_footer.h"
 #include "main_footer.h"
 #include "block_mode_marker.h"
+#include "kernel_mandala_encode.h"
 
-#define DENSITY_MANDALA_DECODE_MINIMUM_INPUT_LOOKAHEAD               (sizeof(density_mandala_signature) + sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
+//#define DENSITY_MANDALA_DECODE_MINIMUM_INPUT_LOOKAHEAD               (sizeof(density_mandala_signature) + sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
 #define DENSITY_MANDALA_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
-#define DENSITY_MANDALA_DECODE_PROCESS_UNIT_SIZE                     (sizeof(density_block_header) + sizeof(density_mode_marker) + sizeof(density_mandala_signature) + bitsizeof(density_mandala_signature) * sizeof(uint32_t))
+//#define DENSITY_MANDALA_DECODE_PROCESS_UNIT_SIZE                     (sizeof(density_block_header) + sizeof(density_mode_marker) + sizeof(density_mandala_signature) + bitsizeof(density_mandala_signature) * sizeof(uint32_t))
 
 typedef enum {
-    DENSITY_MANDALA_DECODE_PROCESS_SIGNATURES_AND_DATA_FAST,
-    DENSITY_MANDALA_DECODE_PROCESS_SIGNATURE_SAFE,
-    DENSITY_MANDALA_DECODE_PROCESS_DATA_FAST,
-    DENSITY_MANDALA_DECODE_PROCESS_DATA_SAFE,
-    DENSITY_MANDALA_DECODE_PROCESS_FINISH
+    DENSITY_MANDALA_DECODE_PROCESS_PREPARE_NEW_BLOCK,
+    DENSITY_MANDALA_DECODE_PROCESS_SIGNATURE,
+    DENSITY_MANDALA_DECODE_PROCESS_DECOMPRESS_BODY,
 } DENSITY_MANDALA_DECODE_PROCESS;
 
 #pragma pack(push)
@@ -74,14 +73,12 @@ typedef struct {
     uint_fast64_t resetCycle;
 
     density_mandala_signature signature;
+    uint_fast32_t bodyLength;
     uint_fast32_t shift;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
     uint_fast64_t endDataOverhead;
-
-    uint_fast64_t signatureBytes;
-    uint_fast64_t uncompressedChunkBytes;
 
     uint32_t lastHash;
 

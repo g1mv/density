@@ -125,7 +125,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_process(density_memory_
     }
 }
 
-DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_teleport *in, density_decode_state *restrict state, void (*mem_free)(void *)) {
+DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_teleport *restrict in, density_decode_state *restrict state, void (*mem_free)(void *)) {
     if (state->process ^ DENSITY_DECODE_PROCESS_READ_FOOTER)
         return DENSITY_DECODE_STATE_ERROR;
 

@@ -128,6 +128,7 @@ DENSITY_FORCE_INLINE void density_mandala_encode_kernel(density_memory_location 
             *found_b = *found_a;
             *found_a = chunk;
         } else {
+            density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_SIGNATURE_FLAG_MAP_A);
             *(uint16_t *) (out->pointer) = DENSITY_LITTLE_ENDIAN_16(*hash);
             out->pointer += sizeof(uint16_t);
         }
@@ -135,7 +136,7 @@ DENSITY_FORCE_INLINE void density_mandala_encode_kernel(density_memory_location 
     } else {
         density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED);
     }
-    state->lastHash = (uint16_t)*hash;
+    state->lastHash = (uint16_t) *hash;
 
     state->shift += 2;
 }
@@ -199,7 +200,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(
                         density_memory_teleport_copy(in, out, remaining);
                         return DENSITY_KERNEL_ENCODE_STATE_FINISHED;
                     } else {
-                        if(!density_memory_teleport_read(in, DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE))
+                        if (!density_memory_teleport_read(in, DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE))
                             return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
                         else
                             return DENSITY_KERNEL_ENCODE_STATE_ERROR;

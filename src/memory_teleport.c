@@ -101,7 +101,7 @@ DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available(density_mem
     return teleport->directMemoryLocation->available_bytes + teleport->stagingMemoryLocation->position;
 }
 
-DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *in, density_memory_location *out, uint_fast64_t bytes) {
+DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *restrict in, density_memory_location *restrict out, uint_fast64_t bytes) {
     uint_fast64_t fromStaging = 0;
     uint_fast64_t fromDirect = 0;
     switch (in->source) {

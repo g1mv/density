@@ -39,7 +39,7 @@ DENSITY_FORCE_INLINE uint_fast32_t density_block_header_read(density_memory_loca
     return sizeof(density_block_header);
 }
 
-DENSITY_FORCE_INLINE uint_fast32_t density_block_header_write(density_memory_location *restrict out) {
+DENSITY_FORCE_INLINE uint_fast32_t density_block_header_write(density_memory_location * out) {
     out->pointer += sizeof(density_block_header);
     out->available_bytes -= sizeof(density_block_header);
 

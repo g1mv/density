@@ -80,22 +80,22 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_read_signature(density_memory
     state->signaturesCount++;
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_decode_read_compressed_chunk(uint16_t *chunk, density_memory_location *restrict in) {
+DENSITY_FORCE_INLINE void density_chameleon_decode_read_compressed_chunk(uint16_t *restrict chunk, density_memory_location *restrict in) {
     *chunk = *(uint16_t *) (in->pointer);
     in->pointer += sizeof(uint16_t);
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_decode_read_uncompressed_chunk(uint32_t *chunk, density_memory_location *restrict in) {
+DENSITY_FORCE_INLINE void density_chameleon_decode_read_uncompressed_chunk(uint32_t *restrict chunk, density_memory_location *restrict in) {
     *chunk = *(uint32_t *) (in->pointer);
     in->pointer += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_decode_compressed_chunk(const uint16_t *chunk, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
+DENSITY_FORCE_INLINE void density_chameleon_decode_compressed_chunk(const uint16_t *restrict chunk, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
     *(uint32_t *) (out->pointer) = (&state->dictionary.entries[DENSITY_LITTLE_ENDIAN_16(*chunk)])->as_uint32_t;
     out->pointer += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_decode_uncompressed_chunk(const uint32_t *chunk, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
+DENSITY_FORCE_INLINE void density_chameleon_decode_uncompressed_chunk(const uint32_t *restrict chunk, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
     uint32_t hash;
     DENSITY_CHAMELEON_HASH_ALGORITHM(hash, DENSITY_LITTLE_ENDIAN_32(*chunk));
     (&state->dictionary.entries[hash])->as_uint32_t = *chunk;
@@ -183,6 +183,5 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_proces
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish(density_chameleon_decode_state *state) {
-
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }

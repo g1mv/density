@@ -42,7 +42,7 @@ When this is done you can start using the **DENSITY API** :
     DENSITY_STREAM_STATE streamState;
     
     // Let's compress our text, using the Chameleon algorithm (extremely fast compression and decompression)
-    if (density_stream_prepare(stream, (uint8_t *) TEXT, strlen(TEXT), outCompressed, BUFFER_SIZE))
+    if ((streamState = density_stream_prepare(stream, (uint8_t *) TEXT, strlen(TEXT), outCompressed, BUFFER_SIZE)))
         fprintf(stderr, "Error %i when preparing compression\n", streamState);
     if ((streamState = density_stream_compress_init(stream, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, DENSITY_ENCODE_OUTPUT_TYPE_DEFAULT, DENSITY_BLOCK_TYPE_DEFAULT)))
         fprintf(stderr, "Error %i when initializing compression\n", streamState);
@@ -53,7 +53,7 @@ When this is done you can start using the **DENSITY API** :
     printf("%llu bytes >> %llu bytes\n", *stream->in_total_read, *stream->out_total_written);
 
     // Now let's decompress it, using the density_stream_output_available_for_use() method to know how many bytes were made available
-    if (density_stream_prepare(stream, outCompressed, density_stream_output_available_for_use(stream), outDecompressed, BUFFER_SIZE))
+    if ((streamState = density_stream_prepare(stream, outCompressed, density_stream_output_available_for_use(stream), outDecompressed, BUFFER_SIZE)))
         fprintf(stderr, "Error %i when preparing decompression\n", streamState);
     if ((streamState = density_stream_decompress_init(stream)))
         fprintf(stderr, "Error %i when initializing decompression\n", streamState);

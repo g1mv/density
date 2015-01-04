@@ -55,7 +55,7 @@
 #include "main_footer.h"
 
 #define DENSITY_CHAMELEON_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
-#define DENSITY_CHAMELEON_DECODE_PROCESS_UNIT_SIZE                     (sizeof(density_block_header) + sizeof(density_mode_marker) + sizeof(density_chameleon_signature) + bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
+//#define DENSITY_CHAMELEON_DECODE_PROCESS_UNIT_SIZE                     (sizeof(density_block_header) + sizeof(density_mode_marker) + sizeof(density_chameleon_signature) + bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
 
 typedef enum {
     DENSITY_CHAMELEON_DECODE_PROCESS_PREPARE_NEW_BLOCK,
