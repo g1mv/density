@@ -54,9 +54,7 @@
 #include "block_mode_marker.h"
 #include "kernel_mandala_encode.h"
 
-//#define DENSITY_MANDALA_DECODE_MINIMUM_INPUT_LOOKAHEAD               (sizeof(density_mandala_signature) + sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
 #define DENSITY_MANDALA_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
-//#define DENSITY_MANDALA_DECODE_PROCESS_UNIT_SIZE                     (sizeof(density_block_header) + sizeof(density_mode_marker) + sizeof(density_mandala_signature) + bitsizeof(density_mandala_signature) * sizeof(uint32_t))
 
 typedef enum {
     DENSITY_MANDALA_DECODE_PROCESS_PREPARE_NEW_BLOCK,
