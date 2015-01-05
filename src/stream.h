@@ -76,10 +76,8 @@ DENSITY_STREAM_STATE density_stream_compress_init(density_stream *, const DENSIT
 DENSITY_STREAM_STATE density_stream_compress(density_stream *, const density_bool);
 DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *);
 
-DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *);
+DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *, density_stream_header_information *);
 DENSITY_STREAM_STATE density_stream_decompress(density_stream *, const density_bool);
 DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *);
-
-DENSITY_STREAM_STATE density_stream_decompress_utilities_get_header(density_stream*, density_main_header*);
 
 #endif

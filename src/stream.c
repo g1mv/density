@@ -32,6 +32,7 @@
 #include "stream.h"
 #include "density_api_data_structures.h"
 #include "memory_location.h"
+#include "main_header.h"
 
 DENSITY_FORCE_INLINE density_stream *density_stream_create(void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
     density_stream *stream;
@@ -172,7 +173,7 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_finish(density
     return DENSITY_STREAM_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream) {
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *restrict stream, density_stream_header_information *restrict headerInformation) {
     if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_PREPARED)
         return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
@@ -196,6 +197,15 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_init(density
     stream->out_total_written = &((density_stream_state *) stream->internal_state)->internal_decode_state.totalWritten;
 
     ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_DECOMPRESSION_INITED;
+
+    if(headerInformation != NULL) {
+        density_main_header header = ((density_stream_state *) stream->internal_state)->internal_decode_state.header;
+        headerInformation->majorVersion = header.version[0];
+        headerInformation->minorVersion = header.version[1];
+        headerInformation->revision = header.version[2];
+        headerInformation->compressionMode = (DENSITY_COMPRESSION_MODE)header.compressionMode;
+        headerInformation->blockType = (DENSITY_BLOCK_TYPE)header.blockType;
+    }
 
     return DENSITY_STREAM_STATE_READY;
 }

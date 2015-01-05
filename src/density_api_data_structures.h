@@ -60,7 +60,7 @@ typedef enum {
 
 typedef enum {
     DENSITY_BLOCK_TYPE_DEFAULT = 0,
-    DENSITY_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK = 1
+    DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK = 1
 } DENSITY_BLOCK_TYPE;
 
 typedef enum {
@@ -71,25 +71,13 @@ typedef enum {
     DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE                   // error during processing
 } DENSITY_STREAM_STATE;
 
-#pragma pack(push)
-#pragma pack(4)
-
 typedef struct {
-    union {
-        uint64_t as_uint64_t;
-        density_byte as_bytes[8];
-    };
-} density_main_header_parameters;
-
-typedef struct {
-    density_byte version[3];
-    density_byte compressionMode;
-    density_byte blockType;
-    density_byte reserved[3];
-    density_main_header_parameters parameters;
-} density_main_header;
-
-#pragma pack(pop)
+    density_byte majorVersion;
+    density_byte minorVersion;
+    density_byte revision;
+    DENSITY_COMPRESSION_MODE compressionMode;
+    DENSITY_BLOCK_TYPE blockType;
+} density_stream_header_information;
 
 typedef struct {
     void *in;

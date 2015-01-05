@@ -53,6 +53,7 @@
 #include "main_footer.h"
 #include "block_mode_marker.h"
 #include "kernel_mandala_encode.h"
+#include "main_header.h"
 
 #define DENSITY_MANDALA_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
 

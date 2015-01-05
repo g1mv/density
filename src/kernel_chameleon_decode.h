@@ -53,6 +53,7 @@
 #include "density_api_data_structures.h"
 #include "block_footer.h"
 #include "main_footer.h"
+#include "main_header.h"
 
 #define DENSITY_CHAMELEON_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
 

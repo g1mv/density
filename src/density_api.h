@@ -155,8 +155,9 @@ DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const 
  * Stream decompression initialization
  *
  * @param stream the stream
+ * @param header_information stream header information, use NULL if you don't need it
  */
-DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream);
+DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream, density_stream_header_information *header_information);
 
 /*
  * Stream compression function, has to be called repetitively.
@@ -199,13 +200,5 @@ DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *stream);
  * @param stream the stream
  */
 DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream);
-
-/*
- * Returns the header that was read during density_stream_decompress_init.
- *
- * @param stream the stream
- * @param header the header returned
- */
-DENSITY_STREAM_STATE density_stream_decompress_utilities_get_header(density_stream* stream, density_main_header* header);
 
 #endif
