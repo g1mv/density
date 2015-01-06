@@ -55,7 +55,7 @@ When this is done you can start using the **DENSITY API** :
     // Now let's decompress it, using the density_stream_output_available_for_use() method to know how many bytes were made available
     if ((streamState = density_stream_prepare(stream, outCompressed, density_stream_output_available_for_use(stream), outDecompressed, BUFFER_SIZE)))
         fprintf(stderr, "Error %i when preparing decompression\n", streamState);
-    if ((streamState = density_stream_decompress_init(stream)))
+    if ((streamState = density_stream_decompress_init(stream, NULL)))
         fprintf(stderr, "Error %i when initializing decompression\n", streamState);
     if ((streamState = density_stream_decompress(stream, true)))
         fprintf(stderr, "Error %i occured during decompression\n", streamState);
