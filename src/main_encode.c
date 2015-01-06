@@ -64,10 +64,9 @@ DENSITY_FORCE_INLINE void density_encode_update_totals(density_memory_teleport *
     state->totalWritten += availableOutBefore - out->available_bytes;
 }
 
-DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_memory_location *restrict out, density_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_ENCODE_OUTPUT_TYPE encodeOutputType, const DENSITY_BLOCK_TYPE blockType, void *(*mem_alloc)(size_t)) {
+DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_memory_location *restrict out, density_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, void *(*mem_alloc)(size_t)) {
     state->compressionMode = mode;
     state->blockType = blockType;
-    state->encodeOutputType = encodeOutputType;
 
     state->totalRead = 0;
     state->totalWritten = 0;
@@ -86,14 +85,12 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_memory_loc
             break;
     }
 
-    switch (state->encodeOutputType) {
-        case DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER:
-        case DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER_NOR_FOOTER:
-            state->process = DENSITY_ENCODE_PROCESS_WRITE_BLOCKS;
-            return DENSITY_ENCODE_STATE_READY;
-        default:
-            return density_encode_write_header(out, state, mode, blockType);
-    }
+#if DENSITY_WRITE_MAIN_HEADER == DENSITY_YES
+    return density_encode_write_header(out, state, mode, blockType);
+#else
+    state->process = DENSITY_ENCODE_PROCESS_WRITE_BLOCKS;
+    return DENSITY_ENCODE_STATE_READY;
+#endif
 }
 
 DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_process(density_memory_teleport *restrict in, density_memory_location *restrict out, density_encode_state *restrict state, const density_bool flush) {
@@ -146,11 +143,9 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_finish(density_memory_l
             break;
     }
 
-    switch (state->encodeOutputType) {
-        case DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_FOOTER:
-        case DENSITY_ENCODE_OUTPUT_TYPE_WITHOUT_HEADER_NOR_FOOTER:
-            return DENSITY_ENCODE_STATE_READY;
-        default:
-            return density_encode_write_footer(out, state);
-    }
+#if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES
+    return density_encode_write_footer(out, state);
+#else
+    return DENSITY_ENCODE_STATE_READY;
+#endif
 }

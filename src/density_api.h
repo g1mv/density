@@ -35,21 +35,6 @@
 #include "density_api_data_structures.h"
 
 
-
-/***********************************************************************************************************************
- *                                                                                                                     *
- * Compilation switches (compression only)                                                                             *
- *                                                                                                                     *
- ***********************************************************************************************************************/
-
-#define DENSITY_YES                                                 1
-#define DENSITY_NO                                                  0
-
-#define DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT         DENSITY_NO
-// No disables compression dictionary resets and improves compression ratio
-
-
-
 /***********************************************************************************************************************
  *                                                                                                                     *
  * Density version information                                                                                         *
@@ -149,7 +134,7 @@ uint_fast64_t density_stream_output_available_for_use(density_stream* stream);
  *      It can be useful in network streaming situations, where data integrity is already checked by the protocol (TCP/IP for example), and the flush option in density_stream_compress is often set,
  *      as the absence of block footer will enhance compression ratio.
  */
-DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_ENCODE_OUTPUT_TYPE output_type, const DENSITY_BLOCK_TYPE block_type);
+DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type);
 
 /*
  * Stream decompression initialization

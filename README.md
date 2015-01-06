@@ -44,7 +44,7 @@ When this is done you can start using the **DENSITY API** :
     // Let's compress our text, using the Chameleon algorithm (extremely fast compression and decompression)
     if ((streamState = density_stream_prepare(stream, (uint8_t *) TEXT, strlen(TEXT), outCompressed, BUFFER_SIZE)))
         fprintf(stderr, "Error %i when preparing compression\n", streamState);
-    if ((streamState = density_stream_compress_init(stream, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, DENSITY_ENCODE_OUTPUT_TYPE_DEFAULT, DENSITY_BLOCK_TYPE_DEFAULT)))
+    if ((streamState = density_stream_compress_init(stream, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, DENSITY_BLOCK_TYPE_DEFAULT)))
         fprintf(stderr, "Error %i when initializing compression\n", streamState);
     if ((streamState = density_stream_compress(stream, true)))
         fprintf(stderr, "Error %i occured during compression\n", streamState);

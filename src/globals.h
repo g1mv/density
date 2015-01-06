@@ -69,7 +69,6 @@
 #error Unknow endianness
 #endif
 
-#define DENSITY_DICTIONARY_MAX_RESET_CYCLE_SHIFT          32
 #define DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT    6
 #define DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE          (1 << DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT)
 
@@ -78,8 +77,33 @@
 
 #define bitsizeof(x) (8 * sizeof(x))
 
-#define DENSITY_MAJOR_VERSION               0
-#define DENSITY_MINOR_VERSION               10
-#define DENSITY_REVISION                    2
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ * Global compile-time switches                                                                                       *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+
+#define DENSITY_YES 1
+#define DENSITY_NO  0
+
+#define DENSITY_MAJOR_VERSION   0
+#define DENSITY_MINOR_VERSION   10
+#define DENSITY_REVISION        2
+
+/*
+ * Compile-time switches useful for pure data encoding and decoding
+ * They enable/disable writing of the main headers and footers
+ */
+#define DENSITY_WRITE_MAIN_HEADER   DENSITY_YES
+#define DENSITY_WRITE_MAIN_FOOTER   DENSITY_YES
+
+/*
+ * If set to yes, created output's decompression is parallelizable.
+ * If set to no, compression dictionary resets are disabled and therefore compression ratio is improved
+ */
+#define DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT DENSITY_NO
+
+
 
 #endif
