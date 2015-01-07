@@ -73,10 +73,15 @@ And that's it ! We've done a compression/decompression round trip with a few lin
 
 If you want a more elaborate example you can checkout [the SHARC project](https://github.com/centaurean/sharc).
 
-Output
-------
-DENSITY outputs compressed data in a simple format, which enables file storage and parallelization for both compression and decompression.
-
 Build
 -----
-DENSITY is fully C99 compliant and can therefore be built on a number of platforms.
+DENSITY is fully C99 compliant and can therefore be built on a number of platforms. You need a C compiler (gcc, clang ...), and a *make* utility.
+
+Just *cd* into the density directory, then run the following command :
+> make
+
+And that's it !
+
+Output
+------
+DENSITY outputs compressed data in a simple format, which enables file storage and optional parallelization for both compression and decompression.
