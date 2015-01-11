@@ -201,6 +201,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(
             if (flush) {
                 uint_fast64_t remaining = density_memory_teleport_available(in) - sizeof(density_block_footer) - sizeof(density_main_footer);
                 if (remaining < DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE) {
+                    if(remaining > out->available_bytes)
+                        return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT_BUFFER;
                     density_memory_teleport_copy(in, out, remaining);
                     return DENSITY_KERNEL_DECODE_STATE_FINISHED;
                 }

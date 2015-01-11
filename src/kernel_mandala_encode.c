@@ -185,6 +185,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(
     uint64_t chunk;
     density_byte *pointerOutBefore;
     density_memory_location *readMemoryLocation;
+    uint_fast64_t remaining;
 
     switch (state->process) {
         case DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
@@ -194,11 +195,18 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(
 
         case DENSITY_MANDALA_ENCODE_PROCESS_COMPRESS:
             while (true) {
-                uint_fast64_t remaining = density_memory_teleport_available(in);
+                remaining = density_memory_teleport_available(in);
                 if (remaining < DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE) {
                     if (flush) {
-                        density_memory_teleport_copy(in, out, remaining);
-                        return DENSITY_KERNEL_ENCODE_STATE_FINISHED;
+                        // We finish using the current signature
+                        while (state->shift < bitsizeof(density_mandala_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
+                            density_mandala_encode_kernel(out, &hash, (uint32_t) (readMemoryLocation->pointer), state);
+                            readMemoryLocation->available_bytes -= sizeof(uint32_t);
+                            state->shift += 2;
+                        }
+                        // We copy the remaining bytes
+                        state->process = DENSITY_MANDALA_ENCODE_PROCESS_COPY_REMAINING;
+                        goto density_copy_remaining;
                     } else {
                         if (!density_memory_teleport_read(in, DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE))
                             return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
@@ -214,6 +222,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(
                 readMemoryLocation->available_bytes -= DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE;
                 out->available_bytes -= (out->pointer - pointerOutBefore);
             }
+
+        case DENSITY_MANDALA_ENCODE_PROCESS_COPY_REMAINING:
+        density_copy_remaining:
+            remaining = density_memory_teleport_available(in);
+            if (remaining > out->available_bytes)
+                return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
+            density_memory_teleport_copy(in, out, remaining);
+            return DENSITY_KERNEL_ENCODE_STATE_FINISHED;
     }
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;
