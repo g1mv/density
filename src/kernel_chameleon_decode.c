@@ -40,6 +40,7 @@
  */
 
 #include "kernel_chameleon_decode.h"
+#include "memory_location.h"
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_check_state(density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
     if (out->available_bytes < DENSITY_CHAMELEON_DECODE_MINIMUM_OUTPUT_LOOKAHEAD)
@@ -146,6 +147,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(d
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_process(density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state, const density_bool flush) {
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
+    uint_fast64_t remaining;
 
     switch (state->process) {
         case DENSITY_CHAMELEON_DECODE_PROCESS_PREPARE_NEW_BLOCK:
@@ -156,8 +158,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_proces
 
         case DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURE:
             if (flush) {
-                uint_fast64_t remaining = density_memory_teleport_available(in) - sizeof(density_block_footer) - sizeof(density_main_footer);
+                remaining = density_memory_teleport_available(in) - sizeof(density_block_footer) - sizeof(density_main_footer);
                 if (remaining < DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE) {
+                    if(remaining > out->available_bytes)
+                        return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT_BUFFER;
                     density_memory_teleport_copy(in, out, remaining);
                     return DENSITY_KERNEL_DECODE_STATE_FINISHED;
                 }
