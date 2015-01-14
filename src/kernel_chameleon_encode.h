@@ -57,7 +57,6 @@
 typedef enum {
     DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
     DENSITY_CHAMELEON_ENCODE_PROCESS_COMPRESS,
-//    DENSITY_CHAMELEON_ENCODE_PROCESS_COPY_REMAINING,
 } DENSITY_CHAMELEON_ENCODE_PROCESS;
 
 #pragma pack(push)
@@ -73,7 +72,6 @@ typedef struct {
     density_chameleon_signature *signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
-    //density_memory_teleport *lastIn;
 
     density_chameleon_dictionary dictionary;
 } density_chameleon_encode_state;
