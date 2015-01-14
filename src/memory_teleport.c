@@ -142,3 +142,7 @@ DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *
             return;
     }
 }
+
+DENSITY_FORCE_INLINE void density_memory_teleport_copy_remaining(density_memory_teleport *restrict in, density_memory_location *restrict out) {
+    return density_memory_teleport_copy(in, out, density_memory_teleport_available(in));
+}

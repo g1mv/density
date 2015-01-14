@@ -52,7 +52,7 @@ DENSITY_FORCE_INLINE void density_mandala_encode_write_to_signature(density_mand
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_prepare_new_block(density_memory_location *restrict out, density_mandala_encode_state *restrict state) {
     if (DENSITY_MANDALA_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD > out->available_bytes)
-        return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
+        return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT;
 
     switch (state->signaturesCount) {
         case DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES:
@@ -87,7 +87,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_prepare_
     out->pointer += sizeof(density_mandala_signature);
     out->available_bytes -= sizeof(density_mandala_signature);
 
-    return DENSITY_KERNEL_ENCODE_STATE_READY;
+    return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_check_state(density_memory_location *restrict out, density_mandala_encode_state *restrict state) {
@@ -104,7 +104,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_check_st
             break;
     }
 
-    return DENSITY_KERNEL_ENCODE_STATE_READY;
+    return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
 }
 
 DENSITY_FORCE_INLINE void density_mandala_encode_kernel(density_memory_location *restrict out, uint32_t *restrict hash, const uint32_t chunk, density_mandala_encode_state *restrict state) {
@@ -176,7 +176,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_init(den
 
     state->process = DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
 
-    return DENSITY_KERNEL_ENCODE_STATE_READY;
+    return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(density_memory_teleport *restrict in, density_memory_location *restrict out, density_mandala_encode_state *restrict state, const density_bool flush) {
@@ -209,7 +209,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(
                         goto density_copy_remaining;
                     } else {
                         if (!density_memory_teleport_read(in, DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE))
-                            return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT_BUFFER;
+                            return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
                         else
                             return DENSITY_KERNEL_ENCODE_STATE_ERROR;
                     }
@@ -227,14 +227,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(
         density_copy_remaining:
             remaining = density_memory_teleport_available(in);
             if (remaining > out->available_bytes)
-                return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER;
+                return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT;
             density_memory_teleport_copy(in, out, remaining);
-            return DENSITY_KERNEL_ENCODE_STATE_FINISHED;
+            //return DENSITY_KERNEL_ENCODE_STATE_FINISHED;
     }
 
-    return DENSITY_KERNEL_ENCODE_STATE_READY;
+    return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_finish(density_mandala_encode_state *state) {
-    return DENSITY_KERNEL_ENCODE_STATE_READY;
+    return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
 }

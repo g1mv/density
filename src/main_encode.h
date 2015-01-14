@@ -46,9 +46,9 @@
 #include "density_api.h"
 
 typedef enum {
-    DENSITY_ENCODE_STATE_READY = 0,
-    DENSITY_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER,
-    DENSITY_ENCODE_STATE_STALL_ON_INPUT_BUFFER,
+    DENSITY_ENCODE_STATE_AWAITING_FURTHER_INPUT = 0,
+    DENSITY_ENCODE_STATE_STALL_ON_OUTPUT,
+    //DENSITY_ENCODE_STATE_STALL_ON_INPUT_BUFFER,
     DENSITY_ENCODE_STATE_ERROR
 } DENSITY_ENCODE_STATE;
 
@@ -70,14 +70,15 @@ typedef struct {
     uint_fast64_t totalWritten;
 
     density_block_encode_state blockEncodeState;
+    density_memory_teleport *lastIn;
 
-    density_memory_teleport * teleport;
+    //density_memory_teleport * teleport;
 } density_encode_state;
 #pragma pack(pop)
 
 DENSITY_ENCODE_STATE density_encode_init(density_memory_location *, density_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*mem_alloc)(size_t));
 
-DENSITY_ENCODE_STATE density_encode_process(density_memory_teleport *, density_memory_location *, density_encode_state *, const density_bool);
+DENSITY_ENCODE_STATE density_encode_continue(density_memory_teleport *, density_memory_location *, density_encode_state *);
 
 DENSITY_ENCODE_STATE density_encode_finish(density_memory_location *, density_encode_state *, void (*mem_free)(void *));
 

@@ -57,9 +57,8 @@ typedef enum {
 } DENSITY_BLOCK_TYPE;
 
 typedef enum {
-    DENSITY_STREAM_STATE_READY = 0,                                     // ready to continue
-    DENSITY_STREAM_STATE_STALL_ON_INPUT_BUFFER,                         // input buffer has been completely read
-    DENSITY_STREAM_STATE_STALL_ON_OUTPUT_BUFFER,                        // there is not enough space left in the output buffer to continue
+    DENSITY_STREAM_STATE_AWAITING_FURTHER_INPUT = 0,                    // Awaiting further input (new action or providing more data to the input buffer)
+    DENSITY_STREAM_STATE_STALL_ON_OUTPUT,                               // there is not enough space left in the output buffer to continue
     DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // output buffer size is too small
     DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE                   // error during processing
 } DENSITY_STREAM_STATE;

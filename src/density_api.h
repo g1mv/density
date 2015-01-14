@@ -158,7 +158,7 @@ DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream, dens
  *      the *best* input buffer size for compression ratio matters should be a multiple of 256, any other size will also work but will
  *      incur a less than optimal compression ratio.
  */
-DENSITY_STREAM_STATE density_stream_compress(density_stream *stream, const density_bool flush);
+DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *stream);
 
 /*
  * Stream decompression function, has to be called repetitively.
@@ -170,7 +170,7 @@ DENSITY_STREAM_STATE density_stream_compress(density_stream *stream, const densi
  *      flush has to be true when the presented data is the last (end of a file for example)
  *      It can also be set to true multiple times to handle network streaming for example.
  */
-DENSITY_STREAM_STATE density_stream_decompress(density_stream *stream, const density_bool flush);
+DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *stream);
 
 /*
  * Call once processing is finished, to clear up the environment and release eventual allocated memory.

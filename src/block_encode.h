@@ -42,9 +42,9 @@
 #include "memory_teleport.h"
 
 typedef enum {
-    DENSITY_BLOCK_ENCODE_STATE_READY = 0,
-    DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT_BUFFER,
-    DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER,
+    DENSITY_BLOCK_ENCODE_STATE_AWAITING_FURTHER_INPUT = 0,
+    DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT,
+    //DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT_BUFFER,
     DENSITY_BLOCK_ENCODE_STATE_ERROR
 } DENSITY_BLOCK_ENCODE_STATE;
 
@@ -52,7 +52,7 @@ typedef enum {
     DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER,
     DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER,
     DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER,
-    DENSITY_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER,
+    //DENSITY_BLOCK_ENCODE_PROCESS_WRITE_LAST_BLOCK_FOOTER,
     DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA,
     DENSITY_BLOCK_ENCODE_PROCESS_FINISHED
 } DENSITY_BLOCK_ENCODE_PROCESS;
@@ -75,16 +75,17 @@ typedef struct {
     uint_fast64_t totalWritten;
 
     density_block_encode_current_block_data currentBlockData;
+    //density_memory_teleport *lastIn;
 
     void *kernelEncodeState;
     DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeInit)(void*);
-    DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeProcess)(density_memory_teleport *, density_memory_location*, void*, const density_bool);
-    DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeFinish)(void*);
+    DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeProcess)(density_memory_teleport *, density_memory_location*, void*);
+    DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeFinish)(density_memory_teleport *, density_memory_location *, void*);
 } density_block_encode_state;
 #pragma pack(pop)
 
-DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void*, DENSITY_KERNEL_ENCODE_STATE (*)(void*), DENSITY_KERNEL_ENCODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*, const density_bool), DENSITY_KERNEL_ENCODE_STATE (*)(void*));
-DENSITY_BLOCK_ENCODE_STATE density_block_encode_process(density_memory_teleport *, density_memory_location*, density_block_encode_state *, const density_bool);
-DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(density_block_encode_state *);
+DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void*, DENSITY_KERNEL_ENCODE_STATE (*)(void*), DENSITY_KERNEL_ENCODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*), DENSITY_KERNEL_ENCODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*));
+DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(density_memory_teleport *, density_memory_location *, density_block_encode_state *);
+DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(density_memory_teleport *, density_memory_location *, density_block_encode_state *);
 
 #endif

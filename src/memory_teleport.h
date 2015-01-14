@@ -70,4 +70,6 @@ uint_fast64_t density_memory_teleport_available(density_memory_teleport *);
 
 void density_memory_teleport_copy(density_memory_teleport *, density_memory_location *, uint_fast64_t);
 
+void density_memory_teleport_copy_remaining(density_memory_teleport *, density_memory_location *);
+
 #endif

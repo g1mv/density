@@ -43,9 +43,9 @@
 #include "memory_teleport.h"
 
 typedef enum {
-    DENSITY_BLOCK_DECODE_STATE_READY = 0,
-    DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT_BUFFER,
-    DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER,
+    DENSITY_BLOCK_DECODE_STATE_AWAITING_FURTHER_INPUT = 0,
+    DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT,
+    //DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER,
     DENSITY_BLOCK_DECODE_STATE_ERROR
 } DENSITY_BLOCK_DECODE_STATE;
 
@@ -84,13 +84,13 @@ typedef struct {
 
     void* kernelDecodeState;
     DENSITY_KERNEL_DECODE_STATE (*kernelDecodeInit)(void*, const density_main_header_parameters, const uint_fast64_t);
-    DENSITY_KERNEL_DECODE_STATE (*kernelDecodeProcess)(density_memory_teleport *, density_memory_location*, void*, const density_bool);
-    DENSITY_KERNEL_DECODE_STATE (*kernelDecodeFinish)(void*);
+    DENSITY_KERNEL_DECODE_STATE (*kernelDecodeProcess)(density_memory_teleport *, density_memory_location*, void*);
+    DENSITY_KERNEL_DECODE_STATE (*kernelDecodeFinish)(density_memory_teleport *, density_memory_location*, void*);
 } density_block_decode_state;
 #pragma pack(pop)
 
-DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters, const uint_fast32_t, void*, DENSITY_KERNEL_DECODE_STATE (*)(void*, const density_main_header_parameters, const uint_fast64_t), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*, const density_bool), DENSITY_KERNEL_DECODE_STATE (*)(void*));
-DENSITY_BLOCK_DECODE_STATE density_block_decode_process(density_memory_teleport *, density_memory_location *, density_block_decode_state *, const density_bool);
-DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(density_block_decode_state *);
+DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters, const uint_fast32_t, void*, DENSITY_KERNEL_DECODE_STATE (*)(void*, const density_main_header_parameters, const uint_fast64_t), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_teleport *, density_memory_location*, void*));
+DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(density_memory_teleport *, density_memory_location *, density_block_decode_state *);
+DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(density_memory_teleport *, density_memory_location *, density_block_decode_state *);
 
 #endif

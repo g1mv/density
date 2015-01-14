@@ -45,9 +45,9 @@
 #include "memory_location.h"
 
 typedef enum {
-    DENSITY_DECODE_STATE_READY = 0,
-    DENSITY_DECODE_STATE_STALL_ON_OUTPUT_BUFFER,
-    DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER,
+    DENSITY_DECODE_STATE_AWAITING_FURTHER_INPUT = 0,
+    DENSITY_DECODE_STATE_STALL_ON_OUTPUT,
+    //DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER,
     DENSITY_DECODE_STATE_ERROR
 } DENSITY_DECODE_STATE;
 
@@ -74,8 +74,8 @@ typedef struct {
 
 DENSITY_DECODE_STATE density_decode_init(density_memory_teleport *, density_decode_state *, void *(*mem_alloc)(size_t));
 
-DENSITY_DECODE_STATE density_decode_process(density_memory_teleport *, density_memory_location *, density_decode_state *, const density_bool);
+DENSITY_DECODE_STATE density_decode_continue(density_memory_teleport *, density_memory_location *, density_decode_state *);
 
-DENSITY_DECODE_STATE density_decode_finish(density_memory_teleport *, density_decode_state *, void (*mem_free)(void *));
+DENSITY_DECODE_STATE density_decode_finish(density_memory_teleport *, density_memory_location *, density_decode_state *, void (*mem_free)(void *));
 
 #endif
