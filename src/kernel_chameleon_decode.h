@@ -57,8 +57,10 @@
 
 #if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES
 #define DENSITY_CHAMELEON_DECODE_PROCESS_UNIT_SIZE                     (bitsizeof(density_chameleon_signature) * sizeof(uint32_t) + sizeof(density_block_footer) + sizeof(density_main_footer))
+#define DENSITY_CHAMELEON_DECODE_RESERVED                              (sizeof(density_block_footer) + sizeof(density_main_footer))
 #else
 #define DENSITY_CHAMELEON_DECODE_PROCESS_UNIT_SIZE                     (bitsizeof(density_chameleon_signature) * sizeof(uint32_t) + sizeof(density_block_footer))
+#define DENSITY_CHAMELEON_DECODE_RESERVED                              (sizeof(density_block_footer))
 #endif
 #define DENSITY_CHAMELEON_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
 
