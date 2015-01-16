@@ -240,8 +240,8 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_continue(den
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream) {
-    if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED)
-        return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+    //if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_DECOMPRESSION_DATA_FINISHED)
+    //    return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
 
     DENSITY_DECODE_STATE decodeState = density_decode_finish(stream->in, stream->out, &((density_stream_state *) stream->internal_state)->internal_decode_state, ((density_stream_state *) stream->internal_state)->mem_free);
     switch (decodeState) {

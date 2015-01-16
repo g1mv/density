@@ -201,23 +201,31 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_contin
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
+    DENSITY_KERNEL_ENCODE_STATE returnState;
     uint32_t hash;
     density_memory_location *readMemoryLocation;
 
     // Finish using the current signature
-    while (state->shift < bitsizeof(density_chameleon_signature) - 1 && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
+    density_chameleon_finish_cycle:
+    while (state->shift != bitsizeof(density_chameleon_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
         density_chameleon_encode_kernel(out, &hash, (uint32_t) (readMemoryLocation->pointer), state);
         readMemoryLocation->available_bytes -= sizeof(uint32_t);
         state->shift++;
     }
 
-    // Insert a stop marker
-    DENSITY_CHAMELEON_HASH_ALGORITHM(hash, DENSITY_LITTLE_ENDIAN_32(0));
-    *(uint32_t *) (out->pointer) = state->dictionary.entries[hash].as_uint32_t;
-    out->pointer += sizeof(uint32_t);
-    out->available_bytes -= sizeof(uint32_t);
+    // If there aren't enough bytes to read an uint32_t, copy remaining bytes directly
+    if(!readMemoryLocation)
+        goto density_chameleon_encode_finish_copy_remaining;
+
+    // Create a new signature, and anything else deemed necessary
+    if ((returnState = density_chameleon_encode_check_state(out, state)))
+        return returnState;
+
+    // Start the cycle again
+    goto density_chameleon_finish_cycle;
 
     // Copy the remaining bytes
+    density_chameleon_encode_finish_copy_remaining:
     density_memory_teleport_copy_remaining(in, out);
 
     return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
