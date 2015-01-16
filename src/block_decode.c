@@ -109,7 +109,6 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
     uint_fast64_t outAvailableBefore;
     uint_fast64_t blockRemaining;
     uint_fast64_t inRemaining;
-    uint_fast64_t positionIncrement;
     uint_fast64_t outRemaining;
 
     while (true) {
@@ -149,13 +148,10 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
                             if (blockRemaining <= inRemaining)
                                 goto copy_until_end_of_block;
                             else {
-                                /*if (flush && inRemaining <= state->endDataOverhead) {
-                                    state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_LAST_BLOCK_FOOTER;
-                                } else*/ if (!inRemaining) {
+                                if (!inRemaining) {
                                     return DENSITY_BLOCK_DECODE_STATE_AWAITING_FURTHER_INPUT;
                                 } else {
-                                    //todo positionIncrement = inRemaining - (flush ? state->endDataOverhead : 0);
-                                    density_memory_teleport_copy(in, out, positionIncrement);
+                                    density_memory_teleport_copy(in, out, inRemaining);
                                     density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
                                 }
                             }
@@ -185,9 +181,6 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
                         density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
 
                         switch (hashDecodeState) {
-                            //case DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT_BUFFER:
-                            //    return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER;
-
                             case DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT:
                                 return DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT;
 
@@ -205,7 +198,6 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
 
                             case DENSITY_KERNEL_DECODE_STATE_AWAITING_FURTHER_INPUT:
                                 return DENSITY_BLOCK_DECODE_STATE_AWAITING_FURTHER_INPUT;
-                                //break;
 
                             default:
                                 return DENSITY_BLOCK_DECODE_STATE_ERROR;
@@ -224,10 +216,16 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
 }
 
 DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state) {
-    //if (state->process ^ DENSITY_BLOCK_DECODE_PROCESS_FINISHED)
-    //    return DENSITY_BLOCK_DECODE_STATE_ERROR;
+    uint_fast64_t inAvailableBefore = density_memory_teleport_available(in);
+    uint_fast64_t outAvailableBefore = out->available_bytes;
 
-    state->kernelDecodeFinish(in, out, state->kernelDecodeState);
+    if(state->kernelDecodeFinish(in, out, state->kernelDecodeState))
+        return DENSITY_BLOCK_DECODE_STATE_ERROR;
+
+    if(density_block_decode_read_block_footer(in, state))
+        return DENSITY_BLOCK_DECODE_STATE_ERROR;
+
+    density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
 
     return DENSITY_BLOCK_DECODE_STATE_AWAITING_FURTHER_INPUT;
 }

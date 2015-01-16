@@ -48,7 +48,6 @@
 typedef enum {
     DENSITY_ENCODE_STATE_AWAITING_FURTHER_INPUT = 0,
     DENSITY_ENCODE_STATE_STALL_ON_OUTPUT,
-    //DENSITY_ENCODE_STATE_STALL_ON_INPUT_BUFFER,
     DENSITY_ENCODE_STATE_ERROR
 } DENSITY_ENCODE_STATE;
 
@@ -71,8 +70,6 @@ typedef struct {
 
     density_block_encode_state blockEncodeState;
     density_memory_teleport *lastIn;
-
-    //density_memory_teleport * teleport;
 } density_encode_state;
 #pragma pack(pop)
 

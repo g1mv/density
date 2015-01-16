@@ -91,8 +91,7 @@ DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(densi
             teleport->indirectMemoryLocation->available_bytes = bytes;
             teleport->directMemoryLocation->pointer += missingBytes;
             teleport->directMemoryLocation->available_bytes -= missingBytes;
-            teleport->stagingMemoryLocation->pointer = teleport->stagingMemoryLocation->originalPointer;
-            teleport->stagingMemoryLocation->position = 0;
+            density_memory_teleport_reset_staging(teleport);
             return teleport->indirectMemoryLocation;
         } else {
             memcpy(teleport->stagingMemoryLocation->originalPointer + teleport->stagingMemoryLocation->position, teleport->directMemoryLocation->pointer, directAvailableBytes);
@@ -139,8 +138,10 @@ DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *
     }
 
     memcpy(out->pointer, teleport->stagingMemoryLocation->pointer, fromStaging);
-    teleport->stagingMemoryLocation->pointer += fromStaging;
-    teleport->stagingMemoryLocation->position -= fromStaging;
+    if(fromStaging == stagingAvailableBytes)
+        density_memory_teleport_reset_staging(teleport);
+    else
+        teleport->stagingMemoryLocation->pointer += fromStaging;
     out->pointer += fromStaging;
     out->available_bytes -= fromStaging;
 

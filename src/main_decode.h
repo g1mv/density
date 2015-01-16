@@ -44,10 +44,15 @@
 #include "block_encode.h"
 #include "memory_location.h"
 
+#if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES
+#define DENSITY_DECODE_END_DATA_OVERHEAD                           (sizeof(density_main_footer))
+#else
+#define DENSITY_DECODE_END_DATA_OVERHEAD                           0
+#endif
+
 typedef enum {
     DENSITY_DECODE_STATE_AWAITING_FURTHER_INPUT = 0,
     DENSITY_DECODE_STATE_STALL_ON_OUTPUT,
-    //DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER,
     DENSITY_DECODE_STATE_ERROR
 } DENSITY_DECODE_STATE;
 

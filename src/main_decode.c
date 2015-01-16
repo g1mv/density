@@ -31,28 +31,28 @@
 
 #include "main_decode.h"
 
-DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_header(density_memory_teleport *restrict in, density_decode_state *restrict state) {
+DENSITY_FORCE_INLINE bool density_decode_read_header(density_memory_teleport *restrict in, density_decode_state *restrict state) {
     density_memory_location *readLocation;
     if (!(readLocation = density_memory_teleport_read(in, sizeof(density_main_header))))
-        return DENSITY_DECODE_STATE_AWAITING_FURTHER_INPUT;
+        return false;
 
     state->totalRead += density_main_header_read(readLocation, &state->header);
 
     state->process = DENSITY_DECODE_PROCESS_READ_BLOCKS;
 
-    return DENSITY_DECODE_STATE_AWAITING_FURTHER_INPUT;
+    return true;
 }
 
-DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_footer(density_memory_teleport *restrict in, density_decode_state *restrict state) {
+DENSITY_FORCE_INLINE bool density_decode_read_footer(density_memory_teleport *restrict in, density_decode_state *restrict state) {
     density_memory_location *readLocation;
     if (!(readLocation = density_memory_teleport_read(in, sizeof(density_main_footer))))
-        return DENSITY_DECODE_STATE_AWAITING_FURTHER_INPUT;
+        return false;
 
     state->totalRead += density_main_footer_read(readLocation, &state->footer);
 
     state->process = DENSITY_DECODE_PROCESS_FINISHED;
 
-    return DENSITY_DECODE_STATE_AWAITING_FURTHER_INPUT;
+    return true;
 }
 
 DENSITY_FORCE_INLINE void density_decode_update_totals(density_memory_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state, const uint_fast64_t inAvailableBefore, const uint_fast64_t outAvailableBefore) {
@@ -61,25 +61,23 @@ DENSITY_FORCE_INLINE void density_decode_update_totals(density_memory_teleport *
 }
 
 DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_teleport *in, density_decode_state *restrict state, void *(*mem_alloc)(size_t)) {
-    DENSITY_DECODE_STATE decodeState;
-
     state->totalRead = 0;
     state->totalWritten = 0;
 
-    if ((decodeState = density_decode_read_header(in, state)))
-        return decodeState;
+    if (!density_decode_read_header(in, state))
+        return DENSITY_DECODE_STATE_AWAITING_FURTHER_INPUT;
 
     switch (state->header.compressionMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
-            density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_COPY, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, sizeof(density_main_footer), NULL, NULL, NULL, NULL);
+            density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_COPY, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, NULL, NULL, NULL, NULL);
             break;
 
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, sizeof(density_main_footer), mem_alloc(sizeof(density_chameleon_decode_state)), (void *) density_chameleon_decode_init, (void *) density_chameleon_decode_continue, (void *) density_chameleon_decode_finish);
+            density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, mem_alloc(sizeof(density_chameleon_decode_state)), (void *) density_chameleon_decode_init, (void *) density_chameleon_decode_continue, (void *) density_chameleon_decode_finish);
             break;
 
         case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
-            density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, sizeof(density_main_footer), mem_alloc(sizeof(density_mandala_decode_state)), (void *) density_mandala_decode_init, (void *) density_mandala_decode_process, (void *) density_mandala_decode_finish);
+            density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, mem_alloc(sizeof(density_mandala_decode_state)), (void *) density_mandala_decode_init, (void *) density_mandala_decode_process, (void *) density_mandala_decode_finish);
             break;
 
         default:
@@ -111,9 +109,6 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_continue(density_memory
                     case DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT:
                         return DENSITY_DECODE_STATE_STALL_ON_OUTPUT;
 
-                    //case DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT_BUFFER:
-                    //    return DENSITY_DECODE_STATE_STALL_ON_INPUT_BUFFER;
-
                     case DENSITY_BLOCK_DECODE_STATE_ERROR:
                         return DENSITY_DECODE_STATE_ERROR;
                 }
@@ -126,18 +121,26 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_continue(density_memory
 }
 
 DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state, void (*mem_free)(void *)) {
-    if (state->process ^ DENSITY_DECODE_PROCESS_READ_FOOTER)
-        return DENSITY_DECODE_STATE_ERROR;
+    DENSITY_BLOCK_DECODE_STATE blockDecodeState;
+    uint_fast64_t inAvailableBefore = density_memory_teleport_available(in);
+    uint_fast64_t outAvailableBefore = out->available_bytes;
 
     switch (state->header.compressionMode) {
         default:
-            density_block_decode_finish(in, out, &state->blockDecodeState);
+            blockDecodeState = density_block_decode_finish(in, out, &state->blockDecodeState);
             mem_free(state->blockDecodeState.kernelDecodeState);
+            if (blockDecodeState)
+                return DENSITY_DECODE_STATE_ERROR;
             break;
 
         case DENSITY_COMPRESSION_MODE_COPY:
             break;
     }
 
-    return density_decode_read_footer(in, state);
+    if (density_decode_read_footer(in, state))
+        return DENSITY_DECODE_STATE_ERROR;
+
+    density_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
+
+    return DENSITY_DECODE_STATE_AWAITING_FURTHER_INPUT;
 }

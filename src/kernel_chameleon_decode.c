@@ -138,6 +138,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(d
         state->resetCycle = (uint_fast64_t) (1 << resetDictionaryCycleShift) - 1;
 
     state->endDataOverhead = endDataOverhead;
+    //state->unitSize = bitsizeof(density_chameleon_signature) + endDataOverhead;
 
     state->process = DENSITY_CHAMELEON_DECODE_PROCESS_PREPARE_NEW_BLOCK;
 
@@ -147,7 +148,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(d
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
-    density_byte *pointerInBefore;
+    //density_byte *pointerInBefore;
 
     switch (state->process) {
         case DENSITY_CHAMELEON_DECODE_PROCESS_PREPARE_NEW_BLOCK:
@@ -169,19 +170,18 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_contin
             readMemoryLocation->available_bytes -= sizeof(density_chameleon_signature);
 
             // Read was successful, calculate body size
-            //state->bodyLength = (uint_fast32_t) (sizeof(uint32_t) * bitsizeof(density_chameleon_signature) - __builtin_popcountll(state->signature) * (sizeof(uint32_t) - sizeof(uint16_t)));
+            state->bodyLength = (uint_fast32_t) (sizeof(uint32_t) * bitsizeof(density_chameleon_signature) - __builtin_popcountll(state->signature) * (sizeof(uint32_t) - sizeof(uint16_t)));
 
         case DENSITY_CHAMELEON_DECODE_PROCESS_DECOMPRESS_BODY:
             // Try to read the body
-            if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_CHAMELEON_DECODE_PROCESS_UNIT_SIZE/*state->bodyLength*/))) {
+            if (!(readMemoryLocation = density_memory_teleport_read(in, state->bodyLength))) {
                 state->process = DENSITY_CHAMELEON_DECODE_PROCESS_DECOMPRESS_BODY;
                 return DENSITY_KERNEL_DECODE_STATE_AWAITING_FURTHER_INPUT;
             }
 
             // Body was read properly, process
-            pointerInBefore = readMemoryLocation->pointer;
             density_chameleon_decode_process_data(readMemoryLocation, out, state);
-            readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - pointerInBefore);//state->bodyLength;
+            readMemoryLocation->available_bytes -= state->bodyLength;
             out->available_bytes -= bitsizeof(density_chameleon_signature) * sizeof(uint32_t);
 
             // Start over
@@ -195,47 +195,55 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
 
-    while(true) {
-        if ((returnState = density_chameleon_decode_check_state(out, state)))
-            return returnState;
+    switch (state->process) {
+        case DENSITY_CHAMELEON_DECODE_PROCESS_PREPARE_NEW_BLOCK:
+        prepare_new_block:
+            if ((returnState = density_chameleon_decode_check_state(out, state)))
+                return returnState;
 
-        // Try to read a signature
-        if(density_memory_teleport_available(in) < sizeof(density_chameleon_signature) + DENSITY_CHAMELEON_DECODE_RESERVED)
-            break;
-        if (!(readMemoryLocation = density_memory_teleport_read(in, sizeof(density_chameleon_signature))))
-            break;
+        case DENSITY_CHAMELEON_DECODE_PROCESS_SIGNATURE:
+            // Try to read a signature
+            if (density_memory_teleport_available(in) < sizeof(density_chameleon_signature) + state->endDataOverhead)
+                goto density_chameleon_decode_finish;
+            if (!(readMemoryLocation = density_memory_teleport_read(in, sizeof(density_chameleon_signature))))
+                goto density_chameleon_decode_finish;
 
-        // Decode the signature (endian processing)
-        density_chameleon_decode_read_signature(readMemoryLocation, state);
-        readMemoryLocation->available_bytes -= sizeof(density_chameleon_signature);
+            // Decode the signature (endian processing)
+            density_chameleon_decode_read_signature(readMemoryLocation, state);
+            readMemoryLocation->available_bytes -= sizeof(density_chameleon_signature);
 
-        // Try to read the body, step by step
-        while (state->shift != 64) {
-            if (density_chameleon_decode_test_compressed(state)) {
-                uint16_t chunk;
-                if(density_memory_teleport_available(in) < sizeof(uint16_t) + DENSITY_CHAMELEON_DECODE_RESERVED)
-                    break;
-                if (!(readMemoryLocation = density_memory_teleport_read(in, sizeof(uint16_t))))
-                    break;
-                density_chameleon_decode_read_compressed_chunk(&chunk, readMemoryLocation);
-                readMemoryLocation->available_bytes -= sizeof(uint16_t);
-                density_chameleon_decode_compressed_chunk(&chunk, out, state);
-            } else {
-                uint32_t chunk;
-                if(density_memory_teleport_available(in) < sizeof(uint32_t) + DENSITY_CHAMELEON_DECODE_RESERVED)
-                    break;
-                if (!(readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t))))
-                    break;
-                density_chameleon_decode_read_uncompressed_chunk(&chunk, readMemoryLocation);
-                readMemoryLocation->available_bytes -= sizeof(uint32_t);
-                density_chameleon_decode_uncompressed_chunk(&chunk, out, state);
+        case DENSITY_CHAMELEON_DECODE_PROCESS_DECOMPRESS_BODY:
+            // Try to read and process the body, step by step
+            while (state->shift != 64) {
+                if (density_chameleon_decode_test_compressed(state)) {
+                    uint16_t chunk;
+                    if (density_memory_teleport_available(in) < sizeof(uint16_t) + state->endDataOverhead)
+                        goto density_chameleon_decode_finish;
+                    if (!(readMemoryLocation = density_memory_teleport_read(in, sizeof(uint16_t))))
+                        goto density_chameleon_decode_finish;
+                    density_chameleon_decode_read_compressed_chunk(&chunk, readMemoryLocation);
+                    readMemoryLocation->available_bytes -= sizeof(uint16_t);
+                    density_chameleon_decode_compressed_chunk(&chunk, out, state);
+                } else {
+                    uint32_t chunk;
+                    if (density_memory_teleport_available(in) < sizeof(uint32_t) + state->endDataOverhead)
+                        goto density_chameleon_decode_finish;
+                    if (!(readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t))))
+                        goto density_chameleon_decode_finish;
+                    density_chameleon_decode_read_uncompressed_chunk(&chunk, readMemoryLocation);
+                    readMemoryLocation->available_bytes -= sizeof(uint32_t);
+                    density_chameleon_decode_uncompressed_chunk(&chunk, out, state);
+                }
+                state->shift++;
             }
-            state->shift++;
-        }
-        out->available_bytes -= bitsizeof(density_chameleon_signature) * sizeof(uint32_t);
+            out->available_bytes -= bitsizeof(density_chameleon_signature) * sizeof(uint32_t);
+
+            // Start over
+            goto prepare_new_block;
     }
 
-    density_memory_teleport_copy(in, out, density_memory_teleport_available(in) - DENSITY_CHAMELEON_DECODE_RESERVED);
+    density_chameleon_decode_finish:
+    density_memory_teleport_copy(in, out, density_memory_teleport_available(in) - state->endDataOverhead);
 
     return DENSITY_KERNEL_DECODE_STATE_AWAITING_FURTHER_INPUT;
 }
