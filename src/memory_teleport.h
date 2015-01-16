@@ -39,18 +39,19 @@
 #include "memory_location.h"
 #include "density_api_data_structures.h"
 
-typedef enum {
+/*typedef enum {
     DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_INDIRECT_ACCESS,
     DENSITY_MEMORY_TELEPORT_INPUT_SOURCE_DIRECT_ACCESS
-} DENSITY_MEMORY_TELEPORT_INPUT_SOURCE;
+} DENSITY_MEMORY_TELEPORT_INPUT_SOURCE;*/
 
 typedef struct {
+    density_byte *originalPointer;
     density_byte *pointer;
     uint_fast64_t position;
 } density_staging_memory_location;
 
 typedef struct {
-    DENSITY_MEMORY_TELEPORT_INPUT_SOURCE source;
+    //DENSITY_MEMORY_TELEPORT_INPUT_SOURCE source;
     density_staging_memory_location *stagingMemoryLocation;
     density_memory_location *indirectMemoryLocation;
     density_memory_location *directMemoryLocation;
