@@ -62,9 +62,21 @@ DENSITY_FORCE_INLINE void density_memory_teleport_store(density_memory_teleport 
     teleport->directMemoryLocation->available_bytes = availableIn;
 }
 
+DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_from_staging(density_memory_teleport *teleport) {
+    return teleport->stagingMemoryLocation->position - (teleport->stagingMemoryLocation->pointer - teleport->stagingMemoryLocation->originalPointer);
+}
+
+DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_from_direct(density_memory_teleport *teleport) {
+    return teleport->directMemoryLocation->available_bytes;
+}
+
+DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available(density_memory_teleport *teleport) {
+    return density_memory_teleport_available_from_staging(teleport) + density_memory_teleport_available_from_direct(teleport);
+}
+
 DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(density_memory_teleport *restrict teleport, uint_fast64_t bytes) {
-    uint_fast64_t directAvailableBytes = teleport->directMemoryLocation->available_bytes;
-    uint_fast64_t stagingAvailableBytes = teleport->stagingMemoryLocation->position - (teleport->stagingMemoryLocation->pointer - teleport->stagingMemoryLocation->originalPointer);
+    uint_fast64_t stagingAvailableBytes = density_memory_teleport_available_from_staging(teleport);
+    uint_fast64_t directAvailableBytes = density_memory_teleport_available_from_direct(teleport);
 
     if(stagingAvailableBytes) {
         if (bytes <= stagingAvailableBytes) {
@@ -102,15 +114,11 @@ DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(densi
     }
 }
 
-DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available(density_memory_teleport *teleport) {
-    return teleport->directMemoryLocation->available_bytes + teleport->stagingMemoryLocation->position - (teleport->stagingMemoryLocation->pointer - teleport->stagingMemoryLocation->originalPointer);
-}
-
 DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *restrict teleport, density_memory_location *restrict out, uint_fast64_t bytes) {
     uint_fast64_t fromStaging = 0;
     uint_fast64_t fromDirect = 0;
-    uint_fast64_t directAvailableBytes = teleport->directMemoryLocation->available_bytes;
-    uint_fast64_t stagingAvailableBytes = teleport->stagingMemoryLocation->position - (teleport->stagingMemoryLocation->pointer - teleport->stagingMemoryLocation->originalPointer);
+    uint_fast64_t stagingAvailableBytes = density_memory_teleport_available_from_staging(teleport);
+    uint_fast64_t directAvailableBytes = density_memory_teleport_available_from_direct(teleport);
 
     if(stagingAvailableBytes) {
         if(bytes <= stagingAvailableBytes) {
