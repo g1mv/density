@@ -222,8 +222,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish
                 pointerOutBefore = out->pointer;
 
                 // Try to read a complete chunk unit
-                if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE)))
+                if(density_memory_teleport_available(in) < DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE)
                     goto step_by_step;
+                if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE)))
+                    return DENSITY_KERNEL_ENCODE_STATE_ERROR;
 
                 // Chunk was read properly, process
                 density_chameleon_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
