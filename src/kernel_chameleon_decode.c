@@ -121,7 +121,7 @@ DENSITY_FORCE_INLINE const bool density_chameleon_decode_test_compressed(density
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
-    while (state->shift != 64) {
+    while (state->shift != bitsizeof(density_chameleon_signature)) {
         density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state), state);
         state->shift++;
     }
@@ -227,7 +227,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish
 
             // Try to read and process the body, step by step
             step_by_step:
-            while (state->shift != 64) {
+            while (state->shift != bitsizeof(density_chameleon_signature)) {
                 if (density_chameleon_decode_test_compressed(state)) {
                     uint16_t chunk;
                     if (density_memory_teleport_available(in) < sizeof(uint16_t) + state->endDataOverhead)
