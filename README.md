@@ -62,7 +62,7 @@ When this is done you can start using the **DENSITY API** :
         fprintf(stderr, "Error %i when preparing compression\n", streamState);
     if ((streamState = density_stream_compress_init(stream, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, DENSITY_BLOCK_TYPE_DEFAULT)))
         fprintf(stderr, "Error %i when initializing compression\n", streamState);
-    if ((streamState = density_stream_compress(stream)))  if (streamState != DENSITY_STREAM_STATE_STALL_ON_INPUT)
+    if ((streamState = density_stream_compress_continue(stream)))  if (streamState != DENSITY_STREAM_STATE_STALL_ON_INPUT)
         fprintf(stderr, "Error %i occured during compression\n", streamState);
     if ((streamState = density_stream_compress_finish(stream)))
         fprintf(stderr, "Error %i occured while finishing compression\n", streamState);
@@ -73,7 +73,7 @@ When this is done you can start using the **DENSITY API** :
         fprintf(stderr, "Error %i when preparing decompression\n", streamState);
     if ((streamState = density_stream_decompress_init(stream, NULL)))
         fprintf(stderr, "Error %i when initializing decompression\n", streamState);
-    if ((streamState = density_stream_decompress(stream))) if (streamState != DENSITY_STREAM_STATE_STALL_ON_INPUT)
+    if ((streamState = density_stream_decompress_continue(stream))) if (streamState != DENSITY_STREAM_STATE_STALL_ON_INPUT)
         fprintf(stderr, "Error %i occured during decompression\n", streamState);
     if ((streamState = density_stream_decompress_finish(stream)))
         fprintf(stderr, "Error %i occured while finishing compression\n", streamState);
