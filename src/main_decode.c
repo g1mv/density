@@ -135,7 +135,6 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_t
             outAvailableBefore = out->available_bytes;
             blockDecodeState = density_block_decode_finish(in, out, &state->blockDecodeState);
             density_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
-            mem_free(state->blockDecodeState.kernelDecodeState);
             if (blockDecodeState) {
                 if (blockDecodeState == DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT)
                     return DENSITY_DECODE_STATE_STALL_ON_OUTPUT;
@@ -145,6 +144,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_t
             state->process = DENSITY_DECODE_PROCESS_READ_FOOTER;
 
         case DENSITY_DECODE_PROCESS_READ_FOOTER:
+            mem_free(state->blockDecodeState.kernelDecodeState);
             if ((decodeState = density_decode_read_footer(in, state)))
                 return decodeState;
             break;

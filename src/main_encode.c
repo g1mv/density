@@ -142,7 +142,6 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_finish(density_memory_t
             availableOutBefore = out->available_bytes;
             blockEncodeState = density_block_encode_finish(in, out, &state->blockEncodeState);
             density_encode_update_totals(in, out, state, availableInBefore, availableOutBefore);
-            mem_free(state->blockEncodeState.kernelEncodeState);
             if (blockEncodeState) {
                 if (blockEncodeState == DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT)
                     return DENSITY_ENCODE_STATE_STALL_ON_OUTPUT;
@@ -152,6 +151,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_finish(density_memory_t
             state->process = DENSITY_ENCODE_PROCESS_WRITE_FOOTER;
 
         case DENSITY_ENCODE_PROCESS_WRITE_FOOTER:
+            mem_free(state->blockEncodeState.kernelEncodeState);
 #if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES
             encodeState = density_encode_write_footer(out, state);
             if (encodeState)
