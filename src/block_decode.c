@@ -299,12 +299,14 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
                         }
                         break;
                 }
+                break;
 
             case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER:
                 if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) if ((blockDecodeState = density_block_decode_read_block_footer(in, state)))
                     return blockDecodeState;
                 if (density_memory_teleport_available(in) <= state->endDataOverhead)
                     return DENSITY_BLOCK_DECODE_STATE_READY;
+                state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER;
                 break;
 
             default:

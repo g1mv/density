@@ -300,13 +300,14 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
                         }
                         break;
                 }
+                break;
 
             case DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER:
                 if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) if ((encodeState = density_block_encode_write_block_footer(out, state)))
                     return encodeState;
-                state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER;
                 if (!density_memory_teleport_available(in))
                     return DENSITY_BLOCK_ENCODE_STATE_READY;
+                state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER;
                 break;
 
             default:
