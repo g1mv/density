@@ -123,12 +123,6 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
                     return blockDecodeState;
                 break;
 
-            case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER:
-                if (state->blockType == DENSITY_BLOCK_TYPE_DEFAULT) if ((blockDecodeState = density_block_decode_read_block_footer(in, state)))
-                    return blockDecodeState;
-                state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER;
-                break;
-
             case DENSITY_BLOCK_DECODE_PROCESS_READ_DATA:
                 inAvailableBefore = density_memory_teleport_available(in);
                 outAvailableBefore = out->available_bytes;
@@ -200,6 +194,12 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
                     default:
                         return DENSITY_BLOCK_DECODE_STATE_ERROR;
                 }
+                break;
+
+            case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER:
+                if (state->blockType == DENSITY_BLOCK_TYPE_DEFAULT) if ((blockDecodeState = density_block_decode_read_block_footer(in, state)))
+                    return blockDecodeState;
+                state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER;
                 break;
 
             default:

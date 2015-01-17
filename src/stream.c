@@ -162,9 +162,6 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_finish(density
         case DENSITY_ENCODE_STATE_READY:
             break;
 
-        case DENSITY_ENCODE_STATE_STALL_ON_INPUT:
-            return DENSITY_STREAM_STATE_STALL_ON_INPUT;
-
         case DENSITY_ENCODE_STATE_STALL_ON_OUTPUT:
             return DENSITY_STREAM_STATE_STALL_ON_OUTPUT;
 
@@ -251,8 +248,8 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_finish(densi
         case DENSITY_DECODE_STATE_READY:
             break;
 
-        case DENSITY_DECODE_STATE_STALL_ON_INPUT:
-            return DENSITY_STREAM_STATE_STALL_ON_INPUT;
+        case DENSITY_DECODE_STATE_STALL_ON_OUTPUT:
+            return DENSITY_STREAM_STATE_STALL_ON_OUTPUT;
 
         default:
             return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
