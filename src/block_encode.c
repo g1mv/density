@@ -66,8 +66,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_mode_
             break;
 
         default:
-            // todo if (state->totalWritten > state->totalRead)
-            //    state->blockMode = DENSITY_BLOCK_MODE_COPY;
+            if (state->totalWritten > state->totalRead)
+                state->blockMode = DENSITY_BLOCK_MODE_COPY;
             break;
     }
 
@@ -125,12 +125,6 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(de
                     return encodeState;
                 break;
 
-            case DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER:
-                if (state->blockType == DENSITY_BLOCK_TYPE_DEFAULT) if ((encodeState = density_block_encode_write_block_footer(out, state)))
-                    return encodeState;
-                state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER;
-                break;
-
             case DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER:
                 if ((encodeState = density_block_encode_write_mode_marker(out, state)))
                     return encodeState;
@@ -146,7 +140,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(de
                         inRemaining = density_memory_teleport_available(in);
                         outRemaining = out->available_bytes;
 
-                        if (density_memory_teleport_available(in) <= outRemaining) {
+                        if (inRemaining <= outRemaining) {
                             if (blockRemaining <= inRemaining)
                                 goto copy_until_end_of_block;
                             else {
@@ -206,6 +200,12 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(de
                 }
                 break;
 
+            case DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER:
+                if (state->blockType == DENSITY_BLOCK_TYPE_DEFAULT) if ((encodeState = density_block_encode_write_block_footer(out, state)))
+                    return encodeState;
+                state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER;
+                break;
+
             default:
                 return DENSITY_BLOCK_ENCODE_STATE_ERROR;
         }
@@ -223,6 +223,16 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
 
     while (true) {
         switch (state->process) {
+            case DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER:
+                if ((encodeState = density_block_encode_write_block_header(out, state)))
+                    return encodeState;
+                break;
+
+            case DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER:
+                if ((encodeState = density_block_encode_write_mode_marker(out, state)))
+                    return encodeState;
+                break;
+
             case DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA:
                 availableInBefore = density_memory_teleport_available(in);
                 availableOutBefore = out->available_bytes;
@@ -233,7 +243,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
                         inRemaining = density_memory_teleport_available(in);
                         outRemaining = out->available_bytes;
 
-                        if (density_memory_teleport_available(in) <= outRemaining) {
+                        if (inRemaining <= outRemaining) {
                             if (blockRemaining <= inRemaining)
                                 goto copy_until_end_of_block;
                             else {
@@ -265,18 +275,36 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
                     case DENSITY_BLOCK_MODE_KERNEL:
                         kernelEncodeState = state->kernelEncodeFinish(in, out, state->kernelEncodeState);
                         density_block_encode_update_totals(in, out, state, availableInBefore, availableOutBefore);
-                        if (kernelEncodeState) {
-                            if (kernelEncodeState == DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT)
+
+                        switch (kernelEncodeState) {
+                            case DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT:
+                                return DENSITY_BLOCK_ENCODE_STATE_ERROR;
+
+                            case DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT:
                                 return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT;
-                            else
+
+                            case DENSITY_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK:
+                                state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER;
+                                break;
+
+                            case DENSITY_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK:
+                                state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER;
+                                break;
+
+                            case DENSITY_KERNEL_ENCODE_STATE_READY:
+                                state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER;
+                                break;
+
+                            default:
                                 return DENSITY_BLOCK_ENCODE_STATE_ERROR;
                         }
-                        state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER;
+                        break;
                 }
 
             case DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER:
                 if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) if ((encodeState = density_block_encode_write_block_footer(out, state)))
                     return encodeState;
+                state->process = DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER;
                 if (!density_memory_teleport_available(in))
                     return DENSITY_BLOCK_ENCODE_STATE_READY;
                 break;

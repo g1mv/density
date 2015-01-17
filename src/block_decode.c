@@ -103,8 +103,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(densit
 }
 
 DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state) {
-    DENSITY_BLOCK_DECODE_STATE decodeState;
-    DENSITY_KERNEL_DECODE_STATE hashDecodeState;
+    DENSITY_KERNEL_DECODE_STATE kernelDecodeState;
+    DENSITY_BLOCK_DECODE_STATE blockDecodeState;
     uint_fast64_t inAvailableBefore;
     uint_fast64_t outAvailableBefore;
     uint_fast64_t blockRemaining;
@@ -114,18 +114,18 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
     while (true) {
         switch (state->process) {
             case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER:
-                if ((decodeState = density_block_decode_read_block_header(in, state)))
-                    return decodeState;
+                if ((blockDecodeState = density_block_decode_read_block_header(in, state)))
+                    return blockDecodeState;
                 break;
 
             case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_MODE_MARKER:
-                if ((decodeState = density_block_decode_read_block_mode_marker(in, state)))
-                    return decodeState;
+                if ((blockDecodeState = density_block_decode_read_block_mode_marker(in, state)))
+                    return blockDecodeState;
                 break;
 
             case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER:
-                if (state->blockType == DENSITY_BLOCK_TYPE_DEFAULT) if ((decodeState = density_block_decode_read_block_footer(in, state)))
-                    return decodeState;
+                if (state->blockType == DENSITY_BLOCK_TYPE_DEFAULT) if ((blockDecodeState = density_block_decode_read_block_footer(in, state)))
+                    return blockDecodeState;
                 state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER;
                 break;
 
@@ -171,10 +171,10 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
                         break;
 
                     case DENSITY_BLOCK_MODE_KERNEL:
-                        hashDecodeState = state->kernelDecodeProcess(in, out, state->kernelDecodeState);
+                        kernelDecodeState = state->kernelDecodeProcess(in, out, state->kernelDecodeState);
                         density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
 
-                        switch (hashDecodeState) {
+                        switch (kernelDecodeState) {
                             case DENSITY_KERNEL_DECODE_STATE_READY:
                                 break;
 
@@ -219,6 +219,16 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
 
     while (true) {
         switch (state->process) {
+            case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER:
+                if (density_block_decode_read_block_header(in, state))
+                    return DENSITY_BLOCK_DECODE_STATE_ERROR;
+                break;
+
+            case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_MODE_MARKER:
+                if (density_block_decode_read_block_mode_marker(in, state))
+                    return DENSITY_BLOCK_DECODE_STATE_ERROR;
+                break;
+
             case DENSITY_BLOCK_DECODE_PROCESS_READ_DATA:
                 inAvailableBefore = density_memory_teleport_available(in);
                 outAvailableBefore = out->available_bytes;
@@ -250,7 +260,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
                                     return DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT;
                             }
                         }
-                        goto exit;
+                        break;
 
                     copy_until_end_of_block:
                         density_memory_teleport_copy(in, out, blockRemaining);
@@ -258,8 +268,6 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
 
                     read_block_footer:
                         state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER;
-
-                    exit:
                         break;
 
                     case DENSITY_BLOCK_MODE_KERNEL:
@@ -268,13 +276,30 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
 
                         kernelDecodeState = state->kernelDecodeFinish(in, out, state->kernelDecodeState);
                         density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
-                        if (kernelDecodeState) {
-                            if (kernelDecodeState == DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT)
+
+                        switch (kernelDecodeState) {
+                            case DENSITY_KERNEL_DECODE_STATE_READY:
+                                state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER;
+                                break;
+
+                            case DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT:
+                                return DENSITY_BLOCK_DECODE_STATE_ERROR;
+
+                            case DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT:
                                 return DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT;
-                            else
+
+                            case DENSITY_KERNEL_DECODE_STATE_INFO_NEW_BLOCK:
+                                state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER;
+                                break;
+
+                            case DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK:
+                                state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_MODE_MARKER;
+                                break;
+
+                            default:
                                 return DENSITY_BLOCK_DECODE_STATE_ERROR;
                         }
-                        state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER;
+                        break;
                 }
 
             case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER:
