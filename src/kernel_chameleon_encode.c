@@ -222,7 +222,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish
 
                 // Read from signature step by step
                 while (state->shift != bitsizeof(density_chameleon_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
-                    density_chameleon_encode_kernel(out, &hash, (uint32_t) (readMemoryLocation->pointer), state);
+                    density_chameleon_encode_kernel(out, &hash, *(uint32_t *) (readMemoryLocation->pointer), state);
                     readMemoryLocation->pointer += sizeof(uint32_t);
                     readMemoryLocation->available_bytes -= sizeof(uint32_t);
                 }

@@ -84,7 +84,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(densit
 
     state->totalRead = 0;
     state->totalWritten = 0;
-    state->endDataOverhead = (state->blockType == DENSITY_BLOCK_TYPE_DEFAULT ? sizeof(density_block_footer) : 0) + endDataOverhead;
+    state->endDataOverhead = (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK ? sizeof(density_block_footer) : 0) + endDataOverhead;
 
     switch (state->blockMode) {
         case DENSITY_BLOCK_MODE_KERNEL:
@@ -231,9 +231,9 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
                 state->process = DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER;
 
             case DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_FOOTER:
-                if (state->blockType == DENSITY_BLOCK_TYPE_DEFAULT) if ((blockDecodeState = density_block_decode_read_block_footer(in, state)))
+                if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) if ((blockDecodeState = density_block_decode_read_block_footer(in, state)))
                     return blockDecodeState;
-                if(!density_memory_teleport_available(in) <= state->endDataOverhead)
+                if(density_memory_teleport_available(in) <= state->endDataOverhead)
                     return DENSITY_BLOCK_DECODE_STATE_READY;
                 break;
 
