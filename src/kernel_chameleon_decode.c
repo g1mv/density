@@ -231,9 +231,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish
                     readMemoryLocation->available_bytes -= sizeof(uint32_t);
                     density_chameleon_decode_uncompressed_chunk(&chunk, out, state);
                 }
+                out->available_bytes -= sizeof(uint32_t);
                 state->shift++;
             }
-            out->available_bytes -= bitsizeof(density_chameleon_signature) * sizeof(uint32_t);
 
             // Start over
             state->process = DENSITY_CHAMELEON_DECODE_PROCESS_PREPARE_NEW_BLOCK;

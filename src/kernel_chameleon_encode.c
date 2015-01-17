@@ -214,7 +214,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish
             state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_COMPRESS;
 
         case DENSITY_CHAMELEON_ENCODE_PROCESS_COMPRESS:
-            while(density_memory_teleport_available(in)) {
+            while(density_memory_teleport_available(in) >= sizeof(uint32_t)) {
                 // Check signature state
                 if ((returnState = density_chameleon_encode_check_state(out, state)))
                     return returnState;
@@ -225,7 +225,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish
                     density_chameleon_encode_kernel(out, &hash, (uint32_t) (readMemoryLocation->pointer), state);
                     readMemoryLocation->pointer += sizeof(uint32_t);
                     readMemoryLocation->available_bytes -= sizeof(uint32_t);
-                    state->shift++;
                 }
 
                 out->available_bytes -= (out->pointer - pointerOutBefore);
