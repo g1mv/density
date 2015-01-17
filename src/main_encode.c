@@ -138,22 +138,16 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_finish(density_memory_t
 
     switch (state->process) {
         case DENSITY_ENCODE_PROCESS_WRITE_BLOCKS:
-            switch (state->compressionMode) {
-                default:
-                    availableInBefore = density_memory_teleport_available(in);
-                    availableOutBefore = out->available_bytes;
-                    blockEncodeState = density_block_encode_finish(in, out, &state->blockEncodeState);
-                    density_encode_update_totals(in, out, state, availableInBefore, availableOutBefore);
-                    mem_free(state->blockEncodeState.kernelEncodeState);
-                    if (blockEncodeState) {
-                        if (blockEncodeState == DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT)
-                            return DENSITY_ENCODE_STATE_STALL_ON_OUTPUT;
-                        else
-                            return DENSITY_ENCODE_STATE_ERROR;
-                    }
-
-                case DENSITY_COMPRESSION_MODE_COPY:
-                    break;
+            availableInBefore = density_memory_teleport_available(in);
+            availableOutBefore = out->available_bytes;
+            blockEncodeState = density_block_encode_finish(in, out, &state->blockEncodeState);
+            density_encode_update_totals(in, out, state, availableInBefore, availableOutBefore);
+            mem_free(state->blockEncodeState.kernelEncodeState);
+            if (blockEncodeState) {
+                if (blockEncodeState == DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT)
+                    return DENSITY_ENCODE_STATE_STALL_ON_OUTPUT;
+                else
+                    return DENSITY_ENCODE_STATE_ERROR;
             }
             state->process = DENSITY_ENCODE_PROCESS_WRITE_FOOTER;
 

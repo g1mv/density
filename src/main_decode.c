@@ -131,23 +131,16 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_t
 
     switch (state->process) {
         case DENSITY_DECODE_PROCESS_READ_BLOCKS:
-            switch (state->header.compressionMode) {
-                default:
-                    inAvailableBefore = density_memory_teleport_available(in);
-                    outAvailableBefore = out->available_bytes;
-                    blockDecodeState = density_block_decode_finish(in, out, &state->blockDecodeState);
-                    density_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
-                    mem_free(state->blockDecodeState.kernelDecodeState);
-                    if (blockDecodeState) {
-                        if (blockDecodeState == DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT)
-                            return DENSITY_DECODE_STATE_STALL_ON_OUTPUT;
-                        else
-                            return DENSITY_DECODE_STATE_ERROR;
-                    }
-                    break;
-
-                case DENSITY_COMPRESSION_MODE_COPY:
-                    break;
+            inAvailableBefore = density_memory_teleport_available(in);
+            outAvailableBefore = out->available_bytes;
+            blockDecodeState = density_block_decode_finish(in, out, &state->blockDecodeState);
+            density_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
+            mem_free(state->blockDecodeState.kernelDecodeState);
+            if (blockDecodeState) {
+                if (blockDecodeState == DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT)
+                    return DENSITY_DECODE_STATE_STALL_ON_OUTPUT;
+                else
+                    return DENSITY_DECODE_STATE_ERROR;
             }
             state->process = DENSITY_DECODE_PROCESS_READ_FOOTER;
 
