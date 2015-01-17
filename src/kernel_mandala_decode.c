@@ -71,7 +71,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_check_st
         default:
             break;
     }
-    return DENSITY_KERNEL_DECODE_STATE_AWAITING_FURTHER_INPUT;
+    return DENSITY_KERNEL_DECODE_STATE_READY;
 }
 
 DENSITY_FORCE_INLINE void density_mandala_decode_read_signature(density_memory_location *restrict in, density_mandala_decode_state *restrict state) {
@@ -183,7 +183,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_init(den
 
     state->process = DENSITY_MANDALA_DECODE_PROCESS_PREPARE_NEW_BLOCK;
 
-    return DENSITY_KERNEL_DECODE_STATE_AWAITING_FURTHER_INPUT;
+    return DENSITY_KERNEL_DECODE_STATE_READY;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(density_memory_teleport *restrict in, density_memory_location *restrict out, density_mandala_decode_state *restrict state, const density_bool flush) {
@@ -204,11 +204,11 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(
                     if(remaining > out->available_bytes)
                         return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT;
                     density_memory_teleport_copy(in, out, remaining);
-                    return DENSITY_KERNEL_DECODE_STATE_FINISHED;
+                    // todo return DENSITY_KERNEL_DECODE_STATE_FINISHED;
                 }
             }
             if (!(readMemoryLocation = density_memory_teleport_read(in, sizeof(density_mandala_signature))))
-                return DENSITY_KERNEL_DECODE_STATE_AWAITING_FURTHER_INPUT;
+                return DENSITY_KERNEL_DECODE_STATE_READY;
             density_mandala_decode_read_signature(readMemoryLocation, state);
             readMemoryLocation->available_bytes -= sizeof(density_mandala_signature);
             state->bodyLength = __builtin_popcountll(state->signature) << 1;
@@ -216,7 +216,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(
 
         case DENSITY_MANDALA_DECODE_PROCESS_DECOMPRESS_BODY:
             if (!(readMemoryLocation = density_memory_teleport_read(in, state->bodyLength)))
-                return DENSITY_KERNEL_DECODE_STATE_AWAITING_FURTHER_INPUT;
+                return DENSITY_KERNEL_DECODE_STATE_READY;
             density_mandala_decode_process_data(readMemoryLocation, out, state);
             readMemoryLocation->available_bytes -= state->bodyLength;
             out->available_bytes -= bitsizeof(density_mandala_signature) * sizeof(uint16_t);
@@ -224,9 +224,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(
             goto prepare_new_block;
     }
 
-    return DENSITY_KERNEL_DECODE_STATE_AWAITING_FURTHER_INPUT;
+    return DENSITY_KERNEL_DECODE_STATE_READY;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_finish(density_mandala_decode_state *state) {
-    return DENSITY_KERNEL_DECODE_STATE_AWAITING_FURTHER_INPUT;
+    return DENSITY_KERNEL_DECODE_STATE_READY;
 }

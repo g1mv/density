@@ -48,6 +48,6 @@ typedef struct {
 #pragma pack(pop)
 
 uint_fast32_t density_block_mode_marker_read(density_memory_location *, density_mode_marker *);
-uint_fast32_t density_block_mode_marker_write(density_memory_location*, const DENSITY_BLOCK_TYPE);
+uint_fast32_t density_block_mode_marker_write(density_memory_location*, const DENSITY_BLOCK_MODE);
 
 #endif

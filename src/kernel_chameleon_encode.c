@@ -92,7 +92,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_prepar
     }
     density_chameleon_encode_prepare_new_signature(out, state);
 
-    return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
+    return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_check_state(density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
@@ -109,7 +109,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_check_
             break;
     }
 
-    return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
+    return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(density_memory_location *restrict out, uint32_t *restrict hash, const uint32_t chunk, density_chameleon_encode_state *restrict state) {
@@ -163,7 +163,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(d
 
     state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
 
-    return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
+    return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
@@ -188,7 +188,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_contin
 
                 // Try to read a complete chunk unit
                 if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE)))
-                    return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
+                    return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT;
 
                 // Chunk was read properly, process
                 density_chameleon_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
@@ -214,28 +214,30 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish
             state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_COMPRESS;
 
         case DENSITY_CHAMELEON_ENCODE_PROCESS_COMPRESS:
-        density_chameleon_encode_process_compress:
-            pointerOutBefore = out->pointer;
+            while(density_memory_teleport_available(in)) {
+                // Check signature state
+                if ((returnState = density_chameleon_encode_check_state(out, state)))
+                    return returnState;
+                pointerOutBefore = out->pointer;
 
-            // Finish using the current signature
-            while (state->shift != bitsizeof(density_chameleon_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
-                density_chameleon_encode_kernel(out, &hash, (uint32_t) (readMemoryLocation->pointer), state);
-                readMemoryLocation->pointer += sizeof(uint32_t);
-                readMemoryLocation->available_bytes -= sizeof(uint32_t);
-                state->shift++;
+                // Read from signature step by step
+                while (state->shift != bitsizeof(density_chameleon_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
+                    density_chameleon_encode_kernel(out, &hash, (uint32_t) (readMemoryLocation->pointer), state);
+                    readMemoryLocation->pointer += sizeof(uint32_t);
+                    readMemoryLocation->available_bytes -= sizeof(uint32_t);
+                    state->shift++;
+                }
+
+                out->available_bytes -= (out->pointer - pointerOutBefore);
             }
-
-            out->available_bytes -= (out->pointer - pointerOutBefore);
-
-            if(readMemoryLocation)
-                goto density_chameleon_encode_process_compress;
-            state->process = DENSITY_CHAMELEON_ENCODE_PROCESS_COPY_REMAINING;
-
-        case DENSITY_CHAMELEON_ENCODE_PROCESS_COPY_REMAINING:
-            // Copy the remaining bytes
-            density_memory_teleport_copy_remaining(in, out);
             break;
+
+        default:
+            return DENSITY_KERNEL_ENCODE_STATE_ERROR;
     }
 
-    return DENSITY_KERNEL_ENCODE_STATE_AWAITING_FURTHER_INPUT;
+    // Copy the remaining bytes
+    density_memory_teleport_copy_remaining(in, out);
+
+    return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
