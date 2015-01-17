@@ -232,6 +232,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
             case DENSITY_BLOCK_DECODE_PROCESS_READ_DATA:
                 inAvailableBefore = density_memory_teleport_available(in);
                 outAvailableBefore = out->available_bytes;
+
                 switch (state->blockMode) {
                     case DENSITY_BLOCK_MODE_COPY:
                         blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalWritten - state->currentBlockData.outStart);
@@ -271,9 +272,6 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
                         break;
 
                     case DENSITY_BLOCK_MODE_KERNEL:
-                        inAvailableBefore = density_memory_teleport_available(in);
-                        outAvailableBefore = out->available_bytes;
-
                         kernelDecodeState = state->kernelDecodeFinish(in, out, state->kernelDecodeState);
                         density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
 
