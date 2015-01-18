@@ -75,16 +75,20 @@ DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available(density_mem
 }
 
 DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(density_memory_teleport *restrict teleport, uint_fast64_t bytes) {
+    return density_memory_teleport_read_reserved(teleport, bytes, 0);
+}
+
+DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read_reserved(density_memory_teleport *restrict teleport, uint_fast64_t bytes, uint_fast64_t reserved) {
     uint_fast64_t stagingAvailableBytes = density_memory_teleport_available_from_staging(teleport);
     uint_fast64_t directAvailableBytes = density_memory_teleport_available_from_direct(teleport);
 
     if(stagingAvailableBytes) {
-        if (bytes <= stagingAvailableBytes) {
+        if (bytes <= stagingAvailableBytes - reserved) {
             teleport->indirectMemoryLocation->pointer = teleport->stagingMemoryLocation->pointer;
             teleport->stagingMemoryLocation->pointer += bytes;
             teleport->indirectMemoryLocation->available_bytes = bytes;
             return teleport->indirectMemoryLocation;
-        } else if (bytes <= stagingAvailableBytes + directAvailableBytes) {
+        } else if (bytes <= stagingAvailableBytes + directAvailableBytes - reserved) {
             uint_fast64_t missingBytes = bytes - stagingAvailableBytes;
             memcpy(teleport->stagingMemoryLocation->originalPointer + teleport->stagingMemoryLocation->position, teleport->directMemoryLocation->pointer, missingBytes);
             teleport->indirectMemoryLocation->pointer = teleport->stagingMemoryLocation->pointer;
@@ -101,7 +105,7 @@ DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(densi
             return NULL;
         }
     } else {
-        if(bytes <= directAvailableBytes) {
+        if(bytes <= directAvailableBytes - reserved) {
             return teleport->directMemoryLocation;
         } else {
             memcpy(teleport->stagingMemoryLocation->originalPointer + teleport->stagingMemoryLocation->position, teleport->directMemoryLocation->pointer, directAvailableBytes);
