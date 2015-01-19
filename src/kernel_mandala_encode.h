@@ -56,8 +56,8 @@
 
 typedef enum {
     DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
-    DENSITY_MANDALA_ENCODE_PROCESS_COMPRESS,
-    DENSITY_MANDALA_ENCODE_PROCESS_COPY_REMAINING,
+    DENSITY_MANDALA_ENCODE_PROCESS_CHECK_SIGNATURE_STATE,
+    DENSITY_MANDALA_ENCODE_PROCESS_READ_CHUNK,
 } DENSITY_MANDALA_ENCODE_PROCESS;
 
 #pragma pack(push)
@@ -82,5 +82,5 @@ typedef struct {
 
 DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_init(density_mandala_encode_state *);
 DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(density_memory_teleport *, density_memory_location *, density_mandala_encode_state *, const density_bool);
-DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_finish(density_mandala_encode_state *);
+DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_finish(density_memory_teleport *, density_memory_location *, density_mandala_encode_state *);
 #endif

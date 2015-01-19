@@ -42,6 +42,11 @@
 
 #include "kernel_mandala_encode.h"
 
+DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE exitProcess(density_mandala_encode_state *state, DENSITY_MANDALA_ENCODE_PROCESS process, DENSITY_KERNEL_ENCODE_STATE kernelEncodeState) {
+    state->process = process;
+    return kernelEncodeState;
+}
+
 DENSITY_FORCE_INLINE void density_mandala_encode_write_to_signature(density_mandala_encode_state *state, uint_fast8_t flag) {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     *(state->signature) |= ((uint64_t) flag) << state->shift;
@@ -95,10 +100,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_check_st
 
     switch (state->shift) {
         case bitsizeof(density_mandala_signature):
-            if ((returnState = density_mandala_encode_prepare_new_block(out, state))) {
-                state->process = DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
-                return returnState;
-            }
+            if ((returnState = density_mandala_encode_prepare_new_block(out, state)))
+                exitProcess(state, DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
             break;
         default:
             break;
@@ -174,9 +177,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_init(den
     state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
 #endif
 
-    state->process = DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK;
-
-    return DENSITY_KERNEL_ENCODE_STATE_READY;
+    exitProcess(state, DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK, DENSITY_KERNEL_ENCODE_STATE_READY);
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(density_memory_teleport *restrict in, density_memory_location *restrict out, density_mandala_encode_state *restrict state, const density_bool flush) {
@@ -187,54 +188,99 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(
     density_memory_location *readMemoryLocation;
     uint_fast64_t remaining;
 
+    // Dispatch
     switch (state->process) {
         case DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
-            if ((returnState = density_mandala_encode_prepare_new_block(out, state)))
-                return returnState;
-            state->process = DENSITY_MANDALA_ENCODE_PROCESS_COMPRESS;
-
-        case DENSITY_MANDALA_ENCODE_PROCESS_COMPRESS:
-            while (true) {
-                remaining = density_memory_teleport_available(in);
-                if (remaining < DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE) {
-                    if (flush) {
-                        // We finish using the current signature
-                        while (state->shift < bitsizeof(density_mandala_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
-                            density_mandala_encode_kernel(out, &hash, (uint32_t) (readMemoryLocation->pointer), state);
-                            readMemoryLocation->available_bytes -= sizeof(uint32_t);
-                            state->shift += 2;
-                        }
-                        // We copy the remaining bytes
-                        state->process = DENSITY_MANDALA_ENCODE_PROCESS_COPY_REMAINING;
-                        goto density_copy_remaining;
-                    } else {
-                        if (!density_memory_teleport_read(in, DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE))
-                            return DENSITY_KERNEL_ENCODE_STATE_READY;
-                        else
-                            return DENSITY_KERNEL_ENCODE_STATE_ERROR;
-                    }
-                }
-                if ((returnState = density_mandala_encode_check_state(out, state)))
-                    return returnState;
-                pointerOutBefore = out->pointer;
-                readMemoryLocation = density_memory_teleport_read(in, DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE);
-                density_mandala_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
-                readMemoryLocation->available_bytes -= DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE;
-                out->available_bytes -= (out->pointer - pointerOutBefore);
-            }
-
-        case DENSITY_MANDALA_ENCODE_PROCESS_COPY_REMAINING:
-        density_copy_remaining:
-            remaining = density_memory_teleport_available(in);
-            if (remaining > out->available_bytes)
-                return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT;
-            density_memory_teleport_copy(in, out, remaining);
-            //return DENSITY_KERNEL_ENCODE_STATE_FINISHED;
+            goto prepare_new_block;
+        case DENSITY_MANDALA_ENCODE_PROCESS_CHECK_SIGNATURE_STATE:
+            goto check_signature_state;
+        case DENSITY_MANDALA_ENCODE_PROCESS_READ_CHUNK:
+            goto read_chunk;
+        default:
+            return DENSITY_KERNEL_ENCODE_STATE_ERROR;
     }
 
-    return DENSITY_KERNEL_ENCODE_STATE_READY;
+    // Prepare new block
+    prepare_new_block:
+    if ((returnState = density_mandala_encode_prepare_new_block(out, state)))
+        return exitProcess(state, DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
+
+    // Check signature state
+    check_signature_state:
+    if ((returnState = density_mandala_encode_check_state(out, state)))
+        return exitProcess(state, DENSITY_MANDALA_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
+
+    // Try to read a complete chunk unit
+    read_chunk:
+    pointerOutBefore = out->pointer;
+    if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE)))
+        return exitProcess(state, DENSITY_MANDALA_ENCODE_PROCESS_READ_CHUNK, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
+
+    // Chunk was read properly, process
+    density_mandala_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
+    readMemoryLocation->available_bytes -= DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE;
+    out->available_bytes -= (out->pointer - pointerOutBefore);
+
+    // New loop
+    goto check_signature_state;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_finish(density_mandala_encode_state *state) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_mandala_encode_state *restrict state) {
+    DENSITY_KERNEL_ENCODE_STATE returnState;
+    uint32_t hash;
+    uint64_t chunk;
+    density_memory_location *readMemoryLocation;
+    density_byte *pointerOutBefore;
+
+    // Dispatch
+    switch (state->process) {
+        case DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
+            goto prepare_new_block;
+        case DENSITY_MANDALA_ENCODE_PROCESS_CHECK_SIGNATURE_STATE:
+            goto check_signature_state;
+        case DENSITY_MANDALA_ENCODE_PROCESS_READ_CHUNK:
+            goto read_chunk;
+        default:
+            return DENSITY_KERNEL_ENCODE_STATE_ERROR;
+    }
+
+    // Prepare new block
+    prepare_new_block:
+    if ((returnState = density_mandala_encode_prepare_new_block(out, state)))
+        return exitProcess(state, DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
+
+    // Check signature state
+    check_signature_state:
+    if ((returnState = density_mandala_encode_check_state(out, state)))
+        return exitProcess(state, DENSITY_MANDALA_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
+
+    // Try to read a complete chunk unit
+    read_chunk:
+    pointerOutBefore = out->pointer;
+    if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE)))
+        goto step_by_step;
+
+    // Chunk was read properly, process
+    density_mandala_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
+    readMemoryLocation->available_bytes -= DENSITY_MANDALA_ENCODE_PROCESS_UNIT_SIZE;
+    goto exit;
+
+    // Read step by step
+    step_by_step:
+    while (state->shift != bitsizeof(density_mandala_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
+        density_mandala_encode_kernel(out, &hash, *(uint32_t *) (readMemoryLocation->pointer), state);
+        readMemoryLocation->pointer += sizeof(uint32_t);
+        readMemoryLocation->available_bytes -= sizeof(uint32_t);
+    }
+    exit:
+    out->available_bytes -= (out->pointer - pointerOutBefore);
+
+    // New loop
+    if (density_memory_teleport_available(in) >= sizeof(uint32_t))
+        goto check_signature_state;
+
+    // Copy the remaining bytes
+    density_memory_teleport_copy_remaining(in, out);
+
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
