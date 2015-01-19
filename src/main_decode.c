@@ -38,7 +38,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE exitProcess(density_decode_state *stat
 
 DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_header(density_memory_teleport *restrict in, density_decode_state *restrict state) {
     density_memory_location *readLocation;
-    if (!(readLocation = density_memory_teleport_read(in, sizeof(density_main_header))))
+    if (!(readLocation = density_memory_teleport_read_reserved(in, sizeof(density_main_header), DENSITY_DECODE_END_DATA_OVERHEAD)))
         return DENSITY_DECODE_STATE_STALL_ON_INPUT;
 
     state->totalRead += density_main_header_read(readLocation, &state->header);
