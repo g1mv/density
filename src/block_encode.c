@@ -64,17 +64,17 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_mode_
     if (sizeof(density_mode_marker) > out->available_bytes)
         return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT;
 
-    switch (state->blockMode) {
-        case DENSITY_BLOCK_MODE_COPY:
+    switch (state->currentMode) {
+        case DENSITY_COMPRESSION_MODE_COPY:
             break;
 
         default:
             if (state->totalWritten > state->totalRead)
-                state->blockMode = DENSITY_BLOCK_MODE_COPY;
+                state->currentMode = DENSITY_COMPRESSION_MODE_COPY;
             break;
     }
 
-    state->totalWritten += density_block_mode_marker_write(out, state->blockMode);
+    state->totalWritten += density_block_mode_marker_write(out, state->currentMode);
 
     return DENSITY_BLOCK_ENCODE_STATE_READY;
 }
@@ -88,21 +88,20 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(densit
     state->blockType = blockType;
     state->targetMode = mode;
     state->currentMode = mode;
-    state->blockMode = mode ? DENSITY_BLOCK_MODE_KERNEL : DENSITY_BLOCK_MODE_COPY;
 
     state->totalRead = 0;
     state->totalWritten = 0;
 
-    switch (state->blockMode) {
-        case DENSITY_BLOCK_MODE_KERNEL:
+    switch (state->currentMode) {
+        case DENSITY_COMPRESSION_MODE_COPY:
+            break;
+        default:
             state->kernelEncodeState = kernelState;
             state->kernelEncodeInit = kernelInit;
             state->kernelEncodeProcess = kernelProcess;
             state->kernelEncodeFinish = kernelFinish;
 
             state->kernelEncodeInit(state->kernelEncodeState);
-            break;
-        default:
             break;
     }
 
@@ -145,8 +144,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(de
     availableInBefore = density_memory_teleport_available(in);
     availableOutBefore = out->available_bytes;
 
-    switch (state->blockMode) {
-        case DENSITY_BLOCK_MODE_COPY:
+    switch (state->currentMode) {
+        case DENSITY_COMPRESSION_MODE_COPY:
             blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalRead - state->currentBlockData.inStart);
             inRemaining = density_memory_teleport_available(in);
             outRemaining = out->available_bytes;
@@ -174,7 +173,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(de
             density_block_encode_update_totals(in, out, state, availableInBefore, availableOutBefore);
             goto write_block_footer;
 
-        case DENSITY_BLOCK_MODE_KERNEL:
+        default:
             kernelEncodeState = state->kernelEncodeProcess(in, out, state->kernelEncodeState);
             density_block_encode_update_totals(in, out, state, availableInBefore, availableOutBefore);
 
@@ -190,9 +189,6 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(de
                 default:
                     return DENSITY_BLOCK_ENCODE_STATE_ERROR;
             }
-
-        default:
-            return DENSITY_BLOCK_ENCODE_STATE_ERROR;
     }
 
     write_block_footer:
@@ -237,8 +233,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
     availableInBefore = density_memory_teleport_available(in);
     availableOutBefore = out->available_bytes;
 
-    switch (state->blockMode) {
-        case DENSITY_BLOCK_MODE_COPY:
+    switch (state->currentMode) {
+        case DENSITY_COMPRESSION_MODE_COPY:
             blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalRead - state->currentBlockData.inStart);
             inRemaining = density_memory_teleport_available(in);
             outRemaining = out->available_bytes;
@@ -266,7 +262,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
             density_block_encode_update_totals(in, out, state, availableInBefore, availableOutBefore);
             goto write_block_footer;
 
-        case DENSITY_BLOCK_MODE_KERNEL:
+        default:
             kernelEncodeState = state->kernelEncodeFinish(in, out, state->kernelEncodeState);
             density_block_encode_update_totals(in, out, state, availableInBefore, availableOutBefore);
 
@@ -283,9 +279,6 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
                 default:
                     return DENSITY_BLOCK_ENCODE_STATE_ERROR;
             }
-
-        default:
-            return DENSITY_BLOCK_ENCODE_STATE_ERROR;
     }
 
     write_block_footer:

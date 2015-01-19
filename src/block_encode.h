@@ -66,7 +66,6 @@ typedef struct {
     DENSITY_BLOCK_ENCODE_PROCESS process;
     DENSITY_COMPRESSION_MODE targetMode;
     DENSITY_COMPRESSION_MODE currentMode;
-    DENSITY_BLOCK_MODE blockMode;
     DENSITY_BLOCK_TYPE blockType;
 
     uint_fast64_t totalRead;

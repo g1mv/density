@@ -152,7 +152,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_t
         case DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT:
             return exitProcess(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_STALL_ON_OUTPUT);
         default:
-            DENSITY_DECODE_STATE_ERROR;
+            return DENSITY_DECODE_STATE_ERROR;
     }
 
     read_footer:

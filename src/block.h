@@ -36,9 +36,4 @@
 
 #define DENSITY_PREFERRED_COPY_BLOCK_SIZE                         (1 << 19)
 
-typedef enum {
-    DENSITY_BLOCK_MODE_COPY = 0,
-    DENSITY_BLOCK_MODE_KERNEL = 1
-} DENSITY_BLOCK_MODE;
-
 #endif

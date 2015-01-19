@@ -81,23 +81,23 @@ DENSITY_FORCE_INLINE void density_block_decode_update_totals(density_memory_tele
 DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead, void *kernelState, DENSITY_KERNEL_DECODE_STATE (*kernelInit)(void *, const density_main_header_parameters, const uint_fast64_t), DENSITY_KERNEL_DECODE_STATE (*kernelProcess)(density_memory_teleport *, density_memory_location *, void *), DENSITY_KERNEL_DECODE_STATE (*kernelFinish)(density_memory_teleport *, density_memory_location *, void *)) {
     state->targetMode = mode;
     state->currentMode = mode;
-    state->blockMode = mode ? DENSITY_BLOCK_MODE_KERNEL : DENSITY_BLOCK_MODE_COPY;
     state->blockType = blockType;
 
     state->totalRead = 0;
     state->totalWritten = 0;
     state->endDataOverhead = (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK ? sizeof(density_block_footer) : 0) + endDataOverhead;
 
-    switch (state->blockMode) {
-        case DENSITY_BLOCK_MODE_KERNEL:
+    switch (state->currentMode) {
+        case DENSITY_COMPRESSION_MODE_COPY:
+            break;
+
+        default:
             state->kernelDecodeState = kernelState;
             state->kernelDecodeInit = kernelInit;
             state->kernelDecodeProcess = kernelProcess;
             state->kernelDecodeFinish = kernelFinish;
 
             state->kernelDecodeInit(state->kernelDecodeState, parameters, state->endDataOverhead);
-            break;
-        default:
             break;
     }
 
@@ -139,8 +139,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
     read_data:
     inAvailableBefore = density_memory_teleport_available_reserved(in, state->endDataOverhead);
     outAvailableBefore = out->available_bytes;
-    switch (state->blockMode) {
-        case DENSITY_BLOCK_MODE_COPY:
+    switch (state->currentMode) {
+        case DENSITY_COMPRESSION_MODE_COPY:
             blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalWritten - state->currentBlockData.outStart);
             inRemaining = density_memory_teleport_available_reserved(in, state->endDataOverhead);
             outRemaining = out->available_bytes;
@@ -168,7 +168,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
             density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
             goto read_block_footer;
 
-        case DENSITY_BLOCK_MODE_KERNEL:
+        default:
             kernelDecodeState = state->kernelDecodeProcess(in, out, state->kernelDecodeState);
             density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
 
@@ -184,9 +184,6 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
                 default:
                     return DENSITY_BLOCK_DECODE_STATE_ERROR;
             }
-
-        default:
-            return DENSITY_BLOCK_DECODE_STATE_ERROR;
     }
 
     read_block_footer:
@@ -231,8 +228,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
     inAvailableBefore = density_memory_teleport_available_reserved(in, state->endDataOverhead);
     outAvailableBefore = out->available_bytes;
 
-    switch (state->blockMode) {
-        case DENSITY_BLOCK_MODE_COPY:
+    switch (state->currentMode) {
+        case DENSITY_COMPRESSION_MODE_COPY:
             blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalWritten - state->currentBlockData.outStart);
             inRemaining = density_memory_teleport_available_reserved(in, state->endDataOverhead);
             outRemaining = out->available_bytes;
@@ -260,7 +257,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
             density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
             goto read_block_footer;
 
-        case DENSITY_BLOCK_MODE_KERNEL:
+        default:
             kernelDecodeState = state->kernelDecodeFinish(in, out, state->kernelDecodeState);
             density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
 
