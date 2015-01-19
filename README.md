@@ -18,8 +18,8 @@ Timing : using the *time* function, and taking the best *user* output after mult
 
 <sub>Program</sub> | <sub>Library</sub> | <sub>Compress</sub> | <sub>Decompress</sub> | <sub>Size</sub> | <sub>Ratio</sub> | <sub>Round trip</sub>
 --- | --- | --- | --- | --- | --- | ---
-<sub>**sharc** -c1</sub> | <sub>**density** 0.10.2</sub> | <sub>0,117s (854,70 MB/s)</sub> | <sub>0,096s (1041,67 MB/s)</sub> | <sub>61 525 266</sub> | <sub>61,53%</sub> | <sub>0,213s</sub>
-<sub>**sharc** -c2</sub> | <sub>**density** 0.10.2</sub> | <sub>0,217s (460,83 MB/s)</sub> | <sub>0,231s (432,90 MB/s)</sub> | <sub>53 157 538</sub> | <sub>53,16%</sub> | <sub>0,448s</sub>
+<sub>**sharc** -c1</sub> | <sub>**density** 0.11.1</sub> | <sub>0,118s (847,45 MB/s)</sub> | <sub>0,095s (1052,63 MB/s)</sub> | <sub>61 524 502</sub> | <sub>61,52%</sub> | <sub>0,213s</sub>
+<sub>**sharc** -c2</sub> | <sub>**density** 0.11.1</sub> | <sub>0,219s (456,62 MB/s)</sub> | <sub>0,231s (432,90 MB/s)</sub> | <sub>53 156 782</sub> | <sub>53,16%</sub> | <sub>0,450s</sub>
 <sub>lz4 -1</sub> | <sub>lz4 r126</sub> | <sub>0,479s (208,77 MB/s)</sub> | <sub>0,091s (1098,90 MB/s)</sub> | <sub>56 995 497</sub> | <sub>57,00%</sub> | <sub>0,570s</sub>
 <sub>lz4 -9</sub> | <sub>lz4 r126</sub> | <sub>3,925s (25,48 MB/s)</sub> | <sub>0,087s (1149,43 MB/s)</sub> | <sub>44 250 986</sub> | <sub>44,25%</sub> | <sub>4,012s</sub>
 <sub>lzop -1</sub> | <sub>lzo 2.08</sub> | <sub>0,367s (272,48 MB/s)</sub> | <sub>0,309s (323,62 MB/s)</sub> | <sub>56 709 096</sub> | <sub>56,71%</sub> | <sub>0,676s</sub>
