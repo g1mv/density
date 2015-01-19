@@ -279,6 +279,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_finish(d
     if (density_memory_teleport_available(in) >= sizeof(uint32_t))
         goto check_signature_state;
 
+    // Marker for decode loop exit
+    density_mandala_encode_write_to_signature(state, DENSITY_MANDALA_SIGNATURE_FLAG_CHUNK);
+
     // Copy the remaining bytes
     density_memory_teleport_copy_remaining(in, out);
 

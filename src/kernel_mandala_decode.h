@@ -58,8 +58,8 @@
 #define DENSITY_MANDALA_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
 
 typedef enum {
-    DENSITY_MANDALA_DECODE_PROCESS_PREPARE_NEW_BLOCK,
-    DENSITY_MANDALA_DECODE_PROCESS_SIGNATURE,
+    DENSITY_MANDALA_DECODE_PROCESS_CHECK_SIGNATURE_STATE,
+    DENSITY_MANDALA_DECODE_PROCESS_READ_SIGNATURE,
     DENSITY_MANDALA_DECODE_PROCESS_DECOMPRESS_BODY,
 } DENSITY_MANDALA_DECODE_PROCESS;
 
@@ -87,6 +87,6 @@ typedef struct {
 
 DENSITY_KERNEL_DECODE_STATE density_mandala_decode_init(density_mandala_decode_state *, const density_main_header_parameters parameters, const uint_fast32_t);
 DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(density_memory_teleport *, density_memory_location *, density_mandala_decode_state *, const density_bool);
-DENSITY_KERNEL_DECODE_STATE density_mandala_decode_finish(density_mandala_decode_state *);
+DENSITY_KERNEL_DECODE_STATE density_mandala_decode_finish(density_memory_teleport *, density_memory_location *, density_mandala_decode_state *);
 
 #endif
