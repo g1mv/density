@@ -66,8 +66,10 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_tel
     state->totalRead = 0;
     state->totalWritten = 0;
 
+#if DENSITY_WRITE_MAIN_HEADER == DENSITY_YES
     if ((decodeState = density_decode_read_header(in, state)))
         return exitProcess(state, DENSITY_DECODE_PROCESS_READ_HEADER, decodeState);
+#endif
 
     switch (state->header.compressionMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
