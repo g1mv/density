@@ -65,11 +65,13 @@ void density_memory_teleport_reset_staging(density_memory_teleport *);
 
 void density_memory_teleport_store(density_memory_teleport *, density_byte *, const uint_fast64_t);
 
-density_memory_location *density_memory_teleport_read_reserved(density_memory_teleport *, uint_fast64_t, uint_fast64_t);
-
 density_memory_location *density_memory_teleport_read(density_memory_teleport *, uint_fast64_t);
 
+density_memory_location *density_memory_teleport_read_reserved(density_memory_teleport *, uint_fast64_t, uint_fast64_t);
+
 uint_fast64_t density_memory_teleport_available(density_memory_teleport *);
+
+uint_fast64_t density_memory_teleport_available_reserved(density_memory_teleport *, uint_fast64_t);
 
 void density_memory_teleport_copy(density_memory_teleport *, density_memory_location *, uint_fast64_t);
 

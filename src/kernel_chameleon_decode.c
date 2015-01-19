@@ -170,7 +170,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_contin
 
     // Try to read a signature
     read_signature:
-    if (!(readMemoryLocation = density_memory_teleport_read(in, sizeof(density_chameleon_signature))))
+    if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(density_chameleon_signature), state->endDataOverhead)))
         return exitProcess(state, DENSITY_CHAMELEON_DECODE_PROCESS_READ_SIGNATURE, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 
     // Decode the signature (endian processing)
@@ -181,7 +181,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_contin
     state->bodyLength = (uint_fast32_t) (sizeof(uint32_t) * bitsizeof(density_chameleon_signature) - __builtin_popcountll(state->signature) * (sizeof(uint32_t) - sizeof(uint16_t)));
 
     // Try to read the body
-    if (!(readMemoryLocation = density_memory_teleport_read(in, state->bodyLength)))
+    if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, state->bodyLength, state->endDataOverhead)))
         return exitProcess(state, DENSITY_CHAMELEON_DECODE_PROCESS_DECOMPRESS_BODY, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 
     // Body was read properly, process
@@ -262,7 +262,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish
     goto prepare_new_block;
 
     density_chameleon_decode_finish:
-    density_memory_teleport_copy(in, out, density_memory_teleport_available(in) - state->endDataOverhead);
+    density_memory_teleport_copy(in, out, density_memory_teleport_available_reserved(in, state->endDataOverhead));
 
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }

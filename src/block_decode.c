@@ -38,7 +38,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE exitProcess(density_block_decode
 
 DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_header(density_memory_teleport *restrict in, density_block_decode_state *restrict state) {
     density_memory_location *readLocation;
-    if (!(readLocation = density_memory_teleport_read(in, sizeof(density_block_header))))
+    if (!(readLocation = density_memory_teleport_read_reserved(in, sizeof(density_block_header), state->endDataOverhead)))
         return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT;
 
     state->currentBlockData.inStart = state->totalRead;
@@ -63,7 +63,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_
 
 DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_mode_marker(density_memory_teleport *restrict in, density_block_decode_state *restrict state) {
     density_memory_location *readLocation;
-    if (!(readLocation = density_memory_teleport_read(in, sizeof(density_mode_marker))))
+    if (!(readLocation = density_memory_teleport_read_reserved(in, sizeof(density_mode_marker), state->endDataOverhead)))
         return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT;
 
     state->totalRead += density_block_mode_marker_read(readLocation, &state->lastModeMarker);
@@ -142,7 +142,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
     switch (state->blockMode) {
         case DENSITY_BLOCK_MODE_COPY:
             blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalWritten - state->currentBlockData.outStart);
-            inRemaining = density_memory_teleport_available(in);
+            inRemaining = density_memory_teleport_available_reserved(in, state->endDataOverhead);
             outRemaining = out->available_bytes;
 
             if (inRemaining <= outRemaining) {
@@ -269,7 +269,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
                     return DENSITY_BLOCK_DECODE_STATE_ERROR;
                 case DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT:
                     return exitProcess(state, DENSITY_BLOCK_DECODE_PROCESS_READ_DATA, DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT);
-                case DENSITY_BLOCK_DECODE_STATE_READY:
+                case DENSITY_KERNEL_DECODE_STATE_READY:
                 case DENSITY_KERNEL_DECODE_STATE_INFO_NEW_BLOCK:
                     goto read_block_footer;
                 case DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK:

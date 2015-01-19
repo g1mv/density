@@ -71,7 +71,15 @@ DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_from_direct
 }
 
 DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available(density_memory_teleport *teleport) {
-    return density_memory_teleport_available_from_staging(teleport) + density_memory_teleport_available_from_direct(teleport);
+    return density_memory_teleport_available_reserved(teleport, 0);
+}
+
+DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_reserved(density_memory_teleport *teleport, uint_fast64_t reserved) {
+    uint_fast64_t contained = density_memory_teleport_available_from_staging(teleport) + density_memory_teleport_available_from_direct(teleport);
+    if(reserved >= contained)
+        return 0;
+    else
+        return contained - reserved;
 }
 
 DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(density_memory_teleport *restrict teleport, uint_fast64_t bytes) {
