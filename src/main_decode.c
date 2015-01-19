@@ -88,7 +88,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_tel
             return DENSITY_DECODE_STATE_ERROR;
     }
 
-    return DENSITY_DECODE_STATE_READY;
+    return exitProcess(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_READY);
 }
 
 DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state) {
