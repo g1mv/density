@@ -55,6 +55,16 @@ DENSITY_FORCE_INLINE void density_mandala_encode_write_to_signature(density_mand
 #endif
 }
 
+DENSITY_FORCE_INLINE void density_mandala_encode_prepare_new_signature(density_memory_location *restrict out, density_mandala_encode_state *restrict state) {
+    state->signaturesCount++;
+    state->shift = 0;
+    state->signature = (density_mandala_signature *) (out->pointer);
+    *state->signature = 0;
+
+    out->pointer += sizeof(density_mandala_signature);
+    out->available_bytes -= sizeof(density_mandala_signature);
+}
+
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_prepare_new_block(density_memory_location *restrict out, density_mandala_encode_state *restrict state) {
     if (DENSITY_MANDALA_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD > out->available_bytes)
         return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT;
@@ -83,14 +93,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_prepare_
         default:
             break;
     }
-    state->signaturesCount++;
-
-    state->shift = 0;
-    state->signature = (density_mandala_signature *) (out->pointer);
-    *state->signature = 0;
-
-    out->pointer += sizeof(density_mandala_signature);
-    out->available_bytes -= sizeof(density_mandala_signature);
+    density_mandala_encode_prepare_new_signature(out, state);
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
@@ -101,7 +104,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_check_st
     switch (state->shift) {
         case bitsizeof(density_mandala_signature):
             if ((returnState = density_mandala_encode_prepare_new_block(out, state)))
-                exitProcess(state, DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
+                return returnState;
             break;
         default:
             break;
@@ -186,7 +189,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(
     uint64_t chunk;
     density_byte *pointerOutBefore;
     density_memory_location *readMemoryLocation;
-    uint_fast64_t remaining;
 
     // Dispatch
     switch (state->process) {
