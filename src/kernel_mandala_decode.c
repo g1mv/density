@@ -82,6 +82,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_check_st
 DENSITY_FORCE_INLINE void density_mandala_decode_read_signature(density_memory_location *restrict in, density_mandala_decode_state *restrict state) {
     state->signature = DENSITY_LITTLE_ENDIAN_64(*(density_mandala_signature *) (in->pointer));
     in->pointer += sizeof(density_mandala_signature);
+    in->available_bytes -= sizeof(density_mandala_signature);
     state->shift = 0;
     state->signaturesCount++;
 }
@@ -263,7 +264,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_finish(d
 
     // Calculate body size
     decompress_body:
-    state->bodyLength = (uint_fast32_t) (sizeof(uint32_t) * bitsizeof(density_mandala_signature) - __builtin_popcountll(state->signature) * (sizeof(uint32_t) - sizeof(uint16_t)));
+    state->bodyLength = __builtin_popcountll(state->signature) << 1;
 
     // Try to read the body
     if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, state->bodyLength, state->endDataOverhead)))
@@ -272,7 +273,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_finish(d
     // Body was read properly, process
     density_mandala_decode_process_data(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= state->bodyLength;
-    out->available_bytes -= bitsizeof(density_mandala_signature) * sizeof(uint32_t);
+    out->available_bytes -= bitsizeof(density_mandala_signature) * sizeof(uint16_t);
 
     // New loop
     goto check_signature_state;
