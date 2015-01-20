@@ -1,6 +1,17 @@
+0.11.1 beta
+-----------
+*January 19, 2015*
+
+* Added a sharc benchmark in README
+* Stateless memory teleport
+* Improved event management and dispatching
+* Improved compression/decompression finishes
+* Improved streams API
+* Various bug fixes, robustness improvements
+
 0.9.12 beta
 -----------
-<i>December 2, 2013</i>
+*December 2, 2013*
 
 * Mandala kernel addition, replacing dual pass chameleon
 * Simplified, faster hash function
@@ -15,7 +26,7 @@
 
 0.9.11 beta
 -----------
-<i>November 2, 2013</i>
+*November 2, 2013*
 
 * First beta release of DENSITY, including all the compression code from SHARC in a standalone, BSD licensed library
 * Added copy mode (useful for enhancing data security via the density block checksums for example)
