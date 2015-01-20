@@ -5,7 +5,7 @@ Superfast compression library
 DENSITY is a free C99, open-source, BSD licensed compression library.
 
 It is focused on high-speed compression, at the best ratio possible.
-DENSITY features two APIs to enable quick integration in any project.
+DENSITY features a stream API to enable quick integration in any project.
 
 Benchmark
 ---------
