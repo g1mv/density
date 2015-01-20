@@ -27,11 +27,47 @@ Timing : using the *time* function, and taking the best *user* output after mult
 
 [Click here for a more exhaustive benchmark](http://quixdb.github.io/squash/benchmarks/core-i3-2105.html) of DENSITY's fastest mode compared to other libraries (look for the [sharc](https://github.com/centaurean/sharc) line), on an Intel® Core™ i3-2105 (x86 64), Asus P8H61-H motherboard with Fedora 19. It is possible to run yours using [this project](https://github.com/quixdb/squash).
 
+Build
+-----
+DENSITY is fully C99 compliant and can therefore be built on a number of platforms. You need a C compiler (gcc, clang ...), and a *make* utility.
+
+Just *cd* into the density directory, then run the following command :
+> make
+
+And that's it !
+
+Output format
+-------------
+DENSITY outputs compressed data in a simple format, which enables file storage and optional parallelization for both compression and decompression.
+Inside the main header and footer, a number of blocks can be found, each having its own header and footer.
+Inside each block, compressed data has a structure determined by the compression algorithm used.
+
 API
 ---
 DENSITY features a *stream API* which is very simple to use, yet powerful enough to keep users' creativity unleashed.
+Please see the *quick start* at the bottom of this page.
 
-Quick start : a simple example using the API
+About the algorithms
+--------------------
+
+**Copy** ( *DENSITY_COMPRESSION_MODE_COPY* )
+
+This is not a so-to-speak algorithm as the name implies. It embeds data inside the density block structures.
+It can be used to quickly add integrity checks to input data, but it has another important purpose inside each block : if data is marked as incompressible using the target algorithm, a mode reversion occurs and copy mode is instead used for the remainder of the block.
+On the next block the target algorithm is tried again.
+
+**Chameleon** ( *DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM* )
+
+This is a dictionary lookup based compression algorithm. It is designed for absolute speed and usually reaches a ~60% compression ratio on compressible data.
+Decompression is just as fast. This algorithm is a great choice when main concern is speed.
+
+**Mandala** ( *DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM* )
+
+This algorithm was developed in conjunction with Piotr Tarsa (https://github.com/tarsa).
+It uses swapped double dictionary lookups and predictions. It can be extremely good with highly compressible data (ratio reaching ~5% or less).
+On typical compressible data compression ratio is ~50% or less. It is still extremely fast for both compression and decompression and is a great, efficient all-rounder algorithm.
+
+Quick start (a simple example using the API)
 --------------------------------------------
 Using DENSITY in your application couldn't be any simpler.
 
@@ -88,16 +124,3 @@ When this is done you can start using the **DENSITY API** :
 And that's it ! We've done a compression/decompression round trip with a few lines !
 
 If you want a more elaborate example you can checkout [the SHARC project](https://github.com/centaurean/sharc).
-
-Build
------
-DENSITY is fully C99 compliant and can therefore be built on a number of platforms. You need a C compiler (gcc, clang ...), and a *make* utility.
-
-Just *cd* into the density directory, then run the following command :
-> make
-
-And that's it !
-
-Output
-------
-DENSITY outputs compressed data in a simple format, which enables file storage and optional parallelization for both compression and decompression.

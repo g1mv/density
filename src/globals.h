@@ -89,7 +89,7 @@
 
 #define DENSITY_MAJOR_VERSION   0
 #define DENSITY_MINOR_VERSION   11
-#define DENSITY_REVISION        1
+#define DENSITY_REVISION        2
 
 /*
  * Compile-time switches useful for pure data encoding and decoding
