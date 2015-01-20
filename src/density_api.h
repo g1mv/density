@@ -42,17 +42,17 @@
  ***********************************************************************************************************************/
 
 /*
- * Returns the major ssc version
+ * Returns the major density version
  */
 uint8_t density_version_major(void);
 
 /*
- * Returns the minor ssc version
+ * Returns the minor density version
  */
 uint8_t density_version_minor(void);
 
 /*
- * Returns the ssc revision
+ * Returns the density revision
  */
 uint8_t density_version_revision(void);
 
