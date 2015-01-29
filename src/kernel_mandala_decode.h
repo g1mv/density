@@ -79,7 +79,7 @@ typedef struct {
 
     uint_fast64_t endDataOverhead;
 
-    uint32_t lastHash;
+    uint_fast16_t lastHash;
 
     density_mandala_dictionary dictionary;
 } density_mandala_decode_state;

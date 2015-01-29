@@ -187,6 +187,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_init(den
 
     state->endDataOverhead = endDataOverhead;
 
+    state->lastHash = 0;
+
     return exitProcess(state, DENSITY_MANDALA_DECODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_DECODE_STATE_READY);
 }
 

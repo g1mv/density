@@ -180,6 +180,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_init(den
     state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
 #endif
 
+    state->lastHash = 0;
+
     return exitProcess(state, DENSITY_MANDALA_ENCODE_PROCESS_PREPARE_NEW_BLOCK, DENSITY_KERNEL_ENCODE_STATE_READY);
 }
 
