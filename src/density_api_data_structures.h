@@ -58,7 +58,7 @@ typedef enum {
 
 typedef enum {
     DENSITY_STREAM_STATE_READY = 0,                                     // Awaiting further instructions (new action or adding data to the input buffer)
-    DENSITY_STREAM_STATE_STALL_ON_INPUT,                                // there is not enough space left in the output buffer to continue
+    DENSITY_STREAM_STATE_STALL_ON_INPUT,                                // there is not enough space left in the input buffer to continue
     DENSITY_STREAM_STATE_STALL_ON_OUTPUT,                               // there is not enough space left in the output buffer to continue
     DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // output buffer size is too small
     DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE                   // error during processing
