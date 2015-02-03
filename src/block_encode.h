@@ -65,6 +65,15 @@ typedef struct {
 } density_block_encode_current_block_data;
 
 typedef struct {
+    bool update;
+    density_byte* stagingInputPointer;
+    uint_fast64_t stagingAvailable;
+    density_byte* directInputPointer;
+    uint_fast64_t directAvailable;
+    spookyhash_context* context;
+} density_block_encode_integrity_data;
+
+typedef struct {
     DENSITY_BLOCK_ENCODE_PROCESS process;
     DENSITY_COMPRESSION_MODE targetMode;
     DENSITY_COMPRESSION_MODE currentMode;
@@ -74,9 +83,7 @@ typedef struct {
     uint_fast64_t totalWritten;
 
     density_block_encode_current_block_data currentBlockData;
-
-    bool spookyhashUpdate;
-    spookyhash_context* spookyhashContext;
+    density_block_encode_integrity_data integrityData;
 
     void *kernelEncodeState;
     DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeInit)(void*);

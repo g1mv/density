@@ -67,6 +67,13 @@ typedef struct {
 } density_block_decode_current_block_data;
 
 typedef struct {
+    bool update;
+    density_byte* outputPointer;
+    uint_fast64_t available;
+    spookyhash_context* context;
+} density_block_decode_integrity_data;
+
+typedef struct {
     DENSITY_BLOCK_DECODE_PROCESS process;
     DENSITY_COMPRESSION_MODE targetMode;
     DENSITY_COMPRESSION_MODE currentMode;
@@ -81,10 +88,7 @@ typedef struct {
     density_block_footer lastBlockFooter;
 
     density_block_decode_current_block_data currentBlockData;
-
-    bool spookyhashUpdate;
-    density_byte* spookyHashOutputPointer;
-    spookyhash_context* spookyhashContext;
+    density_block_decode_integrity_data integrityData;
 
     void* kernelDecodeState;
     DENSITY_KERNEL_DECODE_STATE (*kernelDecodeInit)(void*, const density_main_header_parameters, const uint_fast64_t);

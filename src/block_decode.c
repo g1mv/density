@@ -48,8 +48,10 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_
 
     state->currentMode = state->targetMode;
 
-    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
-        spookyhash_context_init(state->spookyhashContext, DENSITY_SPOOKYHASH_SEED_1, DENSITY_SPOOKYHASH_SEED_2);
+    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) {
+        spookyhash_context_init(state->integrityData.context, DENSITY_SPOOKYHASH_SEED_1, DENSITY_SPOOKYHASH_SEED_2);
+        state->integrityData.update = true;
+    }
 
     return DENSITY_BLOCK_DECODE_STATE_READY;
 }
@@ -59,11 +61,14 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_
     if (!(readLocation = density_memory_teleport_read(in, sizeof(density_block_footer))))
         return DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT;
 
-    spookyhash_update(state->spookyhashContext, state->spookyHashOutputPointer, out->pointer - state->spookyHashOutputPointer);
-    state->spookyhashUpdate = true;
+    uint_fast64_t availableBefore = state->integrityData.available;
+    uint_fast64_t available = out->available_bytes;
+    uint_fast64_t used = availableBefore - available;
+
+    spookyhash_update(state->integrityData.context, state->integrityData.outputPointer, used);
 
     uint64_t hashsum1, hashsum2;
-    spookyhash_final(state->spookyhashContext, &hashsum1, &hashsum2);
+    spookyhash_final(state->integrityData.context, &hashsum1, &hashsum2);
 
     state->totalRead += density_block_footer_read(readLocation, &state->lastBlockFooter);
 
@@ -90,6 +95,13 @@ DENSITY_FORCE_INLINE void density_block_decode_update_totals(density_memory_tele
     state->totalWritten += outAvailableBefore - out->available_bytes;
 }
 
+DENSITY_FORCE_INLINE void density_block_decode_update_integrity_data(density_memory_location *restrict out, density_block_decode_state *restrict state) {
+    state->integrityData.available = out->available_bytes;
+    state->integrityData.outputPointer = out->pointer;
+
+    state->integrityData.update = false;
+}
+
 DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead, void *kernelState, DENSITY_KERNEL_DECODE_STATE (*kernelInit)(void *, const density_main_header_parameters, const uint_fast64_t), DENSITY_KERNEL_DECODE_STATE (*kernelProcess)(density_memory_teleport *, density_memory_location *, void *), DENSITY_KERNEL_DECODE_STATE (*kernelFinish)(density_memory_teleport *, density_memory_location *, void *), void *(*mem_alloc)(size_t)) {
     state->targetMode = mode;
     state->currentMode = mode;
@@ -99,11 +111,9 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(densit
     state->totalWritten = 0;
     state->endDataOverhead = endDataOverhead;
 
-    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) {
-        state->endDataOverhead += sizeof(density_block_footer);
-        state->spookyhashUpdate = true;
-        state->spookyhashContext = spookyhash_context_allocate(mem_alloc);
-    }
+    // Add to the integrity check hashsum
+    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
+        state->integrityData.context = spookyhash_context_allocate(mem_alloc);
 
     switch (state->currentMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
@@ -131,11 +141,9 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
     uint_fast64_t inRemaining;
     uint_fast64_t outRemaining;
 
-    // Update the integrity check output pointer
-    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK && state->spookyhashUpdate) {
-        state->spookyHashOutputPointer = out->pointer;
-        state->spookyhashUpdate = false;
-    }
+    // Update integrity pointers
+    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK && state->integrityData.update)
+        density_block_decode_update_integrity_data(out, state);
 
     // Dispatch
     switch (state->process) {
@@ -184,8 +192,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
                     density_memory_teleport_copy(in, out, outRemaining);
                     density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
                     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) {
-                        spookyhash_update(state->spookyhashContext, state->spookyHashOutputPointer, out->pointer - state->spookyHashOutputPointer);
-                        state->spookyhashUpdate = true;
+                        spookyhash_update(state->integrityData.context, state->integrityData.outputPointer, state->integrityData.available);
+                        state->integrityData.update = true;
                     }
                     return exitProcess(state, DENSITY_BLOCK_DECODE_PROCESS_READ_DATA, DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT);
                 }
@@ -205,8 +213,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
                     return exitProcess(state, DENSITY_BLOCK_DECODE_PROCESS_READ_DATA, DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT);
                 case DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT:
                     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) {
-                        spookyhash_update(state->spookyhashContext, state->spookyHashOutputPointer, out->pointer - state->spookyHashOutputPointer);
-                        state->spookyhashUpdate = true;
+                        spookyhash_update(state->integrityData.context, state->integrityData.outputPointer, state->integrityData.available);
+                        state->integrityData.update = true;
                     }
                     return exitProcess(state, DENSITY_BLOCK_DECODE_PROCESS_READ_DATA, DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT);
                 case DENSITY_KERNEL_DECODE_STATE_INFO_NEW_BLOCK:
@@ -233,11 +241,9 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
     uint_fast64_t inRemaining;
     uint_fast64_t outRemaining;
 
-    // Update the integrity check output pointer
-    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK && state->spookyhashUpdate) {
-        state->spookyHashOutputPointer = out->pointer;
-        state->spookyhashUpdate = false;
-    }
+    // Update integrity pointers
+    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK && state->integrityData.update)
+        density_block_decode_update_integrity_data(out, state);
 
     // Dispatch
     switch (state->process) {
@@ -287,8 +293,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
                     density_memory_teleport_copy(in, out, outRemaining);
                     density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
                     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) {
-                        spookyhash_update(state->spookyhashContext, state->spookyHashOutputPointer, out->pointer - state->spookyHashOutputPointer);
-                        state->spookyhashUpdate = true;
+                        spookyhash_update(state->integrityData.context, state->integrityData.outputPointer, state->integrityData.available);
+                        state->integrityData.update = true;
                     }
                     return exitProcess(state, DENSITY_BLOCK_DECODE_PROCESS_READ_DATA, DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT);
                 }
@@ -308,8 +314,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
                     return DENSITY_BLOCK_DECODE_STATE_ERROR;
                 case DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT:
                     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) {
-                        spookyhash_update(state->spookyhashContext, state->spookyHashOutputPointer, out->pointer - state->spookyHashOutputPointer);
-                        state->spookyhashUpdate = true;
+                        spookyhash_update(state->integrityData.context, state->integrityData.outputPointer, state->integrityData.available);
+                        state->integrityData.update = true;
                     }
                     return exitProcess(state, DENSITY_BLOCK_DECODE_PROCESS_READ_DATA, DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT);
                 case DENSITY_KERNEL_DECODE_STATE_READY:
@@ -329,7 +335,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
         goto read_block_header;
 
     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
-        spookyhash_context_free(state->spookyhashContext, mem_free);
+        spookyhash_context_free(state->integrityData.context, mem_free);
 
     return DENSITY_BLOCK_DECODE_STATE_READY;
 }
