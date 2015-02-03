@@ -1,3 +1,13 @@
+0.11.2 beta
+-----------
+February 3, 2015
+
+* Added an algorithms overview in README
+* Removed ssc references
+* Now Initializing last hash to zero on mandala kernel inits
+* Reimplemented the buffer API
+* Various corrections and improvements
+
 0.11.1 beta
 -----------
 *January 19, 2015*
