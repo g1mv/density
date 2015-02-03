@@ -30,7 +30,6 @@
  */
 
 #include "buffer.h"
-#include "density_api_data_structures.h"
 
 DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_return_processing_result(density_stream* stream, DENSITY_BUFFER_STATE state) {
     density_buffer_processing_result result = {state, *stream->totalBytesRead, *stream->totalBytesWritten};
