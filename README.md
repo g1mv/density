@@ -76,7 +76,7 @@ First you need to include the 2 following files in your project :
 * density_api.h
 * density_api_data_structures.h
 
-When this is done you can start using the **DENSITY API** :
+When this is done you can start using the **DENSITY APIs** :
 
     #include "density_api.h"
 
