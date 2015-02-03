@@ -80,15 +80,15 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_memory_loc
 
     switch (mode) {
         case DENSITY_COMPRESSION_MODE_COPY:
-            density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_COPY, blockType, NULL, NULL, NULL, NULL);
+            density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_COPY, blockType, NULL, NULL, NULL, NULL, mem_alloc);
             break;
 
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, blockType, mem_alloc(sizeof(density_chameleon_encode_state)), (void *) density_chameleon_encode_init, (void *) density_chameleon_encode_continue, (void *) density_chameleon_encode_finish);
+            density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, blockType, mem_alloc(sizeof(density_chameleon_encode_state)), (void *) density_chameleon_encode_init, (void *) density_chameleon_encode_continue, (void *) density_chameleon_encode_finish, mem_alloc);
             break;
 
         case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
-            density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM, blockType, mem_alloc(sizeof(density_mandala_encode_state)), (void *) density_mandala_encode_init, (void *) density_mandala_encode_process, (void *) density_mandala_encode_finish);
+            density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM, blockType, mem_alloc(sizeof(density_mandala_encode_state)), (void *) density_mandala_encode_init, (void *) density_mandala_encode_process, (void *) density_mandala_encode_finish, mem_alloc);
             break;
     }
 
@@ -148,7 +148,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_finish(density_memory_t
     availableInBefore = density_memory_teleport_available(in);
     availableOutBefore = out->available_bytes;
 
-    blockEncodeState = density_block_encode_finish(in, out, &state->blockEncodeState);
+    blockEncodeState = density_block_encode_finish(in, out, &state->blockEncodeState, mem_free);
     density_encode_update_totals(in, out, state, availableInBefore, availableOutBefore);
     switch (blockEncodeState) {
         case DENSITY_BLOCK_ENCODE_STATE_READY:

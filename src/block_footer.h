@@ -41,11 +41,12 @@
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    uint32_t hashsum;
+    uint64_t hashsum1;
+    uint64_t hashsum2;
 } density_block_footer;
 #pragma pack(pop)
 
 uint_fast32_t density_block_footer_read(density_memory_location *, density_block_footer*);
-uint_fast32_t density_block_footer_write(density_memory_location*, const uint_fast32_t);
+uint_fast32_t density_block_footer_write(density_memory_location*, const uint_fast64_t, const uint_fast64_t);
 
 #endif

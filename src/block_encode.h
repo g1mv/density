@@ -40,6 +40,8 @@
 #include "kernel_encode.h"
 #include "memory_location.h"
 #include "memory_teleport.h"
+#include "spookyhash/src/context.h"
+#include "spookyhash/src/spookyhash.h"
 
 typedef enum {
     DENSITY_BLOCK_ENCODE_STATE_READY = 0,
@@ -73,6 +75,9 @@ typedef struct {
 
     density_block_encode_current_block_data currentBlockData;
 
+    bool spookyhashUpdate;
+    spookyhash_context* spookyhashContext;
+
     void *kernelEncodeState;
     DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeInit)(void*);
     DENSITY_KERNEL_ENCODE_STATE (*kernelEncodeProcess)(density_memory_teleport *, density_memory_location*, void*);
@@ -80,8 +85,8 @@ typedef struct {
 } density_block_encode_state;
 #pragma pack(pop)
 
-DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void*, DENSITY_KERNEL_ENCODE_STATE (*)(void*), DENSITY_KERNEL_ENCODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*), DENSITY_KERNEL_ENCODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*));
+DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void*, DENSITY_KERNEL_ENCODE_STATE (*)(void*), DENSITY_KERNEL_ENCODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*), DENSITY_KERNEL_ENCODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*), void *(*)(size_t));
 DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(density_memory_teleport *, density_memory_location *, density_block_encode_state *);
-DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(density_memory_teleport *, density_memory_location *, density_block_encode_state *);
+DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(density_memory_teleport *, density_memory_location *, density_block_encode_state *, void (*)(void *));
 
 #endif

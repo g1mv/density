@@ -30,7 +30,6 @@
  */
 
 #include "block_encode.h"
-#include "density_api_data_structures.h"
 
 DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE exitProcess(density_block_encode_state *state, DENSITY_BLOCK_ENCODE_PROCESS process, DENSITY_BLOCK_ENCODE_STATE blockEncodeState) {
     state->process = process;
@@ -48,6 +47,9 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_block
 
     state->totalWritten += density_block_header_write(out);
 
+    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
+        spookyhash_context_init(state->spookyhashContext, DENSITY_SPOOKYHASH_SEED_1, DENSITY_SPOOKYHASH_SEED_2);
+
     return DENSITY_BLOCK_ENCODE_STATE_READY;
 }
 
@@ -55,7 +57,10 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_block
     if (sizeof(density_block_footer) > out->available_bytes)
         return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT;
 
-    state->totalWritten += density_block_footer_write(out, 0);
+    uint64_t hashsum1, hashsum2;
+    spookyhash_final(state->spookyhashContext, &hashsum1, &hashsum2);
+
+    state->totalWritten += density_block_footer_write(out, hashsum1, hashsum2);
 
     return DENSITY_BLOCK_ENCODE_STATE_READY;
 }
@@ -84,13 +89,28 @@ DENSITY_FORCE_INLINE void density_block_encode_update_totals(density_memory_tele
     state->totalWritten += availableOutBefore - out->available_bytes;
 }
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, void *kernelState, DENSITY_KERNEL_ENCODE_STATE (*kernelInit)(void *), DENSITY_KERNEL_ENCODE_STATE (*kernelProcess)(density_memory_teleport *, density_memory_location *, void *), DENSITY_KERNEL_ENCODE_STATE (*kernelFinish)(density_memory_teleport *, density_memory_location *, void *)) {
+DENSITY_FORCE_INLINE void density_block_encode_update_integrity_hashsum(density_memory_teleport *restrict in, density_block_encode_state *restrict state) {
+    uint_fast64_t availableFromStaging = density_memory_teleport_available_from_staging(in);
+    uint_fast64_t availableFromDirect = density_memory_teleport_available_from_direct(in);
+    if (availableFromStaging)
+        spookyhash_update(state->spookyhashContext, in->stagingMemoryLocation->pointer, availableFromStaging);
+    if (availableFromDirect)
+        spookyhash_update(state->spookyhashContext, in->directMemoryLocation->pointer, availableFromDirect);
+    state->spookyhashUpdate = false;
+}
+
+DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, void *kernelState, DENSITY_KERNEL_ENCODE_STATE (*kernelInit)(void *), DENSITY_KERNEL_ENCODE_STATE (*kernelProcess)(density_memory_teleport *, density_memory_location *, void *), DENSITY_KERNEL_ENCODE_STATE (*kernelFinish)(density_memory_teleport *, density_memory_location *, void *), void *(*mem_alloc)(size_t)) {
     state->blockType = blockType;
     state->targetMode = mode;
     state->currentMode = mode;
 
     state->totalRead = 0;
     state->totalWritten = 0;
+
+    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) {
+        state->spookyhashUpdate = true;
+        state->spookyhashContext = spookyhash_context_allocate(mem_alloc);
+    }
 
     switch (state->currentMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
@@ -116,6 +136,10 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(de
     uint_fast64_t blockRemaining;
     uint_fast64_t inRemaining;
     uint_fast64_t outRemaining;
+
+    // Add to the integrity check hashsum
+    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK && state->spookyhashUpdate)
+        density_block_encode_update_integrity_hashsum(in, state);
 
     // Dispatch
     switch (state->process) {
@@ -156,6 +180,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(de
                 else {
                     density_memory_teleport_copy(in, out, inRemaining);
                     density_block_encode_update_totals(in, out, state, availableInBefore, availableOutBefore);
+                    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
+                        state->spookyhashUpdate = true;
                     return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT);
                 }
             } else {
@@ -179,6 +205,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(de
 
             switch (kernelEncodeState) {
                 case DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT:
+                    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
+                        state->spookyhashUpdate = true;
                     return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT);
                 case DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT:
                     return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT);
@@ -197,7 +225,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(de
     goto write_block_header;
 }
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_encode_state *restrict state) {
+DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_encode_state *restrict state, void (*mem_free)(void *)) {
     DENSITY_BLOCK_ENCODE_STATE blockEncodeState;
     DENSITY_KERNEL_ENCODE_STATE kernelEncodeState;
     uint_fast64_t availableInBefore;
@@ -205,6 +233,10 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
     uint_fast64_t blockRemaining;
     uint_fast64_t inRemaining;
     uint_fast64_t outRemaining;
+
+    // Add to the integrity check hashsum
+    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK && state->spookyhashUpdate)
+        density_block_encode_update_integrity_hashsum(in, state);
 
     // Dispatch
     switch (state->process) {
@@ -286,6 +318,9 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
         return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER, blockEncodeState);
     if (density_memory_teleport_available(in))
         goto write_block_header;
+
+    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
+        spookyhash_context_free(state->spookyhashContext, mem_free);
 
     return DENSITY_BLOCK_ENCODE_STATE_READY;
 }

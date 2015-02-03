@@ -4,7 +4,7 @@ February 3, 2015
 
 * Added an algorithms overview in README
 * Removed ssc references
-* Now Initializing last hash to zero on mandala kernel inits
+* Now initializing last hash to zero on mandala kernel inits
 * Reimplemented the buffer API
 * Various corrections and improvements
 
