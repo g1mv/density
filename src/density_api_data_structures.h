@@ -57,6 +57,18 @@ typedef enum {
 } DENSITY_BLOCK_TYPE;
 
 typedef enum {
+    DENSITY_BUFFER_STATE_OK = 0,                                        // Everything went alright
+    DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // output buffer size is too small
+    DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING                        // error during processing
+} DENSITY_BUFFER_STATE;
+
+typedef struct {
+    DENSITY_BUFFER_STATE state;
+    uint_fast64_t bytesRead;
+    uint_fast64_t bytesWritten;
+} density_buffer_processing_result;
+
+typedef enum {
     DENSITY_STREAM_STATE_READY = 0,                                     // Awaiting further instructions (new action or adding data to the input buffer)
     DENSITY_STREAM_STATE_STALL_ON_INPUT,                                // there is not enough space left in the input buffer to continue
     DENSITY_STREAM_STATE_STALL_ON_OUTPUT,                               // there is not enough space left in the output buffer to continue
@@ -74,10 +86,10 @@ typedef struct {
 
 typedef struct {
     void *in;
-    uint_fast64_t *in_total_read;
+    uint_fast64_t *totalBytesRead;
 
     void *out;
-    uint_fast64_t *out_total_written;
+    uint_fast64_t *totalBytesWritten;
 
     void *internal_state;
 } density_stream;

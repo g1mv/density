@@ -42,9 +42,9 @@ DENSITY outputs compressed data in a simple format, which enables file storage a
 Inside the main header and footer, a number of blocks can be found, each having its own header and footer.
 Inside each block, compressed data has a structure determined by the compression algorithm used.
 
-API
----
-DENSITY features a *stream API* which is very simple to use, yet powerful enough to keep users' creativity unleashed.
+APIs
+----
+DENSITY features a *buffer API* and a *stream API* which are very simple to use, yet powerful enough to keep users' creativity unleashed.
 Please see the *quick start* at the bottom of this page.
 
 About the algorithms
@@ -79,7 +79,6 @@ First you need to include the 2 following files in your project :
 When this is done you can start using the **DENSITY API** :
 
     #include "density_api.h"
-    #include "density_api_data_structures.h"
 
     #define MY_TEXT "This is a simple example on how to use Density API bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla"
     #define BUFFER_SIZE 16384
@@ -88,6 +87,23 @@ When this is done you can start using the **DENSITY API** :
     
     uint8_t *outCompressed = (uint8_t *) malloc(BUFFER_SIZE * sizeof(uint8_t));
     uint8_t *outDecompressed = (uint8_t *) malloc(BUFFER_SIZE * sizeof(uint8_t));
+    
+    /**************
+     * Buffer API *
+     **************/
+     
+    density_buffer_processing_result result;
+    result = density_buffer_compress((uint8_t *) TEXT, strlen(TEXT), outCompressed, BUFFER_SIZE, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, DENSITY_BLOCK_TYPE_DEFAULT, NULL, NULL);
+    if(!result.state)
+        printf("%llu bytes >> %llu bytes\n", result.bytesRead, result.bytesWritten);
+
+    result = density_buffer_decompress(outCompressed, result.bytesWritten, outDecompressed, BUFFER_SIZE, NULL, NULL);
+    if(!result.state)
+        printf("%llu bytes >> %llu bytes\n", result.bytesRead, result.bytesWritten);
+    
+    /**************
+     * Stream API *
+     **************/
 
     // We create the stream using the standard malloc and free functions
     density_stream* stream = density_stream_create(NULL, NULL);
@@ -102,7 +118,7 @@ When this is done you can start using the **DENSITY API** :
         fprintf(stderr, "Error %i occured during compression\n", streamState);
     if ((streamState = density_stream_compress_finish(stream)))
         fprintf(stderr, "Error %i occured while finishing compression\n", streamState);
-    printf("%llu bytes >> %llu bytes\n", *stream->in_total_read, *stream->out_total_written);
+    printf("%llu bytes >> %llu bytes\n", *stream->totalBytesRead, *stream->totalBytesWritten);
 
     // Now let's decompress it, using the density_stream_output_available_for_use() method to know how many bytes were made available
     if ((streamState = density_stream_prepare(stream, outCompressed, density_stream_output_available_for_use(stream), outDecompressed, BUFFER_SIZE)))
@@ -113,7 +129,7 @@ When this is done you can start using the **DENSITY API** :
         fprintf(stderr, "Error %i occured during decompression\n", streamState);
     if ((streamState = density_stream_decompress_finish(stream)))
         fprintf(stderr, "Error %i occured while finishing compression\n", streamState);
-    printf("%llu bytes >> %llu bytes\n", *stream->in_total_read, *stream->out_total_written);
+    printf("%llu bytes >> %llu bytes\n", *stream->totalBytesRead, *stream->totalBytesWritten);
 
     // Free memory
     density_stream_destroy(stream);
@@ -121,6 +137,6 @@ When this is done you can start using the **DENSITY API** :
     free(outCompressed);
     free(outDecompressed);
 
-And that's it ! We've done a compression/decompression round trip with a few lines !
+And that's it ! We've done two compression/decompression round trips with a few lines !
 
 If you want a more elaborate example you can checkout [the SHARC project](https://github.com/centaurean/sharc).

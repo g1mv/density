@@ -30,9 +30,6 @@
  */
 
 #include "stream.h"
-#include "density_api_data_structures.h"
-#include "memory_location.h"
-#include "main_header.h"
 
 DENSITY_FORCE_INLINE density_stream *density_stream_create(void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
     density_stream *stream;
@@ -113,8 +110,8 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_init(density_s
             return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    stream->in_total_read = &((density_stream_state *) stream->internal_state)->internal_encode_state.totalRead;
-    stream->out_total_written = &((density_stream_state *) stream->internal_state)->internal_encode_state.totalWritten;
+    stream->totalBytesRead = &((density_stream_state *) stream->internal_state)->internal_encode_state.totalRead;
+    stream->totalBytesWritten = &((density_stream_state *) stream->internal_state)->internal_encode_state.totalWritten;
 
     ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_COMPRESSION_INITED;
 
@@ -194,8 +191,8 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_init(density
             return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
     }
 
-    stream->in_total_read = &((density_stream_state *) stream->internal_state)->internal_decode_state.totalRead;
-    stream->out_total_written = &((density_stream_state *) stream->internal_state)->internal_decode_state.totalWritten;
+    stream->totalBytesRead = &((density_stream_state *) stream->internal_state)->internal_decode_state.totalRead;
+    stream->totalBytesWritten = &((density_stream_state *) stream->internal_state)->internal_decode_state.totalWritten;
 
     ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_DECOMPRESSION_INITED;
 

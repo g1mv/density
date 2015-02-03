@@ -60,6 +60,46 @@ uint8_t density_version_revision(void);
 
 /***********************************************************************************************************************
  *                                                                                                                     *
+ * Density buffer API functions                                                                                        *
+ *                                                                                                                     *
+ ***********************************************************************************************************************/
+
+/*
+ * Compress an input_buffer of input_size bytes and store the result in output_buffer, using compression_mode and block_type.
+ * mem_alloc and mem_free can be used to allocate/free memory using specific malloc and free functions.
+ * If NULL is specified, the standard malloc/free will be used.
+ *
+ * @param input_buffer a buffer of bytes
+ * @param input_size the size in bytes of input_buffer
+ * @param output_buffer a buffer of bytes
+ * @param output_size the size of output_buffer, must be at least DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE
+ * @param compression_mode the compression mode
+ * @param block_type the type of data blocks Density will generate.
+ *      The option DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK adds data integrity checks in the encoded output.
+ *      The output size becomes therefore slightly bigger (a few hundred bytes for huge input files).
+ * @param mem_alloc the memory allocation function
+ * @param mem_free the memory freeing function
+ */
+density_buffer_processing_result density_buffer_compress(uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+
+/*
+ * Decompress an input_buffer of input_size bytes and store the result in output_buffer.
+ * mem_alloc and mem_free can be used to allocate/free memory using specific malloc and free functions.
+ * If NULL is specified, the standard malloc/free will be used.
+ *
+ * @param input_buffer a buffer of bytes
+ * @param input_size the size in bytes of input_buffer
+ * @param output_buffer a buffer of bytes
+ * @param output_size the size of output_buffer, must be at least DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE
+ * @param mem_alloc the memory allocation function
+ * @param mem_free the memory freeing function
+ */
+density_buffer_processing_result density_buffer_decompress(uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+
+
+
+/***********************************************************************************************************************
+ *                                                                                                                     *
  * Density stream API functions                                                                                        *
  *                                                                                                                     *
  ***********************************************************************************************************************/
@@ -125,14 +165,9 @@ uint_fast64_t density_stream_output_available_for_use(density_stream* stream);
  *
  * @param stream the stream
  * @param compression_mode the compression mode
- * @param output_type the format of data output by encoding.
- *      EXPERTS ONLY ! If unsure, use DENSITY_ENCODE_OUTPUT_TYPE_DEFAULT.
- *      Any other option will create output data which is *NOT* directly decompressible by the API. This can be used for parallelizing Density.
  * @param block_type the type of data blocks Density will generate.
- *      EXPERTS ONLY ! If you're unsure use DENSITY_BLOCK_TYPE_DEFAULT.
- *      The option DENSITY_BLOCK_TYPE_NO_HASHSUM_INTEGRITY_CHECK basically makes the block footer size zero, and removes data integrity checks in the encoded output.
- *      It can be useful in network streaming situations, where data integrity is already checked by the protocol (TCP/IP for example), and the flush option in density_stream_compress is often set,
- *      as the absence of block footer will enhance compression ratio.
+ *      The option DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK adds data integrity checks in the encoded output.
+ *      The output size becomes therefore slightly bigger (a few hundred bytes for huge input files).
  */
 DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type);
 
