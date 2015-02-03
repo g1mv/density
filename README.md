@@ -67,8 +67,8 @@ This algorithm was developed in conjunction with Piotr Tarsa (https://github.com
 It uses swapped double dictionary lookups and predictions. It can be extremely good with highly compressible data (ratio reaching ~5% or less).
 On typical compressible data compression ratio is ~50% or less. It is still extremely fast for both compression and decompression and is a great, efficient all-rounder algorithm.
 
-Quick start (a simple example using the API)
---------------------------------------------
+Quick start (a simple example using the APIs)
+---------------------------------------------
 Using DENSITY in your application couldn't be any simpler.
 
 First you need to include the 2 following files in your project :
