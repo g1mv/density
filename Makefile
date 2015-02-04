@@ -1,7 +1,7 @@
 #
 # Centaurean Density
 #
-# Copyright (c) 2013, Guillaume Voirin
+# Copyright (c) 2015, Guillaume Voirin
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,43 +26,73 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# 19/10/13 00:27
+# 4/02/15 22:02
 #
 
 ifeq ($(OS),Windows_NT)
     bold =
     normal =
-    ARROW = ^-^>
 else
     bold = `tput bold`
     normal = `tput sgr0`
+endif
+
+TARGET = density
+SRC_DIRECTORY = ./src/
+SPOOKYHASH_SRC_DIRECTORY = ./src/spookyhash/src/
+
+ifeq ($(OS),Windows_NT)
+    DYN_EXT = .dll
+    STAT_EXT = .lib
+    ARROW = ^-^>
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        DYN_EXT = .so
+    endif
+    ifeq ($(UNAME_S),Darwin)
+        DYN_EXT = .dylib
+    endif
+    STAT_EXT = .a
     ARROW = \-\>
 endif
 
-CFLAGS = -O3 -w -flto -std=c99 $(EXTRA_CFLAGS)
-
-SRC = $(wildcard *.c)
+SRC = $(wildcard $(SRC_DIRECTORY)*.c $(SPOOKYHASH_SRC_DIRECTORY)*.c)
 OBJ = $(SRC:.c=.o)
 
 ALL_OBJ = $(OBJ)
 
-.PHONY: compile-header compile
+.PHONY: link-header link
 
-all: compile
+all: compile link-header link
 
-compile-header:
-	@echo ${bold}Compiling Density${normal} ...
+$(SPOOKYHASH_SRC_DIRECTORY)Makefile:
+	@echo ${bold}Cloning SpookyHash${normal} ...
+	@git submodule init
+	@git submodule update
+	@echo
 
-compile: compile-header $(ALL_OBJ)
+link-header:
+	@echo ${bold}Linking Density${normal} ...
+
+compile: $(SPOOKYHASH_SRC_DIRECTORY)Makefile
+	@cd $(SPOOKYHASH_SRC_DIRECTORY) && $(MAKE) EXTRA_CFLAGS=-fPIC compile
+	@cd $(SRC_DIRECTORY) && $(MAKE) EXTRA_CFLAGS=-fPIC compile
+
+link: compile link-header $(TARGET)$(STAT_EXT) $(TARGET)$(DYN_EXT)
 	@echo Done.
 	@echo
 
-%.o: %.c
-	@echo $^ $(ARROW) $@
-	@$(CC) -c $(CFLAGS) $< -o $@
+$(TARGET)$(DYN_EXT): $(ALL_OBJ)
+	@echo $^ $(ARROW) ${bold}$(TARGET)$(DYN_EXT)${normal}
+	@$(CC) -shared -o $(TARGET)$(DYN_EXT) $^
+
+$(TARGET)$(STAT_EXT): $(ALL_OBJ)
+	@echo $^ $(ARROW) ${bold}$(TARGET)$(STAT_EXT)${normal}
+	@ar r $(TARGET)$(STAT_EXT) $^
+	@ranlib $(TARGET)$(STAT_EXT)
 
 clean:
-	@echo ${bold}Cleaning Density objects${normal} ...
-	@rm -f $(ALL_OBJ)
-	@echo Done.
-	@echo
+	@rm -f $(TARGET)$(DYN_EXT)
+	@rm -f $(TARGET)$(STAT_EXT)
+	@cd $(SRC_DIRECTORY) && $(MAKE) clean
