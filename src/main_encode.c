@@ -161,10 +161,17 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_finish(density_memory_t
 
     write_footer:
 #if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES
-    if((encodeState = density_encode_write_footer(out, state)))
+    if ((encodeState = density_encode_write_footer(out, state)))
         return exitProcess(state, DENSITY_ENCODE_PROCESS_WRITE_FOOTER, encodeState);
 #endif
-    mem_free(state->blockEncodeState.kernelEncodeState);
+
+    switch (state->compressionMode) {
+        case DENSITY_COMPRESSION_MODE_COPY:
+            mem_free(state->blockEncodeState.kernelEncodeState);
+            break;
+        default:
+            break;
+    }
 
     return DENSITY_ENCODE_STATE_READY;
 }
