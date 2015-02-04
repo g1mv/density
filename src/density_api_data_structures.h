@@ -59,7 +59,8 @@ typedef enum {
 typedef enum {
     DENSITY_BUFFER_STATE_OK = 0,                                        // Everything went alright
     DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // output buffer size is too small
-    DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING                        // error during processing
+    DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING,                       // error during processing
+    DENSITY_BUFFER_STATE_ERROR_INTEGRITY_CHECK_FAIL                     // Integrity check has failed
 } DENSITY_BUFFER_STATE;
 
 typedef struct {
@@ -73,7 +74,8 @@ typedef enum {
     DENSITY_STREAM_STATE_STALL_ON_INPUT,                                // there is not enough space left in the input buffer to continue
     DENSITY_STREAM_STATE_STALL_ON_OUTPUT,                               // there is not enough space left in the output buffer to continue
     DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // output buffer size is too small
-    DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE                   // error during processing
+    DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE,                  // error during processing
+    DENSITY_STREAM_STATE_ERROR_INTEGRITY_CHECK_FAIL                     // Integrity check has failed
 } DENSITY_STREAM_STATE;
 
 typedef struct {

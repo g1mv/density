@@ -104,6 +104,8 @@ DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_decompress(
             break;
         case DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL:
             return density_buffer_return_processing_result(stream, DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL);
+        case DENSITY_STREAM_STATE_ERROR_INTEGRITY_CHECK_FAIL:
+            return density_buffer_return_processing_result(stream, DENSITY_BUFFER_STATE_ERROR_INTEGRITY_CHECK_FAIL);
         default:
             return density_buffer_return_processing_result(stream, DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING);
     }
@@ -115,6 +117,8 @@ DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_decompress(
             return density_buffer_return_processing_result(stream, DENSITY_BUFFER_STATE_OK);
         case DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL:
             return density_buffer_return_processing_result(stream, DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL);
+        case DENSITY_STREAM_STATE_ERROR_INTEGRITY_CHECK_FAIL:
+            return density_buffer_return_processing_result(stream, DENSITY_BUFFER_STATE_ERROR_INTEGRITY_CHECK_FAIL);
         default:
             return density_buffer_return_processing_result(stream, DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING);
     }
