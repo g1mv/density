@@ -95,4 +95,5 @@ $(TARGET)$(STAT_EXT): $(ALL_OBJ)
 clean:
 	@rm -f $(TARGET)$(DYN_EXT)
 	@rm -f $(TARGET)$(STAT_EXT)
+	@cd $(SPOOKYHASH_SRC_DIRECTORY) && $(MAKE) clean
 	@cd $(SRC_DIRECTORY) && $(MAKE) clean
