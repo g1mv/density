@@ -6,6 +6,8 @@
 * Corrected pointer usage and update on footer read/writes
 * Now freeing kernel state memory only when compression mode is not copy
 * Updated Makefiles
+* Improved memory teleport
+* Fixed sequencing problem after kernels request a new block
 
 0.11.2 beta
 -----------
