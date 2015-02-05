@@ -30,7 +30,6 @@
  */
 
 #include "memory_teleport.h"
-#include "memory_location.h"
 
 DENSITY_FORCE_INLINE density_memory_teleport *density_memory_teleport_allocate(uint_fast64_t size, void *(*mem_alloc)(size_t)) {
     density_memory_teleport *teleport = (density_memory_teleport *) mem_alloc(sizeof(density_memory_teleport));
@@ -89,15 +88,29 @@ DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(densi
 DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read_reserved(density_memory_teleport *restrict teleport, uint_fast64_t bytes, uint_fast64_t reserved) {
     uint_fast64_t stagingAvailableBytes = density_memory_teleport_available_from_staging(teleport);
     uint_fast64_t directAvailableBytes = density_memory_teleport_available_from_direct(teleport);
+    uint_fast64_t stagingAvailableBytesReserved;
+    uint_fast64_t directAvailableBytesReserved;
 
-    if(stagingAvailableBytes) {
-        if (bytes <= stagingAvailableBytes - reserved) {
+    if(reserved > directAvailableBytes) {
+        directAvailableBytesReserved = 0;
+        uint_fast64_t requiredBytesFromStaging = reserved - directAvailableBytes;
+        if(requiredBytesFromStaging > stagingAvailableBytes)
+            stagingAvailableBytesReserved = 0;
+        else
+            stagingAvailableBytesReserved = stagingAvailableBytes - requiredBytesFromStaging;
+    } else {
+        stagingAvailableBytesReserved = stagingAvailableBytes;
+        directAvailableBytesReserved = directAvailableBytes - reserved;
+    }
+
+    if(stagingAvailableBytesReserved) {
+        if (bytes <= stagingAvailableBytesReserved) {
             teleport->indirectMemoryLocation->pointer = teleport->stagingMemoryLocation->pointer;
             teleport->stagingMemoryLocation->pointer += bytes;
             teleport->indirectMemoryLocation->available_bytes = bytes;
             return teleport->indirectMemoryLocation;
-        } else if (bytes <= stagingAvailableBytes + directAvailableBytes - reserved) {
-            uint_fast64_t missingBytes = bytes - stagingAvailableBytes;
+        } else if (bytes <= stagingAvailableBytesReserved + directAvailableBytesReserved) {
+            uint_fast64_t missingBytes = bytes - stagingAvailableBytesReserved;
             memcpy(teleport->stagingMemoryLocation->originalPointer + teleport->stagingMemoryLocation->position, teleport->directMemoryLocation->pointer, missingBytes);
             teleport->indirectMemoryLocation->pointer = teleport->stagingMemoryLocation->pointer;
             teleport->indirectMemoryLocation->available_bytes = bytes;
@@ -113,7 +126,7 @@ DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read_reser
             return NULL;
         }
     } else {
-        if(bytes <= directAvailableBytes - reserved) {
+        if(bytes <= directAvailableBytesReserved) {
             return teleport->directMemoryLocation;
         } else {
             memcpy(teleport->stagingMemoryLocation->originalPointer + teleport->stagingMemoryLocation->position, teleport->directMemoryLocation->pointer, directAvailableBytes);
