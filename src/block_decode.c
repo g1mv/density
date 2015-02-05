@@ -226,7 +226,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
                         density_block_decode_update_integrity_hash(out, state, true);
                     return exitProcess(state, DENSITY_BLOCK_DECODE_PROCESS_READ_DATA, DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT);
                 case DENSITY_KERNEL_DECODE_STATE_INFO_NEW_BLOCK:
-                    goto read_block_header;
+                    goto read_block_footer;
                 case DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK:
                     goto read_mode_marker;
                 default:
