@@ -32,89 +32,37 @@
 ifeq ($(OS),Windows_NT)
     bold =
     normal =
+    ARROW = ^-^>
 else
     bold = `tput bold`
     normal = `tput sgr0`
-endif
-
-TARGET = density
-
-CFLAGS = -flto -std=c99 -fPIC
-
-ifeq ($(OS),Windows_NT)
-    DYN_EXT = .dll
-    STAT_EXT = .lib
-    ARROW = ^-^>
-else
-    UNAME_S := $(shell uname -s)
-    ifeq ($(UNAME_S),Linux)
-        DYN_EXT = .so
-    endif
-    ifeq ($(UNAME_S),Darwin)
-        DYN_EXT = .dylib
-    endif
-    STAT_EXT = .a
     ARROW = \-\>
 endif
 
-ifdef ARCH
-    CFLAGS += -m$(ARCH)
-endif
-
-ifndef WARNINGS
-    CFLAGS += -w
-else
-    CFLAGS += -Wall
-endif
-
-ifndef DEBUG
-    CFLAGS += -O4
-else
-    CFLAGS += -O0 -g
-endif
-
-CC = @$(PREFIX)cc
+CFLAGS = -O3 -w -flto -std=c99 $(EXTRA_CFLAGS)
 
 SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 
 ALL_OBJ = $(OBJ)
 
-.PHONY: compile-header compile link-header link
+.PHONY: compile-header compile
 
-all: compile-header compile link-header link
+all: compile
 
 compile-header:
 	@echo ${bold}Compiling Density${normal} ...
-
-link-header:
-	@echo ${bold}Linking Density${normal} ...
 
 compile: compile-header $(ALL_OBJ)
 	@echo Done.
 	@echo
 
-link: compile link-header $(TARGET)$(STAT_EXT) $(TARGET)$(DYN_EXT)
-	@echo Done.
-	@echo
-
-$(TARGET)$(DYN_EXT): $(ALL_OBJ)
-	@echo $^ $(ARROW) ${bold}$(TARGET)$(DYN_EXT)${normal}
-	$(CC) -shared -o $(TARGET)$(DYN_EXT) $^ $(CFLAGS)
-
-$(TARGET)$(STAT_EXT): $(ALL_OBJ)
-	@echo $^ $(ARROW) ${bold}$(TARGET)$(STAT_EXT)${normal}
-	@ar r $(TARGET)$(STAT_EXT) $^
-	@ranlib $(TARGET)$(STAT_EXT)
-
 %.o: %.c
 	@echo $^ $(ARROW) $@
-	$(CC) -c $(CFLAGS) $< -o $@
-	
+	@$(CC) -c $(CFLAGS) $< -o $@
+
 clean:
-	@echo ${bold}Cleaning Density build directories${normal} ...
+	@echo ${bold}Cleaning Density objects${normal} ...
 	@rm -f $(ALL_OBJ)
-	@rm -f $(TARGET)$(DYN_EXT)
-	@rm -f $(TARGET)$(STAT_EXT)
 	@echo Done.
 	@echo

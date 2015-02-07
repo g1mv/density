@@ -1,6 +1,17 @@
+0.11.3 beta
+-----------
+*February 5, 2015*
+
+* Added integrity check system
+* Corrected pointer usage and update on footer read/writes
+* Now freeing kernel state memory only when compression mode is not copy
+* Updated Makefiles
+* Improved memory teleport
+* Fixed sequencing problem after kernels request a new block
+
 0.11.2 beta
 -----------
-February 3, 2015
+*February 3, 2015*
 
 * Added an algorithms overview in README
 * Removed ssc references
@@ -18,6 +29,30 @@ February 3, 2015
 * Improved compression/decompression finishes
 * Improved streams API
 * Various bug fixes, robustness improvements
+
+0.10.2 beta
+-----------
+*January 7, 2015*
+
+* Improved organization of compile-time switches and run-time options in the API
+* Removed method density_stream_decompress_utilities_get_header from the API, header info is now returned in the density_stream_decompress_init function
+* Corrected readme to reflect API changes
+
+0.10.1 beta
+-----------
+*January 5, 2015*
+
+* Re-added mandala kernel
+* Corrected available bytes adjustment problem
+* Added missing restrict keywords
+* Cleaned unnecessary defines
+
+0.10.0 beta
+-----------
+*January 2, 2015*
+
+* Complete stream API redesign to greatly improve flexibility
+* Only one supported algorithm for now : Chameleon
 
 0.9.12 beta
 -----------
