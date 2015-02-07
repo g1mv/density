@@ -29,23 +29,24 @@
 # 19/10/13 00:27
 #
 
+UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
+
+TARGET = density
+CFLAGS = -O3 -w -flto -std=c99
+
+SRC_DIRECTORY = ./src/
+SPOOKYHASH_DIRECTORY = ./src/spookyhash/
+SPOOKYHASH_SRC_DIRECTORY = $(SPOOKYHASH_DIRECTORY)src/
+
 ifeq ($(OS),Windows_NT)
     bold =
     normal =
-else
-    bold = `tput bold`
-    normal = `tput sgr0`
-endif
-
-TARGET = density
-
-CFLAGS = -flto -std=c99 -fPIC
-
-ifeq ($(OS),Windows_NT)
     DYN_EXT = .dll
     STAT_EXT = .lib
     ARROW = ^-^>
 else
+    bold = `tput bold`
+    normal = `tput sgr0`
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Linux)
         DYN_EXT = .so
@@ -57,63 +58,63 @@ else
     ARROW = \-\>
 endif
 
-ifdef ARCH
-    CFLAGS += -m$(ARCH)
-endif
+DENSITY_SRC = $(wildcard $(SRC_DIRECTORY)*.c)
+DENSITY_OBJ = $(DENSITY_SRC:.c=.o)
+OTHER_SRC = $(wildcard $(SPOOKYHASH_SRC_DIRECTORY)*.c)
+OTHER_OBJ = $(OTHER_SRC:.c=.o)
+ALL_OBJ = $(DENSITY_OBJ) $(OTHER_OBJ)
 
-ifndef WARNINGS
-    CFLAGS += -w
-else
-    CFLAGS += -Wall
-endif
+.PHONY: compile-header compile-library-header link-header
 
-ifndef DEBUG
-    CFLAGS += -O4
-else
-    CFLAGS += -O0 -g
-endif
-
-CC = @$(PREFIX)cc
-
-SRC = $(wildcard *.c)
-OBJ = $(SRC:.c=.o)
-
-ALL_OBJ = $(OBJ)
-
-.PHONY: compile-header compile link-header link
-
-all: compile-header compile link-header link
-
-compile-header:
-	@echo ${bold}Compiling Density${normal} ...
-
-link-header:
-	@echo ${bold}Linking Density${normal} ...
-
-compile: compile-header $(ALL_OBJ)
-	@echo Done.
-	@echo
-
-link: compile link-header $(TARGET)$(STAT_EXT) $(TARGET)$(DYN_EXT)
-	@echo Done.
-	@echo
-
-$(TARGET)$(DYN_EXT): $(ALL_OBJ)
-	@echo $^ $(ARROW) ${bold}$(TARGET)$(DYN_EXT)${normal}
-	$(CC) -shared -o $(TARGET)$(DYN_EXT) $^ $(CFLAGS)
-
-$(TARGET)$(STAT_EXT): $(ALL_OBJ)
-	@echo $^ $(ARROW) ${bold}$(TARGET)$(STAT_EXT)${normal}
-	@ar r $(TARGET)$(STAT_EXT) $^
-	@ranlib $(TARGET)$(STAT_EXT)
+all: $(TARGET)$(DYN_EXT) $(TARGET)$(STAT_EXT)
 
 %.o: %.c
 	@echo $^ $(ARROW) $@
-	$(CC) -c $(CFLAGS) $< -o $@
-	
-clean:
-	@echo ${bold}Cleaning Density build directories${normal} ...
-	@rm -f $(ALL_OBJ)
+	@$(CC) -c $(CFLAGS) $< -o $@
+
+compile-submodules:
+	@cd $(SPOOKYHASH_DIRECTORY) && $(MAKE) compile
+
+compile-header: compile-submodules
+	@echo ${bold}Compiling Density${normal} ...
+
+compile-submodules-library:
+	@cd $(SPOOKYHASH_DIRECTORY) && $(MAKE) compile-library
+
+compile-library-header: compile-submodules-library
+	@$(eval CFLAGS = $(CFLAGS) -fPIC)
+	@echo ${bold}Compiling Density as a library${normal} ...
+
+compile: compile-header $(DENSITY_OBJ)
+	@echo Done.
+	@echo
+
+compile-library: compile-library-header $(DENSITY_OBJ)
+	@echo Done.
+	@echo
+
+link-header: compile-library
+	@echo ${bold}Linking Density${normal} ...
+
+$(TARGET)$(DYN_EXT): link-header $(ALL_OBJ)
+	@echo *.o $(ARROW) ${bold}$(TARGET)$(DYN_EXT)${normal}
+	@$(CC) -shared -o $(TARGET)$(DYN_EXT) $(ALL_OBJ)
+	@echo Done.
+	@echo
+
+$(TARGET)$(STAT_EXT): link-header $(ALL_OBJ)
+	@echo *.o $(ARROW) ${bold}$(TARGET)$(STAT_EXT)${normal}
+	@ar r $(TARGET)$(STAT_EXT) $(ALL_OBJ)
+	@ranlib $(TARGET)$(STAT_EXT)
+	@echo Done.
+	@echo
+
+clean-submodules:
+	@cd $(SPOOKYHASH_DIRECTORY) && $(MAKE) clean
+
+clean: clean-submodules
+	@echo ${bold}Cleaning Density objects${normal} ...
+	@rm -f $(DENSITY_OBJ)
 	@rm -f $(TARGET)$(DYN_EXT)
 	@rm -f $(TARGET)$(STAT_EXT)
 	@echo Done.

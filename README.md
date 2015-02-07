@@ -42,6 +42,10 @@ DENSITY outputs compressed data in a simple format, which enables file storage a
 Inside the main header and footer, a number of blocks can be found, each having its own header and footer.
 Inside each block, compressed data has a structure determined by the compression algorithm used.
 
+It is possible to add an integrity checksum to the compressed output by using the *DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK* block type.
+The 128-bit checksum is calculated using the excellent [SpookyHash algorithm](https://github.com/centaurean/spookyhash), which is extremely fast and offers a near-zero performance penalty.
+An additional integrity check will then be automatically performed during decompression.
+
 APIs
 ----
 DENSITY features a *buffer API* and a *stream API* which are very simple to use, yet powerful enough to keep users' creativity unleashed.

@@ -161,7 +161,7 @@ DENSITY_FORCE_INLINE void density_mandala_decode_kernel(density_memory_location 
             break;
     }
 
-    state->lastHash = hash;
+    state->lastHash = (uint16_t) hash;
 }
 
 DENSITY_FORCE_INLINE const DENSITY_MANDALA_SIGNATURE_FLAG density_mandala_decode_get_signature_flag(density_mandala_decode_state *state) {
@@ -310,7 +310,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_finish(d
                 break;
         }
 
-        state->lastHash = hash;
+        state->lastHash = (uint16_t)hash;
 
         out->available_bytes -= sizeof(uint32_t);
         state->shift += 2;

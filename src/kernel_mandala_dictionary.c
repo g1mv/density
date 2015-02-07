@@ -42,7 +42,7 @@
 
 #include "kernel_mandala_dictionary.h"
 
-const density_mandala_dictionary density_mandala_empty_dictionary = {.entries = {{0}}};
+const density_mandala_dictionary density_mandala_empty_dictionary = {.entries = {{0}}, .prediction_entries = {{0}}};
 
 DENSITY_FORCE_INLINE void density_mandala_dictionary_reset(density_mandala_dictionary *dictionary) {
     memcpy(dictionary, &density_mandala_empty_dictionary, sizeof(density_mandala_dictionary));
