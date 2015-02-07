@@ -78,7 +78,10 @@ compile-submodules:
 compile-header: compile-submodules
 	@echo ${bold}Compiling Density${normal} ...
 
-compile-library-header:
+compile-submodules-library:
+	@cd $(SPOOKYHASH_DIRECTORY) && $(MAKE) compile-library
+
+compile-library-header: compile-submodules-library
 	@$(eval CFLAGS = $(CFLAGS) -fPIC)
 	@echo ${bold}Compiling Density as a library${normal} ...
 
