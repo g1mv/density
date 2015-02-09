@@ -79,20 +79,20 @@ typedef struct {
     uint8_t rank;
     uint32_t usage;
     uint32_t durability;
-} density_argonaut_dictionary_entry;
+} density_argonaut_dictionary_word_entry;
 
 typedef struct {
     uint8_t letter;
     uint32_t usage;
     uint8_t rank;
-} density_argonaut_letter_dictionary_entry;
+} density_argonaut_dictionary_letter_entry;
 
 typedef struct {
-    density_argonaut_letter_dictionary_entry letters[1 << 8];
-    density_argonaut_letter_dictionary_entry *letterRanks[1 << 8];
-    density_argonaut_dictionary_entry wordsA[1 << DENSITY_ARGONAUT_DICTIONARY_BITS];
-    density_argonaut_dictionary_entry wordsB[1 << DENSITY_ARGONAUT_DICTIONARY_BITS];
-    density_argonaut_dictionary_entry *wordRanks[1 << 8];
+    density_argonaut_dictionary_letter_entry letters[1 << 8];
+    density_argonaut_dictionary_letter_entry *letterRanks[1 << 8];
+    density_argonaut_dictionary_word_entry wordsA[1 << DENSITY_ARGONAUT_DICTIONARY_BITS];
+    density_argonaut_dictionary_word_entry wordsB[1 << DENSITY_ARGONAUT_DICTIONARY_BITS];
+    density_argonaut_dictionary_word_entry *wordRanks[1 << 8];
     density_argonaut_dictionary_unigram_prediction_entry unigramPredictions[1 << 8];
     density_argonaut_dictionary_bigram_prediction_entry bigramPredictions[1 << 16];
     density_argonaut_dictionary_fourgram_prediction_entry fourgramPredictions[1 << 16];

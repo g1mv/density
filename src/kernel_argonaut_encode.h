@@ -36,7 +36,7 @@
  * Guillaume Voirin (https://github.com/gpnuma)
  *
  * Description
- * Word rank and predictions algorithm
+ * Multiform compression algorithm
  */
 
 #ifndef DENSITY_ARGONAUT_ENCODE_H
@@ -53,30 +53,60 @@
 #include <math.h>
 #include <stdint.h>
 
+#define DENSITY_ARGONAUT_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (256)
+
 #define density_argonaut_contains_zero(search64) (((search64) - 0x0101010101010101llu) & ~(search64) & 0x8080808080808080llu)
 #define density_argonaut_contains_value(search64, value8) (density_argonaut_contains_zero((search64) ^ (~0llu / 255 * (value8))))
 
-#define DENSITY_ARGONAUT_BLOCK   512
+typedef enum {
+    DENSITY_ARGONAUT_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
+    DENSITY_ARGONAUT_ENCODE_PROCESS_CHECK_SIGNATURE_STATE,
+    DENSITY_ARGONAUT_ENCODE_PROCESS_READ_CHUNK
+} DENSITY_ARGONAUT_ENCODE_PROCESS;
 
 typedef enum {
-    DENSITY_ARGONAUT_ENCODE_PROCESS_CHECK_OUTPUT_MEMORY,
-    DENSITY_ARGONAUT_ENCODE_PROCESS_GOTO_NEXT_WORD,
-    DENSITY_ARGONAUT_ENCODE_PROCESS_WORD,
-    DENSITY_ARGONAUT_ENCODE_PROCESS_FINISH
-} DENSITY_ARGONAUT_ENCODE_PROCESS;
+    DENSITY_ARGONAUT_FORM_PREDICTIONS,
+    DENSITY_ARGONAUT_FORM_RANK,
+    DENSITY_ARGONAUT_FORM_DICTIONARY,
+    DENSITY_ARGONAUT_FORM_ENCODED
+} DENSITY_ARGONAUT_FORM;
+
+typedef struct {
+    uint32_t usage;
+    uint8_t rank;
+} density_argonaut_form_statistics;
+
+typedef struct {
+    density_argonaut_form_statistics *statistics;
+} density_argonaut_form_rank;
+
+typedef struct {
+    union {
+        uint64_t as_uint64_t;
+        uint8_t letters[sizeof(uint64_t)];
+    };
+    uint_fast8_t length;
+} density_argonaut_encode_word;
 
 #pragma pack(push)
 #pragma pack(1)
 typedef struct {
     DENSITY_ARGONAUT_ENCODE_PROCESS process;
 
-    uint_fast32_t shift;
-    uint_fast16_t count;
+#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
+    uint_fast64_t resetCycle;
+#endif
+
+    uint_fast8_t shift;
+    density_argonaut_signature *signature;
+    uint_fast32_t signaturesCount;
+    uint_fast8_t efficiencyChecked;
 
     density_argonaut_encode_word word;
+    uint8_t lastByteHash;
 
-    uint_fast64_t buffer;
-    uint_fast8_t bufferBits;
+    density_argonaut_form_statistics formStatistics[sizeof(DENSITY_ARGONAUT_FORM)];
+    density_argonaut_form_rank formRanks[sizeof(DENSITY_ARGONAUT_FORM)];
 
     density_argonaut_dictionary dictionary;
 } density_argonaut_encode_state;
