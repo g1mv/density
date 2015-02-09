@@ -271,7 +271,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_continu
 
         // Check if we have a 8 bit rank
         if (wordFound->rank < 255) {
-            ////uint8_t add = density_argonaut_huffman_codes[found16->rank].bitSize;
+            ////uint8_t add = density_argonaut_huffman_codes[wordFound->rank].bitSize;
             uint8_t rank = state->formStatistics[DENSITY_ARGONAUT_FORM_RANK].rank;
             ////outputBits += rank + 1 + add;
             state->formStatistics[DENSITY_ARGONAUT_FORM_RANK].usage++;
@@ -314,7 +314,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_continu
         }
 
         // Check word inner predictions
-        bool encode = true;
         uint32_t tot = 0;
         tot += density_argonaut_huffman_codes[state->dictionary.letters[state->word.letters[0]].rank].bitSize;
         for (int wordLetter = 1; wordLetter < state->word.length; wordLetter++) {
