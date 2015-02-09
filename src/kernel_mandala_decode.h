@@ -86,7 +86,7 @@ typedef struct {
 #pragma pack(pop)
 
 DENSITY_KERNEL_DECODE_STATE density_mandala_decode_init(density_mandala_decode_state *, const density_main_header_parameters parameters, const uint_fast32_t);
-DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(density_memory_teleport *, density_memory_location *, density_mandala_decode_state *, const density_bool);
+DENSITY_KERNEL_DECODE_STATE density_mandala_decode_continue(density_memory_teleport *, density_memory_location *, density_mandala_decode_state *, const density_bool);
 DENSITY_KERNEL_DECODE_STATE density_mandala_decode_finish(density_memory_teleport *, density_memory_location *, density_mandala_decode_state *);
 
 #endif

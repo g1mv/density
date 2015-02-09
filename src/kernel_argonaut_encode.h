@@ -65,16 +65,8 @@ typedef enum {
     DENSITY_ARGONAUT_ENCODE_PROCESS_FINISH
 } DENSITY_ARGONAUT_ENCODE_PROCESS;
 
-typedef struct {
-    union {
-        uint64_t as_uint64_t;
-        uint8_t letters[DENSITY_ARGONAUT_DICTIONARY_MAX_WORD_LETTERS];
-    };
-    uint_fast8_t length;
-} density_argonaut_encode_word;
-
 #pragma pack(push)
-#pragma pack(4)
+#pragma pack(1)
 typedef struct {
     DENSITY_ARGONAUT_ENCODE_PROCESS process;
 
@@ -90,10 +82,10 @@ typedef struct {
 } density_argonaut_encode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_init(void *);
+DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_init(density_argonaut_encode_state *);
 
-DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_process(density_memory_teleport *, density_memory_location *, void *, const density_bool);
+DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_continue(density_memory_teleport *, density_memory_location *, density_argonaut_encode_state *);
 
-DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_finish(void *);
+DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_finish(density_memory_teleport *, density_memory_location *, density_argonaut_encode_state *);
 
 #endif

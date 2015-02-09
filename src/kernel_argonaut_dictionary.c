@@ -36,12 +36,12 @@
  * Guillaume Voirin (https://github.com/gpnuma)
  *
  * Description
- * Word rank and predictions algorithm
+ * Multiform compression algorithm
  */
 
 #include "kernel_argonaut_dictionary.h"
 
-const density_argonaut_dictionary density_argonaut_empty_dictionary = {.predictions = {{0}}, .ranks_4bits = {{0}}, .entries_8bits = {{0}}, .ranks_8bits = {{0}}, .entries_16bits = {{0}}, .letterRanks = {{0}}, .letters = {{0}}};
+const density_argonaut_dictionary density_argonaut_empty_dictionary = {.letters = {0}, .letterRanks = {0}, .wordsA = {0}, .wordsB = {0}, .wordRanks = {0}, .unigramPredictions = {0}, .bigramPredictions = {0}, .fourgramPredictions = {0}, .wordPredictions = {0}};
 
 DENSITY_FORCE_INLINE void density_argonaut_dictionary_reset(density_argonaut_dictionary * dictionary) {
     memcpy(dictionary, &density_argonaut_empty_dictionary, sizeof(density_argonaut_dictionary));

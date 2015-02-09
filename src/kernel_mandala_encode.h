@@ -81,6 +81,6 @@ typedef struct {
 #pragma pack(pop)
 
 DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_init(density_mandala_encode_state *);
-DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_process(density_memory_teleport *, density_memory_location *, density_mandala_encode_state *, const density_bool);
+DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_continue(density_memory_teleport *, density_memory_location *, density_mandala_encode_state *, const density_bool);
 DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_finish(density_memory_teleport *, density_memory_location *, density_mandala_encode_state *);
 #endif

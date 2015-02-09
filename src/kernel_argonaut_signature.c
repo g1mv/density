@@ -69,5 +69,3 @@ DENSITY_FORCE_INLINE void density_kernel_argonaut_signature_write(density_argona
         return;
     }
 }
-
-#endif

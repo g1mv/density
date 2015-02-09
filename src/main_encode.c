@@ -88,7 +88,11 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_memory_loc
             break;
 
         case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
-            density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM, blockType, mem_alloc(sizeof(density_mandala_encode_state)), (void *) density_mandala_encode_init, (void *) density_mandala_encode_process, (void *) density_mandala_encode_finish, mem_alloc);
+            density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM, blockType, mem_alloc(sizeof(density_mandala_encode_state)), (void *) density_mandala_encode_init, (void *) density_mandala_encode_continue, (void *) density_mandala_encode_finish, mem_alloc);
+            break;
+
+        case DENSITY_COMPRESSION_MODE_ARGONAUT_ALGORITHM:
+            density_block_encode_init(&state->blockEncodeState, DENSITY_COMPRESSION_MODE_ARGONAUT_ALGORITHM, blockType, mem_alloc(sizeof(density_argonaut_encode_state)), (void *) density_argonaut_encode_init, (void *) density_argonaut_encode_continue, (void *) density_argonaut_encode_finish, mem_alloc);
             break;
     }
 

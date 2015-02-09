@@ -36,7 +36,7 @@
  * Guillaume Voirin (https://github.com/gpnuma)
  *
  * Description
- * Word rank and predictions algorithm
+ * Multiform compression algorithm
  */
 
 #ifndef DENSITY_ARGONAUT_DICTIONARY_H
@@ -47,46 +47,59 @@
 
 #include <string.h>
 
+#define DENSITY_ARGONAUT_DICTIONARY_BITS 16
+
 #pragma pack(push)
 #pragma pack(1)
 typedef struct {
     union {
-        uint64_t as_uint64_t;
         uint8_t letters[sizeof(uint64_t)];
+        uint64_t as_uint64_t;
     };
 } density_argonaut_word;
 
 typedef struct {
     density_argonaut_word next_word;
-} density_argonaut_dictionary_prediction_entry;
+} density_argonaut_dictionary_word_prediction_entry;
+
+typedef struct {
+    uint8_t next_letter;
+} density_argonaut_dictionary_unigram_prediction_entry;
+
+typedef struct {
+    uint8_t next_letter;
+} density_argonaut_dictionary_bigram_prediction_entry;
+
+typedef struct {
+    uint32_t next_part;
+} density_argonaut_dictionary_fourgram_prediction_entry;
 
 typedef struct {
     density_argonaut_word word;
-    uint8_t rank_4bits;
+    uint8_t rank;
     uint32_t usage;
-} density_argonaut_dictionary_8bits_entry;
-
-typedef struct {
-    density_argonaut_word word;
-    uint8_t rank_8bits;
-    uint32_t usage;
-} density_argonaut_dictionary_16bits_entry;
+    uint32_t durability;
+} density_argonaut_dictionary_entry;
 
 typedef struct {
     uint8_t letter;
     uint32_t usage;
     uint8_t rank;
-} density_argonaut_dictionary_letter;
+} density_argonaut_letter_dictionary_entry;
 
 typedef struct {
-    density_argonaut_dictionary_letter letters[1 << 8];
-    density_argonaut_dictionary_letter letterRanks[1 << 8];
-    density_argonaut_dictionary_prediction_entry predictions[1 << 16];
-    density_argonaut_word* ranks_4bits[1 << 4];
-    density_argonaut_word* ranks_8bits[1 << 8];
-    density_argonaut_dictionary_8bits_entry entries_8bits[1 << 8];
-    density_argonaut_dictionary_16bits_entry entries_16bits[1 << 16];
+    density_argonaut_letter_dictionary_entry letters[1 << 8];
+    density_argonaut_letter_dictionary_entry *letterRanks[1 << 8];
+    density_argonaut_dictionary_entry wordsA[1 << DENSITY_ARGONAUT_DICTIONARY_BITS];
+    density_argonaut_dictionary_entry wordsB[1 << DENSITY_ARGONAUT_DICTIONARY_BITS];
+    density_argonaut_dictionary_entry *wordRanks[1 << 8];
+    density_argonaut_dictionary_unigram_prediction_entry unigramPredictions[1 << 8];
+    density_argonaut_dictionary_bigram_prediction_entry bigramPredictions[1 << 16];
+    density_argonaut_dictionary_fourgram_prediction_entry fourgramPredictions[1 << 16];
+    density_argonaut_dictionary_word_prediction_entry wordPredictions[1 << 8];
 } density_argonaut_dictionary;
 #pragma pack(pop)
+
+void density_argonaut_dictionary_reset(density_argonaut_dictionary *);
 
 #endif
