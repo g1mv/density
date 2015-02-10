@@ -1,6 +1,6 @@
 0.11.4 beta
 -----------
-* February 10, 2015*
+*February 10, 2015*
 
 * Removed unnecessary makefile, now using a single makefile
 * Mandala kernel : reset prediction entries as required
