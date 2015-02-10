@@ -98,6 +98,8 @@ typedef struct {
 #endif
 
     uint_fast8_t shift;
+    uint64_t content;
+    uint_fast8_t remainder;
     density_argonaut_signature *signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
