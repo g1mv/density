@@ -1,3 +1,12 @@
+0.11.4 beta
+-----------
+* February 10, 2015*
+
+* Removed unnecessary makefile, now using a single makefile
+* Mandala kernel : reset prediction entries as required
+* Mandala kernel : convert hash to 16-bit unsigned int before storing
+* Updated SpookyHash to 1.0.2
+
 0.11.3 beta
 -----------
 *February 5, 2015*
