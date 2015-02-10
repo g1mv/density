@@ -98,10 +98,8 @@ typedef struct {
 #endif
 
     uint_fast8_t shift;
-    uint64_t content;
-    uint_fast8_t remainder;
     density_argonaut_signature *signature;
-    uint_fast32_t signaturesCount;
+    uint_fast32_t wordCount;
     uint_fast8_t efficiencyChecked;
 
     density_argonaut_encode_word word;
@@ -113,6 +111,8 @@ typedef struct {
     density_argonaut_dictionary dictionary;
 } density_argonaut_encode_state;
 #pragma pack(pop)
+
+void density_argonaut_encode_push_to_signature(density_memory_location *, density_argonaut_encode_state *, uint64_t, uint_fast8_t);
 
 DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_init(density_argonaut_encode_state *);
 
