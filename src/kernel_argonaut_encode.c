@@ -390,5 +390,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_continu
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_argonaut_encode_state *restrict state) {
+    uint_fast64_t available = density_memory_teleport_available(in);
+    density_memory_location *readMemoryLocation = density_memory_teleport_read(in, available);
+    readMemoryLocation->available_bytes -= available;
+
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
