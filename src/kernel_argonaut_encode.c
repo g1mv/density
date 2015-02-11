@@ -133,7 +133,7 @@ DENSITY_FORCE_INLINE uint8_t density_argonaut_encode_fetch_form_rank_for_use(den
 
 DENSITY_FORCE_INLINE void density_argonaut_encode_process_write_word(density_memory_location *restrict out, density_argonaut_encode_state *state) {
     // Check word predictions
-    if (state->word.length <= 4) {
+    if (state->lastLength <= 4) {
         if (state->dictionary.wordPredictions[state->lastByteHash].next_word.as_uint64_t == state->word.as_uint64_t) {
             uint8_t rank = density_argonaut_encode_fetch_form_rank_for_use(state, DENSITY_ARGONAUT_FORM_PREDICTIONS);
             density_argonaut_encode_push_to_signature(out, state, 0, rank + (uint8_t) 1);
@@ -380,6 +380,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_continu
 
         density_argonaut_encode_process_write_word(out, state);
         state->wordCount ++;
+        state->lastLength = state->word.length;
         state->word.length = 0;
     }
 }
@@ -420,6 +421,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_finish(
 
         density_argonaut_encode_process_write_word(out, state);
         state->wordCount ++;
+        state->lastLength = state->word.length;
         state->word.length = 0;
     }
 
@@ -432,6 +434,11 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_finish(
     // todo check output size
     density_argonaut_encode_process_write_word(out, state);
     state->wordCount ++;
+
+    /*uint_fast64_t available = density_memory_teleport_available(in);
+    state->readMemoryLocation = density_memory_teleport_read(in, available);
+    state->readMemoryLocation->pointer += available;
+    state->readMemoryLocation->available_bytes -= available;*/
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }

@@ -85,7 +85,7 @@ typedef struct {
         uint64_t as_uint64_t;
         uint8_t letters[sizeof(uint64_t)];
     };
-    uint_fast8_t length;
+    uint8_t length;
 } density_argonaut_encode_word;
 
 #pragma pack(push)
@@ -97,14 +97,15 @@ typedef struct {
     uint_fast64_t resetCycle;
 #endif
 
-    uint_fast8_t shift;
+    uint8_t shift;
     density_argonaut_signature *signature;
-    uint_fast64_t wordCount;
-    uint_fast8_t efficiencyChecked;
+    uint64_t wordCount;
+    uint8_t efficiencyChecked;
 
     density_argonaut_encode_word word;
     density_memory_location* readMemoryLocation;
     uint8_t lastByteHash;
+    uint8_t lastLength;
 
     density_argonaut_form_statistics formStatistics[sizeof(DENSITY_ARGONAUT_FORM)];
     density_argonaut_form_rank formRanks[sizeof(DENSITY_ARGONAUT_FORM)];
