@@ -68,9 +68,11 @@ typedef struct {
 
 typedef struct {
     uint8_t next_letter;
+    uint16_t next_bigram;
 } density_argonaut_dictionary_bigram_prediction_entry;
 
 typedef struct {
+    uint8_t next_letter;
     uint32_t next_part;
 } density_argonaut_dictionary_fourgram_prediction_entry;
 

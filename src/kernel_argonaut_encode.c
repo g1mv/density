@@ -213,13 +213,18 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_process_write_word(density_mem
         // Look for word inner predictions
         density_argonaut_encode_push_to_signature(out, state, 0, density_argonaut_huffman_codes[state->dictionary.letters[state->word.letters[0]].rank].bitSize);
         for (int wordLetter = 1; wordLetter < state->word.length; wordLetter++) {
-            if (wordLetter == 5 && state->dictionary.fourgramPredictions[(((uint32_t) (state->word.as_uint64_t & 0xFFFFFFFF)) * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> 16].next_part == (uint32_t) ((state->word.as_uint64_t & 0xFFFFFFFF00000000) >> 8)) {
+            if (wordLetter == 5 && state->dictionary.fourgramPredictions[(((uint32_t) (state->word.as_uint64_t & 0xFFFFFFFF)) * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> 16].next_part == (uint32_t) ((state->word.as_uint64_t & 0xFFFFFFFF00000000) >> 32)) {
                 density_argonaut_encode_push_to_signature(out, state, 0x3, 2);
                 goto exit_inner_predictions;
+            } else if (wordLetter >= 2 && wordLetter < 4 && state->word.length >= wordLetter + 2 && state->dictionary.bigramPredictions[((uint16_t) (state->word.letters[wordLetter - 2]) << 8) + (uint16_t) state->word.letters[wordLetter - 1]].next_bigram == (uint16_t) (state->word.letters[wordLetter] << 8) + state->word.letters[wordLetter + 1]) {
+                density_argonaut_encode_push_to_signature(out, state, 0x3, 2);
+                wordLetter += 1;
             } else if (state->dictionary.unigramPredictions[(uint8_t) state->word.letters[wordLetter - 1]].next_letter == state->word.letters[wordLetter]) {
                 density_argonaut_encode_push_to_signature(out, state, 0x2, 2);
             } else if (wordLetter >= 2 && state->dictionary.bigramPredictions[((uint16_t) (state->word.letters[wordLetter - 2]) << 8) + (uint16_t) state->word.letters[wordLetter - 1]].next_letter == state->word.letters[wordLetter]) {
                 density_argonaut_encode_push_to_signature(out, state, 0x1, 2);
+            } else if (wordLetter > 5 && state->dictionary.fourgramPredictions[(((uint32_t) (((state->word.as_uint64_t) >> (wordLetter - 4)) & 0xFFFFFFFF)) * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> 16].next_letter == state->word.letters[wordLetter]) {
+                density_argonaut_encode_push_to_signature(out, state, 0x3, 2);
             } else {
                 density_argonaut_encode_push_to_signature_dual(out, state, 0x0, 2, 0, density_argonaut_huffman_codes[state->dictionary.letters[state->word.letters[wordLetter]].rank].bitSize);
             }
@@ -227,16 +232,30 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_process_write_word(density_mem
         exit_inner_predictions:
 
         // Update word inner predictions
-        for (uint_fast8_t wordLetter = 1; wordLetter < state->word.length; wordLetter++)
-            state->dictionary.unigramPredictions[(uint8_t) state->word.letters[wordLetter - 1]].next_letter = (uint8_t) state->word.letters[wordLetter];
+        if (state->word.length > 1)
+            for (uint_fast8_t wordLetter = 1; wordLetter < state->word.length; wordLetter++)
+                state->dictionary.unigramPredictions[(uint8_t) state->word.letters[wordLetter - 1]].next_letter = (uint8_t) state->word.letters[wordLetter];
 
-        if (state->word.length >= 2)
+        if (state->word.length > 2)
             for (uint_fast8_t wordLetter = 2; wordLetter < state->word.length; wordLetter++)
                 state->dictionary.bigramPredictions[((uint16_t) (state->word.letters[wordLetter - 2]) << 8) + (uint16_t) state->word.letters[wordLetter - 1]].next_letter = (uint8_t) state->word.letters[wordLetter];
 
-        if (state->word.length == 5)
-            state->dictionary.fourgramPredictions[((uint32_t) (state->word.as_uint64_t & 0xFFFFFFFF) * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> 16].next_part = (uint32_t) ((state->word.as_uint64_t & 0xFFFFFFFF00000000) >> 8);
+        if (state->word.length > 3)
+            for (uint_fast8_t wordLetter = 3; wordLetter < state->word.length; wordLetter++)
+                state->dictionary.bigramPredictions[((uint16_t) (state->word.letters[wordLetter - 3]) << 8) + (uint16_t) state->word.letters[wordLetter - 2]].next_bigram = (uint16_t) (state->word.letters[wordLetter - 1] << 8) + state->word.letters[wordLetter];
+
+        if (state->word.length > 4) {
+            for (uint_fast8_t wordLetter = 4; wordLetter < state->word.length; wordLetter++)
+                state->dictionary.fourgramPredictions[(((uint32_t) (((state->word.as_uint64_t) >> (wordLetter - 4)) & 0xFFFFFFFF)) * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> 16].next_letter = (uint8_t) state->word.letters[wordLetter];
+
+            state->dictionary.fourgramPredictions[((uint32_t) (state->word.as_uint64_t & 0xFFFFFFFF) * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> 16].next_part = (uint32_t) ((state->word.as_uint64_t & 0xFFFFFFFF00000000) >> 32);
+        }
     }
+}
+
+DENSITY_FORCE_INLINE void density_argonaut_encode_mask_word(density_argonaut_encode_state *restrict state) {
+    if (state->word.length < 8)
+        state->word.as_uint64_t &= (0xFFFFFFFFFFFFFFFFllu >> (bitsizeof(density_argonaut_word) - state->word.length * bitsizeof(uint8_t)));
 }
 
 DENSITY_FORCE_INLINE bool density_argonaut_encode_read_word(density_argonaut_encode_state *restrict state) {
@@ -289,8 +308,7 @@ DENSITY_FORCE_INLINE bool density_argonaut_encode_read_word(density_argonaut_enc
     state->readMemoryLocation->pointer += (state->word.length - startLength);
 
     // Masking
-    if (state->word.length < 8)
-        state->word.as_uint64_t &= (0xFFFFFFFFFFFFFFFFllu >> (bitsizeof(density_argonaut_word) - state->word.length * bitsizeof(uint8_t)));
+    density_argonaut_encode_mask_word(state);
 
     return false;
 }
@@ -319,24 +337,24 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_init(de
     state->formRanks[2].statistics = &state->formStatistics[DENSITY_ARGONAUT_FORM_ENCODED];
     state->formRanks[3].statistics = &state->formStatistics[DENSITY_ARGONAUT_FORM_PREDICTIONS];
 
-    uint8_t count = 0xFF;
+    uint8_t count = 0xff;
     do {
         state->dictionary.letters[count].letter = count;
         state->dictionary.letters[count].rank = count;
         state->dictionary.letterRanks[count] = &state->dictionary.letters[count];
     } while (count--);
 
-    uint16_t dCount = 0xFFFF;
+    uint16_t dCount = 0xffff;
     do {
         state->dictionary.wordsA[dCount].word.as_uint64_t = 0;
         state->dictionary.wordsA[dCount].usage = 0;
-        state->dictionary.wordsA[dCount].rank = 255;
+        state->dictionary.wordsA[dCount].rank = 0xff;
         state->dictionary.wordsB[dCount].word.as_uint64_t = 0;
         state->dictionary.wordsB[dCount].usage = 0;
-        state->dictionary.wordsB[dCount].rank = 255;
+        state->dictionary.wordsB[dCount].rank = 0xff;
     } while (dCount--);
 
-    count = 0xFF;
+    count = 0xff;
     do {
         state->dictionary.wordRanks[count] = NULL;
     } while (count--);
@@ -370,8 +388,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_continu
         return exitProcess(state, DENSITY_ARGONAUT_ENCODE_PROCESS_PREPARE_INPUT, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
 
     // Main loop
-    while(true) {
-        if(density_argonaut_encode_read_word(state))
+    while (true) {
+        if (density_argonaut_encode_read_word(state))
             goto prepare_input;
 
         prepare_output:
@@ -379,7 +397,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_continu
             return exitProcess(state, DENSITY_ARGONAUT_ENCODE_PROCESS_PREPARE_OUTPUT, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
 
         density_argonaut_encode_process_write_word(out, state);
-        state->wordCount ++;
+        state->wordCount++;
         state->lastLength = state->word.length;
         state->word.length = 0;
     }
@@ -411,8 +429,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_finish(
         state->readMemoryLocation = density_memory_teleport_read(in, density_memory_teleport_available(in));
 
     // Main loop
-    while(true) {
-        if(density_argonaut_encode_read_word(state))
+    while (true) {
+        if (density_argonaut_encode_read_word(state))
             goto finish;
 
         prepare_output:
@@ -420,20 +438,18 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_finish(
             return exitProcess(state, DENSITY_ARGONAUT_ENCODE_PROCESS_PREPARE_OUTPUT, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
 
         density_argonaut_encode_process_write_word(out, state);
-        state->wordCount ++;
+        state->wordCount++;
         state->lastLength = state->word.length;
         state->word.length = 0;
     }
 
     finish:
 
-    // Masking
-    if (state->word.length < 8)
-        state->word.as_uint64_t &= (0xFFFFFFFFFFFFFFFFllu >> (bitsizeof(density_argonaut_word) - state->word.length * bitsizeof(uint8_t)));
+    density_argonaut_encode_mask_word(state);
 
     // todo check output size
     density_argonaut_encode_process_write_word(out, state);
-    state->wordCount ++;
+    state->wordCount++;
 
     /*uint_fast64_t available = density_memory_teleport_available(in);
     state->readMemoryLocation = density_memory_teleport_read(in, available);

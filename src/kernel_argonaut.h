@@ -52,7 +52,7 @@
 #define DENSITY_ARGONAUT_PREFERRED_EFFICIENCY_CHECK_WORDS               (1 << DENSITY_ARGONAUT_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT)
 
 #define DENSITY_ARGONAUT_HASH32_MULTIPLIER                                   (uint32_t)0x9D6EF916lu
-#define DENSITY_ARGONAUT_HASH64_MULTIPLIER                                   (uint64_t)0x60D14D9FFD43CDE4llu
+#define DENSITY_ARGONAUT_HASH64_MULTIPLIER                                   (uint64_t)0x9D6EF9169D6EF917llu //0x60D14D9FFD43CDE4llu
 
 #define FORMAT(v)               0##v##llu
 
