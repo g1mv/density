@@ -66,7 +66,7 @@ typedef enum {
 
 typedef enum {
     DENSITY_ARGONAUT_FORM_PREDICTIONS,
-    DENSITY_ARGONAUT_FORM_RANK,
+    DENSITY_ARGONAUT_FORM_WORD_RANK,
     DENSITY_ARGONAUT_FORM_DICTIONARY,
     DENSITY_ARGONAUT_FORM_ENCODED
 } DENSITY_ARGONAUT_FORM;
@@ -99,10 +99,11 @@ typedef struct {
 
     uint_fast8_t shift;
     density_argonaut_signature *signature;
-    uint_fast32_t wordCount;
+    uint_fast64_t wordCount;
     uint_fast8_t efficiencyChecked;
 
     density_argonaut_encode_word word;
+    density_memory_location* readMemoryLocation;
     uint8_t lastByteHash;
 
     density_argonaut_form_statistics formStatistics[sizeof(DENSITY_ARGONAUT_FORM)];
