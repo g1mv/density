@@ -48,6 +48,7 @@
 #include <string.h>
 
 #define DENSITY_ARGONAUT_DICTIONARY_BITS 16
+#define DENSITY_ARGONAUT_DICTIONARY_MAX_WORD_LETTERS 8
 
 #pragma pack(push)
 #pragma pack(1)

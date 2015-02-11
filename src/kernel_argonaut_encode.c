@@ -273,12 +273,44 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_update_letter_rank(density_arg
     }
 }
 
-DENSITY_FORCE_INLINE bool density_argonaut_encode_read_word(density_argonaut_encode_state *restrict state) {
-    uint8_t letter = *state->readMemoryLocation->pointer;
-    uint_fast8_t startLength = state->word.length;
-    bool startWithSeparator = ((startLength ? *state->word.letters : letter) == (*state->dictionary.letterRanks)->letter);
+DENSITY_FORCE_INLINE uint_fast8_t density_argonaut_encode_find_position(uint64_t chain) {
+    if (chain) {
+        uint_fast32_t word_beginning = (uint_fast32_t) (chain & 0xFFFFFFFF);
+        if (word_beginning)
+            return __builtin_ctz(word_beginning) >> 3;
+        else {
+            uint_fast32_t word_end = (uint_fast32_t) (chain >> 32);
+            return 4 + (__builtin_ctz(word_end) >> 3);
+        }
+    } else
+        return (uint_fast8_t) sizeof(uint64_t);
+}
 
-    while (state->readMemoryLocation->available_bytes) {
+DENSITY_FORCE_INLINE uint_fast8_t density_argonaut_encode_find_first_separator_position(uint64_t *restrict chain, uint8_t *restrict separator) {
+    return density_argonaut_encode_find_position(density_argonaut_contains_value(*chain, *separator));
+}
+
+DENSITY_FORCE_INLINE bool density_argonaut_encode_read_word(density_argonaut_encode_state *restrict state) {
+    density_memory_location *in = state->readMemoryLocation;
+    uint8_t letter = *in->pointer;
+    uint_fast8_t startLength = state->word.length;
+    uint8_t* separator = &((*state->dictionary.letterRanks)->letter);
+    bool startWithSeparator = ((startLength ? *state->word.letters : letter) == *separator);
+
+    if (startWithSeparator || startLength)
+        goto slow_read;
+
+    if (in->available_bytes & 0xFFFFFFFFFFFFFFF8llu) {
+        state->word.as_uint64_t = *(uint64_t *) (in->pointer);
+        uint8_t firstPosition = density_argonaut_encode_find_first_separator_position(&state->word.as_uint64_t, separator);
+        state->word.length = (firstPosition == 8 ? (uint8_t) 8 : firstPosition + (uint8_t) 1);
+        in->pointer += state->word.length;
+        in->available_bytes -= state->word.length;
+        goto update_letter_stats;
+    }
+
+    slow_read:
+    while (in->available_bytes) {
         density_argonaut_dictionary_letter_entry *letterEntry = &state->dictionary.letters[letter];
 
         // Stop if the word started with the separator letter and a different letter has been read
@@ -287,8 +319,8 @@ DENSITY_FORCE_INLINE bool density_argonaut_encode_read_word(density_argonaut_enc
 
         // Store and read new letter
         state->word.letters[state->word.length++] = letter;
-        letter = *(state->readMemoryLocation->pointer + state->word.length);
-        state->readMemoryLocation->available_bytes--;
+        letter = *(++in->pointer);
+        in->available_bytes--;
 
         // Stop if word length has reached the maximum of 8 letters
         if (state->word.length == 8)
@@ -298,8 +330,6 @@ DENSITY_FORCE_INLINE bool density_argonaut_encode_read_word(density_argonaut_enc
         if (!startWithSeparator && !letterEntry->rank)
             goto update_letter_stats;
     }
-
-    state->readMemoryLocation->pointer += (state->word.length - startLength);
     return true;
 
     // Update letter usage and rank
@@ -315,8 +345,6 @@ DENSITY_FORCE_INLINE bool density_argonaut_encode_read_word(density_argonaut_enc
             }
         }
     }
-
-    state->readMemoryLocation->pointer += (state->word.length - startLength);
 
     // Masking
     density_argonaut_encode_mask_word(state);
