@@ -258,10 +258,25 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_mask_word(density_argonaut_enc
         state->word.as_uint64_t &= (0xFFFFFFFFFFFFFFFFllu >> (bitsizeof(density_argonaut_word) - state->word.length * bitsizeof(uint8_t)));
 }
 
+DENSITY_FORCE_INLINE void density_argonaut_encode_update_letter_rank(density_argonaut_dictionary_letter_entry *restrict letterEntry, density_argonaut_encode_state *restrict state) {
+    letterEntry->usage++;
+    if (letterEntry->rank) {
+        uint8_t lowerRank = letterEntry->rank;
+        uint8_t upperRank = lowerRank - (uint8_t) 1;
+        if (letterEntry->usage > state->dictionary.letterRanks[upperRank]->usage) {
+            density_argonaut_dictionary_letter_entry *swappedLetterEntry = state->dictionary.letterRanks[upperRank];
+            letterEntry->rank = upperRank;
+            state->dictionary.letterRanks[upperRank] = letterEntry;
+            swappedLetterEntry->rank = lowerRank;
+            state->dictionary.letterRanks[lowerRank] = swappedLetterEntry;
+        }
+    }
+}
+
 DENSITY_FORCE_INLINE bool density_argonaut_encode_read_word(density_argonaut_encode_state *restrict state) {
-    uint8_t letter = state->readMemoryLocation->pointer[0];
+    uint8_t letter = *state->readMemoryLocation->pointer;
     uint_fast8_t startLength = state->word.length;
-    bool startWithSeparator = ((startLength ? state->word.letters[0] : letter) == state->dictionary.letterRanks[0]->letter);
+    bool startWithSeparator = ((startLength ? *state->word.letters : letter) == (*state->dictionary.letterRanks)->letter);
 
     while (state->readMemoryLocation->available_bytes) {
         density_argonaut_dictionary_letter_entry *letterEntry = &state->dictionary.letters[letter];
@@ -272,7 +287,7 @@ DENSITY_FORCE_INLINE bool density_argonaut_encode_read_word(density_argonaut_enc
 
         // Store and read new letter
         state->word.letters[state->word.length++] = letter;
-        letter = state->readMemoryLocation->pointer[state->word.length];
+        letter = *(state->readMemoryLocation->pointer + state->word.length);
         state->readMemoryLocation->available_bytes--;
 
         // Stop if word length has reached the maximum of 8 letters
@@ -287,20 +302,16 @@ DENSITY_FORCE_INLINE bool density_argonaut_encode_read_word(density_argonaut_enc
     state->readMemoryLocation->pointer += (state->word.length - startLength);
     return true;
 
-    update_letter_stats:
     // Update letter usage and rank
-    for (uint_fast8_t count = 0; count < state->word.length; count++) {
-        density_argonaut_dictionary_letter_entry *letterEntry = &state->dictionary.letters[state->word.letters[count]];
-        letterEntry->usage++;
-        if (letterEntry->rank) {
-            uint8_t lowerRank = letterEntry->rank;
-            uint8_t upperRank = lowerRank - (uint8_t) 1;
-            if (letterEntry->usage > state->dictionary.letterRanks[upperRank]->usage) {
-                density_argonaut_dictionary_letter_entry *swappedLetterEntry = state->dictionary.letterRanks[upperRank];
-                letterEntry->rank = upperRank;
-                state->dictionary.letterRanks[upperRank] = letterEntry;
-                swappedLetterEntry->rank = lowerRank;
-                state->dictionary.letterRanks[lowerRank] = swappedLetterEntry;
+    update_letter_stats:
+    if (!(letter % 5)) {
+        density_argonaut_encode_update_letter_rank(&state->dictionary.letters[*state->word.letters], state);
+        if (state->word.length > 2) {
+            density_argonaut_encode_update_letter_rank(&state->dictionary.letters[*(state->word.letters + 2)], state);
+            if (state->word.length > 4) {
+                density_argonaut_encode_update_letter_rank(&state->dictionary.letters[*(state->word.letters + 4)], state);
+                if (state->word.length > 6)
+                    density_argonaut_encode_update_letter_rank(&state->dictionary.letters[*(state->word.letters + 6)], state);
             }
         }
     }
