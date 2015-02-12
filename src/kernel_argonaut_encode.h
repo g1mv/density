@@ -56,7 +56,9 @@
 #define DENSITY_ARGONAUT_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (256)
 
 #define density_argonaut_contains_zero(search64) (((search64) - 0x0101010101010101llu) & ~(search64) & 0x8080808080808080llu)
+#define density_argonaut_contains_zero32(search32) (((search32) - 0x01010101lu) & ~(search32) & 0x80808080lu)
 #define density_argonaut_contains_value(search64, value8) (density_argonaut_contains_zero((search64) ^ (~0llu / 255 * (value8))))
+#define density_argonaut_contains_value32(search32, value8) (density_argonaut_contains_zero32((search32) ^ (~0llu / 255 * (value8))))
 
 typedef enum {
     DENSITY_ARGONAUT_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
@@ -82,8 +84,8 @@ typedef struct {
 
 typedef struct {
     union {
-        uint64_t as_uint64_t;
-        uint8_t letters[sizeof(uint64_t)];
+        uint32_t as_uint32_t;
+        uint8_t letters[sizeof(uint32_t)];
     };
     uint8_t length;
 } density_argonaut_encode_word;
@@ -104,7 +106,7 @@ typedef struct {
 
     density_argonaut_encode_word word;
     density_memory_location* readMemoryLocation;
-    uint8_t lastByteHash;
+    uint32_t lastByteHash;
     uint8_t lastLength;
 
     density_argonaut_form_statistics formStatistics[sizeof(DENSITY_ARGONAUT_FORM)];

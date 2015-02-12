@@ -48,14 +48,14 @@
 #include <string.h>
 
 #define DENSITY_ARGONAUT_DICTIONARY_BITS 16
-#define DENSITY_ARGONAUT_DICTIONARY_MAX_WORD_LETTERS 8
+#define DENSITY_ARGONAUT_DICTIONARY_MAX_WORD_LETTERS 4
 
 #pragma pack(push)
 #pragma pack(1)
 typedef struct {
     union {
-        uint8_t letters[sizeof(uint64_t)];
-        uint64_t as_uint64_t;
+        uint8_t letters[DENSITY_ARGONAUT_DICTIONARY_MAX_WORD_LETTERS];
+        uint32_t as_uint32_t;
     };
 } density_argonaut_word;
 
@@ -99,7 +99,7 @@ typedef struct {
     density_argonaut_dictionary_unigram_prediction_entry unigramPredictions[1 << 8];
     density_argonaut_dictionary_bigram_prediction_entry bigramPredictions[1 << 16];
     density_argonaut_dictionary_fourgram_prediction_entry fourgramPredictions[1 << 16];
-    density_argonaut_dictionary_word_prediction_entry wordPredictions[1 << 8];
+    density_argonaut_dictionary_word_prediction_entry wordPredictions[1 << DENSITY_ARGONAUT_DICTIONARY_BITS];
 } density_argonaut_dictionary;
 #pragma pack(pop)
 
