@@ -26,7 +26,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 5/02/15 20:54
+ * 12/02/15 23:12
  *
  * ------------------
  * Argonaut algorithm
@@ -41,8 +41,8 @@
 
 #include "kernel_argonaut_dictionary.h"
 
-const density_argonaut_dictionary density_argonaut_empty_dictionary = {.letters = {0}, .letterRanks = {0}, .wordsA = {0}, .wordsB = {0}, .wordRanks = {0}, .unigramPredictions = {0}, .bigramPredictions = {0}, .fourgramPredictions = {0}, .wordPredictions = {0}};
+const density_argonaut_dictionary density_argonaut_empty_dictionary = {.entries = {{0}}, .prediction_entries = {{0}}};
 
-DENSITY_FORCE_INLINE void density_argonaut_dictionary_reset(density_argonaut_dictionary * dictionary) {
+DENSITY_FORCE_INLINE void density_argonaut_dictionary_reset(density_argonaut_dictionary *dictionary) {
     memcpy(dictionary, &density_argonaut_empty_dictionary, sizeof(density_argonaut_dictionary));
 }

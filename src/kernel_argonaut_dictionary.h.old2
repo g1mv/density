@@ -26,7 +26,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 12/02/15 23:09
+ * 5/02/15 20:54
  *
  * ------------------
  * Argonaut algorithm
@@ -47,8 +47,43 @@
 
 #include <string.h>
 
+#define DENSITY_ARGONAUT_DICTIONARY_BITS 16
+#define DENSITY_ARGONAUT_DICTIONARY_MAX_WORD_LETTERS 4
+
 #pragma pack(push)
-#pragma pack(4)
+#pragma pack(1)
+typedef struct {
+    union {
+        uint8_t letters[DENSITY_ARGONAUT_DICTIONARY_MAX_WORD_LETTERS];
+        uint32_t as_uint32_t;
+    };
+} density_argonaut_word;
+
+typedef struct {
+    density_argonaut_word next_word;
+} density_argonaut_dictionary_word_prediction_entry;
+
+typedef struct {
+    uint8_t next_letter;
+} density_argonaut_dictionary_unigram_prediction_entry;
+
+typedef struct {
+    uint8_t next_letter;
+    uint16_t next_bigram;
+} density_argonaut_dictionary_bigram_prediction_entry;
+
+typedef struct {
+    uint8_t next_letter;
+    uint32_t next_part;
+} density_argonaut_dictionary_fourgram_prediction_entry;
+
+typedef struct {
+    density_argonaut_word word;
+    uint8_t rank;
+    uint32_t usage;
+    uint32_t durability;
+} density_argonaut_dictionary_word_entry;
+
 typedef struct {
     uint8_t letter;
     uint32_t usage;
@@ -56,19 +91,15 @@ typedef struct {
 } density_argonaut_dictionary_letter_entry;
 
 typedef struct {
-    uint32_t chunk_a;
-    uint32_t chunk_b;
-} density_argonaut_dictionary_chunk_entry;
-
-typedef struct {
-    uint32_t next_chunk_prediction;
-} density_argonaut_dictionary_prediction_entry;
-
-typedef struct {
     density_argonaut_dictionary_letter_entry letters[1 << 8];
     density_argonaut_dictionary_letter_entry *letterRanks[1 << 8];
-    density_argonaut_dictionary_chunk_entry entries[1 << DENSITY_ARGONAUT_HASH_BITS];
-    density_argonaut_dictionary_prediction_entry prediction_entries[1 << DENSITY_ARGONAUT_HASH_BITS];
+    density_argonaut_dictionary_word_entry wordsA[1 << DENSITY_ARGONAUT_DICTIONARY_BITS];
+    density_argonaut_dictionary_word_entry wordsB[1 << DENSITY_ARGONAUT_DICTIONARY_BITS];
+    density_argonaut_dictionary_word_entry *wordRanks[1 << 8];
+    density_argonaut_dictionary_unigram_prediction_entry unigramPredictions[1 << 8];
+    density_argonaut_dictionary_bigram_prediction_entry bigramPredictions[1 << 16];
+    density_argonaut_dictionary_fourgram_prediction_entry fourgramPredictions[1 << 16];
+    density_argonaut_dictionary_word_prediction_entry wordPredictions[1 << DENSITY_ARGONAUT_DICTIONARY_BITS];
 } density_argonaut_dictionary;
 #pragma pack(pop)
 

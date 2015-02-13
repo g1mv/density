@@ -26,7 +26,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 12/02/15 23:09
+ * 5/02/15 20:54
  *
  * ------------------
  * Argonaut algorithm
@@ -39,39 +39,10 @@
  * Multiform compression algorithm
  */
 
-#ifndef DENSITY_ARGONAUT_DICTIONARY_H
-#define DENSITY_ARGONAUT_DICTIONARY_H
+#include "kernel_argonaut_dictionary.h.old2"
 
-#include "globals.h"
-#include "kernel_argonaut.h"
+const density_argonaut_dictionary density_argonaut_empty_dictionary = {.letters = {0}, .letterRanks = {0}, .wordsA = {0}, .wordsB = {0}, .wordRanks = {0}, .unigramPredictions = {0}, .bigramPredictions = {0}, .fourgramPredictions = {0}, .wordPredictions = {0}};
 
-#include <string.h>
-
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    uint8_t letter;
-    uint32_t usage;
-    uint8_t rank;
-} density_argonaut_dictionary_letter_entry;
-
-typedef struct {
-    uint32_t chunk_a;
-    uint32_t chunk_b;
-} density_argonaut_dictionary_chunk_entry;
-
-typedef struct {
-    uint32_t next_chunk_prediction;
-} density_argonaut_dictionary_prediction_entry;
-
-typedef struct {
-    density_argonaut_dictionary_letter_entry letters[1 << 8];
-    density_argonaut_dictionary_letter_entry *letterRanks[1 << 8];
-    density_argonaut_dictionary_chunk_entry entries[1 << DENSITY_ARGONAUT_HASH_BITS];
-    density_argonaut_dictionary_prediction_entry prediction_entries[1 << DENSITY_ARGONAUT_HASH_BITS];
-} density_argonaut_dictionary;
-#pragma pack(pop)
-
-void density_argonaut_dictionary_reset(density_argonaut_dictionary *);
-
-#endif
+DENSITY_FORCE_INLINE void density_argonaut_dictionary_reset(density_argonaut_dictionary * dictionary) {
+    memcpy(dictionary, &density_argonaut_empty_dictionary, sizeof(density_argonaut_dictionary));
+}
