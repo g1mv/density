@@ -41,7 +41,7 @@
 
 #include "kernel_argonaut_dictionary.h"
 
-const density_argonaut_dictionary density_argonaut_empty_dictionary = {.entries = {{0}}, .prediction_entries = {{0}}};
+const density_argonaut_dictionary density_argonaut_empty_dictionary = {.letters = {{0}}, .chunks = {{0}}, .predictions = {{0}}};
 
 DENSITY_FORCE_INLINE void density_argonaut_dictionary_reset(density_argonaut_dictionary *dictionary) {
     memcpy(dictionary, &density_argonaut_empty_dictionary, sizeof(density_argonaut_dictionary));
