@@ -53,6 +53,11 @@
 #define DENSITY_ARGONAUT_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (2 * (sizeof(density_argonaut_signature) + sizeof(uint32_t) * 4 * sizeof(density_argonaut_signature)))
 #define DENSITY_ARGONAUT_ENCODE_PROCESS_UNIT_SIZE                    (2 * 4 * sizeof(uint64_t))
 
+#define density_argonaut_contains_zero(search64) (((search64) - 0x0101010101010101llu) & ~(search64) & 0x8080808080808080llu)
+#define density_argonaut_contains_zero32(search32) (((search32) - 0x01010101lu) & ~(search32) & 0x80808080lu)
+#define density_argonaut_contains_value(search64, value8) (density_argonaut_contains_zero((search64) ^ (~0llu / 255 * (value8))))
+#define density_argonaut_contains_value32(search32, value8) (density_argonaut_contains_zero32((search32) ^ (~0llu / 255 * (value8))))
+
 typedef enum {
     DENSITY_ARGONAUT_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
     DENSITY_ARGONAUT_ENCODE_PROCESS_CHECK_SIGNATURE_STATE,
@@ -64,6 +69,7 @@ typedef enum {
     DENSITY_ARGONAUT_FORM_DICTIONARY_A,
     DENSITY_ARGONAUT_FORM_DICTIONARY_B,
     DENSITY_ARGONAUT_FORM_PREDICTIONS,
+    //DENSITY_ARGONAUT_FORM_HASH_RANKS,
 } DENSITY_ARGONAUT_FORM;
 
 typedef struct {
@@ -89,10 +95,11 @@ typedef struct {
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
-    density_argonaut_form_statistics formStatistics[sizeof(DENSITY_ARGONAUT_FORM)];
-    density_argonaut_form_rank formRanks[sizeof(DENSITY_ARGONAUT_FORM)];
+    density_argonaut_form_statistics formStatistics[4/*sizeof(DENSITY_ARGONAUT_FORM)*/];
+    density_argonaut_form_rank formRanks[4/*sizeof(DENSITY_ARGONAUT_FORM)*/];
 
     uint_fast16_t lastHash;
+    uint_fast32_t lastChunk;
 
     density_argonaut_dictionary dictionary;
 } density_argonaut_encode_state;

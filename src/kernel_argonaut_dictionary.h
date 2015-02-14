@@ -56,26 +56,31 @@ typedef struct {
 } density_argonaut_dictionary_letter_entry;
 
 typedef struct {
+    uint8_t next_letter_prediction;
+    //uint32_t next_special_prediction;
+} density_argonaut_dictionary_letter_prediction_entry;
+
+typedef struct {
+    uint16_t usage;
+    uint8_t rank;
+} density_argonaut_dictionary_hash_entry;
+
+typedef struct {
     uint32_t chunk_a;
-    //uint32_t usage_a;
-    //uint32_t durability_a;
-    //uint8_t rank_a;
     uint32_t chunk_b;
-    //uint32_t usage_b;
-    //uint32_t durability_b;
-    //uint8_t rank_b;
 } density_argonaut_dictionary_chunk_entry;
 
 typedef struct {
     uint32_t next_chunk_prediction;
-} density_argonaut_dictionary_prediction_entry;
+    //uint32_t next_special_prediction;
+} density_argonaut_dictionary_chunk_prediction_entry;
 
 typedef struct {
     density_argonaut_dictionary_letter_entry letters[1 << bitsizeof(uint8_t)];
-    density_argonaut_dictionary_letter_entry *letterRanks[1 << 8];
+    density_argonaut_dictionary_letter_entry *letterRanks[1 << bitsizeof(uint8_t)];
     density_argonaut_dictionary_chunk_entry chunks[1 << DENSITY_ARGONAUT_HASH_BITS];
-    //density_argonaut_dictionary_chunk_entry *chunkRanks[1 << 8];
-    density_argonaut_dictionary_prediction_entry predictions[1 << DENSITY_ARGONAUT_HASH_BITS];
+    density_argonaut_dictionary_letter_prediction_entry letterPredictions[1 << bitsizeof(uint8_t)];
+    density_argonaut_dictionary_chunk_prediction_entry predictions[1 << DENSITY_ARGONAUT_HASH_BITS];
 } density_argonaut_dictionary;
 #pragma pack(pop)
 
