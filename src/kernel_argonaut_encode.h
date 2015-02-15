@@ -69,7 +69,7 @@ typedef enum {
     DENSITY_ARGONAUT_FORM_DICTIONARY_A,
     DENSITY_ARGONAUT_FORM_DICTIONARY_B,
     DENSITY_ARGONAUT_FORM_PREDICTIONS,
-    //DENSITY_ARGONAUT_FORM_HASH_RANKS,
+    //DENSITY_ARGONAUT_FORM_PREDICTIONS_64,
 } DENSITY_ARGONAUT_FORM;
 
 typedef struct {
@@ -100,6 +100,8 @@ typedef struct {
 
     uint_fast16_t lastHash;
     uint_fast32_t lastChunk;
+    uint_fast16_t beforeLastHash;
+    //uint_fast16_t lastHash64;
 
     density_argonaut_dictionary dictionary;
 } density_argonaut_encode_state;

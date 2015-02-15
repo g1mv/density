@@ -76,11 +76,18 @@ typedef struct {
 } density_argonaut_dictionary_chunk_prediction_entry;
 
 typedef struct {
+    uint32_t next_chunk_prediction;
+} density_argonaut_dictionary_chunk64_prediction_entry;
+
+typedef struct {
     density_argonaut_dictionary_letter_entry letters[1 << bitsizeof(uint8_t)];
     density_argonaut_dictionary_letter_entry *letterRanks[1 << bitsizeof(uint8_t)];
+    //density_argonaut_dictionary_letter_entry hashes[1 << bitsizeof(uint8_t)];
+    //density_argonaut_dictionary_letter_entry *hashRanks[1 << bitsizeof(uint8_t)];
     density_argonaut_dictionary_chunk_entry chunks[1 << DENSITY_ARGONAUT_HASH_BITS];
-    density_argonaut_dictionary_letter_prediction_entry letterPredictions[1 << bitsizeof(uint8_t)];
+    //density_argonaut_dictionary_letter_prediction_entry letterPredictions[1 << bitsizeof(uint8_t)];
     density_argonaut_dictionary_chunk_prediction_entry predictions[1 << DENSITY_ARGONAUT_HASH_BITS];
+    density_argonaut_dictionary_chunk64_prediction_entry predictions64[1 << DENSITY_ARGONAUT_HASH_BITS];
 } density_argonaut_dictionary;
 #pragma pack(pop)
 

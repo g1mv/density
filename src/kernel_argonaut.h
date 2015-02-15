@@ -351,12 +351,20 @@ typedef enum {
     {BINARY_TO_UINT(00010110000), 11},\
 }
 
+#define DENSITY_ARGONAUT_FORM_CODES {\
+    {BINARY_TO_UINT(0), 1},\
+    {BINARY_TO_UINT(10), 2},\
+    {BINARY_TO_UINT(110), 3},\
+    {BINARY_TO_UINT(111), 3},\
+}
+
 typedef struct {
     uint_fast32_t code;
     uint_fast8_t bitSize;
 } density_argonaut_huffman_code;
 
 static const density_argonaut_huffman_code density_argonaut_huffman_codes[256] = DENSITY_ARGONAUT_HUFFMAN_CODES;
+static const density_argonaut_huffman_code density_argonaut_form_codes[4] = DENSITY_ARGONAUT_FORM_CODES;
 
 typedef enum {
     DENSITY_ARGONAUT_ENTITY_PREDICTIONS = 0,
