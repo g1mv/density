@@ -258,7 +258,7 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
                 density_argonaut_encode_update_letter_rank(&state->dictionary.letters[letterC], state);
                 density_argonaut_encode_update_letter_rank(&state->dictionary.letters[letterD], state);
             } else {
-                found->usage++;
+                //found->usage++;
                 //found->usage_b++;
                 //found->durability_b++;
                 density_argonaut_huffman_code code = density_argonaut_encode_fetch_form_rank_for_use(state, DENSITY_ARGONAUT_FORM_DICTIONARY_B);
@@ -292,7 +292,7 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
             *found_a = chunk;
             //}
         } else {
-            found->usage++;
+            //found->usage++;
             /*density_argonaut_dictionary_hash_entry* hashEntry = &state->dictionary.hashes[*hash];
             hashEntry->usage ++;
             bool exit = hashEntry->rank < 255;
@@ -427,7 +427,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_init(de
     state->formStatistics[DENSITY_ARGONAUT_FORM_DICTIONARY_B].rank = 2;
     state->formStatistics[DENSITY_ARGONAUT_FORM_PREDICTIONS].usage = 0;
     state->formStatistics[DENSITY_ARGONAUT_FORM_PREDICTIONS].rank = 3;
-    state->formStatistics[DENSITY_ARGONAUT_FORM_PREDICTIONS].usage = 0;
+    //state->formStatistics[DENSITY_ARGONAUT_FORM_PREDICTIONS].usage = 0;
     //state->formStatistics[DENSITY_ARGONAUT_FORM_PREDICTIONS_64].rank = 4;
     //state->formStatistics[DENSITY_ARGONAUT_FORM_PREDICTIONS_64].usage = 0;
 

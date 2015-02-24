@@ -74,7 +74,7 @@ typedef struct {
     uint32_t chunk_a;
     uint32_t chunk_b;
     //density_argonaut_dictionary_secondary_chunk_entry* alt;
-    uint64_t usage;
+    //uint64_t usage;
 } density_argonaut_dictionary_chunk_entry;
 
 typedef struct {
