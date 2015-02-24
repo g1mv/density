@@ -153,6 +153,8 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_update_letter_rank(density_arg
     }
 }*/
 
+//int i = 0;
+
 DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location *restrict out, uint32_t *restrict hash, const uint32_t chunk, density_argonaut_encode_state *restrict state) {
     DENSITY_ARGONAUT_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(chunk));
     //density_argonaut_dictionary_chunk_prediction_entry* predictions = &(state->dictionary.predictions[state->lastHash]);
@@ -165,15 +167,17 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
     } else {
         predictedChunk = &(predictions->next_chunk_prediction);
     }*/
-    uint32_t chunk1;
+    //uint32_t chunk1;
 
     if (*predictedChunk ^ chunk) {
         density_argonaut_dictionary_chunk_entry *found = &state->dictionary.chunks[*hash];
         uint32_t *found_a = &found->chunk_a;
         if (*found_a ^ chunk) {
+            //uint32_t hashalt = *hash;//((*hash >> (16 - DENSITY_SECONDARY_HASH_BITS)) ^ *hash) & ((1 << DENSITY_SECONDARY_HASH_BITS) - 1);//&found->hash8;// (*hash >> 8) ^ *hash;
+            //uint32_t *found_b = &(state->dictionary.altchunks[hashalt].chunk);
             uint32_t *found_b = &found->chunk_b;
+            //uint32_t* found_b = &(found->alt->chunk);
             if (*found_b ^ chunk) {
-
                 density_argonaut_huffman_code code = density_argonaut_encode_fetch_form_rank_for_use(state, DENSITY_ARGONAUT_FORM_ENCODED);
                 density_argonaut_encode_push_to_signature(out, state, code.code, code.bitSize);
 
@@ -254,15 +258,17 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
                 density_argonaut_encode_update_letter_rank(&state->dictionary.letters[letterC], state);
                 density_argonaut_encode_update_letter_rank(&state->dictionary.letters[letterD], state);
             } else {
+                found->usage++;
                 //found->usage_b++;
                 //found->durability_b++;
                 density_argonaut_huffman_code code = density_argonaut_encode_fetch_form_rank_for_use(state, DENSITY_ARGONAUT_FORM_DICTIONARY_B);
-                density_argonaut_encode_push_to_signature(out, state, code.code, code.bitSize);
+                density_argonaut_encode_push_to_signature(out, state, code.code, code.bitSize/* + DENSITY_SECONDARY_HASH_BITS*/);
                 //density_argonaut_encode_push_to_signature(out, state, 0x0, (uint8_t) (DENSITY_ARGONAUT_HASH_BITS - 8));
                 *(uint16_t *) (out->pointer) = DENSITY_LITTLE_ENDIAN_16(*hash);
                 out->pointer += sizeof(uint16_t);
-                /**(out->pointer) = (uint8_t) (*hash & 0xFF);
-                out->pointer += sizeof(uint8_t);*/
+                //*(out->pointer) = found->alt->hash;//(uint8_t) ((*hash >> 8) ^ *hash);
+                //out->pointer += sizeof(uint8_t);
+                //i++;
 
                 /*uint8_t letter1 = (uint8_t)(*hash & 0xFF);
                 uint8_t letter2 = (uint8_t)(*hash >> 8);
@@ -286,6 +292,7 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
             *found_a = chunk;
             //}
         } else {
+            found->usage++;
             /*density_argonaut_dictionary_hash_entry* hashEntry = &state->dictionary.hashes[*hash];
             hashEntry->usage ++;
             bool exit = hashEntry->rank < 255;
@@ -435,7 +442,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_init(de
         state->dictionary.letters[count].letter = count;
         state->dictionary.letters[count].rank = count;
         state->dictionary.letterRanks[count] = &state->dictionary.letters[count];
+        //state->dictionary.altchunks[count].hash = count;
     } while (count--);
+
+    /*uint_fast16_t dcount = (1 << DENSITY_SECONDARY_HASH_BITS);
+    do {
+        uint16_t hash = (uint16_t)((dcount >> (16 - DENSITY_SECONDARY_HASH_BITS)) ^ dcount);
+        state->dictionary.chunks[dcount].alt = &(state->dictionary.altchunks[hash]);
+    } while (dcount--);*/
 
     /*count = 0xff;
     do {
@@ -453,6 +467,12 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_init(de
     do {
         state->dictionary.hashes[diCount].usage = 0;
         state->dictionary.hashes[diCount].rank = 255;
+    } while (diCount--);*/
+
+    /*uint16_t diCount = 0xffff;
+    do {
+        uint16_t hash = (uint16_t)((diCount >> (16 - DENSITY_SECONDARY_HASH_BITS)) ^ diCount);
+        state->dictionary.chunks[diCount].alt = &(state->dictionary.altchunks[hash]);
     } while (diCount--);*/
 
     state->lastHash = 0;

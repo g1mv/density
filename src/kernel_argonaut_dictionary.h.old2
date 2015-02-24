@@ -98,7 +98,7 @@ typedef struct {
     density_argonaut_dictionary_word_entry *wordRanks[1 << 8];
     density_argonaut_dictionary_unigram_prediction_entry unigramPredictions[1 << 8];
     density_argonaut_dictionary_bigram_prediction_entry bigramPredictions[1 << 16];
-    density_argonaut_dictionary_fourgram_prediction_entry fourgramPredictions[1 << 16];
+    density_argonaut_dictionary_fourgram_prediction_entry fourgramPredictions[1 << 15];
     density_argonaut_dictionary_word_prediction_entry wordPredictions[1 << DENSITY_ARGONAUT_DICTIONARY_BITS];
 } density_argonaut_dictionary;
 #pragma pack(pop)
