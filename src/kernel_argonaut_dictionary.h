@@ -89,6 +89,14 @@ typedef struct {
 //#define DENSITY_SECONDARY_HASH_BITS 16
 
 typedef struct {
+    uint32_t word;
+    uint8_t length;
+} density_argonaut_word;
+
+#define DICT_BITS 12
+#define DCT_BITS 8
+
+typedef struct {
     density_argonaut_dictionary_letter_entry letters[1 << bitsizeof(uint8_t)];
     density_argonaut_dictionary_letter_entry *letterRanks[1 << bitsizeof(uint8_t)];
     //density_argonaut_dictionary_letter_entry hashes[1 << bitsizeof(uint8_t)];
@@ -98,6 +106,8 @@ typedef struct {
     //density_argonaut_dictionary_letter_prediction_entry letterPredictions[1 << bitsizeof(uint8_t)];
     density_argonaut_dictionary_chunk_prediction_entry predictions[1 << DENSITY_ARGONAUT_HASH_BITS];
     //density_argonaut_dictionary_chunk64_prediction_entry predictions64[1 << DENSITY_ARGONAUT_HASH_BITS];
+    //density_argonaut_word dict[1 << DICT_BITS];
+    uint16_t dct[1 << DCT_BITS];
 } density_argonaut_dictionary;
 #pragma pack(pop)
 
