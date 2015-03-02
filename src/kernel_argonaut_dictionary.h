@@ -95,6 +95,7 @@ typedef struct {
 
 #define DICT_BITS 12
 #define DCT_BITS 8
+#define DCTL_BITS 4
 
 typedef struct {
     density_argonaut_dictionary_letter_entry letters[1 << bitsizeof(uint8_t)];
@@ -108,6 +109,7 @@ typedef struct {
     //density_argonaut_dictionary_chunk64_prediction_entry predictions64[1 << DENSITY_ARGONAUT_HASH_BITS];
     //density_argonaut_word dict[1 << DICT_BITS];
     uint16_t dct[1 << DCT_BITS];
+    //uint8_t dctl[1 << DCTL_BITS];
 } density_argonaut_dictionary;
 #pragma pack(pop)
 

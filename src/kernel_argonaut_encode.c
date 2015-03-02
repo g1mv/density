@@ -114,6 +114,7 @@ DENSITY_FORCE_INLINE density_argonaut_huffman_code density_argonaut_encode_fetch
 
     uint8_t rank = stats->rank;
     if (rank) {
+        //if (!(stats->usage & 0xFF)) {
         density_argonaut_form_rank *rankCurrent = &state->formRanks[rank];
         density_argonaut_form_rank *rankUpper = &state->formRanks[rank - 1];
         if (density_unlikely(stats->usage > rankUpper->statistics->usage)) {
@@ -123,6 +124,7 @@ DENSITY_FORCE_INLINE density_argonaut_huffman_code density_argonaut_encode_fetch
             rankUpper->statistics = stats;
             rankCurrent->statistics = replaced;
         }
+        //}
     }
 
     stats->usage++;
@@ -131,15 +133,17 @@ DENSITY_FORCE_INLINE density_argonaut_huffman_code density_argonaut_encode_fetch
 
 DENSITY_FORCE_INLINE void density_argonaut_encode_update_letter_rank(density_argonaut_dictionary_letter_entry *restrict letterEntry, density_argonaut_encode_state *restrict state) {
     letterEntry->usage++;
-    if (letterEntry->rank) {
-        uint8_t lowerRank = letterEntry->rank;
-        uint8_t upperRank = lowerRank - (uint8_t) 1;
-        if (density_unlikely(letterEntry->usage > state->dictionary.letterRanks[upperRank]->usage)) {
-            density_argonaut_dictionary_letter_entry *swappedLetterEntry = state->dictionary.letterRanks[upperRank];
-            letterEntry->rank = upperRank;
-            state->dictionary.letterRanks[upperRank] = letterEntry;
-            swappedLetterEntry->rank = lowerRank;
-            state->dictionary.letterRanks[lowerRank] = swappedLetterEntry;
+    if (!(letterEntry->usage & 0xF)) {  // Check once every 16 times
+        if (letterEntry->rank) {
+            uint8_t lowerRank = letterEntry->rank;
+            uint8_t upperRank = lowerRank - (uint8_t) 1;
+            if (density_unlikely(letterEntry->usage > state->dictionary.letterRanks[upperRank]->usage)) {
+                density_argonaut_dictionary_letter_entry *swappedLetterEntry = state->dictionary.letterRanks[upperRank];
+                letterEntry->rank = upperRank;
+                state->dictionary.letterRanks[upperRank] = letterEntry;
+                swappedLetterEntry->rank = lowerRank;
+                state->dictionary.letterRanks[lowerRank] = swappedLetterEntry;
+            }
         }
     }
 }
@@ -942,15 +946,15 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
                 const uint32_t chunkRS16 = chunk >> 16;
                 const uint32_t chunkRS24 = chunk >> 24;
 
-                const uint16_t bigramP = (state->lastChunk >> 24) | ((chunk & 0xFF) << 8);
-                const uint16_t bigramA = chunk & 0xFFFF;
-                const uint16_t bigramB = chunkRS8 & 0xFFFF;
-                const uint16_t bigramC = chunkRS16 & 0xFFFF;
+                const uint16_t bigramP = (uint16_t) ((state->lastChunk >> 24) | ((chunk & 0xFF) << 8));
+                const uint16_t bigramA = (uint16_t) (chunk & 0xFFFF);
+                const uint16_t bigramB = (uint16_t) (chunkRS8 & 0xFFFF);
+                const uint16_t bigramC = (uint16_t) (chunkRS16 & 0xFFFF);
 
-                const uint8_t hashP = ((bigramP * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCT_BITS));
-                const uint8_t hashA = ((bigramA * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCT_BITS));
-                const uint8_t hashB = ((bigramB * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCT_BITS));
-                const uint8_t hashC = ((bigramC * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCT_BITS));
+                const uint8_t hashP = (uint8_t) (((bigramP * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCT_BITS)));
+                const uint8_t hashA = (uint8_t) (((bigramA * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCT_BITS)));
+                const uint8_t hashB = (uint8_t) (((bigramB * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCT_BITS)));
+                const uint8_t hashC = (uint8_t) (((bigramC * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCT_BITS)));
 
                 density_argonaut_encode_push_to_signature(out, state, 0x1, 2);
                 if (state->dictionary.dct[hashA] == bigramA) {
@@ -970,9 +974,29 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
 
                     const uint8_t letterA = (uint8_t) (chunk & 0xFF);
                     const uint8_t letterB = (uint8_t) (chunkRS8 & 0xFF);
+                    //printf("%c%c", letterA, letterB);
 
-                    const density_argonaut_dictionary_letter_entry* lA = &state->dictionary.letters[letterA];
-                    const density_argonaut_dictionary_letter_entry* lB = &state->dictionary.letters[letterB];
+                    /*const uint8_t hashLA = (uint8_t) (((letterA * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCTL_BITS)));
+                    const uint8_t hashLB = (uint8_t) (((letterB * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCTL_BITS)));
+
+                    density_argonaut_encode_push_to_signature(out, state, 0x1, 1);
+                    if (state->dictionary.dctl[hashLA] == letterA) {
+                        density_argonaut_encode_push_to_signature(out, state, hashLA, DCTL_BITS);
+                    } else {
+                        state->dictionary.dctl[hashLA] = letterA;
+                        *(out->pointer) = letterA;
+                        out->pointer++;
+                    }
+                    if (state->dictionary.dctl[hashLB] == letterB) {
+                        density_argonaut_encode_push_to_signature(out, state, hashLB, DCTL_BITS);
+                    } else {
+                        state->dictionary.dctl[hashLB] = letterB;
+                        *(out->pointer) = letterB;
+                        out->pointer++;
+                    }*/
+
+                    const density_argonaut_dictionary_letter_entry *lA = &state->dictionary.letters[letterA];
+                    density_argonaut_dictionary_letter_entry *lB = &state->dictionary.letters[letterB];
 
                     const density_argonaut_huffman_code codeA = density_argonaut_huffman_codes[lA->rank];
                     const density_argonaut_huffman_code codeB = density_argonaut_huffman_codes[lB->rank];
@@ -1034,9 +1058,29 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
 
                     const uint8_t letterC = (uint8_t) (chunkRS16 & 0xFF);
                     const uint8_t letterD = (uint8_t) (chunkRS24 & 0xFF);
+                    //printf("%c%c", letterC, letterD);
 
-                    const density_argonaut_dictionary_letter_entry* lC = &state->dictionary.letters[letterC];
-                    const density_argonaut_dictionary_letter_entry* lD = &state->dictionary.letters[letterD];
+                    /*const uint8_t hashLC = (uint8_t) (((letterC * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCTL_BITS)));
+                    const uint8_t hashLD = (uint8_t) (((letterD * DENSITY_ARGONAUT_HASH32_MULTIPLIER) >> (32 - DCTL_BITS)));
+
+                    density_argonaut_encode_push_to_signature(out, state, 0x1, 1);
+                    if (state->dictionary.dctl[hashLC] == letterC) {
+                        density_argonaut_encode_push_to_signature(out, state, hashLC, DCTL_BITS);
+                    } else {
+                        state->dictionary.dctl[hashLC] = letterC;
+                        *(out->pointer) = letterC;
+                        out->pointer++;
+                    }
+                    if (state->dictionary.dctl[hashLD] == letterD) {
+                        density_argonaut_encode_push_to_signature(out, state, hashLD, DCTL_BITS);
+                    } else {
+                        state->dictionary.dctl[hashLC] = letterD;
+                        *(out->pointer) = letterD;
+                        out->pointer++;
+                    }*/
+
+                    density_argonaut_dictionary_letter_entry *lC = &state->dictionary.letters[letterC];
+                    const density_argonaut_dictionary_letter_entry *lD = &state->dictionary.letters[letterD];
 
                     density_argonaut_huffman_code codeC = density_argonaut_huffman_codes[lC->rank];
                     density_argonaut_huffman_code codeD = density_argonaut_huffman_codes[lD->rank];
