@@ -151,7 +151,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_bigram(density_memory_loca
     }
 
     DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE(out, &state->signatureData, DENSITY_LION_SIGNATURE_FLAG_BIGRAM_PLAIN, 1);
-    *(uint16_t *) out->pointer = bigram;
+    *(uint16_t *) out->pointer = DENSITY_LITTLE_ENDIAN_16(bigram);
     out->pointer += sizeof(uint16_t);
 
     density_lion_encode_update_unigram_model(state, unigram_a, unigram_found_a);
