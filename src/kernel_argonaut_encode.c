@@ -112,8 +112,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_argonaut_encode_prepare
 DENSITY_FORCE_INLINE density_argonaut_huffman_code density_argonaut_encode_fetch_form_rank_for_use(density_argonaut_encode_state *state, DENSITY_ARGONAUT_FORM form) {
     density_argonaut_form_statistics *stats = &state->formStatistics[form];
 
-    uint8_t rank = stats->rank;
-    if (rank) {
+    const uint8_t rank = stats->rank;
+    if (density_unlikely(rank)) {
         //if (!(stats->usage & 0xFF)) {
         density_argonaut_form_rank *rankCurrent = &state->formRanks[rank];
         density_argonaut_form_rank *rankUpper = &state->formRanks[rank - 1];
@@ -125,10 +125,12 @@ DENSITY_FORCE_INLINE density_argonaut_huffman_code density_argonaut_encode_fetch
             rankCurrent->statistics = replaced;
         }
         //}
+        stats->usage++;
+        return density_argonaut_form_codes[rank];
+    } else {
+        stats->usage++;
+        return density_argonaut_form_codes[0];
     }
-
-    stats->usage++;
-    return density_argonaut_form_codes[rank];
 }
 
 DENSITY_FORCE_INLINE void density_argonaut_encode_update_letter_rank(density_argonaut_dictionary_letter_entry *restrict letterEntry, density_argonaut_encode_state *restrict state) {
@@ -849,6 +851,9 @@ void hcompress(uint32_t *bitword, uint8_t *shift, listnode_t *node) {
 //    }
 }
 
+uint_fast64_t count = 0;
+uint_fast64_t distance = 0;
+
 DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location *restrict out, uint32_t *restrict hash, const uint32_t chunk, density_argonaut_encode_state *restrict state) {
     DENSITY_ARGONAUT_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(chunk));
     //density_argonaut_dictionary_chunk_prediction_entry* predictions = &(state->dictionary.predictions[state->lastHash]);
@@ -995,7 +1000,7 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
                         out->pointer++;
                     }*/
 
-                    const density_argonaut_dictionary_letter_entry *lA = &state->dictionary.letters[letterA];
+                    /****const density_argonaut_dictionary_letter_entry *lA = &state->dictionary.letters[letterA];
                     density_argonaut_dictionary_letter_entry *lB = &state->dictionary.letters[letterB];
 
                     const density_argonaut_huffman_code codeA = density_argonaut_huffman_codes[lA->rank];
@@ -1004,7 +1009,7 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
                     density_argonaut_encode_push_to_signature(out, state, codeA.code | (codeB.code << codeA.bitSize), codeA.bitSize + codeB.bitSize);
 
                     //density_argonaut_encode_update_letter_rank(lA, state);
-                    density_argonaut_encode_update_letter_rank(lB, state);
+                    density_argonaut_encode_update_letter_rank(lB, state);****/
 
                     //i++;
 
@@ -1039,6 +1044,13 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
 
                     //*(uint16_t *) (out->pointer) = bigramA;
                     //out->pointer += sizeof(uint16_t);
+
+                    /*distance += (count - state->dictionary.indexes[letterA]) + (count + 1 - state->dictionary.indexes[letterB]);
+
+                    state->dictionary.indexes[letterA] = count;
+                    state->dictionary.indexes[letterB] = count + 1;
+
+                    count += 2;*/
                 }
 
                 if (state->dictionary.dct[hashC] == bigramC) {
@@ -1079,7 +1091,7 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
                         out->pointer++;
                     }*/
 
-                    density_argonaut_dictionary_letter_entry *lC = &state->dictionary.letters[letterC];
+                    /****density_argonaut_dictionary_letter_entry *lC = &state->dictionary.letters[letterC];
                     const density_argonaut_dictionary_letter_entry *lD = &state->dictionary.letters[letterD];
 
                     density_argonaut_huffman_code codeC = density_argonaut_huffman_codes[lC->rank];
@@ -1088,7 +1100,7 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
                     density_argonaut_encode_push_to_signature(out, state, codeC.code | (codeD.code << codeC.bitSize), codeC.bitSize + codeD.bitSize);
 
                     density_argonaut_encode_update_letter_rank(lC, state);
-                    //density_argonaut_encode_update_letter_rank(lD, state);
+                    //density_argonaut_encode_update_letter_rank(lD, state);****/
 
                     //i++;
 
@@ -1123,6 +1135,13 @@ DENSITY_FORCE_INLINE void density_argonaut_encode_kernel(density_memory_location
 
                     //*(uint16_t *) (out->pointer) = bigramC;
                     //out->pointer += sizeof(uint16_t);
+
+                    /*distance += (count - state->dictionary.indexes[letterC]) + (count + 1 - state->dictionary.indexes[letterD]);
+
+                    state->dictionary.indexes[letterC] = count;
+                    state->dictionary.indexes[letterD] = count + 1;
+
+                    count += 2;*/
                 }
 
                 state->dictionary.dct[hashP] = bigramP;

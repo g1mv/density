@@ -110,6 +110,7 @@ typedef struct {
     //density_argonaut_word dict[1 << DICT_BITS];
     uint16_t dct[1 << DCT_BITS];
     //uint8_t dctl[1 << DCTL_BITS];
+    uint64_t indexes[1 << bitsizeof(uint8_t)];
 } density_argonaut_dictionary;
 #pragma pack(pop)
 
