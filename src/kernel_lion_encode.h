@@ -95,6 +95,9 @@ typedef struct {
     uint_fast32_t lastHash;
     uint_fast32_t lastChunk;
 
+    uint_fast64_t localSignature;
+    uint_fast8_t localShift;
+
     density_lion_dictionary dictionary;
 } density_lion_encode_state;
 #pragma pack(pop)

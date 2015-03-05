@@ -51,8 +51,9 @@
 #pragma pack(4)
 typedef struct {
     uint8_t unigram;
-    uint8_t* previousUnigram;
-} density_lion_dictionary_unigram_entry;
+    uint8_t rank;
+    void *previousUnigram;
+} density_lion_dictionary_unigram_node;
 
 typedef struct {
     uint16_t bigram;
@@ -68,9 +69,10 @@ typedef struct {
 } density_lion_dictionary_chunk_prediction_entry;
 
 typedef struct {
-    uint8_t distinctUnigrams;
-    density_lion_dictionary_unigram_entry unigramFrieze[1 << density_bitsizeof(uint8_t)];
-    density_lion_dictionary_unigram_entry *unigramsIndex[1 << density_bitsizeof(uint8_t)];
+    uint8_t nextAvailableUnigram;
+    density_lion_dictionary_unigram_node unigramsPool[1 << density_bitsizeof(uint8_t)];
+    density_lion_dictionary_unigram_node *lastUnigramNode;
+    density_lion_dictionary_unigram_node *unigramsIndex[1 << density_bitsizeof(uint8_t)];
     density_lion_dictionary_bigram_entry bigrams[1 << density_bitsizeof(uint8_t)];
     density_lion_dictionary_chunk_entry chunks[1 << DENSITY_LION_CHUNK_HASH_BITS];
     density_lion_dictionary_chunk_prediction_entry predictions[1 << DENSITY_LION_CHUNK_HASH_BITS];

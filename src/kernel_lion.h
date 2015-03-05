@@ -64,7 +64,7 @@ typedef enum {
 
 #define DENSITY_LION_HASH32_MULTIPLIER                                  (uint32_t)0x9D6EF916lu
 #define DENSITY_LION_CHUNK_HASH_BITS                                    16
-#define DENSITY_LION_DIGRAM_HASH_BITS                                   8
+#define DENSITY_LION_BIGRAM_HASH_BITS                                   8
 
 #define DENSITY_LION_HASH_ALGORITHM(hash32, value32)                    hash32 = value32 * DENSITY_LION_HASH32_MULTIPLIER;\
                                                                         hash32 = (hash32 >> (32 - DENSITY_LION_CHUNK_HASH_BITS));
