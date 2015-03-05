@@ -26,10 +26,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 06/12/13 20:23
+ * 06/12/13 20:20
  *
  * -----------------
- * Mandala algorithm
+ * Cheetah algorithm
  * -----------------
  *
  * Author(s)
@@ -40,10 +40,31 @@
  * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#include "kernel_mandala_dictionary.h"
+#ifndef DENSITY_CHEETAH_DICTIONARY_H
+#define DENSITY_CHEETAH_DICTIONARY_H
 
-const density_mandala_dictionary density_mandala_empty_dictionary = {.entries = {{0}}, .prediction_entries = {{0}}};
+#include "globals.h"
+#include "kernel_cheetah.h"
 
-DENSITY_FORCE_INLINE void density_mandala_dictionary_reset(density_mandala_dictionary *dictionary) {
-    memcpy(dictionary, &density_mandala_empty_dictionary, sizeof(density_mandala_dictionary));
-}
+#include <string.h>
+
+#pragma pack(push)
+#pragma pack(4)
+typedef struct {
+    uint32_t chunk_a;
+    uint32_t chunk_b;
+} density_cheetah_dictionary_entry;
+
+typedef struct {
+    uint32_t next_chunk_prediction;
+} density_cheetah_dictionary_prediction_entry;
+
+typedef struct {
+    density_cheetah_dictionary_entry entries[1 << DENSITY_CHEETAH_HASH_BITS];
+    density_cheetah_dictionary_prediction_entry prediction_entries[1 << DENSITY_CHEETAH_HASH_BITS];
+} density_cheetah_dictionary;
+#pragma pack(pop)
+
+void density_cheetah_dictionary_reset(density_cheetah_dictionary *);
+
+#endif

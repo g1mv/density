@@ -41,7 +41,7 @@
 
 #include "kernel_lion_dictionary.h"
 
-const density_lion_dictionary density_lion_empty_dictionary = {.distinctMonograms = 0, .frieze  = {{0}}, .monogramsIndex = {{0}}, .bigrams = {{0}}, .chunks = {{0}}};
+const density_lion_dictionary density_lion_empty_dictionary = {.distinctUnigrams = 0, .unigramFrieze  = {{0}}, .bigrams = {{0}}, .chunks = {{0}}};
 
 DENSITY_FORCE_INLINE void density_lion_dictionary_reset(density_lion_dictionary *dictionary) {
     memcpy(dictionary, &density_lion_empty_dictionary, sizeof(density_lion_dictionary));

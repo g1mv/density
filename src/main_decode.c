@@ -80,8 +80,8 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_tel
             density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, mem_alloc(sizeof(density_chameleon_decode_state)), (void *) density_chameleon_decode_init, (void *) density_chameleon_decode_continue, (void *) density_chameleon_decode_finish, mem_alloc);
             break;
 
-        case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
-            density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, mem_alloc(sizeof(density_mandala_decode_state)), (void *) density_mandala_decode_init, (void *) density_mandala_decode_continue, (void *) density_mandala_decode_finish, mem_alloc);
+        case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
+            density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, mem_alloc(sizeof(density_cheetah_decode_state)), (void *) density_cheetah_decode_init, (void *) density_cheetah_decode_continue, (void *) density_cheetah_decode_finish, mem_alloc);
             break;
 
         default:

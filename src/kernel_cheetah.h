@@ -26,10 +26,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 07/12/13 15:40
+ * 06/12/13 20:10
  *
  * -----------------
- * Mandala algorithm
+ * Cheetah algorithm
  * -----------------
  *
  * Author(s)
@@ -40,53 +40,30 @@
  * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#ifndef DENSITY_MANDALA_DECODE_H
-#define DENSITY_MANDALA_DECODE_H
+#ifndef DENSITY_CHEETAH_H
+#define DENSITY_CHEETAH_H
 
-#include "kernel_mandala_dictionary.h"
-#include "kernel_mandala.h"
-#include "block.h"
-#include "kernel_decode.h"
-#include "density_api.h"
-#include "memory_teleport.h"
-#include "block_footer.h"
-#include "main_footer.h"
-#include "block_mode_marker.h"
-#include "kernel_mandala_encode.h"
-#include "main_header.h"
+#include "globals.h"
 
-#define DENSITY_MANDALA_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
+#define DENSITY_CHEETAH_PREFERRED_BLOCK_SIGNATURES_SHIFT                    12
+#define DENSITY_CHEETAH_PREFERRED_BLOCK_SIGNATURES                          (1 << DENSITY_CHEETAH_PREFERRED_BLOCK_SIGNATURES_SHIFT)
+
+#define DENSITY_CHEETAH_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT         8
+#define DENSITY_CHEETAH_PREFERRED_EFFICIENCY_CHECK_SIGNATURES               (1 << DENSITY_CHEETAH_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT)
+
+#define DENSITY_CHEETAH_HASH_BITS                                           16
+#define DENSITY_CHEETAH_HASH_MULTIPLIER                                     (uint32_t)2641295638lu
+
+#define DENSITY_CHEETAH_HASH_ALGORITHM(hash32, value32)                     hash32 = value32 * DENSITY_CHEETAH_HASH_MULTIPLIER;\
+                                                                            hash32 = (hash32 >> (32 - DENSITY_CHEETAH_HASH_BITS));
 
 typedef enum {
-    DENSITY_MANDALA_DECODE_PROCESS_CHECK_SIGNATURE_STATE,
-    DENSITY_MANDALA_DECODE_PROCESS_READ_SIGNATURE,
-    DENSITY_MANDALA_DECODE_PROCESS_DECOMPRESS_BODY,
-} DENSITY_MANDALA_DECODE_PROCESS;
+    DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED = 0x0,
+    DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A = 0x1,
+    DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B = 0x2,
+    DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK = 0x3,
+} DENSITY_CHEETAH_SIGNATURE_FLAG;
 
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    DENSITY_MANDALA_DECODE_PROCESS process;
-
-    density_main_header_parameters parameters;
-    uint_fast64_t resetCycle;
-
-    density_mandala_signature signature;
-    uint_fast32_t bodyLength;
-    uint_fast32_t shift;
-    uint_fast32_t signaturesCount;
-    uint_fast8_t efficiencyChecked;
-
-    uint_fast64_t endDataOverhead;
-
-    uint_fast16_t lastHash;
-
-    density_mandala_dictionary dictionary;
-} density_mandala_decode_state;
-#pragma pack(pop)
-
-DENSITY_KERNEL_DECODE_STATE density_mandala_decode_init(density_mandala_decode_state *, const density_main_header_parameters parameters, const uint_fast32_t);
-DENSITY_KERNEL_DECODE_STATE density_mandala_decode_continue(density_memory_teleport *, density_memory_location *, density_mandala_decode_state *, const density_bool);
-DENSITY_KERNEL_DECODE_STATE density_mandala_decode_finish(density_memory_teleport *, density_memory_location *, density_mandala_decode_state *);
+typedef uint64_t                                                            density_cheetah_signature;
 
 #endif
