@@ -26,67 +26,80 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/10/13 12:27
+ * 06/12/13 20:20
  *
- * -------------------
- * Chameleon algorithm
- * -------------------
+ * --------------
+ * Lion algorithm
+ * --------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
  *
  * Description
- * Hash based superfast kernel
+ * Multiform compression algorithm
  */
 
-#ifndef DENSITY_CHAMELEON_DECODE_H
-#define DENSITY_CHAMELEON_DECODE_H
+#ifndef DENSITY_LION_ENCODE_H
+#define DENSITY_LION_ENCODE_H
 
-#include "kernel_chameleon_dictionary.h"
-#include "kernel_chameleon.h"
+#include "kernel_lion_dictionary.h"
+#include "kernel_lion.h"
 #include "block.h"
-#include "kernel_decode.h"
+#include "kernel_encode.h"
 #include "density_api.h"
-#include "block_mode_marker.h"
-#include "block_header.h"
-#include "kernel_chameleon_encode.h"
-#include "density_api_data_structures.h"
-#include "block_footer.h"
-#include "main_footer.h"
-#include "main_header.h"
+#include "memory_location.h"
+#include "memory_teleport.h"
 
-#define DENSITY_CHAMELEON_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
+#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (2 * (sizeof(density_lion_signature) + sizeof(uint32_t) * 4 * sizeof(density_lion_signature)))
+#define DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE                    (2 * 4 * sizeof(uint64_t))
 
 typedef enum {
-    DENSITY_CHAMELEON_DECODE_PROCESS_CHECK_SIGNATURE_STATE,
-    DENSITY_CHAMELEON_DECODE_PROCESS_READ_SIGNATURE,
-    DENSITY_CHAMELEON_DECODE_PROCESS_DECOMPRESS_BODY,
-} DENSITY_CHAMELEON_DECODE_PROCESS;
+    DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
+    DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE,
+    DENSITY_LION_ENCODE_PROCESS_READ_CHUNK,
+} DENSITY_LION_ENCODE_PROCESS;
+
+typedef enum {
+    DENSITY_LION_FORM_PREDICTIONS,
+    DENSITY_LION_FORM_DICTIONARY_A,
+    DENSITY_LION_FORM_DICTIONARY_B,
+    DENSITY_LION_FORM_SECONDARY,
+} DENSITY_LION_FORM;
+
+typedef struct {
+    uint32_t usage;
+    uint8_t rank;
+} density_lion_form_statistics;
+
+typedef struct {
+    density_lion_form_statistics *statistics;
+} density_lion_form_rank;
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_CHAMELEON_DECODE_PROCESS process;
+    DENSITY_LION_ENCODE_PROCESS process;
 
-    density_main_header_parameters parameters;
+#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
     uint_fast64_t resetCycle;
+#endif
 
-    density_chameleon_signature signature;
-    uint_fast32_t bodyLength;
     uint_fast32_t shift;
+    density_lion_signature * signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
-    uint_fast64_t endDataOverhead;
+    density_lion_form_statistics formStatistics[4];
+    density_lion_form_rank formRanks[4];
 
-    density_chameleon_dictionary dictionary;
-} density_chameleon_decode_state;
+    uint_fast32_t lastHash;
+    uint_fast32_t lastChunk;
+
+    density_lion_dictionary dictionary;
+} density_lion_encode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *, const density_main_header_parameters, const uint_fast32_t);
-
-DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_continue(density_memory_teleport *, density_memory_location *, density_chameleon_decode_state *);
-
-DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish(density_memory_teleport *, density_memory_location *, density_chameleon_decode_state *);
-
+DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(density_lion_encode_state *);
+DENSITY_KERNEL_ENCODE_STATE density_lion_encode_continue(density_memory_teleport *, density_memory_location *, density_lion_encode_state *, const density_bool);
+DENSITY_KERNEL_ENCODE_STATE density_lion_encode_finish(density_memory_teleport *, density_memory_location *, density_lion_encode_state *);
 #endif

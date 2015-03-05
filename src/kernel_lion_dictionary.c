@@ -26,46 +26,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 5/02/15 20:57
+ * 12/02/15 23:12
  *
- * ------------------
- * Argonaut algorithm
- * ------------------
+ * --------------
+ * Lion algorithm
+ * --------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
  *
  * Description
- * Rank, predictions and dictionary hash algorithm
+ * Multiform compression algorithm
  */
 
-#include "kernel_argonaut_signature.h"
+#include "kernel_lion_dictionary.h"
 
-DENSITY_FORCE_INLINE uint_fast8_t density_kernel_argonaut_signature_read(density_argonaut_signature signature, uint_fast8_t shift) {
-    uint_fast8_t group = shift >> 6;
-    uint_fast8_t localShift = shift & 63;
-    if(density_likely(localShift < 62)) {
-        return ((signature.elements[group] >> localShift) & 0x7);
-    } else if(localShift == 62) {
-        return (((signature.elements[group] >> localShift) & 0x3) | ((signature.elements[group + 1] & 0x1) << 2));
-    } else if(localShift == 63) {
-        return (((signature.elements[group] >> localShift) & 0x1) | ((signature.elements[group + 1] & 0x3) << 1));
-    }
-}
+const density_lion_dictionary density_lion_empty_dictionary = {.distinctMonograms = 0, .frieze  = {{0}}, .monogramsIndex = {{0}}, .bigrams = {{0}}, .chunks = {{0}}};
 
-DENSITY_FORCE_INLINE void density_kernel_argonaut_signature_write(density_argonaut_signature signature, uint_fast8_t shift, uint_fast8_t value) {
-    uint_fast8_t group = shift >> 6;
-    uint_fast8_t localShift = shift & 63;
-    if(density_likely(localShift < 62)) {
-        signature.elements[group] |= (value << localShift);
-        return;
-    } else if(localShift == 62) {
-        signature.elements[group] |= (value << localShift);
-        signature.elements[group + 1] |= (value >> 2);
-        return;
-    } else if(localShift == 63) {
-        signature.elements[group] |= (value << localShift);
-        signature.elements[group + 1] |= (value >> 1);
-        return;
-    }
+DENSITY_FORCE_INLINE void density_lion_dictionary_reset(density_lion_dictionary *dictionary) {
+    memcpy(dictionary, &density_lion_empty_dictionary, sizeof(density_lion_dictionary));
 }

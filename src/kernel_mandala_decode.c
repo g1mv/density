@@ -169,7 +169,7 @@ DENSITY_FORCE_INLINE const DENSITY_MANDALA_SIGNATURE_FLAG density_mandala_decode
 }
 
 DENSITY_FORCE_INLINE void density_mandala_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_mandala_decode_state *restrict state) {
-    while (state->shift != bitsizeof(density_mandala_signature)) {
+    while (state->shift != density_bitsizeof(density_mandala_signature)) {
         density_mandala_decode_kernel(in, out, density_mandala_decode_get_signature_flag(state), state);
         state->shift += 2;
     }
@@ -231,7 +231,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_continue
     // Body was read properly, process
     density_mandala_decode_process_data(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= state->bodyLength;
-    out->available_bytes -= bitsizeof(density_mandala_signature) * sizeof(uint16_t);
+    out->available_bytes -= density_bitsizeof(density_mandala_signature) * sizeof(uint16_t);
 
     // New loop
     goto check_signature_state;
@@ -275,14 +275,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_mandala_decode_finish(d
     // Body was read properly, process
     density_mandala_decode_process_data(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= state->bodyLength;
-    out->available_bytes -= bitsizeof(density_mandala_signature) * sizeof(uint16_t);
+    out->available_bytes -= density_bitsizeof(density_mandala_signature) * sizeof(uint16_t);
 
     // New loop
     goto check_signature_state;
 
     // Try to read and process the body, step by step
     step_by_step:
-    while (state->shift != bitsizeof(density_mandala_signature)) {
+    while (state->shift != density_bitsizeof(density_mandala_signature)) {
         uint32_t hash = 0;
         uint32_t chunk;
 

@@ -102,7 +102,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_check_
     DENSITY_KERNEL_ENCODE_STATE returnState;
 
     switch (state->shift) {
-        case bitsizeof(density_chameleon_signature):
+        case density_bitsizeof(density_chameleon_signature):
             if ((returnState = density_chameleon_encode_prepare_new_block(out, state)))
                 return returnState;
             break;
@@ -135,7 +135,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_process_chunk(uint64_t *chunk
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     density_chameleon_encode_kernel(out, hash, (uint32_t) (*chunk & 0xFFFFFFFF), state);
 #endif
-    density_chameleon_encode_kernel(out, hash, (uint32_t) (*chunk >> bitsizeof(uint32_t)), state);
+    density_chameleon_encode_kernel(out, hash, (uint32_t) (*chunk >> density_bitsizeof(uint32_t)), state);
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     density_chameleon_encode_kernel(out, hash, (uint32_t)(*chunk & 0xFFFFFFFF), state);
 #endif
@@ -252,7 +252,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish
 
     // Read step by step
     step_by_step:
-    while (state->shift != bitsizeof(density_chameleon_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
+    while (state->shift != density_bitsizeof(density_chameleon_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
         density_chameleon_encode_kernel(out, &hash, *(uint32_t *) (readMemoryLocation->pointer), state);
         readMemoryLocation->pointer += sizeof(uint32_t);
         readMemoryLocation->available_bytes -= sizeof(uint32_t);

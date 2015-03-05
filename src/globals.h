@@ -75,7 +75,7 @@
 #define density_likely(x)                         __builtin_expect(!!(x), 1)
 #define density_unlikely(x)                       __builtin_expect(!!(x), 0)
 
-#define bitsizeof(x) (8 * sizeof(x))
+#define density_bitsizeof(x) (8 * sizeof(x))
 
 
 /**********************************************************************************************************************

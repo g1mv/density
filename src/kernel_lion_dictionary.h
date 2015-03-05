@@ -26,31 +26,57 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 5/02/15 20:57
+ * 12/02/15 23:09
  *
- * ------------------
- * Argonaut algorithm
- * ------------------
+ * --------------
+ * Lion algorithm
+ * --------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
  *
  * Description
- * Rank, predictions and dictionary hash algorithm
+ * Multiform compression algorithm
  */
 
-#ifndef DENSITY_ARGONAUT_SIGNATURE_H
-#define DENSITY_ARGONAUT_SIGNATURE_H
-
-#include <stdint.h>
+#ifndef DENSITY_LION_DICTIONARY_H
+#define DENSITY_LION_DICTIONARY_H
 
 #include "globals.h"
+#include "kernel_lion.h"
+
+#include <string.h>
+
+#pragma pack(push)
+#pragma pack(4)
+typedef struct {
+    uint8_t monogram;
+    uint8_t* previousMonogram;
+} density_lion_dictionary_monogram_entry;
 
 typedef struct {
-    uint_fast64_t elements[3];
-} density_argonaut_signature;
+    uint16_t bigram;
+} density_lion_dictionary_bigram_entry;
 
-uint_fast8_t density_kernel_argonaut_signature_read(density_argonaut_signature, uint_fast8_t);
-void density_kernel_argonaut_signature_write(density_argonaut_signature, uint_fast8_t, uint_fast8_t);
+typedef struct {
+    uint32_t chunk_a;
+    uint32_t chunk_b;
+} density_lion_dictionary_chunk_entry;
+
+typedef struct {
+    uint32_t next_chunk_prediction;
+} density_lion_dictionary_chunk_prediction_entry;
+
+typedef struct {
+    uint8_t distinctMonograms;
+    density_lion_dictionary_monogram_entry frieze[1 << density_bitsizeof(uint8_t)];
+    density_lion_dictionary_monogram_entry* monogramsIndex[1 << density_bitsizeof(uint8_t)];
+    density_lion_dictionary_bigram_entry bigrams[1 << density_bitsizeof(uint8_t)];
+    density_lion_dictionary_chunk_entry chunks[1 << DENSITY_LION_CHUNK_HASH_BITS];
+    density_lion_dictionary_chunk_prediction_entry predictions[1 << DENSITY_LION_CHUNK_HASH_BITS];
+} density_lion_dictionary;
+#pragma pack(pop)
+
+void density_lion_dictionary_reset(density_lion_dictionary *);
 
 #endif

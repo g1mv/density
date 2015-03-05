@@ -102,7 +102,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_check_st
     DENSITY_KERNEL_ENCODE_STATE returnState;
 
     switch (state->shift) {
-        case bitsizeof(density_mandala_signature):
+        case density_bitsizeof(density_mandala_signature):
             if ((returnState = density_mandala_encode_prepare_new_block(out, state)))
                 return returnState;
             break;
@@ -271,7 +271,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_mandala_encode_finish(d
 
     // Read step by step
     step_by_step:
-    while (state->shift != bitsizeof(density_mandala_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
+    while (state->shift != density_bitsizeof(density_mandala_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
         density_mandala_encode_kernel(out, &hash, *(uint32_t *) (readMemoryLocation->pointer), state);
         readMemoryLocation->pointer += sizeof(uint32_t);
         readMemoryLocation->available_bytes -= sizeof(uint32_t);

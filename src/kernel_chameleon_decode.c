@@ -127,7 +127,7 @@ DENSITY_FORCE_INLINE const bool density_chameleon_decode_test_compressed(density
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
-    while (state->shift != bitsizeof(density_chameleon_signature)) {
+    while (state->shift != density_bitsizeof(density_chameleon_signature)) {
         density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state), state);
         state->shift++;
     }
@@ -178,7 +178,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_contin
 
     // Calculate body size
     decompress_body:
-    state->bodyLength = (uint_fast32_t) (sizeof(uint32_t) * bitsizeof(density_chameleon_signature) - __builtin_popcountll(state->signature) * (sizeof(uint32_t) - sizeof(uint16_t)));
+    state->bodyLength = (uint_fast32_t) (sizeof(uint32_t) * density_bitsizeof(density_chameleon_signature) - __builtin_popcountll(state->signature) * (sizeof(uint32_t) - sizeof(uint16_t)));
 
     // Try to read the body
     if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, state->bodyLength, state->endDataOverhead)))
@@ -187,7 +187,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_contin
     // Body was read properly, process
     density_chameleon_decode_process_data(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= state->bodyLength;
-    out->available_bytes -= bitsizeof(density_chameleon_signature) * sizeof(uint32_t);
+    out->available_bytes -= density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t);
 
     // New loop
     goto check_signature_state;
@@ -222,7 +222,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish
 
     // Calculate body size
     decompress_body:
-    state->bodyLength = (uint_fast32_t) (sizeof(uint32_t) * bitsizeof(density_chameleon_signature) - __builtin_popcountll(state->signature) * (sizeof(uint32_t) - sizeof(uint16_t)));
+    state->bodyLength = (uint_fast32_t) (sizeof(uint32_t) * density_bitsizeof(density_chameleon_signature) - __builtin_popcountll(state->signature) * (sizeof(uint32_t) - sizeof(uint16_t)));
 
     // Try to read the body
     if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, state->bodyLength, state->endDataOverhead)))
@@ -231,14 +231,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_finish
     // Body was read properly, process
     density_chameleon_decode_process_data(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= state->bodyLength;
-    out->available_bytes -= bitsizeof(density_chameleon_signature) * sizeof(uint32_t);
+    out->available_bytes -= density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t);
 
     // New loop
     goto check_signature_state;
 
     // Try to read and process the body, step by step
     step_by_step:
-    while (state->shift != bitsizeof(density_chameleon_signature)) {
+    while (state->shift != density_bitsizeof(density_chameleon_signature)) {
         if (density_chameleon_decode_test_compressed(state)) {
             uint16_t chunk;
             if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
