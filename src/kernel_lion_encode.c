@@ -248,10 +248,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(densit
     state->formStatistics[DENSITY_LION_FORM_SECONDARY].usage = 0;
     state->formStatistics[DENSITY_LION_FORM_SECONDARY].rank = 0;
 
-    state->formRanks[0].statistics = &state->formStatistics[DENSITY_LION_FORM_SECONDARY];
+    state->formRanks[3].statistics = &state->formStatistics[DENSITY_LION_FORM_PREDICTIONS];
     state->formRanks[1].statistics = &state->formStatistics[DENSITY_LION_FORM_DICTIONARY_A];
     state->formRanks[2].statistics = &state->formStatistics[DENSITY_LION_FORM_DICTIONARY_B];
-    state->formRanks[3].statistics = &state->formStatistics[DENSITY_LION_FORM_PREDICTIONS];
+    state->formRanks[0].statistics = &state->formStatistics[DENSITY_LION_FORM_SECONDARY];
 
     /*uint_fast8_t count = 0xFF;
     do {

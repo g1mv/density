@@ -99,6 +99,8 @@ typedef struct {
 } density_lion_encode_state;
 #pragma pack(pop)
 
+void density_lion_encode_push_to_signature(density_memory_location *, density_lion_encode_state *, uint64_t, uint_fast8_t);
+
 DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(density_lion_encode_state *);
 DENSITY_KERNEL_ENCODE_STATE density_lion_encode_continue(density_memory_teleport *, density_memory_location *, density_lion_encode_state *, const density_bool);
 DENSITY_KERNEL_ENCODE_STATE density_lion_encode_finish(density_memory_teleport *, density_memory_location *, density_lion_encode_state *);
