@@ -43,24 +43,28 @@
 #define DENSITY_LION_H
 
 #include <stdint.h>
-#include "globals.h"
-
-#include "globals.h"
+#include "kernel.h"
 
 typedef enum {
-    DENSITY_LION_SIGNATURE_FLAG_PREDICTED = 0x0,
-    DENSITY_LION_SIGNATURE_FLAG_MAP_A = 0x1,
-    DENSITY_LION_SIGNATURE_FLAG_MAP_B = 0x2,
-    DENSITY_LION_SIGNATURE_FLAG_CHUNK = 0x3,
+    DENSITY_LION_FORM_CHUNK_PREDICTIONS,
+    DENSITY_LION_FORM_CHUNK_DICTIONARY_A,
+    DENSITY_LION_FORM_CHUNK_DICTIONARY_B,
+    DENSITY_LION_FORM_SECONDARY_ACCESS,
+    DENSITY_LION_NUMBER_OF_FORMS,
+} DENSITY_LION_FORM;
+
+typedef enum {
+    DENSITY_LION_SIGNATURE_FLAG_BIGRAM_DICTIONARY = 0x0,
+    DENSITY_LION_SIGNATURE_FLAG_BIGRAM_SECONDARY = 0x1,
+    DENSITY_LION_SIGNATURE_FLAG_BIGRAM_ENCODED = 0x0,
+    DENSITY_LION_SIGNATURE_FLAG_BIGRAM_PLAIN = 0x1,
 } DENSITY_LION_SIGNATURE_FLAG;
 
 #define DENSITY_LION_PREFERRED_BLOCK_SIGNATURES_SHIFT                   12
 #define DENSITY_LION_PREFERRED_BLOCK_SIGNATURES                         (1 << DENSITY_LION_PREFERRED_BLOCK_SIGNATURES_SHIFT)
-#define DENSITY_LION_PREFERRED_BLOCK_WORDS                              (1 << DENSITY_LION_PREFERRED_BLOCK_SIGNATURES_SHIFT)
 
 #define DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT        8
 #define DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_SIGNATURES              (1 << DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT)
-#define DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_WORDS                   (1 << DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT)
 
 #define DENSITY_LION_HASH32_MULTIPLIER                                  (uint32_t)0x9D6EF916lu
 #define DENSITY_LION_CHUNK_HASH_BITS                                    16
@@ -141,9 +145,7 @@ typedef struct {
     uint_fast8_t bitLength;
 } density_lion_entropy_code;
 
-static const density_lion_entropy_code density_lion_form_entropy_codes[4] = DENSITY_LION_FORM_ENTROPY_CODES;
+static const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUMBER_OF_FORMS] = DENSITY_LION_FORM_ENTROPY_CODES;
 static const density_lion_entropy_code density_lion_index_entropy_codes[32] = DENSITY_LION_INDEX_ENTROPY_CODES;
-
-typedef uint64_t density_lion_signature;
 
 #endif

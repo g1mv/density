@@ -50,7 +50,7 @@
 #include "memory_location.h"
 #include "memory_teleport.h"
 
-#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (2 * (sizeof(density_lion_signature) + sizeof(uint32_t) * 4 * sizeof(density_lion_signature)))
+#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (2 * (sizeof(density_kernel_signature) + sizeof(uint32_t) * 4 * sizeof(density_kernel_signature)))
 #define DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE                    (2 * 4 * sizeof(uint64_t))
 
 typedef enum {
@@ -58,13 +58,6 @@ typedef enum {
     DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE,
     DENSITY_LION_ENCODE_PROCESS_READ_CHUNK,
 } DENSITY_LION_ENCODE_PROCESS;
-
-typedef enum {
-    DENSITY_LION_FORM_PREDICTIONS,
-    DENSITY_LION_FORM_DICTIONARY_A,
-    DENSITY_LION_FORM_DICTIONARY_B,
-    DENSITY_LION_FORM_SECONDARY,
-} DENSITY_LION_FORM;
 
 typedef struct {
     uint32_t usage;
@@ -84,25 +77,20 @@ typedef struct {
     uint_fast64_t resetCycle;
 #endif
 
-    uint_fast32_t shift;
-    density_lion_signature * signature;
-    uint_fast32_t signaturesCount;
+    density_kernel_signature_data signatureData;
     uint_fast8_t efficiencyChecked;
 
-    density_lion_form_statistics formStatistics[4];
-    density_lion_form_rank formRanks[4];
+    density_lion_form_statistics formStatistics[DENSITY_LION_NUMBER_OF_FORMS];
+    density_lion_form_rank formRanks[DENSITY_LION_NUMBER_OF_FORMS];
 
     uint_fast32_t lastHash;
     uint_fast32_t lastChunk;
-
-    uint_fast64_t localSignature;
-    uint_fast8_t localShift;
 
     density_lion_dictionary dictionary;
 } density_lion_encode_state;
 #pragma pack(pop)
 
-void density_lion_encode_push_to_signature(density_memory_location *, density_lion_encode_state *, uint64_t, uint_fast8_t);
+//void density_lion_encode_push_to_signature(density_memory_location *, density_lion_encode_state *, uint64_t, uint_fast8_t);
 
 DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(density_lion_encode_state *);
 DENSITY_KERNEL_ENCODE_STATE density_lion_encode_continue(density_memory_teleport *, density_memory_location *, density_lion_encode_state *, const density_bool);
