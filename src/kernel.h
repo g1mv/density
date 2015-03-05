@@ -62,7 +62,7 @@ typedef struct {
     (shift) += (bits);\
 }
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#define density_kernel_encode_push_to_signature_no_check(signatureData, content, bits) {\
+#define DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_NO_CHECK(signature, shift, content, bits) {\
     (signature) |= ((content) << ((56 - ((shift) & ~0x7)) + ((shift) & 0x7)));\
     (shift) += (bits);\
 }

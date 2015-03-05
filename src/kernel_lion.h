@@ -73,6 +73,8 @@ typedef enum {
 #define DENSITY_LION_HASH_ALGORITHM(hash32, value32)                    hash32 = value32 * DENSITY_LION_HASH32_MULTIPLIER;\
                                                                         hash32 = (hash32 >> (32 - DENSITY_LION_CHUNK_HASH_BITS));
 
+#define DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram)                      (uint8_t) ((((bigram) * DENSITY_LION_HASH32_MULTIPLIER) >> (32 - DENSITY_LION_BIGRAM_HASH_BITS)));
+
 #define FORMAT(v)               0##v##llu
 
 #define ISOLATE(b, p)           ((FORMAT(b) / p) & 0x1)
@@ -141,7 +143,7 @@ typedef enum {
 }
 
 typedef struct {
-    uint_fast32_t value;
+    uint_fast8_t value;
     uint_fast8_t bitLength;
 } density_lion_entropy_code;
 
