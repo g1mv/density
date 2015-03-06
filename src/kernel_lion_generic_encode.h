@@ -65,7 +65,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
 
     check_signature_state:
     if (DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD > out->available_bytes)
-        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
+        return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT;
+    if ((returnState = density_lion_encode_check_state(out, state)))
+        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
 
     // Try to read a complete chunk unit
     read_chunk:
@@ -85,7 +87,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
 
     // Read step by step
     step_by_step:
-    while (state->signatureData.shift != density_bitsizeof(density_kernel_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
+    while (state->shift != density_bitsizeof(density_lion_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
         density_lion_encode_kernel(out, &hash, *(uint32_t *) (readMemoryLocation->pointer), state);
         readMemoryLocation->pointer += sizeof(uint32_t);
         readMemoryLocation->available_bytes -= sizeof(uint32_t);
@@ -104,10 +106,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
 
     // Marker for decode loop exit
     const density_lion_entropy_code code = density_lion_encode_fetch_form_rank_for_use(state, DENSITY_LION_FORM_CHUNK_DICTIONARY_A);
-    DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE(out, &state->signatureData, code.value, code.bitLength);
-    DENSITY_KERNEL_ENCODE_PUSH_PROXIMITY_SIGNATURE_TO_MEMORY(&state->signatureData);
+    density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
 
     // Copy the remaining bytes
+    *(state->signature) = state->proximitySignature;
     density_memory_teleport_copy_remaining(in, out);
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;

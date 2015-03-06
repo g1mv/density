@@ -50,8 +50,8 @@
 #include "memory_location.h"
 #include "memory_teleport.h"
 
-#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (2 * (sizeof(density_kernel_signature) + sizeof(uint32_t) * 4 * sizeof(density_kernel_signature)))
-#define DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE                    (2 * 4 * sizeof(uint64_t))
+#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (2 * (sizeof(density_lion_signature) + sizeof(uint32_t) * 4 * sizeof(density_lion_signature)))
+#define DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE                    (1 * 2 * sizeof(uint64_t))
 
 typedef enum {
     DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
@@ -77,7 +77,10 @@ typedef struct {
     uint_fast64_t resetCycle;
 #endif
 
-    density_kernel_signature_data signatureData;
+    uint_fast32_t shift;
+    density_lion_signature proximitySignature;
+    density_lion_signature * signature;
+    uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
     density_lion_form_statistics formStatistics[DENSITY_LION_NUMBER_OF_FORMS];

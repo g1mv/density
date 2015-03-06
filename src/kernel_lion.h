@@ -43,7 +43,6 @@
 #define DENSITY_LION_H
 
 #include <stdint.h>
-#include "kernel.h"
 
 typedef enum {
     DENSITY_LION_FORM_CHUNK_PREDICTIONS,
@@ -106,48 +105,13 @@ typedef enum {
     {BINARY_TO_UINT(111), 3},\
 }
 
-// Golomb-Rice codes, k = 3, 32 values
-#define DENSITY_LION_INDEX_ENTROPY_CODES {\
-    {BINARY_TO_UINT(0000), 4},\
-    {BINARY_TO_UINT(0001), 4},\
-    {BINARY_TO_UINT(0010), 4},\
-    {BINARY_TO_UINT(0011), 4},\
-    {BINARY_TO_UINT(0100), 4},\
-    {BINARY_TO_UINT(0101), 4},\
-    {BINARY_TO_UINT(0110), 4},\
-    {BINARY_TO_UINT(0111), 4},\
-    {BINARY_TO_UINT(10000), 5},\
-    {BINARY_TO_UINT(10001), 5},\
-    {BINARY_TO_UINT(10010), 5},\
-    {BINARY_TO_UINT(10011), 5},\
-    {BINARY_TO_UINT(10100), 5},\
-    {BINARY_TO_UINT(10101), 5},\
-    {BINARY_TO_UINT(10110), 5},\
-    {BINARY_TO_UINT(10111), 5},\
-    {BINARY_TO_UINT(110000), 6},\
-    {BINARY_TO_UINT(110001), 6},\
-    {BINARY_TO_UINT(110010), 6},\
-    {BINARY_TO_UINT(110011), 6},\
-    {BINARY_TO_UINT(110100), 6},\
-    {BINARY_TO_UINT(110101), 6},\
-    {BINARY_TO_UINT(110110), 6},\
-    {BINARY_TO_UINT(110111), 6},\
-    {BINARY_TO_UINT(1110000), 7},\
-    {BINARY_TO_UINT(1110001), 7},\
-    {BINARY_TO_UINT(1110010), 7},\
-    {BINARY_TO_UINT(1110011), 7},\
-    {BINARY_TO_UINT(1110100), 7},\
-    {BINARY_TO_UINT(1110101), 7},\
-    {BINARY_TO_UINT(1110110), 7},\
-    {BINARY_TO_UINT(1110111), 7},\
-}
-
 typedef struct {
     uint_fast8_t value;
     uint_fast8_t bitLength;
 } density_lion_entropy_code;
 
 static const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUMBER_OF_FORMS] = DENSITY_LION_FORM_ENTROPY_CODES;
-static const density_lion_entropy_code density_lion_index_entropy_codes[32] = DENSITY_LION_INDEX_ENTROPY_CODES;
+
+typedef uint64_t                                                            density_lion_signature;
 
 #endif
