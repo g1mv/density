@@ -39,7 +39,7 @@ typedef uint64_t density_kernel_signature;
 
 typedef struct {
     uint_fast8_t shift;
-    density_kernel_signature registerSignature;
+    density_kernel_signature proximitySignature;
     density_kernel_signature *memorySignature;
     uint_fast32_t count;
 } density_kernel_signature_data;
@@ -47,13 +47,13 @@ typedef struct {
 #define DENSITY_KERNEL_ENCODE_PREPARE_NEW_SIGNATURE(out, data) {\
     (data)->count++;\
     (data)->shift = 0;\
-    (data)->registerSignature = 0;\
+    (data)->proximitySignature = 0;\
     (data)->memorySignature = (density_kernel_signature *) ((out)->pointer);\
     (out)->pointer += sizeof(density_kernel_signature);\
 }
 
-#define DENSITY_KERNEL_ENCODE_PUSH_REGISTER_SIGNATURE_TO_MEMORY(data) {\
-    *((data)->memorySignature) = (data)->registerSignature;\
+#define DENSITY_KERNEL_ENCODE_PUSH_PROXIMITY_SIGNATURE_TO_MEMORY(data) {\
+    *((data)->memorySignature) = (data)->proximitySignature;\
 }
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -71,22 +71,23 @@ typedef struct {
 #endif
 
 #define DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE(out, data, content, bits) {\
-    DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_NO_CHECK((data)->registerSignature, (data)->shift, content, bits);\
+    DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_NO_CHECK((data)->proximitySignature, (data)->shift, content, bits);\
 \
     if (density_unlikely((data)->shift & 0xFFFFFFFFFFFFFFC0llu)) {\
-        DENSITY_KERNEL_ENCODE_PUSH_REGISTER_SIGNATURE_TO_MEMORY(data);\
+        DENSITY_KERNEL_ENCODE_PUSH_PROXIMITY_SIGNATURE_TO_MEMORY(data);\
 \
         const uint8_t remainder = (uint_fast8_t) ((data)->shift & 0x3F);\
         DENSITY_KERNEL_ENCODE_PREPARE_NEW_SIGNATURE((out), (data));\
         if (remainder)\
-            DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_NO_CHECK((data)->registerSignature, (data)->shift, (content) >> ((bits) - remainder), remainder);\
+            DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_NO_CHECK((data)->proximitySignature, (data)->shift, (content) >> ((bits) - remainder), remainder);\
     }\
 }
 
 #define DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_PERFECT(out, data, content, bits) {\
-    DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_NO_CHECK((data)->registerSignature, (data)->shift, content, bits);\
+    DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_NO_CHECK((data)->proximitySignature, (data)->shift, content, bits);\
 \
     if (density_unlikely((data)->shift == density_bitsizeof(density_kernel_signature))) {\
+        DENSITY_KERNEL_ENCODE_PUSH_PROXIMITY_SIGNATURE_TO_MEMORY(data);\
         DENSITY_KERNEL_ENCODE_PREPARE_NEW_SIGNATURE((out), (data));\
     }\
 }

@@ -70,6 +70,7 @@ typedef struct {
 #endif
 
     uint_fast32_t shift;
+    density_chameleon_signature proximitySignature;
     density_chameleon_signature *signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;

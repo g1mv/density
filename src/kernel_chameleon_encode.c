@@ -48,9 +48,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE exitProcess(density_chameleon_e
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_write_to_signature(density_chameleon_encode_state *state) {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    *(state->signature) |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) << state->shift;
+    (state->proximitySignature) |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) << state->shift;
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    *(state->signature) |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) << ((56 - (state->shift & ~0x7)) + (state->shift & 0x7));
+    (state->proximitySignature) |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) << ((56 - (state->shift & ~0x7)) + (state->shift & 0x7));
 #endif
 }
 
@@ -58,7 +58,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_new_signature(density
     state->signaturesCount++;
     state->shift = 0;
     state->signature = (density_chameleon_signature *) (out->pointer);
-    *state->signature = 0;
+    state->proximitySignature = 0;
 
     out->pointer += sizeof(density_chameleon_signature);
     out->available_bytes -= sizeof(density_chameleon_signature);
@@ -103,6 +103,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_check_
 
     switch (state->shift) {
         case density_bitsizeof(density_chameleon_signature):
+            *(state->signature) = state->proximitySignature;
             if ((returnState = density_chameleon_encode_prepare_new_block(out, state)))
                 return returnState;
             break;
@@ -265,6 +266,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish
         goto check_signature_state;
 
     // Copy the remaining bytes
+    *(state->signature) = state->proximitySignature;
     density_memory_teleport_copy_remaining(in, out);
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;

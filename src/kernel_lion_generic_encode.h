@@ -107,7 +107,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
     // Marker for decode loop exit
     const density_lion_entropy_code code = density_lion_encode_fetch_form_rank_for_use(state, DENSITY_LION_FORM_CHUNK_DICTIONARY_A);
     DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE(out, &state->signatureData, code.value, code.bitLength);
-    DENSITY_KERNEL_ENCODE_PUSH_REGISTER_SIGNATURE_TO_MEMORY(&state->signatureData);
+    DENSITY_KERNEL_ENCODE_PUSH_PROXIMITY_SIGNATURE_TO_MEMORY(&state->signatureData);
 
     // Copy the remaining bytes
     density_memory_teleport_copy_remaining(in, out);
