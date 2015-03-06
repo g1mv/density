@@ -40,8 +40,6 @@
  * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#include "globals.h"
-
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_cheetah_encode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
     DENSITY_KERNEL_ENCODE_STATE returnState;
     uint32_t hash;
@@ -68,8 +66,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_cheetah_en
 
     // Check signature state
     check_signature_state:
-    //if (DENSITY_CHEETAH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD > out->available_bytes)
-    //    return exitProcess(state, DENSITY_CHEETAH_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
     if ((returnState = density_cheetah_encode_check_state(out, state)))
         return exitProcess(state, DENSITY_CHEETAH_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
 
