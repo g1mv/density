@@ -295,109 +295,12 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(densit
     return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK, DENSITY_KERNEL_ENCODE_STATE_READY);
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_encode_state *restrict state, const density_bool flush) {
-    DENSITY_KERNEL_ENCODE_STATE returnState;
-    uint32_t hash;
-    uint64_t chunk;
-    density_byte *pointerOutBefore;
-    density_memory_location *readMemoryLocation;
+#define GENERIC_NAME(name) name ## continue
+#define DENSITY_LION_ENCODE_CONTINUE
+#include "kernel_lion_generic_encode.h"
+#undef DENSITY_LION_ENCODE_CONTINUE
+#undef GENERIC_NAME
 
-    // Dispatch
-    switch (state->process) {
-        case DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
-            goto prepare_new_block;
-        case DENSITY_LION_ENCODE_PROCESS_READ_CHUNK:
-            goto read_chunk;
-        case DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE:
-            goto check_signature_state;
-        default:
-            return DENSITY_KERNEL_ENCODE_STATE_ERROR;
-    }
-
-    // Prepare new block
-    prepare_new_block:
-    if ((returnState = density_lion_encode_prepare_new_block(out, state)))
-        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
-
-    check_signature_state:
-    if (DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD > out->available_bytes)
-        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
-
-    // Try to read a complete chunk unit
-    read_chunk:
-    pointerOutBefore = out->pointer;
-    if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE)))
-        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_READ_CHUNK, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
-
-    // Chunk was read properly, process
-    density_lion_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
-    readMemoryLocation->available_bytes -= DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE;
-    out->available_bytes -= (out->pointer - pointerOutBefore);
-
-    // New loop
-    goto check_signature_state;
-}
-
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_encode_state *restrict state) {
-    DENSITY_KERNEL_ENCODE_STATE returnState;
-    uint32_t hash;
-    uint64_t chunk;
-    density_memory_location *readMemoryLocation;
-    density_byte *pointerOutBefore;
-
-    // Dispatch
-    switch (state->process) {
-        case DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
-            goto prepare_new_block;
-        case DENSITY_LION_ENCODE_PROCESS_READ_CHUNK:
-            goto read_chunk;
-        case DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE:
-            goto check_signature_state;
-        default:
-            return DENSITY_KERNEL_ENCODE_STATE_ERROR;
-    }
-
-    // Prepare new block
-    prepare_new_block:
-    if ((returnState = density_lion_encode_prepare_new_block(out, state)))
-        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
-
-    check_signature_state:
-    if (DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD > out->available_bytes)
-        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
-
-    // Try to read a complete chunk unit
-    read_chunk:
-    pointerOutBefore = out->pointer;
-    if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE)))
-        goto step_by_step;
-
-    // Chunk was read properly, process
-    density_lion_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
-    readMemoryLocation->available_bytes -= DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE;
-    goto exit;
-
-    // Read step by step
-    step_by_step:
-    while (state->signatureData.shift != density_bitsizeof(density_kernel_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
-        density_lion_encode_kernel(out, &hash, *(uint32_t *) (readMemoryLocation->pointer), state);
-        readMemoryLocation->pointer += sizeof(uint32_t);
-        readMemoryLocation->available_bytes -= sizeof(uint32_t);
-    }
-    exit:
-    out->available_bytes -= (out->pointer - pointerOutBefore);
-
-    // New loop
-    if (density_memory_teleport_available(in) >= sizeof(uint32_t))
-        goto check_signature_state;
-
-    // Marker for decode loop exit
-    const density_lion_entropy_code code = density_lion_encode_fetch_form_rank_for_use(state, DENSITY_LION_FORM_CHUNK_DICTIONARY_A);
-    DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE(out, &state->signatureData, code.value, code.bitLength);
-    DENSITY_KERNEL_ENCODE_PUSH_REGISTER_SIGNATURE_TO_MEMORY(&state->signatureData);
-
-    // Copy the remaining bytes
-    density_memory_teleport_copy_remaining(in, out);
-
-    return DENSITY_KERNEL_ENCODE_STATE_READY;
-}
+#define GENERIC_NAME(name) name ## finish
+#include "kernel_lion_generic_encode.h"
+#undef GENERIC_NAME
