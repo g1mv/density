@@ -50,6 +50,7 @@
 #include "density_api.h"
 #include "memory_location.h"
 #include "memory_teleport.h"
+#include "kernel.h"
 
 #define DENSITY_CHEETAH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (2 * (sizeof(density_cheetah_signature) + sizeof(uint32_t) * 4 * sizeof(density_cheetah_signature)))
 #define DENSITY_CHEETAH_ENCODE_PROCESS_UNIT_SIZE                    (2 * 4 * sizeof(uint64_t))
@@ -69,9 +70,7 @@ typedef struct {
     uint_fast64_t resetCycle;
 #endif
 
-    uint_fast32_t shift;
-    density_cheetah_signature * signature;
-    uint_fast32_t signaturesCount;
+    density_kernel_signature_data signatureData;
     uint_fast8_t efficiencyChecked;
 
     uint_fast16_t lastHash;
@@ -81,6 +80,6 @@ typedef struct {
 #pragma pack(pop)
 
 DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_init(density_cheetah_encode_state *);
-DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_encode_state *, const density_bool);
+DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_encode_state *);
 DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_finish(density_memory_teleport *, density_memory_location *, density_cheetah_encode_state *);
 #endif

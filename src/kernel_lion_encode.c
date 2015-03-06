@@ -295,11 +295,11 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(densit
     return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK, DENSITY_KERNEL_ENCODE_STATE_READY);
 }
 
-#define GENERIC_NAME(name) name ## continue
 #define DENSITY_LION_ENCODE_CONTINUE
+#define GENERIC_NAME(name) name ## continue
 #include "kernel_lion_generic_encode.h"
-#undef DENSITY_LION_ENCODE_CONTINUE
 #undef GENERIC_NAME
+#undef DENSITY_LION_ENCODE_CONTINUE
 
 #define GENERIC_NAME(name) name ## finish
 #include "kernel_lion_generic_encode.h"

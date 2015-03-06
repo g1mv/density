@@ -74,12 +74,20 @@ typedef struct {
     DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_NO_CHECK((data)->registerSignature, (data)->shift, content, bits);\
 \
     if (density_unlikely((data)->shift & 0xFFFFFFFFFFFFFFC0llu)) {\
-        DENSITY_KERNEL_ENCODE_PUSH_REGISTER_SIGNATURE_TO_MEMORY((data));\
+        DENSITY_KERNEL_ENCODE_PUSH_REGISTER_SIGNATURE_TO_MEMORY(data);\
 \
         const uint8_t remainder = (uint_fast8_t) ((data)->shift & 0x3F);\
         DENSITY_KERNEL_ENCODE_PREPARE_NEW_SIGNATURE((out), (data));\
         if (remainder)\
             DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_NO_CHECK((data)->registerSignature, (data)->shift, (content) >> ((bits) - remainder), remainder);\
+    }\
+}
+
+#define DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_PERFECT(out, data, content, bits) {\
+    DENSITY_KERNEL_ENCODE_PUSH_TO_SIGNATURE_NO_CHECK((data)->registerSignature, (data)->shift, content, bits);\
+\
+    if (density_unlikely((data)->shift == density_bitsizeof(density_kernel_signature))) {\
+        DENSITY_KERNEL_ENCODE_PREPARE_NEW_SIGNATURE((out), (data));\
     }\
 }
 
