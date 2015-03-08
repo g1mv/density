@@ -56,11 +56,12 @@
 #include "main_header.h"
 
 #define DENSITY_CHEETAH_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 4 * sizeof(density_cheetah_signature))
+#define DENSITY_CHEETAH_DECODE_MAXIMUM_BODY_SIZE_PER_SIGNATURE       ((density_bitsizeof(density_cheetah_signature) >> 1) * sizeof(uint32_t))
+#define DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT                      1
 
 typedef enum {
     DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE,
-    DENSITY_CHEETAH_DECODE_PROCESS_READ_SIGNATURE,
-    DENSITY_CHEETAH_DECODE_PROCESS_DECOMPRESS_BODY,
+    DENSITY_CHEETAH_DECODE_PROCESS_READ_PROCESSING_UNIT,
 } DENSITY_CHEETAH_DECODE_PROCESS;
 
 #pragma pack(push)
@@ -72,7 +73,6 @@ typedef struct {
     uint_fast64_t resetCycle;
 
     density_cheetah_signature signature;
-    uint_fast32_t bodyLength;
     uint_fast32_t shift;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
@@ -86,7 +86,7 @@ typedef struct {
 #pragma pack(pop)
 
 DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_init(density_cheetah_decode_state *, const density_main_header_parameters parameters, const uint_fast32_t);
-DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *, const density_bool);
+DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
 DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_finish(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
 
 #endif

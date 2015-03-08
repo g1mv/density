@@ -82,7 +82,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_check_st
 DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(density_memory_location *restrict in, density_cheetah_decode_state *restrict state) {
     state->signature = DENSITY_LITTLE_ENDIAN_64(*(density_cheetah_signature *) (in->pointer));
     in->pointer += sizeof(density_cheetah_signature);
-    in->available_bytes -= sizeof(density_cheetah_signature);
+    //in->available_bytes -= sizeof(density_cheetah_signature);
     state->shift = 0;
     state->signaturesCount++;
 }
@@ -192,135 +192,12 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_init(den
     return exitProcess(state, DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_DECODE_STATE_READY);
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_cheetah_decode_state *restrict state, const density_bool flush) {
-    DENSITY_KERNEL_DECODE_STATE returnState;
-    density_memory_location *readMemoryLocation;
+#define DENSITY_CHEETAH_DECODE_CONTINUE
+#define GENERIC_NAME(name) name ## continue
+#include "kernel_cheetah_generic_decode.h"
+#undef GENERIC_NAME
+#undef DENSITY_CHEETAH_DECODE_CONTINUE
 
-    // Dispatch
-    switch (state->process) {
-        case DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE:
-            goto check_signature_state;
-        case DENSITY_CHEETAH_DECODE_PROCESS_READ_SIGNATURE:
-            goto read_signature;
-        case DENSITY_CHEETAH_DECODE_PROCESS_DECOMPRESS_BODY:
-            goto decompress_body;
-        default:
-            return DENSITY_KERNEL_DECODE_STATE_ERROR;
-    }
-
-    check_signature_state:
-    if ((returnState = density_cheetah_decode_check_state(out, state)))
-        return exitProcess(state, DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
-
-    // Try to read a signature
-    read_signature:
-    if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(density_cheetah_signature), state->endDataOverhead)))
-        return exitProcess(state, DENSITY_CHEETAH_DECODE_PROCESS_READ_SIGNATURE, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
-
-    // Decode the signature (endian processing)
-    density_cheetah_decode_read_signature(readMemoryLocation, state);
-
-    // Calculate body size
-    decompress_body:
-    state->bodyLength = __builtin_popcountll(state->signature) << 1;
-
-    // Try to read the body
-    if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, state->bodyLength, state->endDataOverhead)))
-        return exitProcess(state, DENSITY_CHEETAH_DECODE_PROCESS_DECOMPRESS_BODY, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
-
-    // Body was read properly, process
-    density_cheetah_decode_process_data(readMemoryLocation, out, state);
-    readMemoryLocation->available_bytes -= state->bodyLength;
-    out->available_bytes -= density_bitsizeof(density_cheetah_signature) * sizeof(uint16_t);
-
-    // New loop
-    goto check_signature_state;
-}
-
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_cheetah_decode_state *state) {
-    DENSITY_KERNEL_DECODE_STATE returnState;
-    density_memory_location *readMemoryLocation;
-
-    switch (state->process) {
-        case DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE:
-            goto check_signature_state;
-        case DENSITY_CHEETAH_DECODE_PROCESS_READ_SIGNATURE:
-            goto read_signature;
-        case DENSITY_CHEETAH_DECODE_PROCESS_DECOMPRESS_BODY:
-            goto decompress_body;
-        default:
-            return DENSITY_KERNEL_DECODE_STATE_ERROR;
-    }
-
-    check_signature_state:
-    if ((returnState = density_cheetah_decode_check_state(out, state)))
-        return exitProcess(state, DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
-
-    // Try to read a signature
-    read_signature:
-    if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(density_cheetah_signature), state->endDataOverhead)))
-        goto finish;
-
-    // Decode the signature (endian processing)
-    density_cheetah_decode_read_signature(readMemoryLocation, state);
-
-    // Calculate body size
-    decompress_body:
-    state->bodyLength = __builtin_popcountll(state->signature) << 1;
-
-    // Try to read the body
-    if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, state->bodyLength, state->endDataOverhead)))
-        goto step_by_step;
-
-    // Body was read properly, process
-    density_cheetah_decode_process_data(readMemoryLocation, out, state);
-    readMemoryLocation->available_bytes -= state->bodyLength;
-    out->available_bytes -= density_bitsizeof(density_cheetah_signature) * sizeof(uint16_t);
-
-    // New loop
-    goto check_signature_state;
-
-    // Try to read and process the body, step by step
-    step_by_step:
-    while (state->shift != density_bitsizeof(density_cheetah_signature)) {
-        uint32_t hash = 0;
-        uint32_t chunk;
-
-        switch (density_cheetah_decode_get_signature_flag(state)) {
-            case DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED:
-                density_cheetah_decode_predicted_chunk(&hash, out, state);
-                break;
-            case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A:
-                if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
-                    return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                density_cheetah_decode_read_compressed_chunk(&hash, readMemoryLocation);
-                density_cheetah_decode_compressed_chunk_a(&hash, out, state);
-                break;
-            case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B:
-                if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
-                    return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                density_cheetah_decode_read_compressed_chunk(&hash, readMemoryLocation);
-                density_cheetah_decode_compressed_chunk_b(&hash, out, state);
-                break;
-            case DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK:
-                if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint32_t), state->endDataOverhead)))
-                    goto finish;
-                density_cheetah_decode_read_uncompressed_chunk(&chunk, readMemoryLocation);
-                density_cheetah_decode_uncompressed_chunk(&hash, &chunk, out, state);
-                break;
-        }
-
-        state->lastHash = (uint16_t)hash;
-
-        out->available_bytes -= sizeof(uint32_t);
-        state->shift += 2;
-    }
-
-    // New loop
-    goto check_signature_state;
-
-    finish:
-    density_memory_teleport_copy(in, out, density_memory_teleport_available_reserved(in, state->endDataOverhead));
-
-    return DENSITY_KERNEL_DECODE_STATE_READY;
-}
+#define GENERIC_NAME(name) name ## finish
+#include "kernel_cheetah_generic_decode.h"
+#undef GENERIC_NAME

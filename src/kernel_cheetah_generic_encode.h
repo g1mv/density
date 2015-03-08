@@ -100,7 +100,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_cheetah_en
 #ifdef DENSITY_CHEETAH_ENCODE_CONTINUE
     goto check_signature_state;
 #else
-    if (density_memory_teleport_available(in) >= sizeof(uint32_t))
+    if (density_memory_teleport_available_bytes(in) >= sizeof(uint32_t))
         goto check_signature_state;
 
     // Marker for decode loop exit

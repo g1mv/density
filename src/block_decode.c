@@ -107,7 +107,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_
 }
 
 DENSITY_FORCE_INLINE void density_block_decode_update_totals(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state, const uint_fast64_t inAvailableBefore, const uint_fast64_t outAvailableBefore) {
-    state->totalRead += inAvailableBefore - density_memory_teleport_available_reserved(in, state->endDataOverhead);
+    state->totalRead += inAvailableBefore - density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead);
     state->totalWritten += outAvailableBefore - out->available_bytes;
 }
 
@@ -181,12 +181,12 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(de
         return exitProcess(state, DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER, blockDecodeState);
 
     read_data:
-    inAvailableBefore = density_memory_teleport_available_reserved(in, state->endDataOverhead);
+    inAvailableBefore = density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead);
     outAvailableBefore = out->available_bytes;
     switch (state->currentMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
             blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalWritten - state->currentBlockData.outStart);
-            inRemaining = density_memory_teleport_available_reserved(in, state->endDataOverhead);
+            inRemaining = density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead);
             outRemaining = out->available_bytes;
 
             if (inRemaining <= outRemaining) {
@@ -277,13 +277,13 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
         return exitProcess(state, DENSITY_BLOCK_DECODE_PROCESS_READ_BLOCK_HEADER, blockDecodeState);
 
     read_data:
-    inAvailableBefore = density_memory_teleport_available_reserved(in, state->endDataOverhead);
+    inAvailableBefore = density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead);
     outAvailableBefore = out->available_bytes;
 
     switch (state->currentMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
             blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalWritten - state->currentBlockData.outStart);
-            inRemaining = density_memory_teleport_available_reserved(in, state->endDataOverhead);
+            inRemaining = density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead);
             outRemaining = out->available_bytes;
 
             if (inRemaining <= outRemaining) {
@@ -335,7 +335,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
     read_block_footer:
     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) if ((blockDecodeState = density_block_decode_read_block_footer(in, out, state)))
         return blockDecodeState;
-    if (density_memory_teleport_available(in))
+    if (density_memory_teleport_available_bytes(in))
         goto read_block_header;
 
     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
