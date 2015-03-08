@@ -182,7 +182,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_bigram(density_memory_loca
                 const bool qualify_rank_b = (rank_b < 64);
 
                 if (density_likely(qualify_rank_b)) {
-                    density_lion_encode_push_to_signature(out, state, (uint64_t)(((rank_a >> 1) & 0xFE) | DENSITY_LION_SIGNATURE_FLAG_BIGRAM_ENCODED), 5);
+                    density_lion_encode_push_to_signature(out, state, (uint64_t)(((rank_a >> 1) & 0xFE) | DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_ENCODED), 5);
                     *out->pointer = (rank_b | (rank_a << 6));
                     out->pointer += sizeof(uint8_t);
 
@@ -192,7 +192,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_bigram(density_memory_loca
         }
     }
 
-    density_lion_encode_push_to_signature(out, state, DENSITY_LION_SIGNATURE_FLAG_BIGRAM_PLAIN, 1);
+    density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_PLAIN, 1);
     *(uint16_t *) out->pointer = DENSITY_LITTLE_ENDIAN_16(bigram);
     out->pointer += sizeof(uint16_t);
 
@@ -230,22 +230,22 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                 density_lion_dictionary_bigram_entry *bigram_entry_c = &state->dictionary.bigrams[hash_c];
 
                 if (bigram_entry_a->bigram == bigram_a) {
-                    density_lion_encode_push_to_signature(out, state, DENSITY_LION_SIGNATURE_FLAG_BIGRAM_DICTIONARY, 1);
+                    density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY, 1);
 
                     *(out->pointer) = hash_a;
                     out->pointer++;
                 } else {
-                    density_lion_encode_push_to_signature(out, state, DENSITY_LION_SIGNATURE_FLAG_BIGRAM_SECONDARY, 1);
+                    density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_SECONDARY_ACCESS, 1);
 
                     density_lion_encode_process_bigram(out, state, bigram_a);
                 }
                 if (bigram_entry_c->bigram == bigram_c) {
-                    density_lion_encode_push_to_signature(out, state, DENSITY_LION_SIGNATURE_FLAG_BIGRAM_DICTIONARY, 1);
+                    density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY, 1);
 
                     *(out->pointer) = hash_c;
                     out->pointer++;
                 } else {
-                    density_lion_encode_push_to_signature(out, state, DENSITY_LION_SIGNATURE_FLAG_BIGRAM_SECONDARY, 1);
+                    density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_SECONDARY_ACCESS, 1);
 
                     density_lion_encode_process_bigram(out, state, bigram_c);
                 }
@@ -312,12 +312,16 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(densit
     state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
 #endif
 
+    state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].form = DENSITY_LION_FORM_CHUNK_PREDICTIONS;
     state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].usage = 0;
     state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].rank = 3;
+    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A].form = DENSITY_LION_FORM_CHUNK_DICTIONARY_A;
     state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A].usage = 0;
     state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A].rank = 1;
+    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B].form = DENSITY_LION_FORM_CHUNK_DICTIONARY_B;
     state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B].usage = 0;
     state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B].rank = 2;
+    state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS].form = DENSITY_LION_FORM_SECONDARY_ACCESS;
     state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS].usage = 0;
     state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS].rank = 0;
 

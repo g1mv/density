@@ -126,7 +126,7 @@ DENSITY_FORCE_INLINE const bool density_chameleon_decode_test_compressed(density
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
-    while (state->shift != density_bitsizeof(density_chameleon_signature)) {
+    while (density_likely(state->shift != density_bitsizeof(density_chameleon_signature))) {
         density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state), state);
         state->shift++;
     }

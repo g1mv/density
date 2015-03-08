@@ -49,17 +49,38 @@ typedef enum {
     DENSITY_LION_FORM_CHUNK_DICTIONARY_A,
     DENSITY_LION_FORM_CHUNK_DICTIONARY_B,
     DENSITY_LION_FORM_SECONDARY_ACCESS,
-    DENSITY_LION_NUMBER_OF_FORMS,
 } DENSITY_LION_FORM;
 
 typedef enum {
-    DENSITY_LION_SIGNATURE_FLAG_BIGRAM_DICTIONARY = 0x0,
-    DENSITY_LION_SIGNATURE_FLAG_BIGRAM_SECONDARY = 0x1,
-    DENSITY_LION_SIGNATURE_FLAG_BIGRAM_ENCODED = 0x0,
-    DENSITY_LION_SIGNATURE_FLAG_BIGRAM_PLAIN = 0x1,
-} DENSITY_LION_SIGNATURE_FLAG;
+    DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY = 0x0,
+    DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_SECONDARY_ACCESS = 0x1,
+} DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG;
 
-#define DENSITY_LION_PREFERRED_BLOCK_SIGNATURES_SHIFT                   12
+typedef enum {
+    DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_ENCODED = 0x0,
+    DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_PLAIN = 0x1,
+} DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG;
+
+typedef struct {
+    DENSITY_LION_FORM form;
+    uint32_t usage;
+    uint8_t rank;
+} density_lion_form_statistics;
+
+typedef struct {
+    density_lion_form_statistics *statistics;
+} density_lion_form_rank;
+
+typedef struct {
+    uint_fast8_t value;
+    uint_fast8_t bitLength;
+} density_lion_entropy_code;
+
+typedef uint64_t                                                        density_lion_signature;
+
+#define DENSITY_LION_NUMBER_OF_FORMS                                    4
+
+#define DENSITY_LION_PREFERRED_BLOCK_SIGNATURES_SHIFT                   13
 #define DENSITY_LION_PREFERRED_BLOCK_SIGNATURES                         (1 << DENSITY_LION_PREFERRED_BLOCK_SIGNATURES_SHIFT)
 
 #define DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT        8
@@ -105,13 +126,6 @@ typedef enum {
     {BINARY_TO_UINT(111), 3},\
 }
 
-typedef struct {
-    uint_fast8_t value;
-    uint_fast8_t bitLength;
-} density_lion_entropy_code;
-
 static const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUMBER_OF_FORMS] = DENSITY_LION_FORM_ENTROPY_CODES;
-
-typedef uint64_t                                                            density_lion_signature;
 
 #endif

@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2013, Guillaume Voirin
+ * Copyright (c) 2015, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 06/12/13 20:20
+ * 8/03/15 11:59
  *
  * --------------
  * Lion algorithm
@@ -39,40 +39,56 @@
  * Multiform compression algorithm
  */
 
-#ifndef DENSITY_LION_ENCODE_H
-#define DENSITY_LION_ENCODE_H
+#ifndef DENSITY_LION_DECODE_H
+#define DENSITY_LION_DECODE_H
 
 #include "kernel_lion_dictionary.h"
 #include "kernel_lion.h"
 #include "block.h"
-#include "kernel_encode.h"
+#include "kernel_decode.h"
 #include "density_api.h"
-#include "memory_location.h"
 #include "memory_teleport.h"
+#include "block_footer.h"
+#include "main_footer.h"
+#include "block_mode_marker.h"
+#include "kernel_lion_encode.h"
+#include "main_header.h"
 
-#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (2 * (sizeof(density_lion_signature) + sizeof(uint32_t) * 4 * sizeof(density_lion_signature)))
-#define DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE                    (1 * 2 * sizeof(uint64_t))
+#define DENSITY_LION_DECODE_MAXIMUM_BODY_SIZE_PER_SIGNATURE       (density_bitsizeof(density_lion_signature) * sizeof(uint16_t))
+#define DENSITY_LION_DECODE_ITERATIONS_SHIFT                      1
 
 typedef enum {
-    DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
-    DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE,
-    DENSITY_LION_ENCODE_PROCESS_READ_CHUNK,
-} DENSITY_LION_ENCODE_PROCESS;
+    DENSITY_LION_DECODE_PROCESS_CHECK_SIGNATURE_STATE,
+    DENSITY_LION_DECODE_PROCESS_READ_PROCESSING_UNIT,
+} DENSITY_LION_DECODE_PROCESS;
+
+#define DENSITY_LION_DECODE_BITMASK_VALUES {\
+    BINARY_TO_UINT(0),\
+    BINARY_TO_UINT(1),\
+    BINARY_TO_UINT(11),\
+    BINARY_TO_UINT(111),\
+    BINARY_TO_UINT(1111),\
+    BINARY_TO_UINT(11111),\
+    BINARY_TO_UINT(111111),\
+    BINARY_TO_UINT(1111111),\
+}
+
+#define DENSITY_LION_DECODE_NUMBER_OF_BITMASK_VALUES                                    8
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_LION_ENCODE_PROCESS process;
+    DENSITY_LION_DECODE_PROCESS process;
 
-#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
+    density_main_header_parameters parameters;
     uint_fast64_t resetCycle;
-#endif
 
-    uint_fast32_t shift;
-    density_lion_signature proximitySignature;
-    density_lion_signature * signature;
+    density_lion_signature signature;
+    uint_fast8_t shift;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
+
+    uint_fast64_t endDataOverhead;
 
     density_lion_form_statistics formStatistics[DENSITY_LION_NUMBER_OF_FORMS];
     density_lion_form_rank formRanks[DENSITY_LION_NUMBER_OF_FORMS];
@@ -81,10 +97,13 @@ typedef struct {
     uint_fast32_t lastChunk;
 
     density_lion_dictionary dictionary;
-} density_lion_encode_state;
+} density_lion_decode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(density_lion_encode_state *);
-DENSITY_KERNEL_ENCODE_STATE density_lion_encode_continue(density_memory_teleport *, density_memory_location *, density_lion_encode_state *);
-DENSITY_KERNEL_ENCODE_STATE density_lion_encode_finish(density_memory_teleport *, density_memory_location *, density_lion_encode_state *);
+static const uint8_t density_lion_decode_bitmasks[DENSITY_LION_DECODE_NUMBER_OF_BITMASK_VALUES] = DENSITY_LION_DECODE_BITMASK_VALUES;
+
+DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *, const density_main_header_parameters parameters, const uint_fast32_t);
+DENSITY_KERNEL_DECODE_STATE density_lion_decode_continue(density_memory_teleport *, density_memory_location *, density_lion_decode_state *);
+DENSITY_KERNEL_DECODE_STATE density_lion_decode_finish(density_memory_teleport *, density_memory_location *, density_lion_decode_state *);
+
 #endif

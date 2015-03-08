@@ -168,7 +168,7 @@ DENSITY_FORCE_INLINE const DENSITY_CHEETAH_SIGNATURE_FLAG density_cheetah_decode
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
-    while (state->shift != density_bitsizeof(density_cheetah_signature)) {
+    while (density_likely(state->shift != density_bitsizeof(density_cheetah_signature))) {
         density_cheetah_decode_kernel(in, out, density_cheetah_decode_get_signature_flag(state), state);
         state->shift += 2;
     }
