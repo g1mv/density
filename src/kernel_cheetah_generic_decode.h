@@ -58,7 +58,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_cheetah_de
     if (density_unlikely((returnState = density_cheetah_decode_check_state(out, state))))
         return exitProcess(state, DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
 
-    // Try to read a signature
+    // Try to read the next processing unit
     read_processing_unit:
     if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, (sizeof(density_cheetah_signature) + DENSITY_CHEETAH_DECODE_MAXIMUM_BODY_SIZE_PER_SIGNATURE) << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT, state->endDataOverhead))))
 #ifdef DENSITY_CHEETAH_DECODE_CONTINUE
@@ -77,7 +77,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_cheetah_de
         density_cheetah_decode_process_data(readMemoryLocation, out, state);
     }
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
-    out->available_bytes -= (density_bitsizeof(density_cheetah_signature) * sizeof(uint16_t)) << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT;
+    out->available_bytes -= ((density_bitsizeof(density_cheetah_signature) * sizeof(uint16_t)) << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT);
 
     // New loop
     goto check_signature_state;
@@ -86,9 +86,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_cheetah_de
     step_by_step:
     if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(density_cheetah_signature), state->endDataOverhead)))
         goto finish;
-    readMemoryLocationPointerBefore = readMemoryLocation->pointer;
     density_cheetah_decode_read_signature(readMemoryLocation, state);
-    readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
+    readMemoryLocation->available_bytes -= sizeof(density_cheetah_signature);
 
     while (state->shift != density_bitsizeof(density_cheetah_signature)) {
         uint32_t hash = 0;
@@ -96,33 +95,28 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_cheetah_de
 
         switch (density_cheetah_decode_get_signature_flag(state)) {
             case DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED:
-                readMemoryLocationPointerBefore = readMemoryLocation->pointer;
                 density_cheetah_decode_predicted_chunk(&hash, out, state);
-                readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
                 break;
             case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A:
                 if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                readMemoryLocationPointerBefore = readMemoryLocation->pointer;
                 density_cheetah_decode_read_compressed_chunk(&hash, readMemoryLocation);
+                readMemoryLocation->available_bytes -= sizeof(uint16_t);
                 density_cheetah_decode_compressed_chunk_a(&hash, out, state);
-                readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
                 break;
             case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B:
                 if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                readMemoryLocationPointerBefore = readMemoryLocation->pointer;
                 density_cheetah_decode_read_compressed_chunk(&hash, readMemoryLocation);
+                readMemoryLocation->available_bytes -= sizeof(uint16_t);
                 density_cheetah_decode_compressed_chunk_b(&hash, out, state);
-                readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
                 break;
             case DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK:
                 if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint32_t), state->endDataOverhead)))
                     goto finish;
-                readMemoryLocationPointerBefore = readMemoryLocation->pointer;
                 density_cheetah_decode_read_uncompressed_chunk(&chunk, readMemoryLocation);
+                readMemoryLocation->available_bytes -= sizeof(uint32_t);
                 density_cheetah_decode_uncompressed_chunk(&hash, &chunk, out, state);
-                readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
                 break;
         }
 

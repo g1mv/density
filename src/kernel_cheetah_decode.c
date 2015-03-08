@@ -48,7 +48,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE exitProcess(density_cheetah_dec
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_check_state(density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
-    if (out->available_bytes < DENSITY_CHEETAH_DECODE_MINIMUM_OUTPUT_LOOKAHEAD)
+    if (out->available_bytes < (DENSITY_CHEETAH_DECODE_MAXIMUM_BODY_SIZE_PER_SIGNATURE << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT))
         return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT;
 
     switch (state->signaturesCount) {
@@ -82,7 +82,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_check_st
 DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(density_memory_location *restrict in, density_cheetah_decode_state *restrict state) {
     state->signature = DENSITY_LITTLE_ENDIAN_64(*(density_cheetah_signature *) (in->pointer));
     in->pointer += sizeof(density_cheetah_signature);
-    //in->available_bytes -= sizeof(density_cheetah_signature);
     state->shift = 0;
     state->signaturesCount++;
 }

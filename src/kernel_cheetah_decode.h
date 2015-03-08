@@ -55,7 +55,6 @@
 #include "kernel_cheetah_encode.h"
 #include "main_header.h"
 
-#define DENSITY_CHEETAH_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 4 * sizeof(density_cheetah_signature))
 #define DENSITY_CHEETAH_DECODE_MAXIMUM_BODY_SIZE_PER_SIGNATURE       ((density_bitsizeof(density_cheetah_signature) >> 1) * sizeof(uint32_t))
 #define DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT                      1
 
