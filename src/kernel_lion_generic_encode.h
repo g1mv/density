@@ -96,7 +96,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
 #endif
     out->available_bytes -= (out->pointer - pointerOutBefore);
 
-
     // New loop
 #ifdef DENSITY_LION_ENCODE_CONTINUE
     goto check_signature_state;

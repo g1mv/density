@@ -56,7 +56,7 @@
 #include "main_header.h"
 
 #define DENSITY_CHAMELEON_DECODE_MAXIMUM_BODY_SIZE_PER_SIGNATURE         (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
-#define DENSITY_CHAMELEON_DECODE_ITERATIONS_SHIFT                        1
+#define DENSITY_CHAMELEON_DECODE_ITERATIONS_SHIFT                        0
 
 typedef enum {
     DENSITY_CHAMELEON_DECODE_PROCESS_CHECK_SIGNATURE_STATE,

@@ -101,7 +101,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_proximity_signature(densit
     state->proximitySignature |= (content << state->shift);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     state->proximitySignature |= (content << ((56 - (state->shift & ~0x7)) + (state->shift & 0x7)));
-#elif
+#else
 #error Unknow endianness
 #endif
 
