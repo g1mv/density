@@ -84,9 +84,9 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_tel
             density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, mem_alloc(sizeof(density_cheetah_decode_state)), (void *) density_cheetah_decode_init, (void *) density_cheetah_decode_continue, (void *) density_cheetah_decode_finish, mem_alloc);
             break;
 
-        /*case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
+        case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
             density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_LION_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, mem_alloc(sizeof(density_lion_decode_state)), (void *) density_lion_decode_init, (void *) density_lion_decode_continue, (void *) density_lion_decode_finish, mem_alloc);
-            break;*/
+            break;
 
         default:
             return DENSITY_DECODE_STATE_ERROR;

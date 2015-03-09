@@ -122,62 +122,14 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(density_memory_l
     }
 }
 
-DENSITY_FORCE_INLINE density_lion_entropy_code density_lion_encode_get_form_code(density_lion_encode_state *restrict state, const DENSITY_LION_FORM form) {
-    density_lion_form_node *form_found = state->formData.formsIndex[form];
-    form_found->usage++;
-
-    density_lion_form_node *previous_form = form_found->previousForm;
-    if (form_found->previousForm) {
-        const uint8_t rank = form_found->rank;
-
-        if (density_unlikely(previous_form->usage < form_found->usage)) {    // Relative stability is assumed
-            DENSITY_LION_FORM previous_form_value = previous_form->form;
-            uint32_t previous_form_usage = previous_form->usage;
-
-            previous_form->form = form;
-            previous_form->usage = form_found->usage;
-
-            form_found->form = previous_form_value;
-            form_found->usage = previous_form_usage;
-
-            state->formData.formsIndex[form] = previous_form;
-            state->formData.formsIndex[previous_form_value] = form_found;
-        }
-
-        return density_lion_form_entropy_codes[rank];
-    } else
-        return density_lion_form_entropy_codes[0];
-}
-
-DENSITY_FORCE_INLINE void density_lion_encode_update_unigram_model(density_lion_encode_state *restrict state, const uint8_t unigram, density_lion_dictionary_unigram_node *unigram_found) {
-    if (density_likely(unigram_found)) {
-        const uint8_t rank = unigram_found->rank;
-        if (rank) {
-            density_lion_dictionary_unigram_node *previous_unigram = unigram_found->previousUnigram;
-            uint8_t previous_unigram_value = previous_unigram->unigram;
-            previous_unigram->unigram = unigram;
-            unigram_found->unigram = previous_unigram_value;
-            state->dictionary.unigramsIndex[unigram] = previous_unigram;
-            state->dictionary.unigramsIndex[previous_unigram_value] = unigram_found;
-        }
-    } else {
-        density_lion_dictionary_unigram_node *new_unigram = &state->dictionary.unigramsPool[state->dictionary.nextAvailableUnigram];
-        new_unigram->unigram = unigram;
-        new_unigram->previousUnigram = state->dictionary.lastUnigramNode;
-        new_unigram->rank = state->dictionary.nextAvailableUnigram++;
-        state->dictionary.unigramsIndex[unigram] = new_unigram;
-        state->dictionary.lastUnigramNode = new_unigram;
-    }
-}
-
 DENSITY_FORCE_INLINE void density_lion_encode_process_bigram(density_memory_location *restrict out, density_lion_encode_state *restrict state, const uint16_t bigram) {
     const uint8_t unigram_a = (uint8_t) (bigram & 0xFF);
     const uint8_t unigram_b = (uint8_t) (bigram >> 8);
 
-    density_lion_dictionary_unigram_node *unigram_found_a = state->dictionary.unigramsIndex[unigram_a];
+    density_lion_unigram_node *unigram_found_a = state->unigramData.unigramsIndex[unigram_a];
 
     if (density_likely(unigram_found_a)) {
-        density_lion_dictionary_unigram_node *unigram_found_b = state->dictionary.unigramsIndex[unigram_b];
+        density_lion_unigram_node *unigram_found_b = state->unigramData.unigramsIndex[unigram_b];
 
         if (density_likely(unigram_found_b)) {
             const uint8_t rank_a = unigram_found_a->rank;
@@ -202,8 +154,8 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_bigram(density_memory_loca
     *(uint16_t *) out->pointer = DENSITY_LITTLE_ENDIAN_16(bigram);
     out->pointer += sizeof(uint16_t);
 
-    density_lion_encode_update_unigram_model(state, unigram_a, unigram_found_a);
-    density_lion_encode_update_unigram_model(state, unigram_b, state->dictionary.unigramsIndex[unigram_b]);
+    density_lion_unigram_model_update(&state->unigramData, unigram_a, unigram_found_a);
+    density_lion_unigram_model_update(&state->unigramData, unigram_b, state->unigramData.unigramsIndex[unigram_b]);
 }
 
 DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *restrict out, uint32_t *restrict hash, const uint32_t chunk, density_lion_encode_state *restrict state) {
@@ -216,7 +168,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
         if (*found_a ^ chunk) {
             uint32_t *found_b = &found->chunk_b;
             if (*found_b ^ chunk) {
-                const density_lion_entropy_code code = density_lion_encode_get_form_code(state, DENSITY_LION_FORM_SECONDARY_ACCESS);
+                const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_SECONDARY_ACCESS);
                 density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
 
                 const uint32_t chunk_rs8 = chunk >> 8;
@@ -261,7 +213,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                 state->dictionary.bigrams[hash_b].bigram = bigram_b;
                 bigram_entry_c->bigram = bigram_c;
             } else {
-                const density_lion_entropy_code code = density_lion_encode_get_form_code(state, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
+                const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
                 density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
 
                 *(uint16_t *) (out->pointer) = DENSITY_LITTLE_ENDIAN_16(*hash);
@@ -270,7 +222,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
             *found_b = *found_a;
             *found_a = chunk;
         } else {
-            const density_lion_entropy_code code = density_lion_encode_get_form_code(state, DENSITY_LION_FORM_CHUNK_DICTIONARY_A);
+            const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_A);
             density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
 
             *(uint16_t *) (out->pointer) = DENSITY_LITTLE_ENDIAN_16(*hash);
@@ -278,7 +230,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
         }
         *predictedChunk = chunk;
     } else {
-        const density_lion_entropy_code code = density_lion_encode_get_form_code(state, DENSITY_LION_FORM_CHUNK_PREDICTIONS);
+        const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_PREDICTIONS);
         density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
     }
 
@@ -319,6 +271,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(densit
 #endif
 
     density_lion_form_model_init(&state->formData);
+    density_lion_unigram_model_init(&state->unigramData);
 
     state->lastHash = 0;
     state->lastChunk = 0;

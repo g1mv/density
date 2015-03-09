@@ -26,7 +26,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 12/02/15 23:12
+ * 9/03/15 15:33
  *
  * --------------
  * Lion algorithm
@@ -39,10 +39,30 @@
  * Multiform compression algorithm
  */
 
-#include "kernel_lion_dictionary.h"
+#include "kernel_lion_unigram_model.h"
 
-const density_lion_dictionary density_lion_empty_dictionary = {.bigrams = {{0}}, .chunks = {{0}}};
+void density_lion_unigram_model_init(density_lion_unigram_data *data) {
+    data->nextAvailableUnigram = 0;
+    data->lastUnigramNode = NULL;
+};
 
-DENSITY_FORCE_INLINE void density_lion_dictionary_reset(density_lion_dictionary *dictionary) {
-    memcpy(dictionary, &density_lion_empty_dictionary, sizeof(density_lion_dictionary));
+void density_lion_unigram_model_update(density_lion_unigram_data *restrict data, const uint8_t unigram, density_lion_unigram_node *unigram_found) {
+    if (density_likely(unigram_found)) {
+        const uint8_t rank = unigram_found->rank;
+        if (rank) {
+            density_lion_unigram_node *previous_unigram = unigram_found->previousUnigram;
+            uint8_t previous_unigram_value = previous_unigram->unigram;
+            previous_unigram->unigram = unigram;
+            unigram_found->unigram = previous_unigram_value;
+            data->unigramsIndex[unigram] = previous_unigram;
+            data->unigramsIndex[previous_unigram_value] = unigram_found;
+        }
+    } else {
+        density_lion_unigram_node *new_unigram = &data->unigramsPool[data->nextAvailableUnigram];
+        new_unigram->unigram = unigram;
+        new_unigram->previousUnigram = data->lastUnigramNode;
+        new_unigram->rank = data->nextAvailableUnigram++;
+        data->unigramsIndex[unigram] = new_unigram;
+        data->lastUnigramNode = new_unigram;
+    }
 }

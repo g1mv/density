@@ -92,9 +92,10 @@ typedef struct {
     uint_fast64_t endDataOverhead;
 
     density_lion_form_data formData;
+    density_lion_unigram_data unigramData;
 
     uint_fast32_t lastHash;
-    uint_fast32_t lastChunk;
+    uint_fast8_t lastUnigram;
 
     density_lion_dictionary dictionary;
 } density_lion_decode_state;

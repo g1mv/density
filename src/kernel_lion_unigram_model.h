@@ -26,7 +26,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 12/02/15 23:12
+ * 9/03/15 14:45
  *
  * --------------
  * Lion algorithm
@@ -39,10 +39,31 @@
  * Multiform compression algorithm
  */
 
-#include "kernel_lion_dictionary.h"
+#ifndef DENSITY_LION_UNIGRAM_MODEL_H
+#define DENSITY_LION_UNIGRAM_MODEL_H
 
-const density_lion_dictionary density_lion_empty_dictionary = {.bigrams = {{0}}, .chunks = {{0}}};
+#include "globals.h"
+#include "kernel_lion.h"
 
-DENSITY_FORCE_INLINE void density_lion_dictionary_reset(density_lion_dictionary *dictionary) {
-    memcpy(dictionary, &density_lion_empty_dictionary, sizeof(density_lion_dictionary));
-}
+#define DENSITY_LION_NUMBER_OF_UNIGRAMS                                    (1 << density_bitsizeof(uint8_t))
+
+#pragma pack(push)
+#pragma pack(4)
+typedef struct {
+    uint8_t unigram;
+    uint8_t rank;
+    void *previousUnigram;
+} density_lion_unigram_node;
+
+typedef struct {
+    uint8_t nextAvailableUnigram;
+    density_lion_unigram_node unigramsPool[DENSITY_LION_NUMBER_OF_UNIGRAMS];
+    density_lion_unigram_node *lastUnigramNode;
+    density_lion_unigram_node *unigramsIndex[DENSITY_LION_NUMBER_OF_UNIGRAMS];
+} density_lion_unigram_data;
+#pragma pack(pop)
+
+void density_lion_unigram_model_init(density_lion_unigram_data *);
+void density_lion_unigram_model_update(density_lion_unigram_data *, const uint8_t, density_lion_unigram_node *);
+
+#endif

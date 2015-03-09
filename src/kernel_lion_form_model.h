@@ -75,5 +75,6 @@ static const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_L
 
 void density_lion_form_model_init(density_lion_form_data *);
 void density_lion_form_model_update(density_lion_form_data *, density_lion_form_node *, density_lion_form_node *);
+density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *, const DENSITY_LION_FORM);
 
 #endif
