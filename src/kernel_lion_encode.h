@@ -74,8 +74,14 @@ typedef struct {
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
-    density_lion_form_statistics formStatistics[DENSITY_LION_NUMBER_OF_FORMS];
-    density_lion_form_rank formRanks[DENSITY_LION_NUMBER_OF_FORMS];
+    //density_lion_form_statistics formStatistics[DENSITY_LION_NUMBER_OF_FORMS];
+    //density_lion_form_rank formRanks[DENSITY_LION_NUMBER_OF_FORMS];
+    /*uint8_t nextAvailableForm;
+    density_lion_form_node formsPool[DENSITY_LION_NUMBER_OF_FORMS];
+    density_lion_form_node *lastFormNode;
+    density_lion_form_node *formsIndex[DENSITY_LION_NUMBER_OF_FORMS];*/
+    //density_lion_form_node *formRanksIndex[DENSITY_LION_NUMBER_OF_FORMS];
+    density_lion_form_data formData;
 
     uint_fast32_t lastHash;
     uint_fast32_t lastChunk;

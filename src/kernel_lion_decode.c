@@ -112,7 +112,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_read_signature_from_memory(density
 
 DENSITY_FORCE_INLINE uint8_t density_lion_decode_read_4bits_from_signature(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
     uint_fast8_t result;
-    const uint_fast8_t projected_shift = state->shift + (uint8_t)4;
+    const uint_fast8_t projected_shift = state->shift + (uint8_t) 4;
 
     if (density_likely(state->shift)) {
         if (density_unlikely(projected_shift >= density_bitsizeof(density_lion_signature))) {
@@ -142,15 +142,15 @@ DENSITY_FORCE_INLINE uint8_t density_lion_decode_read_4bits_from_signature(densi
 }
 
 DENSITY_FORCE_INLINE bool density_lion_decode_read_1bit_from_signature(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
-    if(density_likely(state->shift)) {
+    if (density_likely(state->shift)) {
         bool result = (bool) (state->signature >> state->shift);
 
-        switch(state->shift) {
+        switch (state->shift) {
             case (density_bitsizeof(density_lion_signature) - 1):
                 state->shift = 0;
                 break;
             default:
-                state->shift ++;
+                state->shift++;
                 break;
         }
 
@@ -225,7 +225,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_compressed_chunk_b(const uint16_t 
     density_lion_decode_write_decompressed_chunk(chunk, out, state);
 }*/
 
-DENSITY_FORCE_INLINE void density_lion_decode_secondary_access_form(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+DENSITY_FORCE_INLINE void density_lion_decode_bigram(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     /*const uint32_t chunk_rs8 = chunk >> 8;
     const uint32_t chunk_rs16 = chunk >> 16;
 
@@ -244,26 +244,20 @@ DENSITY_FORCE_INLINE void density_lion_decode_secondary_access_form(density_memo
     uint8_t rank_b;
     uint8_t byte;
 
-    switch (density_lion_decode_read_1bit_from_signature(in, state)) {
-        case DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY:
-            density_lion_decode_read_byte(&bigramHash, in);
-            density_lion_decode_compressed_bigram(&bigramHash, out, state);
-            break;
-        default:    // DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_SECONDARY_ACCESS
-            switch (density_lion_decode_read_1bit_from_signature(in, state)) {
-                case DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_ENCODED:
-                    density_lion_decode_read_byte(&byte, in);
-                    rank_a = (uint8_t) (((byte >> 2) & BINARY_TO_UINT(110000)) | density_lion_decode_read_4bits_from_signature(in, state));
-                    rank_b = (uint8_t) (byte & BINARY_TO_UINT(111111));
-                    // write letters from rank;
-                    break;
-                default:    // DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_PLAIN
-                    *(uint16_t *) out->pointer = *(uint16_t *) in->pointer;
-                    in->pointer += sizeof(uint16_t);
-                    break;
-            }
+    if (density_lion_decode_read_1bit_from_signature(in, state)) {  // DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_SECONDARY_ACCESS
+        if (density_lion_decode_read_1bit_from_signature(in, state)) {  // DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_PLAIN
+            *(uint16_t *) out->pointer = *(uint16_t *) in->pointer;
+            in->pointer += sizeof(uint16_t);
+        } else {    // DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_ENCODED:
+            density_lion_decode_read_byte(&byte, in);
+            rank_a = (uint8_t) (((byte >> 2) & BINARY_TO_UINT(110000)) | density_lion_decode_read_4bits_from_signature(in, state));
+            rank_b = (uint8_t) (byte & BINARY_TO_UINT(111111));
+            // write letters from rank;
             out->pointer += sizeof(uint16_t);
-            break;
+        }
+    } else {  // DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY:
+        density_lion_decode_read_byte(&bigramHash, in);
+        density_lion_decode_compressed_bigram(&bigramHash, out, state);
     }
 }
 
@@ -283,8 +277,8 @@ DENSITY_FORCE_INLINE void density_lion_decode_kernel(density_memory_location *re
             density_lion_decode_compressed_chunk_b(&hash, out, state);
             break;
         case DENSITY_LION_FORM_SECONDARY_ACCESS:
-            density_lion_decode_secondary_access_form(in, out, state);
-            density_lion_decode_secondary_access_form(in, out, state);
+            density_lion_decode_bigram(in, out, state);
+            density_lion_decode_bigram(in, out, state);
             break;
     }
 
@@ -293,7 +287,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_kernel(density_memory_location *re
 }
 
 // todo to be improved
-DENSITY_FORCE_INLINE void density_lion_decode_update_form_model(density_lion_decode_state *restrict state, DENSITY_LION_FORM form) {
+/*DENSITY_FORCE_INLINE void density_lion_decode_update_form_model(density_lion_decode_state *restrict state, DENSITY_LION_FORM form) {
     density_lion_form_statistics *stats = &state->formStatistics[form];
 
     const uint8_t rank = stats->rank;
@@ -310,9 +304,9 @@ DENSITY_FORCE_INLINE void density_lion_decode_update_form_model(density_lion_dec
         }
     }
     stats->usage++;
-}
+}*/
 
-DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
+/*DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
     DENSITY_LION_FORM form;
 
     const bool first_bit = density_lion_decode_read_1bit_from_signature(in, state);
@@ -332,11 +326,11 @@ DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(densi
     density_lion_decode_update_form_model(state, form);
 
     return form;
-}
+}*/
 
 DENSITY_FORCE_INLINE void density_lion_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
-    while (density_likely(state->shift))
-        density_lion_decode_kernel(in, out, state, density_lion_decode_read_form(in, state));
+    //while (density_likely(state->shift))
+    //    density_lion_decode_kernel(in, out, state, density_lion_decode_read_form(in, state));
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *state, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead) {
@@ -351,7 +345,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(densit
 
     state->endDataOverhead = endDataOverhead;
 
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].form = DENSITY_LION_FORM_CHUNK_PREDICTIONS;
+    /*state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].form = DENSITY_LION_FORM_CHUNK_PREDICTIONS;
     state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].usage = 0;
     state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].rank = 3;
     state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A].form = DENSITY_LION_FORM_CHUNK_DICTIONARY_A;
@@ -367,7 +361,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(densit
     state->formRanks[3].statistics = &state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS];
     state->formRanks[1].statistics = &state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A];
     state->formRanks[2].statistics = &state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B];
-    state->formRanks[0].statistics = &state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS];
+    state->formRanks[0].statistics = &state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS];*/
 
     state->lastHash = 0;
     state->lastChunk = 0;
