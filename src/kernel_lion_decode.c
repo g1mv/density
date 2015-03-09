@@ -286,28 +286,8 @@ DENSITY_FORCE_INLINE void density_lion_decode_kernel(density_memory_location *re
     state->lastChunk = *(uint32_t *) (out->pointer - sizeof(uint32_t));
 }
 
-// todo to be improved
-/*DENSITY_FORCE_INLINE void density_lion_decode_update_form_model(density_lion_decode_state *restrict state, DENSITY_LION_FORM form) {
-    density_lion_form_statistics *stats = &state->formStatistics[form];
-
-    const uint8_t rank = stats->rank;
-
-    if (density_unlikely(rank)) {
-        density_lion_form_rank *rankCurrent = &state->formRanks[rank];
-        density_lion_form_rank *rankUpper = &state->formRanks[rank - 1];
-        if (density_unlikely(stats->usage > rankUpper->statistics->usage)) {
-            density_lion_form_statistics *replaced = rankUpper->statistics;
-            replaced->rank++;
-            stats->rank--;
-            rankUpper->statistics = stats;
-            rankCurrent->statistics = replaced;
-        }
-    }
-    stats->usage++;
-}*/
-
-/*DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
-    DENSITY_LION_FORM form;
+DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
+    density_lion_form_node* form;
 
     const bool first_bit = density_lion_decode_read_1bit_from_signature(in, state);
     if (density_unlikely(first_bit)) {
@@ -315,18 +295,18 @@ DENSITY_FORCE_INLINE void density_lion_decode_kernel(density_memory_location *re
         if (density_unlikely(second_bit)) {
             const bool third_bit = density_lion_decode_read_1bit_from_signature(in, state);
             if (density_unlikely(third_bit))
-                form = state->formRanks[3].statistics->form;
+                form = &state->formData.formsPool[3];
             else
-                form = state->formRanks[2].statistics->form;
+                form = &state->formData.formsPool[2];
         } else
-            form = state->formRanks[1].statistics->form;
+            form = &state->formData.formsPool[1];
     } else
-        form = state->formRanks[0].statistics->form;
+        form = &state->formData.formsPool[0];
 
-    density_lion_decode_update_form_model(state, form);
+    density_lion_form_model_update(&state->formData, form, form->previousForm);
 
-    return form;
-}*/
+    return form->form;
+}
 
 DENSITY_FORCE_INLINE void density_lion_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     //while (density_likely(state->shift))
@@ -345,23 +325,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(densit
 
     state->endDataOverhead = endDataOverhead;
 
-    /*state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].form = DENSITY_LION_FORM_CHUNK_PREDICTIONS;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].usage = 0;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].rank = 3;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A].form = DENSITY_LION_FORM_CHUNK_DICTIONARY_A;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A].usage = 0;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A].rank = 1;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B].form = DENSITY_LION_FORM_CHUNK_DICTIONARY_B;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B].usage = 0;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B].rank = 2;
-    state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS].form = DENSITY_LION_FORM_SECONDARY_ACCESS;
-    state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS].usage = 0;
-    state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS].rank = 0;
-
-    state->formRanks[3].statistics = &state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS];
-    state->formRanks[1].statistics = &state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A];
-    state->formRanks[2].statistics = &state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B];
-    state->formRanks[0].statistics = &state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS];*/
+    density_lion_form_model_init(&state->formData);
 
     state->lastHash = 0;
     state->lastChunk = 0;

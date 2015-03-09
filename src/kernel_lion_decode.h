@@ -44,6 +44,7 @@
 
 #include "kernel_lion_dictionary.h"
 #include "kernel_lion.h"
+#include "kernel_lion_form_model.h"
 #include "block.h"
 #include "kernel_decode.h"
 #include "density_api.h"
@@ -90,12 +91,7 @@ typedef struct {
 
     uint_fast64_t endDataOverhead;
 
-    //density_lion_form_statistics formStatistics[DENSITY_LION_NUMBER_OF_FORMS];
-    //density_lion_form_rank formRanks[DENSITY_LION_NUMBER_OF_FORMS];
-    uint8_t nextAvailableForm;
-    density_lion_form_node formsPool[DENSITY_LION_NUMBER_OF_FORMS];
-    density_lion_form_node *lastFormNode;
-    density_lion_form_node *formsIndex[DENSITY_LION_NUMBER_OF_FORMS];
+    density_lion_form_data formData;
 
     uint_fast32_t lastHash;
     uint_fast32_t lastChunk;

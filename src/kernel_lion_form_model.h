@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2013, Guillaume Voirin
+ * Copyright (c) 2015, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 06/12/13 20:20
+ * 9/03/15 12:04
  *
  * --------------
  * Lion algorithm
@@ -39,52 +39,41 @@
  * Multiform compression algorithm
  */
 
-#ifndef DENSITY_LION_ENCODE_H
-#define DENSITY_LION_ENCODE_H
+#ifndef DENSITY_LION_FORM_MODEL_H
+#define DENSITY_LION_FORM_MODEL_H
 
-#include "kernel_lion_dictionary.h"
+#include "globals.h"
 #include "kernel_lion.h"
-#include "kernel_lion_form_model.h"
-#include "block.h"
-#include "kernel_encode.h"
-#include "density_api.h"
-#include "memory_location.h"
-#include "memory_teleport.h"
 
-#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (2 * (sizeof(density_lion_signature) + sizeof(uint32_t) * 4 * sizeof(density_lion_signature)))
-#define DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE                    (1 * 2 * sizeof(uint64_t))
+#define DENSITY_LION_NUMBER_OF_FORMS                                    4
 
-typedef enum {
-    DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
-    DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE,
-    DENSITY_LION_ENCODE_PROCESS_READ_CHUNK,
-} DENSITY_LION_ENCODE_PROCESS;
+// Unary codes except the last one
+#define DENSITY_LION_FORM_MODEL_ENTROPY_CODES {\
+    {BINARY_TO_UINT(0), 1},\
+    {BINARY_TO_UINT(10), 2},\
+    {BINARY_TO_UINT(110), 3},\
+    {BINARY_TO_UINT(111), 3},\
+}
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_LION_ENCODE_PROCESS process;
+    DENSITY_LION_FORM form;
+    uint32_t usage;
+    uint8_t rank;
+    void *previousForm;
+} density_lion_form_node;
 
-#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
-    uint_fast64_t resetCycle;
-#endif
-
-    uint_fast32_t shift;
-    density_lion_signature proximitySignature;
-    density_lion_signature * signature;
-    uint_fast32_t signaturesCount;
-    uint_fast8_t efficiencyChecked;
-
-    density_lion_form_data formData;
-
-    uint_fast32_t lastHash;
-    uint_fast32_t lastChunk;
-
-    density_lion_dictionary dictionary;
-} density_lion_encode_state;
+typedef struct {
+    uint8_t nextAvailableForm;
+    density_lion_form_node formsPool[DENSITY_LION_NUMBER_OF_FORMS];
+    density_lion_form_node *formsIndex[DENSITY_LION_NUMBER_OF_FORMS];
+} density_lion_form_data;
 #pragma pack(pop)
 
-DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(density_lion_encode_state *);
-DENSITY_KERNEL_ENCODE_STATE density_lion_encode_continue(density_memory_teleport *, density_memory_location *, density_lion_encode_state *);
-DENSITY_KERNEL_ENCODE_STATE density_lion_encode_finish(density_memory_teleport *, density_memory_location *, density_lion_encode_state *);
+static const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUMBER_OF_FORMS] = DENSITY_LION_FORM_MODEL_ENTROPY_CODES;
+
+void density_lion_form_model_init(density_lion_form_data *);
+void density_lion_form_model_update(density_lion_form_data *, density_lion_form_node *, density_lion_form_node *);
+
 #endif

@@ -44,8 +44,6 @@
 
 #include <stdint.h>
 
-#define DENSITY_LION_NUMBER_OF_FORMS                                    4
-
 #define DENSITY_LION_PREFERRED_BLOCK_SIGNATURES_SHIFT                   13
 #define DENSITY_LION_PREFERRED_BLOCK_SIGNATURES                         (1 << DENSITY_LION_PREFERRED_BLOCK_SIGNATURES_SHIFT)
 
@@ -84,14 +82,6 @@
                                 + (ISOLATE(b, 281474976710656llu) ? 0x10000 : 0)\
                                 + (ISOLATE(b, 2251799813685248llu) ? 0x20000 : 0))
 
-// Unary codes except the last one
-#define DENSITY_LION_FORM_ENTROPY_CODES {\
-    {BINARY_TO_UINT(0), 1},\
-    {BINARY_TO_UINT(10), 2},\
-    {BINARY_TO_UINT(110), 3},\
-    {BINARY_TO_UINT(111), 3},\
-}
-
 typedef enum {
     DENSITY_LION_FORM_CHUNK_PREDICTIONS,
     DENSITY_LION_FORM_CHUNK_DICTIONARY_A,
@@ -112,37 +102,11 @@ typedef enum {
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_LION_FORM form;
-    uint32_t usage;
-    uint8_t rank;
-    void *previousForm;
-} density_lion_form_node;
-
-typedef struct {
-    uint8_t nextAvailableForm;
-    density_lion_form_node formsPool[DENSITY_LION_NUMBER_OF_FORMS];
-    density_lion_form_node *lastFormNode;
-    density_lion_form_node *formsIndex[DENSITY_LION_NUMBER_OF_FORMS];
-} density_lion_form_data;
-
-/*typedef struct {
-    DENSITY_LION_FORM form;
-    uint32_t usage;
-    uint8_t rank;
-} density_lion_form_statistics;
-
-typedef struct {
-    density_lion_form_statistics *statistics;
-} density_lion_form_rank;*/
-
-typedef struct {
     uint_fast8_t value;
     uint_fast8_t bitLength;
 } density_lion_entropy_code;
 #pragma pack(pop)
 
 typedef uint64_t                                                        density_lion_signature;
-
-static const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUMBER_OF_FORMS] = DENSITY_LION_FORM_ENTROPY_CODES;
 
 #endif

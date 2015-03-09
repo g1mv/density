@@ -122,64 +122,31 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(density_memory_l
     }
 }
 
-/*DENSITY_FORCE_INLINE density_lion_entropy_code density_lion_encode_fetch_form_rank_for_use(density_lion_encode_state *state, DENSITY_LION_FORM form) {
-    density_lion_form_statistics *stats = &state->formStatistics[form];
-
-    const uint8_t rank = stats->rank;
-    if (density_unlikely(rank)) {
-        density_lion_form_rank *rankCurrent = &state->formRanks[rank];
-        density_lion_form_rank *rankUpper = &state->formRanks[rank - 1];
-        if (density_unlikely(stats->usage > rankUpper->statistics->usage)) {
-            density_lion_form_statistics *replaced = rankUpper->statistics;
-            replaced->rank++;
-            stats->rank--;
-            rankUpper->statistics = stats;
-            rankCurrent->statistics = replaced;
-        }
-        stats->usage++;
-        return density_lion_form_entropy_codes[rank];
-    } else {
-        stats->usage++;
-        return density_lion_form_entropy_codes[0];
-    }
-}*/
 DENSITY_FORCE_INLINE density_lion_entropy_code density_lion_encode_get_form_code(density_lion_encode_state *restrict state, const DENSITY_LION_FORM form) {
     density_lion_form_node *form_found = state->formData.formsIndex[form];
+    form_found->usage++;
 
-    if (density_likely(form_found)) {
+    density_lion_form_node *previous_form = form_found->previousForm;
+    if (form_found->previousForm) {
         const uint8_t rank = form_found->rank;
-        form_found->usage++;
-        if (rank) {
-            density_lion_form_node *previous_form = form_found->previousForm;
 
-            if (density_unlikely(previous_form->usage < form_found->usage)) {    // Relative stability is assumed
-                DENSITY_LION_FORM previous_form_value = previous_form->form;
-                uint32_t previous_form_usage = previous_form->usage;
+        if (density_unlikely(previous_form->usage < form_found->usage)) {    // Relative stability is assumed
+            DENSITY_LION_FORM previous_form_value = previous_form->form;
+            uint32_t previous_form_usage = previous_form->usage;
 
-                previous_form->form = form;
-                previous_form->usage = form_found->usage;
+            previous_form->form = form;
+            previous_form->usage = form_found->usage;
 
-                form_found->form = previous_form_value;
-                form_found->usage = previous_form_usage;
+            form_found->form = previous_form_value;
+            form_found->usage = previous_form_usage;
 
-                state->formData.formsIndex[form] = previous_form;
-                state->formData.formsIndex[previous_form_value] = form_found;
-            }
+            state->formData.formsIndex[form] = previous_form;
+            state->formData.formsIndex[previous_form_value] = form_found;
+        }
 
-            return density_lion_form_entropy_codes[rank];
-        } else
-            return density_lion_form_entropy_codes[0];
-    } else {
-        density_lion_form_node *new_form = &state->formData.formsPool[state->formData.nextAvailableForm];
-        new_form->form = form;
-        new_form->usage = 1;
-        new_form->previousForm = state->formData.lastFormNode;
-        new_form->rank = state->formData.nextAvailableForm++;
-        state->formData.formsIndex[form] = new_form;
-        state->formData.lastFormNode = new_form;
-
-        return density_lion_form_entropy_codes[new_form->rank];
-    }
+        return density_lion_form_entropy_codes[rank];
+    } else
+        return density_lion_form_entropy_codes[0];
 }
 
 DENSITY_FORCE_INLINE void density_lion_encode_update_unigram_model(density_lion_encode_state *restrict state, const uint8_t unigram, density_lion_dictionary_unigram_node *unigram_found) {
@@ -351,26 +318,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(densit
     state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
 #endif
 
-    state->formData.nextAvailableForm = 0;
-    //state->formsIndex;
-    state->formData.lastFormNode = NULL;
-    /*state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].form = DENSITY_LION_FORM_CHUNK_PREDICTIONS;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].usage = 0;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS].rank = 3;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A].form = DENSITY_LION_FORM_CHUNK_DICTIONARY_A;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A].usage = 0;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A].rank = 1;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B].form = DENSITY_LION_FORM_CHUNK_DICTIONARY_B;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B].usage = 0;
-    state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B].rank = 2;
-    state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS].form = DENSITY_LION_FORM_SECONDARY_ACCESS;
-    state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS].usage = 0;
-    state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS].rank = 0;
-
-    state->formRanks[3].statistics = &state->formStatistics[DENSITY_LION_FORM_CHUNK_PREDICTIONS];
-    state->formRanks[1].statistics = &state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_A];
-    state->formRanks[2].statistics = &state->formStatistics[DENSITY_LION_FORM_CHUNK_DICTIONARY_B];
-    state->formRanks[0].statistics = &state->formStatistics[DENSITY_LION_FORM_SECONDARY_ACCESS];*/
+    density_lion_form_model_init(&state->formData);
 
     state->lastHash = 0;
     state->lastChunk = 0;
