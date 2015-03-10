@@ -64,7 +64,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
         return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
 
     check_signature_state:
-    if (DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD > out->available_bytes)
+    if (DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE > out->available_bytes)
         return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT;
     if ((returnState = density_lion_encode_check_state(out, state)))
         return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);

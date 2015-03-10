@@ -66,4 +66,10 @@ typedef enum {
 
 typedef uint64_t                                                            density_cheetah_signature;
 
+#define DENSITY_CHEETAH_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE          ((density_bitsizeof(density_cheetah_signature) >> 1) * sizeof(uint32_t))   // Uncompressed chunks
+#define DENSITY_CHEETAH_MAXIMUM_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE        ((density_bitsizeof(density_cheetah_signature) >> 1) * sizeof(uint32_t))   // Standard size
+
+#define DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE                        (density_bitsizeof(density_cheetah_signature) + DENSITY_CHEETAH_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
+#define DENSITY_CHEETAH_MAXIMUM_DECOMPRESSED_UNIT_SIZE                      (DENSITY_CHEETAH_MAXIMUM_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
+
 #endif

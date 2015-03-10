@@ -66,7 +66,7 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_prepare_new_signature(density_m
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_prepare_new_block(density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
-    if (DENSITY_CHEETAH_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD > out->available_bytes)
+    if (DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE > out->available_bytes)
         return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT;
 
     switch (state->signaturesCount) {

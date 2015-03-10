@@ -60,7 +60,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_cheetah_de
 
     // Try to read the next processing unit
     read_processing_unit:
-    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, (sizeof(density_cheetah_signature) + DENSITY_CHEETAH_DECODE_MAXIMUM_BODY_SIZE_PER_SIGNATURE) << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT, state->endDataOverhead))))
+    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT, state->endDataOverhead))))
 #ifdef DENSITY_CHEETAH_DECODE_CONTINUE
         return exitProcess(state, DENSITY_CHEETAH_DECODE_PROCESS_READ_PROCESSING_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 #else

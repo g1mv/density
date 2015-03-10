@@ -39,6 +39,8 @@
  * Multiform compression algorithm
  */
 
+#include <assert.h>
+
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
@@ -54,14 +56,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
     }
 
     check_signature_state:
-    //if (DENSITY_LION_DECODE_MINIMUM_OUTPUT_LOOKAHEAD > out->available_bytes)
-    //    return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT;
+    if ((DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE << (DENSITY_LION_DECODE_ITERATIONS_SHIFT + 1)) > out->available_bytes)
+        return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT;
     if (density_unlikely((returnState = density_lion_decode_check_state(out, state))))
         return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
 
     // Try to read the next processing unit
     read_processing_unit:
-    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, (sizeof(density_lion_signature) + DENSITY_LION_DECODE_MAXIMUM_BODY_SIZE_PER_SIGNATURE) << DENSITY_LION_DECODE_ITERATIONS_SHIFT, state->endDataOverhead))))
+    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE << (DENSITY_LION_DECODE_ITERATIONS_SHIFT + 1), state->endDataOverhead))))
 #ifdef DENSITY_LION_DECODE_CONTINUE
         return exitProcess(state, DENSITY_LION_DECODE_PROCESS_READ_PROCESSING_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 #else
@@ -73,9 +75,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
 
     uint_fast8_t iterations = (1 << DENSITY_LION_DECODE_ITERATIONS_SHIFT);
     while(iterations--)
-        density_lion_decode_process_data(readMemoryLocation, out, state);
+        density_lion_decode_kernel(readMemoryLocation, out, state);
 
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
+    assert(out->pointer - outPointerBefore < out->available_bytes);
     out->available_bytes -= (out->pointer - outPointerBefore);
 
     // New loop

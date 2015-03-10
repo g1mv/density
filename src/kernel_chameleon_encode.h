@@ -51,7 +51,6 @@
 #include "memory_teleport.h"
 #include "memory_location.h"
 
-#define DENSITY_CHAMELEON_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (sizeof(density_chameleon_signature) + sizeof(uint32_t) * density_bitsizeof(density_chameleon_signature))
 #define DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE                    (8 * sizeof(uint64_t))
 
 typedef enum {

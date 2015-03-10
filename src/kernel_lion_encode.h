@@ -52,7 +52,6 @@
 #include "memory_teleport.h"
 #include "kernel_lion_unigram_model.h"
 
-#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD             (2 * (sizeof(density_lion_signature) + sizeof(uint32_t) * 4 * sizeof(density_lion_signature)))
 #define DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE                    (1 * 2 * sizeof(uint64_t))
 
 typedef enum {

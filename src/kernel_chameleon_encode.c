@@ -65,7 +65,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_new_signature(density
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_prepare_new_block(density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
-    if (DENSITY_CHAMELEON_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD > out->available_bytes)
+    if (DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE > out->available_bytes)
         return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT;
 
     switch (state->signaturesCount) {
