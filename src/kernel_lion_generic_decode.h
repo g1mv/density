@@ -56,14 +56,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
     }
 
     check_signature_state:
-    if ((DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE << (DENSITY_LION_DECODE_ITERATIONS_SHIFT + 1)) > out->available_bytes)
+    if ((DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE << DENSITY_LION_DECODE_ITERATIONS_SHIFT) > out->available_bytes)
         return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT;
     if (density_unlikely((returnState = density_lion_decode_check_state(out, state))))
         return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
 
     // Try to read the next processing unit
     read_processing_unit:
-    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE << (DENSITY_LION_DECODE_ITERATIONS_SHIFT + 1), state->endDataOverhead))))
+    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(density_lion_signature) + (DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE << DENSITY_LION_DECODE_ITERATIONS_SHIFT), state->endDataOverhead))))
 #ifdef DENSITY_LION_DECODE_CONTINUE
         return exitProcess(state, DENSITY_LION_DECODE_PROCESS_READ_PROCESSING_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 #else
