@@ -40,6 +40,9 @@
  */
 
 #include <assert.h>
+#include "memory_location.h"
+#include "kernel_lion_decode.h"
+#include "memory_teleport.h"
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     DENSITY_KERNEL_DECODE_STATE returnState;
@@ -74,11 +77,12 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
     density_byte* outPointerBefore = out->pointer;
 
     uint_fast8_t iterations = (1 << DENSITY_LION_DECODE_ITERATIONS_SHIFT);
-    while(iterations--)
+    do {
         density_lion_decode_kernel(readMemoryLocation, out, state);
+        iterations --;
+    } while(iterations);
 
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
-    assert(out->pointer - outPointerBefore < out->available_bytes);
     out->available_bytes -= (out->pointer - outPointerBefore);
 
     // New loop
@@ -133,6 +137,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
 
     finish:
     density_memory_teleport_copy(in, out, density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead));*/
+
+    readMemoryLocation = density_memory_teleport_read_reserved(in, density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead), state->endDataOverhead);
+    readMemoryLocation->available_bytes = 0;
 
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }

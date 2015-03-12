@@ -47,11 +47,11 @@
 
 #define DENSITY_LION_NUMBER_OF_FORMS                                    4
 
-// Unary codes except the last one
+// Unary codes (reversed) except the last one
 #define DENSITY_LION_FORM_MODEL_ENTROPY_CODES {\
     {BINARY_TO_UINT(0), 1},\
-    {BINARY_TO_UINT(10), 2},\
-    {BINARY_TO_UINT(110), 3},\
+    {BINARY_TO_UINT(01), 2},\
+    {BINARY_TO_UINT(011), 3},\
     {BINARY_TO_UINT(111), 3},\
 }
 

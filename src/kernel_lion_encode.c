@@ -168,8 +168,8 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
         if (*found_a ^ chunk) {
             uint32_t *found_b = &found->chunk_b;
             if (*found_b ^ chunk) {
-                const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_SECONDARY_ACCESS);
-                density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
+                const density_lion_entropy_code codeSA = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_SECONDARY_ACCESS);
+                density_lion_encode_push_to_signature(out, state, codeSA.value, codeSA.bitLength);
 
                 const uint32_t chunk_rs8 = chunk >> 8;
                 const uint32_t chunk_rs16 = chunk >> 16;
@@ -196,7 +196,11 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                     density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_SECONDARY_ACCESS, 1);
 
                     density_lion_encode_process_bigram(out, state, bigram_a);
+
+                    bigram_entry_a->bigram = bigram_a;
                 }
+                state->dictionary.bigrams[hash_p].bigram = bigram_p;
+
                 if (bigram_entry_c->bigram == bigram_c) {
                     density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY, 1);
 
@@ -206,15 +210,14 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                     density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_SECONDARY_ACCESS, 1);
 
                     density_lion_encode_process_bigram(out, state, bigram_c);
-                }
 
-                state->dictionary.bigrams[hash_p].bigram = bigram_p;
-                bigram_entry_a->bigram = bigram_a;
+                    bigram_entry_c->bigram = bigram_c;
+                }
                 state->dictionary.bigrams[hash_b].bigram = bigram_b;
-                bigram_entry_c->bigram = bigram_c;
+
             } else {
-                const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
-                density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
+                const density_lion_entropy_code codeDB = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
+                density_lion_encode_push_to_signature(out, state, codeDB.value, codeDB.bitLength);
 
                 *(uint16_t *) (out->pointer) = DENSITY_LITTLE_ENDIAN_16(*hash);
                 out->pointer += sizeof(uint16_t);
@@ -222,16 +225,16 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
             *found_b = *found_a;
             *found_a = chunk;
         } else {
-            const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_A);
-            density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
+            const density_lion_entropy_code codeDA = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_A);
+            density_lion_encode_push_to_signature(out, state, codeDA.value, codeDA.bitLength);
 
             *(uint16_t *) (out->pointer) = DENSITY_LITTLE_ENDIAN_16(*hash);
             out->pointer += sizeof(uint16_t);
         }
         *predictedChunk = chunk;
     } else {
-        const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_PREDICTIONS);
-        density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
+        const density_lion_entropy_code codeP = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_PREDICTIONS);
+        density_lion_encode_push_to_signature(out, state, codeP.value, codeP.bitLength);
     }
 
     state->lastHash = *hash;
