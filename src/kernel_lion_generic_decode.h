@@ -75,13 +75,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
 
     density_byte *readMemoryLocationPointerBefore = readMemoryLocation->pointer;
     density_byte* outPointerBefore = out->pointer;
-
     uint_fast8_t iterations = (1 << DENSITY_LION_DECODE_ITERATIONS_SHIFT);
-    do {
+    while(iterations --)
         density_lion_decode_kernel(readMemoryLocation, out, state);
-        iterations --;
-    } while(iterations);
-
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
     out->available_bytes -= (out->pointer - outPointerBefore);
 
