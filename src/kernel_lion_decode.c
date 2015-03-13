@@ -104,9 +104,12 @@ DENSITY_FORCE_INLINE uint8_t density_lion_decode_read_4bits_from_signature(densi
             result = (uint8_t) (state->signature >> state->shift);  // Get the remaining bits from the current signature
             uint_fast8_t overflowBits = (uint_fast8_t) (projected_shift & (density_bitsizeof(density_lion_signature) - 1));
 
-            density_lion_decode_read_signature_from_memory(in, state);
+            if(overflowBits) {
+                density_lion_decode_read_signature_from_memory(in, state);
 
-            result |= (state->signature & density_lion_decode_bitmasks[overflowBits]) << (density_bitsizeof(density_lion_signature) - state->shift);   // Add bits from the new signature
+                result |= (state->signature & density_lion_decode_bitmasks[overflowBits]) << (density_bitsizeof(density_lion_signature) - state->shift);   // Add bits from the new signature
+            }
+
             state->shift = overflowBits;
 
             return result;
@@ -133,7 +136,6 @@ DENSITY_FORCE_INLINE bool density_lion_decode_read_1bit_from_signature(density_m
         switch (state->shift) {
             case (density_bitsizeof(density_lion_signature) - 1):
                 state->shift = 0;
-                density_lion_decode_read_signature_from_memory(in, state);
                 break;
             default:
                 state->shift++;
@@ -172,12 +174,6 @@ DENSITY_FORCE_INLINE void density_lion_decode_predicted_chunk(uint32_t *restrict
     out->pointer += sizeof(uint32_t);
 
     state->lastUnigram = (uint8_t) (chunk >> 24);
-
-    fprintf(stderr, "[%c", chunk & 0xFF);
-    fprintf(stderr, "%c", (chunk >> 8) & 0xFF);
-    fprintf(stderr, "%c", (chunk >> 16) & 0xFF);
-    fprintf(stderr, "%c]", (chunk >> 24) & 0xFF);
-    fflush(stderr);
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_write_chunk(const uint32_t *restrict chunk, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
@@ -186,12 +182,6 @@ DENSITY_FORCE_INLINE void density_lion_decode_write_chunk(const uint32_t *restri
 
     (&state->dictionary.predictions[state->lastHash])->next_chunk_prediction = *chunk;
     state->lastUnigram = (uint8_t) (*chunk >> 24);
-
-    fprintf(stderr, "[%c", *chunk & 0xFF);
-    fprintf(stderr, "%c", (*chunk >> 8) & 0xFF);
-    fprintf(stderr, "%c", (*chunk >> 16) & 0xFF);
-    fprintf(stderr, "%c]", (*chunk >> 24) & 0xFF);
-    fflush(stderr);
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_compressed_chunk_a(const uint32_t *restrict hash, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
@@ -226,10 +216,12 @@ DENSITY_FORCE_INLINE uint8_t density_lion_decode_bigram(density_memory_location 
             density_lion_unigram_model_update(&state->unigramData, unigram_a, state->unigramData.unigramsIndex[unigram_a]);
             density_lion_unigram_model_update(&state->unigramData, unigram_b, state->unigramData.unigramsIndex[unigram_b]);
         } else {    // DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_ENCODED:
+            const uint8_t partialBits = density_lion_decode_read_4bits_from_signature(in, state);
+
             uint8_t byte = *in->pointer;
             in->pointer++;
 
-            const uint_fast8_t rank_a = (uint_fast8_t) (((byte >> 6) & BINARY_TO_UINT(11)) | (density_lion_decode_read_4bits_from_signature(in, state) << 2));
+            const uint_fast8_t rank_a = (uint_fast8_t) (((byte >> 6) & BINARY_TO_UINT(11)) | (partialBits << 2));
             const uint_fast8_t rank_b = (uint_fast8_t) (byte & BINARY_TO_UINT(111111));
 
             density_lion_unigram_node *found_a = &state->unigramData.unigramsPool[rank_a];
@@ -263,9 +255,6 @@ DENSITY_FORCE_INLINE uint8_t density_lion_decode_bigram(density_memory_location 
     out->pointer += sizeof(uint16_t);
 
     *chunk |= (bigram << shift);
-    fprintf(stderr, "[%c", bigram & 0xFF);
-    fprintf(stderr, "%c]", bigram >> 8);
-    fflush(stderr);
 
     return unigram_b;
 }
