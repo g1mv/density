@@ -55,7 +55,7 @@
 #include "kernel_lion_encode.h"
 #include "main_header.h"
 
-#define DENSITY_LION_DECODE_ITERATIONS_SHIFT                                    1
+#define DENSITY_LION_DECODE_ITERATIONS_SHIFT                                    2
 
 typedef enum {
     DENSITY_LION_DECODE_PROCESS_CHECK_SIGNATURE_STATE,

@@ -279,11 +279,6 @@ DENSITY_FORCE_INLINE void density_lion_decode_unit(density_memory_location *rest
             break;
         case DENSITY_LION_FORM_SECONDARY_ACCESS:
             state->lastUnigram = density_lion_decode_bigram(in, out, state, density_lion_decode_bigram(in, out, state, state->lastUnigram, &chunk, 0), &chunk, 0x10);
-            fprintf(stderr, "%c", (uint8_t)(chunk & 0xFF));
-            fprintf(stderr, "%c", (uint8_t)((chunk >> 8) & 0xFF));
-            fprintf(stderr, "%c", (uint8_t)((chunk >> 16) & 0xFF));
-            fprintf(stderr, "%c", (uint8_t)((chunk >> 24) & 0xFF));
-            fflush(stderr);
             density_lion_decode_process_chunk(&hash, &chunk, out, state);
             break;
     }
@@ -324,6 +319,20 @@ DENSITY_FORCE_INLINE void density_lion_decode_kernel(density_memory_location *re
     do {
         density_lion_decode_unit(in, out, state, density_lion_decode_read_form(in, state));
     } while (density_likely(state->shift > 0x10));
+}
+
+DENSITY_FORCE_INLINE bool density_lion_decode_unit_step_by_step(density_memory_location *restrict readMemoryLocation, density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+    DENSITY_LION_FORM form = density_lion_decode_read_form(readMemoryLocation, state);
+    switch (form) {
+        case DENSITY_LION_FORM_CHUNK_DICTIONARY_A:  // Potential end marker, we need 2 bytes for a chunk dictionary hash, if remaining bytes < 2 + 2 bytes then this form is the last one
+            if (density_unlikely(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < sizeof(uint32_t)))
+                return false;
+            break;
+        default:
+            break;
+    }
+    density_lion_decode_unit(readMemoryLocation, out, state, form);
+    return true;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *state, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead) {

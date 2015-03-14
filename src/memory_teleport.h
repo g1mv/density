@@ -62,6 +62,8 @@ density_memory_location *density_memory_teleport_read(density_memory_teleport *,
 
 density_memory_location *density_memory_teleport_read_reserved(density_memory_teleport *, const uint_fast64_t, const uint_fast64_t);
 
+density_memory_location *density_memory_teleport_read_remaining_reserved(density_memory_teleport *, const uint_fast64_t);
+
 uint_fast64_t density_memory_teleport_available_bytes(density_memory_teleport *);
 
 uint_fast64_t density_memory_teleport_available_bytes_reserved(density_memory_teleport *, const uint_fast64_t);

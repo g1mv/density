@@ -123,6 +123,10 @@ DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read_reser
     return density_memory_teleport_read(teleport, bytes + reserved);
 }
 
+DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read_remaining_reserved(density_memory_teleport *restrict teleport, const uint_fast64_t reserved) {
+    return density_memory_teleport_read_reserved(teleport, density_memory_teleport_available_bytes_reserved(teleport, reserved), reserved);
+}
+
 DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_bytes(density_memory_teleport *teleport) {
     return teleport->stagingMemoryLocation->memoryLocation->available_bytes + teleport->directMemoryLocation->available_bytes;
 }

@@ -44,7 +44,7 @@
 #include "kernel_lion_decode.h"
 #include "memory_teleport.h"
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decode_)(density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
 
@@ -74,9 +74,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
 #endif
 
     density_byte *readMemoryLocationPointerBefore = readMemoryLocation->pointer;
-    density_byte* outPointerBefore = out->pointer;
+    density_byte *outPointerBefore = out->pointer;
     uint_fast8_t iterations = (1 << DENSITY_LION_DECODE_ITERATIONS_SHIFT);
-    while(iterations --)
+    while (iterations--)
         density_lion_decode_kernel(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
     out->available_bytes -= (out->pointer - outPointerBefore);
@@ -86,56 +86,27 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
 
     // Try to read and process signature and body, step by step
     step_by_step:
-    /*if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(density_lion_signature), state->endDataOverhead)))
-        goto finish;
-    density_lion_decode_read_signature(readMemoryLocation, state);
-    readMemoryLocation->available_bytes -= sizeof(density_lion_signature);
-
-    while (state->shift != density_bitsizeof(density_lion_signature)) {
-        uint32_t hash = 0;
-        uint32_t chunk;
-
-        switch (density_lion_decode_get_signature_flag(state)) {
-            case DENSITY_LION_SIGNATURE_FLAG_PREDICTED:
-                density_lion_decode_predicted_chunk(&hash, out, state);
-                break;
-            case DENSITY_LION_SIGNATURE_FLAG_MAP_A:
-                if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
-                    return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                density_lion_decode_read_compressed_chunk(&hash, readMemoryLocation);
-                readMemoryLocation->available_bytes -= sizeof(uint16_t);
-                density_lion_decode_compressed_chunk_a(&hash, out, state);
-                break;
-            case DENSITY_LION_SIGNATURE_FLAG_MAP_B:
-                if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
-                    return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                density_lion_decode_read_compressed_chunk(&hash, readMemoryLocation);
-                readMemoryLocation->available_bytes -= sizeof(uint16_t);
-                density_lion_decode_compressed_chunk_b(&hash, out, state);
-                break;
-            case DENSITY_LION_SIGNATURE_FLAG_CHUNK:
-                if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint32_t), state->endDataOverhead)))
-                    goto finish;
-                density_lion_decode_read_uncompressed_chunk(&chunk, readMemoryLocation);
-                readMemoryLocation->available_bytes -= sizeof(uint32_t);
-                density_lion_decode_uncompressed_chunk(&hash, &chunk, out, state);
-                break;
-        }
-
-        state->lastHash = (uint16_t)hash;
-
-        out->available_bytes -= sizeof(uint32_t);
-        state->shift += 2;
+    readMemoryLocation = density_memory_teleport_read_remaining_reserved(in, state->endDataOverhead);
+    readMemoryLocationPointerBefore = readMemoryLocation->pointer;
+    outPointerBefore = out->pointer;
+    while (state->shift < 0x10) {  // Maximum signature part size per chunk is 3 + 2 * (1 + 1 + 4) = 15
+        if(density_unlikely(!density_lion_decode_unit_step_by_step(readMemoryLocation, in, out, state)))
+            goto finish;
     }
+    do {
+        if(density_unlikely(!density_lion_decode_unit_step_by_step(readMemoryLocation, in, out, state)))
+            goto finish;
+    } while (density_likely(state->shift > 0x10));
+    readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
+    out->available_bytes -= (out->pointer - outPointerBefore);
 
     // New loop
     goto check_signature_state;
 
     finish:
-    density_memory_teleport_copy(in, out, density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead));*/
-
-    readMemoryLocation = density_memory_teleport_read_reserved(in, density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead), state->endDataOverhead);
-    readMemoryLocation->available_bytes = 0;
+    readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
+    out->available_bytes -= (out->pointer - outPointerBefore);
+    density_memory_teleport_copy(in, out, density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead));
 
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }
