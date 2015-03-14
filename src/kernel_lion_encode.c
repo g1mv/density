@@ -187,8 +187,6 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                 const uint8_t hash_c = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_c);
 
                 density_lion_dictionary_bigram_entry *bigram_entry_a = &state->dictionary.bigrams[hash_a];
-                density_lion_dictionary_bigram_entry *bigram_entry_c = &state->dictionary.bigrams[hash_c];
-
                 if (bigram_entry_a->bigram == bigram_a) {
                     density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY, 1);
 
@@ -203,6 +201,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                 }
                 state->dictionary.bigrams[hash_p].bigram = bigram_p;
 
+                density_lion_dictionary_bigram_entry *bigram_entry_c = &state->dictionary.bigrams[hash_c];
                 if (bigram_entry_c->bigram == bigram_c) {
                     density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY, 1);
 

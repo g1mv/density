@@ -235,22 +235,24 @@ DENSITY_FORCE_INLINE uint8_t density_lion_decode_bigram(density_memory_location 
         }
 
         // Update dictionary values
-        const uint16_t bigram_p = ((unigram_a << 8) | previous_unigram);
-
-        const uint8_t hash_a = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_p);
-        const uint8_t hash_b = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram);
-
-        state->dictionary.bigrams[hash_a].bigram = bigram_p;
-        state->dictionary.bigrams[hash_b].bigram = bigram;
+        const uint8_t hash = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram);
+        state->dictionary.bigrams[hash].bigram = bigram;
 
     } else {  // DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY:
         uint8_t bigramHash = *in->pointer;
         in->pointer++;
 
         bigram = (&state->dictionary.bigrams[bigramHash])->bigram;
+        unigram_a = (uint8_t) (bigram & 0xFF);
         unigram_b = (uint8_t) (bigram >> 8);
     }
 
+    // Update remaining dictionary values
+    const uint16_t bigram_p = ((unigram_a << 8) | previous_unigram);
+    const uint8_t hash_p = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_p);
+    state->dictionary.bigrams[hash_p].bigram = bigram_p;
+
+    // Write bigram to output
     *(uint16_t *) out->pointer = bigram;
     out->pointer += sizeof(uint16_t);
 
@@ -277,6 +279,11 @@ DENSITY_FORCE_INLINE void density_lion_decode_unit(density_memory_location *rest
             break;
         case DENSITY_LION_FORM_SECONDARY_ACCESS:
             state->lastUnigram = density_lion_decode_bigram(in, out, state, density_lion_decode_bigram(in, out, state, state->lastUnigram, &chunk, 0), &chunk, 0x10);
+            fprintf(stderr, "%c", (uint8_t)(chunk & 0xFF));
+            fprintf(stderr, "%c", (uint8_t)((chunk >> 8) & 0xFF));
+            fprintf(stderr, "%c", (uint8_t)((chunk >> 16) & 0xFF));
+            fprintf(stderr, "%c", (uint8_t)((chunk >> 24) & 0xFF));
+            fflush(stderr);
             density_lion_decode_process_chunk(&hash, &chunk, out, state);
             break;
     }
