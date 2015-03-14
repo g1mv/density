@@ -51,6 +51,7 @@
 #include "memory_location.h"
 #include "memory_teleport.h"
 #include "kernel_lion_unigram_model.h"
+#include "kernel_lion_decode.h"
 
 #define DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE                    (1 * 2 * sizeof(uint64_t))
 

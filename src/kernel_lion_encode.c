@@ -40,7 +40,6 @@
  */
 
 #include "kernel_lion_encode.h"
-#include "kernel_lion.h"
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE exitProcess(density_lion_encode_state *state, DENSITY_LION_ENCODE_PROCESS process, DENSITY_KERNEL_ENCODE_STATE kernelEncodeState) {
     state->process = process;
@@ -56,13 +55,14 @@ DENSITY_FORCE_INLINE void density_lion_encode_prepare_new_signature(density_memo
     out->pointer += sizeof(density_lion_signature);
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_prepare_new_block(density_memory_location *restrict out, density_lion_encode_state *restrict state) {
-    if ((state->signaturesCount > DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_SIGNATURES) && (state->efficiencyChecked ^ 0x1)) {
-        state->efficiencyChecked = 1;
-        return DENSITY_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK;
-    } else if (state->signaturesCount > DENSITY_LION_PREFERRED_BLOCK_SIGNATURES) {
-        state->signaturesCount = 0;
-        state->efficiencyChecked = 0;
+DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_prepare_new_block(density_lion_encode_state *restrict state) {
+    if (!(state->signaturesCount & ((1 << DENSITY_LION_DECODE_ITERATIONS_SHIFT) - 1))) {
+        if ((state->signaturesCount > DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_SIGNATURES) && (state->efficiencyChecked ^ 0x1)) {
+            state->efficiencyChecked = 1;
+            return DENSITY_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK;
+        } else if (state->signaturesCount > DENSITY_LION_PREFERRED_BLOCK_SIGNATURES) {
+            state->signaturesCount = 0;
+            state->efficiencyChecked = 0;
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
             if (state->resetCycle)
@@ -73,18 +73,19 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_prepare_new
             }
 #endif
 
-        return DENSITY_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK;
+            return DENSITY_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK;
+        }
     }
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_check_state(density_memory_location *restrict out, density_lion_encode_state *restrict state) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_check_state(density_lion_encode_state *restrict state) {
     DENSITY_KERNEL_ENCODE_STATE returnState;
 
     switch (state->shift) {
         case 0:
-            if ((returnState = density_lion_encode_prepare_new_block(out, state)))
+            if ((returnState = density_lion_encode_prepare_new_block(state)))
                 return returnState;
             break;
         default:

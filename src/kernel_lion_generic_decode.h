@@ -61,7 +61,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
     check_signature_state:
     if ((DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE << DENSITY_LION_DECODE_ITERATIONS_SHIFT) > out->available_bytes)
         return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT;
-    if (density_unlikely((returnState = density_lion_decode_check_state(out, state))))
+    if (density_unlikely((returnState = density_lion_decode_check_state(state))))
         return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
 
     // Try to read the next processing unit
@@ -80,6 +80,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
         density_lion_decode_kernel(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
     out->available_bytes -= (out->pointer - outPointerBefore);
+
+    if(out->available_bytes < 316708 && out->available_bytes > 316508)
+        printf("ouch");
 
     // New loop
     goto check_signature_state;

@@ -51,7 +51,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE exitProcess(density_lion_decode
     return kernelDecodeState;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_prepare_new_block(density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_prepare_new_block(density_lion_decode_state *restrict state) {
     if ((state->signaturesCount > DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_SIGNATURES) && (state->efficiencyChecked ^ 0x1)) {
         state->efficiencyChecked = 1;
         return DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK;
@@ -74,12 +74,12 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_prepare_new
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_check_state(density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_check_state(density_lion_decode_state *restrict state) {
     DENSITY_KERNEL_DECODE_STATE returnState;
 
     switch (state->shift) {
         case 0:
-            if ((returnState = density_lion_decode_prepare_new_block(out, state)))
+            if ((returnState = density_lion_decode_prepare_new_block(state)))
                 return returnState;
             break;
         default:
@@ -104,7 +104,7 @@ DENSITY_FORCE_INLINE uint8_t density_lion_decode_read_4bits_from_signature(densi
             result = (uint8_t) (state->signature >> state->shift);  // Get the remaining bits from the current signature
             uint_fast8_t overflowBits = (uint_fast8_t) (projected_shift & (density_bitsizeof(density_lion_signature) - 1));
 
-            if(overflowBits) {
+            if (overflowBits) {
                 density_lion_decode_read_signature_from_memory(in, state);
 
                 result |= (state->signature & density_lion_decode_bitmasks[overflowBits]) << (density_bitsizeof(density_lion_signature) - state->shift);   // Add bits from the new signature

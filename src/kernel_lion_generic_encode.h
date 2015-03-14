@@ -60,13 +60,13 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
 
     // Prepare new block
     prepare_new_block:
-    if ((returnState = density_lion_encode_prepare_new_block(out, state)))
+    if ((returnState = density_lion_encode_prepare_new_block(state)))
         return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
 
     check_signature_state:
     if (DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE > out->available_bytes)
         return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT;
-    if ((returnState = density_lion_encode_check_state(out, state)))
+    if ((returnState = density_lion_encode_check_state(state)))
         return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
 
     // Try to read a complete chunk unit
