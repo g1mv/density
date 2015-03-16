@@ -39,7 +39,10 @@
  * Multiform compression algorithm
  */
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_encode_state *restrict state) {
+#include "memory_location.h"
+#include "kernel_lion_encode.h"
+
+DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encode_)(density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_encode_state *restrict state) {
     DENSITY_KERNEL_ENCODE_STATE returnState;
     uint32_t hash;
     uint64_t chunk;
@@ -48,33 +51,39 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
 
     // Dispatch
     switch (state->process) {
-        case DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
-            goto prepare_new_block;
-        case DENSITY_LION_ENCODE_PROCESS_READ_CHUNK:
-            goto read_chunk;
-        case DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE:
-            goto check_signature_state;
+        case DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE:
+            goto check_block_state;
+        case DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE:
+            goto check_output_size;
+        case DENSITY_LION_ENCODE_PROCESS_UNIT:
+            goto process_unit;
         default:
             return DENSITY_KERNEL_ENCODE_STATE_ERROR;
     }
 
-    // Prepare new block
-    prepare_new_block:
-    if ((returnState = density_lion_encode_prepare_new_block(state)))
-        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
+    // Check block metadata
+    check_block_state:
+    if (density_unlikely(!state->shift)) {
+        if (density_unlikely(returnState = density_lion_encode_check_block_state(state))) {
+            out->pointer -= sizeof(density_lion_signature);
+            state->signature = NULL;
+            return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, returnState);
+        }
+        if(density_unlikely(!state->signature))
+            density_lion_encode_prepare_new_signature(out, state);
+    }
 
-    check_signature_state:
+    // Check output size
+    check_output_size:
     if (DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE > out->available_bytes)
-        return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT;
-    if ((returnState = density_lion_encode_check_state(state)))
-        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
+        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
 
-    // Try to read a complete chunk unit
-    read_chunk:
+    // Try to read a complete process unit
+    process_unit:
     pointerOutBefore = out->pointer;
     if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE)))
 #ifdef DENSITY_LION_ENCODE_CONTINUE
-        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_READ_CHUNK, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
+        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_UNIT, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
 #else
         goto step_by_step;
 #endif
@@ -89,6 +98,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
     step_by_step:
     while (state->shift != density_bitsizeof(density_lion_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
         density_lion_encode_kernel(out, &hash, *(uint32_t *) (readMemoryLocation->pointer), state);
+        state->chunksCount ++;
+        
         readMemoryLocation->pointer += sizeof(uint32_t);
         readMemoryLocation->available_bytes -= sizeof(uint32_t);
     }
@@ -98,10 +109,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
 
     // New loop
 #ifdef DENSITY_LION_ENCODE_CONTINUE
-    goto check_signature_state;
+    goto check_block_state;
 #else
     if (density_memory_teleport_available_bytes(in) >= sizeof(uint32_t))
-        goto check_signature_state;
+        goto check_block_state;
 
     // Marker for decode loop exit
     const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_A);

@@ -57,9 +57,13 @@
 
 #define DENSITY_LION_DECODE_ITERATIONS_SHIFT                                    1
 
+#define DENSITY_LION_DECODE_CHUNKS_PER_PROCESS_UNIT              4
+#define DENSITY_LION_DECODE_PROCESS_UNIT_SIZE                   (DENSITY_LION_ENCODE_CHUNKS_PER_PROCESS_UNIT * sizeof(uint32_t))
+
 typedef enum {
-    DENSITY_LION_DECODE_PROCESS_CHECK_SIGNATURE_STATE,
-    DENSITY_LION_DECODE_PROCESS_READ_PROCESSING_UNIT,
+    DENSITY_LION_DECODE_PROCESS_CHECK_BLOCK_STATE,
+    DENSITY_LION_DECODE_PROCESS_CHECK_OUTPUT_SIZE,
+    DENSITY_LION_DECODE_PROCESS_UNIT,
 } DENSITY_LION_DECODE_PROCESS;
 
 #define DENSITY_LION_DECODE_BITMASK_VALUES {\
@@ -83,10 +87,11 @@ typedef struct {
     density_main_header_parameters parameters;
     uint_fast64_t resetCycle;
 
+    uint_fast32_t shift;
     density_lion_signature signature;
-    uint_fast8_t shift;
-    uint_fast32_t signaturesCount;
-    uint_fast8_t efficiencyChecked;
+    uint_fast64_t chunksCount;
+    bool efficiencyChecked;
+    bool createSignature;
 
     uint_fast64_t endDataOverhead;
 

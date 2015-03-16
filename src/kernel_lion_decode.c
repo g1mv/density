@@ -51,13 +51,13 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE exitProcess(density_lion_decode
     return kernelDecodeState;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_prepare_new_block(density_lion_decode_state *restrict state) {
-    if ((state->signaturesCount > DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_SIGNATURES) && (state->efficiencyChecked ^ 0x1)) {
-        state->efficiencyChecked = 1;
+DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_check_block_state(density_lion_decode_state *restrict state) {
+    if ((state->chunksCount >= DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS) && (!state->efficiencyChecked)) {
+        state->efficiencyChecked = true;
         return DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK;
-    } else if (state->signaturesCount > DENSITY_LION_PREFERRED_BLOCK_SIGNATURES) {
-        state->signaturesCount = 0;
-        state->efficiencyChecked = 0;
+    } else if (state->chunksCount > DENSITY_LION_PREFERRED_BLOCK_CHUNKS) {
+        state->chunksCount = 0;
+        state->efficiencyChecked = false;
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
             if (state->resetCycle)
@@ -74,30 +74,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_prepare_new
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_check_state(density_lion_decode_state *restrict state) {
-    DENSITY_KERNEL_DECODE_STATE returnState;
-
-    switch (state->shift) {
-        case 0:
-            if ((returnState = density_lion_decode_prepare_new_block(state)))
-                return returnState;
-            break;
-        default:
-            break;
-    }
-
-    return DENSITY_KERNEL_DECODE_STATE_READY;
-}
-
 DENSITY_FORCE_INLINE void density_lion_decode_read_signature_from_memory(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
     state->signature = DENSITY_LITTLE_ENDIAN_64(*(density_lion_signature *) (in->pointer));
     in->pointer += sizeof(density_lion_signature);
-    state->signaturesCount++;
 }
 
 DENSITY_FORCE_INLINE uint8_t density_lion_decode_read_4bits_from_signature(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
     uint_fast8_t result;
-    const uint_fast8_t projected_shift = state->shift + (uint8_t) 4;
+    const uint_fast32_t projected_shift = state->shift + 4;
 
     if (density_likely(state->shift)) {
         if (density_unlikely(projected_shift >= density_bitsizeof(density_lion_signature))) {
@@ -261,7 +245,7 @@ DENSITY_FORCE_INLINE uint8_t density_lion_decode_bigram(density_memory_location 
     return unigram_b;
 }
 
-DENSITY_FORCE_INLINE void density_lion_decode_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state, const DENSITY_LION_FORM form) {
+DENSITY_FORCE_INLINE void density_lion_decode_chunk(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state, const DENSITY_LION_FORM form) {
     uint32_t hash = 0;
     uint32_t chunk = 0;
 
@@ -312,13 +296,17 @@ DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(densi
     return formValue;
 }
 
-DENSITY_FORCE_INLINE void density_lion_decode_kernel(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
-    while (state->shift < 0x10) {  // Maximum signature part size per chunk is 3 + 2 * (1 + 1 + 4) = 15
-        density_lion_decode_unit(in, out, state, density_lion_decode_read_form(in, state));
-    }
-    do {
-        density_lion_decode_unit(in, out, state, density_lion_decode_read_form(in, state));
-    } while (density_likely(state->shift > 0x10));
+DENSITY_FORCE_INLINE void density_lion_decode_process_span(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+    density_lion_decode_chunk(in, out, state, density_lion_decode_read_form(in, state));
+    density_lion_decode_chunk(in, out, state, density_lion_decode_read_form(in, state));
+    density_lion_decode_chunk(in, out, state, density_lion_decode_read_form(in, state));
+    density_lion_decode_chunk(in, out, state, density_lion_decode_read_form(in, state));
+}
+
+DENSITY_FORCE_INLINE void density_lion_encode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+    density_lion_decode_process_span(in, out, state);
+
+    state->chunksCount += DENSITY_LION_DECODE_CHUNKS_PER_PROCESS_UNIT;
 }
 
 DENSITY_FORCE_INLINE bool density_lion_decode_unit_step_by_step(density_memory_location *restrict readMemoryLocation, density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
@@ -331,13 +319,13 @@ DENSITY_FORCE_INLINE bool density_lion_decode_unit_step_by_step(density_memory_l
         default:
             break;
     }
-    density_lion_decode_unit(readMemoryLocation, out, state, form);
+    density_lion_decode_chunk(readMemoryLocation, out, state, form);
     return true;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *state, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead) {
-    state->signaturesCount = 0;
-    state->efficiencyChecked = 0;
+    state->chunksCount = 0;
+    state->efficiencyChecked = false;
     density_lion_dictionary_reset(&state->dictionary);
 
     state->parameters = parameters;
@@ -353,7 +341,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(densit
     state->lastHash = 0;
     state->lastUnigram = 0;
 
-    return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_DECODE_STATE_READY);
+    return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_DECODE_STATE_READY);
 }
 
 #define DENSITY_LION_DECODE_CONTINUE

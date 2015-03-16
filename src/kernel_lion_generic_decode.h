@@ -50,63 +50,71 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
 
     // Dispatch
     switch (state->process) {
-        case DENSITY_LION_DECODE_PROCESS_CHECK_SIGNATURE_STATE:
-            goto check_signature_state;
-        case DENSITY_LION_DECODE_PROCESS_READ_PROCESSING_UNIT:
-            goto read_processing_unit;
+        case DENSITY_LION_DECODE_PROCESS_CHECK_BLOCK_STATE:
+            goto check_block_state;
+        case DENSITY_LION_DECODE_PROCESS_CHECK_OUTPUT_SIZE:
+            goto check_output_size;
+        case DENSITY_LION_DECODE_PROCESS_UNIT:
+            goto process_unit;
         default:
             return DENSITY_KERNEL_DECODE_STATE_ERROR;
     }
 
-    check_signature_state:
-    if ((DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE << DENSITY_LION_DECODE_ITERATIONS_SHIFT) > out->available_bytes)
-        return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT;
-    if (density_unlikely((returnState = density_lion_decode_check_state(state))))
-        return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
+    // Check block state
+    check_block_state:
+    if (density_unlikely(!state->shift)) {
+        if (density_unlikely(returnState = density_lion_decode_check_block_state(state))) {
+            in->directMemoryLocation->pointer -= sizeof(density_lion_signature);
+            state->createSignature = true;
+            return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_BLOCK_STATE, returnState);
+        }
+        if (density_unlikely(state->createSignature)) {
+            density_lion_decode_read_signature_from_memory(out, state);
+            state->createSignature = false;
+        }
+    }
+
+    // Check output size
+    check_output_size:
+    if (256 > out->available_bytes)
+        return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
 
     // Try to read the next processing unit
-    read_processing_unit:
-    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(density_lion_signature) + (DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE << DENSITY_LION_DECODE_ITERATIONS_SHIFT), state->endDataOverhead))))
+    process_unit:
+    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_LION_DECODE_PROCESS_UNIT_SIZE, state->endDataOverhead))))
 #ifdef DENSITY_LION_DECODE_CONTINUE
-        return exitProcess(state, DENSITY_LION_DECODE_PROCESS_READ_PROCESSING_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
+        return exitProcess(state, DENSITY_LION_DECODE_PROCESS_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 #else
         goto step_by_step;
 #endif
 
     density_byte *readMemoryLocationPointerBefore = readMemoryLocation->pointer;
     density_byte *outPointerBefore = out->pointer;
-    uint_fast8_t iterations = (1 << DENSITY_LION_DECODE_ITERATIONS_SHIFT);
-    while (iterations--)
-        density_lion_decode_kernel(readMemoryLocation, out, state);
+    density_lion_encode_process_unit(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
     out->available_bytes -= (out->pointer - outPointerBefore);
 
-    if(out->available_bytes < 316708 && out->available_bytes > 316508)
-        printf("ouch");
-
     // New loop
-    goto check_signature_state;
+    goto check_block_state;
 
-    // Try to read and process signature and body, step by step
+    // Try to read and process units step by step
     step_by_step:
     readMemoryLocation = density_memory_teleport_read_remaining_reserved(in, state->endDataOverhead);
     readMemoryLocationPointerBefore = readMemoryLocation->pointer;
     outPointerBefore = out->pointer;
-    while (state->shift < 0x10) {  // Maximum signature part size per chunk is 3 + 2 * (1 + 1 + 4) = 15
-        if(density_unlikely(!density_lion_decode_unit_step_by_step(readMemoryLocation, in, out, state)))
+    uint_fast8_t iterations = DENSITY_LION_DECODE_CHUNKS_PER_PROCESS_UNIT;
+    while (iterations--)
+        if (density_unlikely(!density_lion_decode_unit_step_by_step(readMemoryLocation, in, out, state)))
             goto finish;
-    }
-    do {
-        if(density_unlikely(!density_lion_decode_unit_step_by_step(readMemoryLocation, in, out, state)))
-            goto finish;
-    } while (density_likely(state->shift > 0x10));
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
     out->available_bytes -= (out->pointer - outPointerBefore);
 
     // New loop
-    goto check_signature_state;
+    goto check_block_state;
 
     finish:
+    if (density_unlikely(!state->shift))
+        in->directMemoryLocation->pointer -= sizeof(density_lion_signature);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
     out->available_bytes -= (out->pointer - outPointerBefore);
     density_memory_teleport_copy(in, out, density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead));

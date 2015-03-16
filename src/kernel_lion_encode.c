@@ -47,7 +47,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE exitProcess(density_lion_encode
 }
 
 DENSITY_FORCE_INLINE void density_lion_encode_prepare_new_signature(density_memory_location *restrict out, density_lion_encode_state *restrict state) {
-    state->signaturesCount++;
     state->shift = 0;
     state->signature = (density_lion_signature *) (out->pointer);
     state->proximitySignature = 0;
@@ -55,14 +54,13 @@ DENSITY_FORCE_INLINE void density_lion_encode_prepare_new_signature(density_memo
     out->pointer += sizeof(density_lion_signature);
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_prepare_new_block(density_lion_encode_state *restrict state) {
-    if (!(state->signaturesCount & ((1 << DENSITY_LION_DECODE_ITERATIONS_SHIFT) - 1))) {
-        if ((state->signaturesCount > DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_SIGNATURES) && (state->efficiencyChecked ^ 0x1)) {
-            state->efficiencyChecked = 1;
-            return DENSITY_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK;
-        } else if (state->signaturesCount > DENSITY_LION_PREFERRED_BLOCK_SIGNATURES) {
-            state->signaturesCount = 0;
-            state->efficiencyChecked = 0;
+DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_check_block_state(density_lion_encode_state *restrict state) {
+    if (density_unlikely((state->chunksCount >= DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS) && (!state->efficiencyChecked))) {
+        state->efficiencyChecked = true;
+        return DENSITY_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK;
+    } else if (density_unlikely(state->chunksCount >= DENSITY_LION_PREFERRED_BLOCK_CHUNKS)) {
+        state->chunksCount = 0;
+        state->efficiencyChecked = false;
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
             if (state->resetCycle)
@@ -73,23 +71,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_prepare_new
             }
 #endif
 
-            return DENSITY_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK;
-        }
-    }
-
-    return DENSITY_KERNEL_ENCODE_STATE_READY;
-}
-
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_check_state(density_lion_encode_state *restrict state) {
-    DENSITY_KERNEL_ENCODE_STATE returnState;
-
-    switch (state->shift) {
-        case 0:
-            if ((returnState = density_lion_encode_prepare_new_block(state)))
-                return returnState;
-            break;
-        default:
-            break;
+        return DENSITY_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK;
     }
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;
@@ -108,20 +90,16 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_proximity_signature(densit
 };
 
 DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(density_memory_location *restrict out, density_lion_encode_state *restrict state, const uint64_t content, const uint_fast8_t bits) {
-    if(density_unlikely(!state->shift))
-        density_lion_encode_prepare_new_signature(out, state);
-
     density_lion_encode_push_to_proximity_signature(state, content, bits);
 
     if (density_unlikely(state->shift >= 64)) {
         *state->signature = state->proximitySignature;
 
+        density_lion_encode_prepare_new_signature(out, state);
+
         const uint_fast8_t remainder = (uint_fast8_t) (state->shift & 0x3F);
-        if (remainder) {
-            density_lion_encode_prepare_new_signature(out, state);
+        if (remainder)
             density_lion_encode_push_to_proximity_signature(state, content >> (bits - remainder), remainder);
-        } else
-            state->shift = 0;
     }
 }
 
@@ -264,11 +242,13 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_span(uint64_t *restrict ch
 
 DENSITY_FORCE_INLINE void density_lion_encode_process_unit(uint64_t *restrict chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_lion_encode_state *restrict state) {
     density_lion_encode_process_span(chunk, in, out, hash, state);
+
+    state->chunksCount += DENSITY_LION_ENCODE_CHUNKS_PER_PROCESS_UNIT;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(density_lion_encode_state *state) {
-    state->signaturesCount = 0;
-    state->efficiencyChecked = 0;
+    state->chunksCount = 0;
+    state->efficiencyChecked = false;
     density_lion_dictionary_reset(&state->dictionary);
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
@@ -281,7 +261,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(densit
     state->lastHash = 0;
     state->lastChunk = 0;
 
-    return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK, DENSITY_KERNEL_ENCODE_STATE_READY);
+    return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_ENCODE_STATE_READY);
 }
 
 #define DENSITY_LION_ENCODE_CONTINUE

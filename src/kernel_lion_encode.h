@@ -53,12 +53,13 @@
 #include "kernel_lion_unigram_model.h"
 #include "kernel_lion_decode.h"
 
-#define DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE                    (1 * 2 * sizeof(uint64_t))
+#define DENSITY_LION_ENCODE_CHUNKS_PER_PROCESS_UNIT              4
+#define DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE                   (DENSITY_LION_ENCODE_CHUNKS_PER_PROCESS_UNIT * sizeof(uint32_t))
 
 typedef enum {
-    DENSITY_LION_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
-    DENSITY_LION_ENCODE_PROCESS_CHECK_SIGNATURE_STATE,
-    DENSITY_LION_ENCODE_PROCESS_READ_CHUNK,
+    DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE,
+    DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE,
+    DENSITY_LION_ENCODE_PROCESS_UNIT,
 } DENSITY_LION_ENCODE_PROCESS;
 
 #pragma pack(push)
@@ -73,8 +74,8 @@ typedef struct {
     uint_fast32_t shift;
     density_lion_signature proximitySignature;
     density_lion_signature * signature;
-    uint_fast32_t signaturesCount;
-    uint_fast8_t efficiencyChecked;
+    uint_fast64_t chunksCount;
+    bool efficiencyChecked;
 
     density_lion_form_data formData;
     density_lion_unigram_data unigramData;
