@@ -90,17 +90,20 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_proximity_signature(densit
 };
 
 DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(density_memory_location *restrict out, density_lion_encode_state *restrict state, const uint64_t content, const uint_fast8_t bits) {
+    if(density_unlikely(!state->shift))
+        density_lion_encode_prepare_new_signature(out, state);
+
     density_lion_encode_push_to_proximity_signature(state, content, bits);
 
     if (density_unlikely(state->shift >= 64)) {
         *state->signature = state->proximitySignature;
 
         const uint_fast8_t remainder = (uint_fast8_t) (state->shift & 0x3F);
-
-        density_lion_encode_prepare_new_signature(out, state);
-
-        if (remainder)
+        if (remainder) {
+            density_lion_encode_prepare_new_signature(out, state);
             density_lion_encode_push_to_proximity_signature(state, content >> (bits - remainder), remainder);
+        } else
+            state->shift = 0;
     }
 }
 

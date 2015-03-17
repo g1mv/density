@@ -309,7 +309,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_process_unit(density_memory_locati
     state->chunksCount += DENSITY_LION_DECODE_CHUNKS_PER_PROCESS_UNIT;
 }
 
-DENSITY_FORCE_INLINE bool density_lion_decode_unit_step_by_step(density_memory_location *restrict readMemoryLocation, density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+DENSITY_FORCE_INLINE bool density_lion_decode_chunk_step_by_step(density_memory_location *restrict readMemoryLocation, density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     DENSITY_LION_FORM form = density_lion_decode_read_form(readMemoryLocation, state);
     switch (form) {
         case DENSITY_LION_FORM_CHUNK_DICTIONARY_A:  // Potential end marker, we need 2 bytes for a chunk dictionary hash, if remaining bytes < 2 + 2 bytes then this form is the last one

@@ -64,13 +64,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
     // Check block metadata
     check_block_state:
     if (density_unlikely(!state->shift)) {
-        if (density_unlikely(returnState = density_lion_encode_check_block_state(state))) {
-            out->pointer -= sizeof(density_lion_signature);
-            state->signature = NULL;
+        if (density_unlikely(returnState = density_lion_encode_check_block_state(state)))
             return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, returnState);
-        }
-        if(density_unlikely(!state->signature))
-            density_lion_encode_prepare_new_signature(out, state);
     }
 
     // Check output size
