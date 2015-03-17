@@ -58,7 +58,7 @@
 #define DENSITY_LION_DECODE_ITERATIONS_SHIFT                                    1
 
 #define DENSITY_LION_DECODE_CHUNKS_PER_PROCESS_UNIT              4
-#define DENSITY_LION_DECODE_PROCESS_UNIT_SIZE                   (DENSITY_LION_ENCODE_CHUNKS_PER_PROCESS_UNIT * sizeof(uint32_t))
+#define DENSITY_LION_DECODE_PROCESS_UNIT_SIZE                   (DENSITY_LION_ENCODE_CHUNKS_PER_PROCESS_UNIT * sizeof(uint32_t) * 8)
 
 typedef enum {
     DENSITY_LION_DECODE_PROCESS_CHECK_BLOCK_STATE,
@@ -91,7 +91,7 @@ typedef struct {
     density_lion_signature signature;
     uint_fast64_t chunksCount;
     bool efficiencyChecked;
-    bool createSignature;
+    bool readSignature;
 
     uint_fast64_t endDataOverhead;
 

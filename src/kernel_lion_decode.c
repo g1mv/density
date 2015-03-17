@@ -55,7 +55,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_check_block
     if ((state->chunksCount >= DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS) && (!state->efficiencyChecked)) {
         state->efficiencyChecked = true;
         return DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK;
-    } else if (state->chunksCount > DENSITY_LION_PREFERRED_BLOCK_CHUNKS) {
+    } else if (state->chunksCount >= DENSITY_LION_PREFERRED_BLOCK_CHUNKS) {
         state->chunksCount = 0;
         state->efficiencyChecked = false;
 
@@ -303,7 +303,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_process_span(density_memory_locati
     density_lion_decode_chunk(in, out, state, density_lion_decode_read_form(in, state));
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+DENSITY_FORCE_INLINE void density_lion_decode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     density_lion_decode_process_span(in, out, state);
 
     state->chunksCount += DENSITY_LION_DECODE_CHUNKS_PER_PROCESS_UNIT;
@@ -326,6 +326,7 @@ DENSITY_FORCE_INLINE bool density_lion_decode_unit_step_by_step(density_memory_l
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *state, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead) {
     state->chunksCount = 0;
     state->efficiencyChecked = false;
+    state->readSignature = true;
     density_lion_dictionary_reset(&state->dictionary);
 
     state->parameters = parameters;

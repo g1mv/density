@@ -65,12 +65,12 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
     if (density_unlikely(!state->shift)) {
         if (density_unlikely(returnState = density_lion_decode_check_block_state(state))) {
             in->directMemoryLocation->pointer -= sizeof(density_lion_signature);
-            state->createSignature = true;
+            state->readSignature = true;
             return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_BLOCK_STATE, returnState);
         }
-        if (density_unlikely(state->createSignature)) {
+        if (density_unlikely(state->readSignature)) {
             density_lion_decode_read_signature_from_memory(out, state);
-            state->createSignature = false;
+            state->readSignature = false;
         }
     }
 
@@ -81,7 +81,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
 
     // Try to read the next processing unit
     process_unit:
-    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_LION_DECODE_PROCESS_UNIT_SIZE, state->endDataOverhead))))
+    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, 128, state->endDataOverhead))))
 #ifdef DENSITY_LION_DECODE_CONTINUE
         return exitProcess(state, DENSITY_LION_DECODE_PROCESS_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 #else
@@ -89,10 +89,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
 #endif
 
     density_byte *readMemoryLocationPointerBefore = readMemoryLocation->pointer;
-    density_byte *outPointerBefore = out->pointer;
-    density_lion_encode_process_unit(readMemoryLocation, out, state);
+    density_byte *outPointerBefore;// = out->pointer;
+    density_lion_decode_process_unit(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
-    out->available_bytes -= (out->pointer - outPointerBefore);
+    out->available_bytes -= DENSITY_LION_DECODE_PROCESS_UNIT;//(out->pointer - outPointerBefore);
 
     // New loop
     goto check_block_state;
