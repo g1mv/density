@@ -115,4 +115,7 @@ typedef uint64_t                                                        density_
 #define DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE                       (density_bitsizeof(density_lion_signature) + DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 #define DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE                     (DENSITY_LION_MAXIMUM_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
 
+#define DENSITY_LION_CHUNKS_PER_PROCESS_UNIT                            4
+#define DENSITY_LION_PROCESS_UNIT_SIZE                                  (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT * sizeof(uint32_t))
+
 #endif

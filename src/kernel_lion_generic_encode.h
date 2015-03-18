@@ -70,13 +70,15 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
 
     // Check output size
     check_output_size:
-    if (DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE > out->available_bytes)
-        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
+    if (density_unlikely(!state->shift)) {
+        if (65536 > out->available_bytes)
+            return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
+    }
 
     // Try to read a complete process unit
     process_unit:
     pointerOutBefore = out->pointer;
-    if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE)))
+    if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_LION_PROCESS_UNIT_SIZE)))
 #ifdef DENSITY_LION_ENCODE_CONTINUE
         return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_UNIT, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
 #else
@@ -85,7 +87,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
 
     // Chunk was read properly, process
     density_lion_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
-    readMemoryLocation->available_bytes -= DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE;
+    readMemoryLocation->available_bytes -= DENSITY_LION_PROCESS_UNIT_SIZE;
 #ifndef DENSITY_LION_ENCODE_CONTINUE
     goto exit;
 
@@ -93,8 +95,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
     step_by_step:
     while (state->shift != density_bitsizeof(density_lion_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
         density_lion_encode_kernel(out, &hash, *(uint32_t *) (readMemoryLocation->pointer), state);
-        state->chunksCount ++;
-        
+        state->chunksCount++;
+
         readMemoryLocation->pointer += sizeof(uint32_t);
         readMemoryLocation->available_bytes -= sizeof(uint32_t);
     }

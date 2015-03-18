@@ -53,9 +53,6 @@
 #include "kernel_lion_unigram_model.h"
 #include "kernel_lion_decode.h"
 
-#define DENSITY_LION_ENCODE_CHUNKS_PER_PROCESS_UNIT              4
-#define DENSITY_LION_ENCODE_PROCESS_UNIT_SIZE                   (DENSITY_LION_ENCODE_CHUNKS_PER_PROCESS_UNIT * sizeof(uint32_t))
-
 typedef enum {
     DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE,
     DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE,
@@ -82,6 +79,10 @@ typedef struct {
 
     uint_fast32_t lastHash;
     uint_fast32_t lastChunk;
+
+    uint_fast64_t deepModeBits;
+    uint_fast64_t fastModeBits;
+    bool deepMode;
 
     density_lion_dictionary dictionary;
 } density_lion_encode_state;
