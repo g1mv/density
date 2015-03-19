@@ -158,6 +158,28 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_bigram(density_memory_loca
     density_lion_unigram_model_update(&state->unigramData, unigram_b, state->unigramData.unigramsIndex[unigram_b]);
 }
 
+DENSITY_FORCE_INLINE void density_lion_encode_manage_bigram(density_memory_location *restrict out, density_lion_encode_state *restrict state, const uint16_t bigram, const uint16_t bigram_p, const bool deepMode) {
+    const uint8_t hash_p = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_p);
+    const uint8_t hash = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram);
+
+    density_lion_dictionary_bigram_entry *bigram_entry_a = &state->dictionary.bigrams[hash];
+    if (bigram_entry_a->bigram == bigram) {
+        if (deepMode) {
+            density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY, 1);
+
+            *(out->pointer) = hash;
+            out->pointer++;
+        }
+        state->deepModeBits += (1 + density_bitsizeof(uint8_t));
+
+    } else {
+        density_lion_encode_process_bigram(out, state, bigram, deepMode);
+
+        bigram_entry_a->bigram = bigram;
+    }
+    state->dictionary.bigrams[hash_p].bigram = bigram_p;
+}
+
 DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *restrict out, uint32_t *restrict hash, const uint32_t chunk, density_lion_encode_state *restrict state) {
     DENSITY_LION_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(chunk));
     uint32_t *predictedChunk = &(state->dictionary.predictions[state->lastHash].next_chunk_prediction);
@@ -180,49 +202,10 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                 state->plainModeBits += density_bitsizeof(uint32_t);
 
                 const uint32_t chunk_rs8 = chunk >> 8;
-                const uint32_t chunk_rs16 = chunk >> 16;
+                const uint32_t chunk_rs16 = chunk_rs8 >> 8;
 
-                const uint16_t bigram_p = (uint16_t) ((state->lastChunk >> 24) | ((chunk & 0xFF) << 8));
-                const uint16_t bigram_a = (uint16_t) (chunk & 0xFFFF);
-                const uint16_t bigram_b = (uint16_t) (chunk_rs8 & 0xFFFF);
-                const uint16_t bigram_c = (uint16_t) (chunk_rs16 & 0xFFFF);
-
-                const uint8_t hash_p = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_p);
-                const uint8_t hash_a = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_a);
-                const uint8_t hash_b = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_b);
-                const uint8_t hash_c = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_c);
-
-                density_lion_dictionary_bigram_entry *bigram_entry_a = &state->dictionary.bigrams[hash_a];
-                if (bigram_entry_a->bigram == bigram_a) {
-                    if (deepMode) {
-                        density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY, 1);
-
-                        *(out->pointer) = hash_a;
-                        out->pointer++;
-                    }
-                    state->deepModeBits += (1 + density_bitsizeof(uint8_t));
-                } else {
-                    density_lion_encode_process_bigram(out, state, bigram_a, deepMode);
-
-                    bigram_entry_a->bigram = bigram_a;
-                }
-                state->dictionary.bigrams[hash_p].bigram = bigram_p;
-
-                density_lion_dictionary_bigram_entry *bigram_entry_c = &state->dictionary.bigrams[hash_c];
-                if (bigram_entry_c->bigram == bigram_c) {
-                    if (deepMode) {
-                        density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY, 1);
-
-                        *(out->pointer) = hash_c;
-                        out->pointer++;
-                    }
-                    state->deepModeBits += (1 + density_bitsizeof(uint8_t));
-                } else {
-                    density_lion_encode_process_bigram(out, state, bigram_c, deepMode);
-
-                    bigram_entry_c->bigram = bigram_c;
-                }
-                state->dictionary.bigrams[hash_b].bigram = bigram_b;
+                density_lion_encode_manage_bigram(out, state, (uint16_t) (chunk & 0xFFFF), (uint16_t) ((state->lastChunk >> 24) | ((chunk & 0xFF) << 8)), deepMode);
+                density_lion_encode_manage_bigram(out, state, (uint16_t) (chunk_rs16 & 0xFFFF), (uint16_t) (chunk_rs8 & 0xFFFF), deepMode);
 
                 state->deepMode = (state->deepModeBits < state->plainModeBits);  // Update choice to use deep mode or not
 
