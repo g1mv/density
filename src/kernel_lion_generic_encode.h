@@ -112,7 +112,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
         goto check_block_state;
 
     // Marker for decode loop exit
-    const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_A);
+    const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
     density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
 
     // Copy the remaining bytes

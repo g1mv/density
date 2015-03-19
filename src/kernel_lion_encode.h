@@ -80,9 +80,9 @@ typedef struct {
     uint_fast32_t lastHash;
     uint_fast32_t lastChunk;
 
-    uint_fast64_t deepModeBits;
-    uint_fast64_t fastModeBits;
     bool deepMode;
+    uint_fast64_t deepModeBits;
+    uint_fast64_t plainModeBits;
 
     density_lion_dictionary dictionary;
 } density_lion_encode_state;
