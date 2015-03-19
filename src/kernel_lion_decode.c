@@ -196,10 +196,12 @@ DENSITY_FORCE_INLINE uint8_t density_lion_decode_bigram(density_memory_location 
             unigram_a = (uint8_t) (bigram & 0xFF);
             unigram_b = (uint8_t) (bigram >> 8);
 
-            density_lion_unigram_model_update(&state->unigramData, unigram_a, state->unigramData.unigramsIndex[unigram_a]);
-            density_lion_unigram_model_update(&state->unigramData, unigram_b, state->unigramData.unigramsIndex[unigram_b]);
-
             state->deepModeBits += (2 + density_bitsizeof(uint16_t));
+
+            if(density_unlikely(!(state->deepModeBits & DENSITY_LION_UNIGRAM_MODEL_UPDATE_FREQUENCY))) {   // Low pass filter
+                density_lion_unigram_model_update(&state->unigramData, unigram_a, state->unigramData.unigramsIndex[unigram_a]);
+                density_lion_unigram_model_update(&state->unigramData, unigram_b, state->unigramData.unigramsIndex[unigram_b]);
+            }
         } else {    // DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_ENCODED:
             const uint8_t partialBits = density_lion_decode_read_4bits_from_signature(in, state);
 
@@ -261,14 +263,10 @@ DENSITY_FORCE_INLINE void density_lion_decode_process_bigram_model(density_lion_
         density_lion_unigram_node *unigram_found_b = state->unigramData.unigramsIndex[unigram_b];
 
         if (density_likely(unigram_found_b)) {
-            const uint8_t rank_a = unigram_found_a->rank;
-            const bool qualify_rank_a = (rank_a < 64);
 
-            if (density_likely(qualify_rank_a)) {
-                const uint8_t rank_b = unigram_found_b->rank;
-                const bool qualify_rank_b = (rank_b < 64);
+            if (density_likely(unigram_found_a->qualified)) {
 
-                if (density_likely(qualify_rank_b)) {
+                if (density_likely(unigram_found_b->qualified)) {
                     state->deepModeBits += (6 + density_bitsizeof(uint8_t));
 
                     return; // Model seems alright, exit
@@ -279,8 +277,10 @@ DENSITY_FORCE_INLINE void density_lion_decode_process_bigram_model(density_lion_
 
     state->deepModeBits += (2 + density_bitsizeof(uint16_t));
 
-    density_lion_unigram_model_update(&state->unigramData, unigram_a, unigram_found_a);
-    density_lion_unigram_model_update(&state->unigramData, unigram_b, state->unigramData.unigramsIndex[unigram_b]);
+    if(density_unlikely(!(state->deepModeBits & DENSITY_LION_UNIGRAM_MODEL_UPDATE_FREQUENCY))) {   // Low pass filter
+        density_lion_unigram_model_update(&state->unigramData, unigram_a, unigram_found_a);
+        density_lion_unigram_model_update(&state->unigramData, unigram_b, state->unigramData.unigramsIndex[unigram_b]);
+    }
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_chunk(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state, const DENSITY_LION_FORM form) {

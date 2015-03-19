@@ -42,16 +42,19 @@
 #ifndef DENSITY_LION_UNIGRAM_MODEL_H
 #define DENSITY_LION_UNIGRAM_MODEL_H
 
+#include <stdbool.h>
 #include "globals.h"
 #include "kernel_lion.h"
 
 #define DENSITY_LION_NUMBER_OF_UNIGRAMS                                    (1 << density_bitsizeof(uint8_t))
+#define DENSITY_LION_UNIGRAM_MODEL_UPDATE_FREQUENCY                         0xF
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
     uint8_t unigram;
     uint8_t rank;
+    bool qualified;
     void *previousUnigram;
 } density_lion_unigram_node;
 

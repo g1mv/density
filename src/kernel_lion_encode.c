@@ -40,8 +40,6 @@
  */
 
 #include "kernel_lion_encode.h"
-#include "kernel_lion.h"
-#include "memory_location.h"
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE exitProcess(density_lion_encode_state *state, DENSITY_LION_ENCODE_PROCESS process, DENSITY_KERNEL_ENCODE_STATE kernelEncodeState) {
     state->process = process;
@@ -124,20 +122,18 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_bigram(density_memory_loca
         density_lion_unigram_node *unigram_found_b = state->unigramData.unigramsIndex[unigram_b];
 
         if (density_likely(unigram_found_b)) {
-            const uint8_t rank_a = unigram_found_a->rank;
-            const bool qualify_rank_a = (rank_a < 64);
 
-            if (density_likely(qualify_rank_a)) {
-                const uint8_t rank_b = unigram_found_b->rank;
-                const bool qualify_rank_b = (rank_b < 64);
+            if (density_likely(unigram_found_a->qualified)) {
 
-                if (density_likely(qualify_rank_b)) {
+                if (density_likely(unigram_found_b->qualified)) {
                     if(deepMode) {
+                        const uint8_t rank_a = unigram_found_a->rank;
+                        const uint8_t rank_b = unigram_found_b->rank;
+
                         density_lion_encode_push_to_signature(out, state, (uint64_t) ((rank_a & 0xFC) | (DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_ENCODED << 1) | DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_SECONDARY_ACCESS), 6);
                         *out->pointer = (rank_b | (rank_a << 6));
                         out->pointer += sizeof(uint8_t);
                     }
-
                     state->deepModeBits += (6 + density_bitsizeof(uint8_t));
 
                     return; // Model seems alright, exit
@@ -151,11 +147,12 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_bigram(density_memory_loca
         *(uint16_t *) out->pointer = DENSITY_LITTLE_ENDIAN_16(bigram);
         out->pointer += sizeof(uint16_t);
     }
-
     state->deepModeBits += (2 + density_bitsizeof(uint16_t));
 
-    density_lion_unigram_model_update(&state->unigramData, unigram_a, unigram_found_a);
-    density_lion_unigram_model_update(&state->unigramData, unigram_b, state->unigramData.unigramsIndex[unigram_b]);
+    if(density_unlikely(!(state->deepModeBits & DENSITY_LION_UNIGRAM_MODEL_UPDATE_FREQUENCY))) {   // Low pass filter
+        density_lion_unigram_model_update(&state->unigramData, unigram_a, unigram_found_a);
+        density_lion_unigram_model_update(&state->unigramData, unigram_b, state->unigramData.unigramsIndex[unigram_b]);
+    }
 }
 
 DENSITY_FORCE_INLINE void density_lion_encode_manage_bigram(density_memory_location *restrict out, density_lion_encode_state *restrict state, const uint16_t bigram, const uint16_t bigram_p, const bool deepMode) {
