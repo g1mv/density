@@ -1,3 +1,13 @@
+0.12.0 beta
+-----------
+*March 20, 2015*
+
+* Added new lion kernel
+* Renamed kernel mandala to cheetah
+* Kernel chameleon and cheetah improvements in encoding/decoding speeds
+* Generic function macros to avoid code rewrite
+* Improved memory teleport IO flexibility and speed, bytes issued by memory teleport can now be partially read
+
 0.11.3 beta
 -----------
 *February 5, 2015*
