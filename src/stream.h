@@ -41,7 +41,6 @@
 #include "density_api.h"
 #include "memory_location.h"
 
-#define DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE  (1 << 9)
 #define DENSITY_STREAM_MEMORY_TELEPORT_BUFFER_SIZE     (1 << 12)
 
 typedef enum {
