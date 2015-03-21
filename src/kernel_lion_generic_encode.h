@@ -39,9 +39,6 @@
  * Multiform compression algorithm
  */
 
-#include "memory_location.h"
-#include "kernel_lion_encode.h"
-
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encode_)(density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_encode_state *restrict state) {
     DENSITY_KERNEL_ENCODE_STATE returnState;
     uint32_t hash;
@@ -66,12 +63,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_lion_encod
     if (density_unlikely(!state->shift)) {
         if (density_unlikely(returnState = density_lion_encode_check_block_state(state)))
             return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, returnState);
-    }
 
-    // Check output size
-    check_output_size:
-    if (density_unlikely(!state->shift)) {
-        if (65536 > out->available_bytes)
+        // Check output size
+        check_output_size:
+        if (density_unlikely(out->available_bytes < DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD))
             return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
     }
 

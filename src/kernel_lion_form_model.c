@@ -69,6 +69,13 @@ DENSITY_FORCE_INLINE void density_lion_form_model_init(density_lion_form_data *d
     rank_3->rank = 3;
     rank_3->previousForm = rank_2;
     data->formsIndex[DENSITY_LION_FORM_CHUNK_PREDICTIONS] = rank_3;
+
+    density_lion_form_node* rank_4 = &data->formsPool[4];
+    rank_4->form = DENSITY_LION_FORM_CHUNK_SECONDARY_PREDICTIONS;
+    rank_4->usage = 0;
+    rank_4->rank = 4;
+    rank_4->previousForm = rank_3;
+    data->formsIndex[DENSITY_LION_FORM_CHUNK_SECONDARY_PREDICTIONS] = rank_4;
 }
 
 DENSITY_FORCE_INLINE void density_lion_form_model_update(density_lion_form_data *restrict data, density_lion_form_node *restrict form, density_lion_form_node *restrict previous_form) {

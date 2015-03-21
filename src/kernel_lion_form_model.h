@@ -45,15 +45,18 @@
 #include "globals.h"
 #include "kernel_lion.h"
 
-#define DENSITY_LION_NUMBER_OF_FORMS                                    4
+#define DENSITY_LION_NUMBER_OF_FORMS                                    5
 
 // Unary codes (reversed) except the last one
 #define DENSITY_LION_FORM_MODEL_ENTROPY_CODES {\
-    {BINARY_TO_UINT(0), 1},\
-    {BINARY_TO_UINT(01), 2},\
-    {BINARY_TO_UINT(011), 3},\
-    {BINARY_TO_UINT(111), 3},\
+    {DENSITY_BINARY_TO_UINT(0), 1},\
+    {DENSITY_BINARY_TO_UINT(01), 2},\
+    {DENSITY_BINARY_TO_UINT(011), 3},\
+    {DENSITY_BINARY_TO_UINT(0111), 4},\
+    {DENSITY_BINARY_TO_UINT(1111), 4},\
 }
+
+#define DENSITY_LION_FORM_MODEL_ENTROPY_DECODES {0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4}
 
 #pragma pack(push)
 #pragma pack(4)
@@ -72,6 +75,7 @@ typedef struct {
 #pragma pack(pop)
 
 static const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUMBER_OF_FORMS] = DENSITY_LION_FORM_MODEL_ENTROPY_CODES;
+static const uint8_t density_lion_form_entropy_decodes[1 << 4] = DENSITY_LION_FORM_MODEL_ENTROPY_DECODES;
 
 void density_lion_form_model_init(density_lion_form_data *);
 void density_lion_form_model_update(density_lion_form_data *, density_lion_form_node *, density_lion_form_node *);

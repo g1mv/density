@@ -59,31 +59,32 @@
 
 #define DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram)                      (uint8_t) ((((bigram) * DENSITY_LION_HASH32_MULTIPLIER) >> (32 - DENSITY_LION_BIGRAM_HASH_BITS)));
 
-#define FORMAT(v)               0##v##llu
+#define DENSITY_FORMAT(v)               0##v##llu
 
-#define ISOLATE(b, p)           ((FORMAT(b) / p) & 0x1)
+#define DENSITY_ISOLATE(b, p)           ((DENSITY_FORMAT(b) / p) & 0x1)
 
-#define BINARY_TO_UINT(b)        ((ISOLATE(b, 1llu) ? 0x1 : 0)\
-                                + (ISOLATE(b, 8llu) ? 0x2 : 0)\
-                                + (ISOLATE(b, 64llu) ? 0x4 : 0)\
-                                + (ISOLATE(b, 512llu) ? 0x8 : 0)\
-                                + (ISOLATE(b, 4096llu) ? 0x10 : 0)\
-                                + (ISOLATE(b, 32768llu) ? 0x20 : 0)\
-                                + (ISOLATE(b, 262144llu) ? 0x40 : 0)\
-                                + (ISOLATE(b, 2097152llu) ? 0x80 : 0)\
-                                + (ISOLATE(b, 16777216llu) ? 0x100 : 0)\
-                                + (ISOLATE(b, 134217728llu) ? 0x200 : 0)\
-                                + (ISOLATE(b, 1073741824llu) ? 0x400 : 0)\
-                                + (ISOLATE(b, 8589934592llu) ? 0x800 : 0)\
-                                + (ISOLATE(b, 68719476736llu) ? 0x1000 : 0)\
-                                + (ISOLATE(b, 549755813888llu) ? 0x2000 : 0)\
-                                + (ISOLATE(b, 4398046511104llu) ? 0x4000 : 0)\
-                                + (ISOLATE(b, 35184372088832llu) ? 0x8000 : 0)\
-                                + (ISOLATE(b, 281474976710656llu) ? 0x10000 : 0)\
-                                + (ISOLATE(b, 2251799813685248llu) ? 0x20000 : 0))
+#define DENSITY_BINARY_TO_UINT(b)        ((DENSITY_ISOLATE(b, 1llu) ? 0x1 : 0)\
+                                        + (DENSITY_ISOLATE(b, 8llu) ? 0x2 : 0)\
+                                        + (DENSITY_ISOLATE(b, 64llu) ? 0x4 : 0)\
+                                        + (DENSITY_ISOLATE(b, 512llu) ? 0x8 : 0)\
+                                        + (DENSITY_ISOLATE(b, 4096llu) ? 0x10 : 0)\
+                                        + (DENSITY_ISOLATE(b, 32768llu) ? 0x20 : 0)\
+                                        + (DENSITY_ISOLATE(b, 262144llu) ? 0x40 : 0)\
+                                        + (DENSITY_ISOLATE(b, 2097152llu) ? 0x80 : 0)\
+                                        + (DENSITY_ISOLATE(b, 16777216llu) ? 0x100 : 0)\
+                                        + (DENSITY_ISOLATE(b, 134217728llu) ? 0x200 : 0)\
+                                        + (DENSITY_ISOLATE(b, 1073741824llu) ? 0x400 : 0)\
+                                        + (DENSITY_ISOLATE(b, 8589934592llu) ? 0x800 : 0)\
+                                        + (DENSITY_ISOLATE(b, 68719476736llu) ? 0x1000 : 0)\
+                                        + (DENSITY_ISOLATE(b, 549755813888llu) ? 0x2000 : 0)\
+                                        + (DENSITY_ISOLATE(b, 4398046511104llu) ? 0x4000 : 0)\
+                                        + (DENSITY_ISOLATE(b, 35184372088832llu) ? 0x8000 : 0)\
+                                        + (DENSITY_ISOLATE(b, 281474976710656llu) ? 0x10000 : 0)\
+                                        + (DENSITY_ISOLATE(b, 2251799813685248llu) ? 0x20000 : 0))
 
 typedef enum {
     DENSITY_LION_FORM_CHUNK_PREDICTIONS,
+    DENSITY_LION_FORM_CHUNK_SECONDARY_PREDICTIONS,
     DENSITY_LION_FORM_CHUNK_DICTIONARY_A,
     DENSITY_LION_FORM_CHUNK_DICTIONARY_B,
     DENSITY_LION_FORM_SECONDARY_ACCESS,
@@ -93,6 +94,11 @@ typedef enum {
     DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY = 0x0,
     DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_SECONDARY_ACCESS = 0x1,
 } DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG;
+
+typedef enum {
+    DENSITY_LION_PREDICTIONS_SIGNATURE_FLAG_A = 0x0,
+    DENSITY_LION_PREDICTIONS_SIGNATURE_FLAG_B = 0x1,
+} DENSITY_LION_PREDICTIONS_SIGNATURE_FLAG;
 
 typedef enum {
     DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_ENCODED = 0x0,
@@ -114,6 +120,8 @@ typedef uint64_t                                                        density_
 
 #define DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE                       (density_bitsizeof(density_lion_signature) + DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 #define DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE                     (DENSITY_LION_MAXIMUM_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
+
+#define DENSITY_LION_SIGNATURE_SHIFT_LIMIT                              (0x3C)
 
 #define DENSITY_LION_CHUNKS_PER_PROCESS_UNIT                            4
 #define DENSITY_LION_PROCESS_UNIT_SIZE                                  (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT * sizeof(uint32_t))

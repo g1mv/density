@@ -138,19 +138,51 @@ DENSITY_FORCE_INLINE void density_lion_decode_read_chunk_hash(uint32_t *restrict
     in->pointer += sizeof(uint16_t);
 }
 
+DENSITY_FORCE_INLINE void density_lion_decode_update_predictions_model(density_lion_dictionary_chunk_prediction_entry *restrict predictions, const uint32_t *restrict chunk) {
+    predictions->next_chunk_c = predictions->next_chunk_b;
+    predictions->next_chunk_b = predictions->next_chunk_a;
+    predictions->next_chunk_a = *chunk;    // Move chunk to the top of the predictions list
+}
+
 DENSITY_FORCE_INLINE void density_lion_decode_process_chunk(uint32_t *restrict hash, const uint32_t *restrict chunk, density_lion_decode_state *restrict state) {
     density_lion_dictionary_chunk_entry *entry;
 
     DENSITY_LION_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(*chunk));
+
     entry = &state->dictionary.chunks[*hash];
     entry->chunk_b = entry->chunk_a;
     entry->chunk_a = *chunk;
 
-    (&state->dictionary.predictions[state->lastHash])->next_chunk_prediction = *chunk;
+    density_lion_dictionary_chunk_prediction_entry *p = &(state->dictionary.predictions[state->lastHash]);
+    density_lion_decode_update_predictions_model(p, chunk);
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_predicted_chunk(uint32_t *restrict hash, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
-    uint32_t chunk = (&state->dictionary.predictions[state->lastHash])->next_chunk_prediction;
+    uint32_t chunk = *(uint32_t *) (&state->dictionary.predictions[state->lastHash]);
+
+    DENSITY_LION_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(chunk));
+
+    *(uint32_t *) (out->pointer) = chunk;
+    out->pointer += sizeof(uint32_t);
+
+    state->lastUnigram = (uint8_t) (chunk >> 24);
+}
+
+DENSITY_FORCE_INLINE void density_lion_decode_secondary_predicted_chunk(uint32_t *restrict hash, const bool flag, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+    uint32_t chunk;
+    density_lion_dictionary_chunk_prediction_entry *p = &(state->dictionary.predictions[state->lastHash]);
+
+    switch ((DENSITY_LION_PREDICTIONS_SIGNATURE_FLAG) flag) {
+        default:    // DENSITY_LION_PREDICTIONS_SIGNATURE_FLAG_A
+            chunk = p->next_chunk_b;
+            break;
+
+        case DENSITY_LION_PREDICTIONS_SIGNATURE_FLAG_B:
+            chunk = p->next_chunk_c;
+            break;
+    }
+    density_lion_decode_update_predictions_model(p, &chunk);
+
     DENSITY_LION_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(chunk));
 
     *(uint32_t *) (out->pointer) = chunk;
@@ -163,7 +195,9 @@ DENSITY_FORCE_INLINE void density_lion_decode_write_chunk(const uint32_t *restri
     *(uint32_t *) (out->pointer) = *chunk;
     out->pointer += sizeof(uint32_t);
 
-    (&state->dictionary.predictions[state->lastHash])->next_chunk_prediction = *chunk;
+    density_lion_dictionary_chunk_prediction_entry *p = &(state->dictionary.predictions[state->lastHash]);
+    density_lion_decode_update_predictions_model(p, chunk);
+
     state->lastUnigram = (uint8_t) (*chunk >> 24);
 }
 
@@ -198,7 +232,7 @@ DENSITY_FORCE_INLINE uint8_t density_lion_decode_bigram(density_memory_location 
 
             state->deepModeBits += (2 + density_bitsizeof(uint16_t));
 
-            if(density_unlikely(!(state->deepModeBits & DENSITY_LION_UNIGRAM_MODEL_UPDATE_FREQUENCY))) {   // Low pass filter
+            if (density_unlikely(!(state->deepModeBits & DENSITY_LION_UNIGRAM_MODEL_UPDATE_FREQUENCY))) {   // Low pass filter
                 density_lion_unigram_model_update(&state->unigramData, unigram_a, state->unigramData.unigramsIndex[unigram_a]);
                 density_lion_unigram_model_update(&state->unigramData, unigram_b, state->unigramData.unigramsIndex[unigram_b]);
             }
@@ -208,8 +242,8 @@ DENSITY_FORCE_INLINE uint8_t density_lion_decode_bigram(density_memory_location 
             uint8_t byte = *in->pointer;
             in->pointer++;
 
-            const uint_fast8_t rank_a = (uint_fast8_t) (((byte >> 6) & BINARY_TO_UINT(11)) | (partialBits << 2));
-            const uint_fast8_t rank_b = (uint_fast8_t) (byte & BINARY_TO_UINT(111111));
+            const uint_fast8_t rank_a = (uint_fast8_t) (((byte >> 6) & DENSITY_BINARY_TO_UINT(11)) | (partialBits << 2));
+            const uint_fast8_t rank_b = (uint_fast8_t) (byte & DENSITY_BINARY_TO_UINT(111111));
 
             density_lion_unigram_node *found_a = &state->unigramData.unigramsPool[rank_a];
             density_lion_unigram_node *found_b = &state->unigramData.unigramsPool[rank_b];
@@ -277,19 +311,39 @@ DENSITY_FORCE_INLINE void density_lion_decode_process_bigram_model(density_lion_
 
     state->deepModeBits += (2 + density_bitsizeof(uint16_t));
 
-    if(density_unlikely(!(state->deepModeBits & DENSITY_LION_UNIGRAM_MODEL_UPDATE_FREQUENCY))) {   // Low pass filter
+    if (density_unlikely(!(state->deepModeBits & DENSITY_LION_UNIGRAM_MODEL_UPDATE_FREQUENCY))) {   // Low pass filter
         density_lion_unigram_model_update(&state->unigramData, unigram_a, unigram_found_a);
         density_lion_unigram_model_update(&state->unigramData, unigram_b, state->unigramData.unigramsIndex[unigram_b]);
     }
+}
+
+DENSITY_FORCE_INLINE void density_lion_decode_manage_bigram(density_lion_decode_state *restrict state, const uint16_t bigram, const uint16_t bigram_p) {
+    const uint8_t hash_p = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_p);
+    const uint8_t hash = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram);
+
+    density_lion_dictionary_bigram_entry *bigram_entry_a = &state->dictionary.bigrams[hash];
+    if (bigram_entry_a->bigram == bigram)
+        state->deepModeBits += (1 + density_bitsizeof(uint8_t));
+    else {
+        density_lion_decode_process_bigram_model(state, bigram);
+
+        bigram_entry_a->bigram = bigram;
+    }
+    state->dictionary.bigrams[hash_p].bigram = bigram_p;
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_chunk(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state, const DENSITY_LION_FORM form) {
     uint32_t hash = 0;
     uint32_t chunk = 0;
 
+    __builtin_prefetch((uint32_t *) out->pointer + 1, 1, 3);
+
     switch (form) {
         case DENSITY_LION_FORM_CHUNK_PREDICTIONS:
             density_lion_decode_predicted_chunk(&hash, out, state);
+            break;
+        case DENSITY_LION_FORM_CHUNK_SECONDARY_PREDICTIONS:
+            density_lion_decode_secondary_predicted_chunk(&hash, density_lion_decode_read_1bit_from_signature(in, state), out, state);
             break;
         case DENSITY_LION_FORM_CHUNK_DICTIONARY_A:
             density_lion_decode_read_chunk_hash(&hash, in);
@@ -301,46 +355,19 @@ DENSITY_FORCE_INLINE void density_lion_decode_chunk(density_memory_location *res
             break;
         case DENSITY_LION_FORM_SECONDARY_ACCESS:
             if (!state->deepMode) {
-                const uint32_t inChunk = *(uint32_t*)in->pointer;
+                const uint32_t inChunk = *(uint32_t *) in->pointer;
                 in->pointer += sizeof(uint32_t);
 
                 const uint32_t chunk_rs8 = inChunk >> 8;
-                const uint32_t chunk_rs16 = inChunk >> 16;
+                const uint32_t chunk_rs16 = chunk_rs8 >> 8;
 
-                const uint16_t bigram_p = (uint16_t) ((state->lastUnigram) | ((inChunk & 0xFF) << 8));
-                const uint16_t bigram_a = (uint16_t) (inChunk & 0xFFFF);
-                const uint16_t bigram_b = (uint16_t) (chunk_rs8 & 0xFFFF);
-                const uint16_t bigram_c = (uint16_t) (chunk_rs16 & 0xFFFF);
-
-                const uint8_t hash_p = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_p);
-                const uint8_t hash_a = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_a);
-                const uint8_t hash_b = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_b);
-                const uint8_t hash_c = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram_c);
-
-                density_lion_dictionary_bigram_entry *bigram_entry_a = &state->dictionary.bigrams[hash_a];
-                if (bigram_entry_a->bigram == bigram_a)
-                    state->deepModeBits += (1 + density_bitsizeof(uint8_t));
-                else {
-                    density_lion_decode_process_bigram_model(state, bigram_a);
-
-                    bigram_entry_a->bigram = bigram_a;
-                }
-                state->dictionary.bigrams[hash_p].bigram = bigram_p;
-
-                density_lion_dictionary_bigram_entry *bigram_entry_c = &state->dictionary.bigrams[hash_c];
-                if (bigram_entry_c->bigram == bigram_c)
-                    state->deepModeBits += (1 + density_bitsizeof(uint8_t));
-                else {
-                    density_lion_decode_process_bigram_model(state, bigram_c);
-
-                    bigram_entry_c->bigram = bigram_c;
-                }
-                state->dictionary.bigrams[hash_b].bigram = bigram_b;
+                density_lion_decode_manage_bigram(state, (uint16_t) (inChunk & 0xFFFF), (uint16_t) ((state->lastUnigram) | ((inChunk & 0xFF) << 8)));
+                density_lion_decode_manage_bigram(state, (uint16_t) (chunk_rs16 & 0xFFFF), (uint16_t) (chunk_rs8 & 0xFFFF));
 
                 *(uint32_t *) out->pointer = DENSITY_LITTLE_ENDIAN_32(inChunk);
                 out->pointer += sizeof(uint32_t);
 
-                state->lastUnigram = (uint8_t)(inChunk >> 24);
+                state->lastUnigram = (uint8_t) (inChunk >> 24);
                 density_lion_decode_process_chunk(&hash, &inChunk, state);
             } else {
                 state->lastUnigram = density_lion_decode_bigram(in, out, state, density_lion_decode_bigram(in, out, state, state->lastUnigram, &chunk, 0), &chunk, 0x10);
@@ -351,6 +378,8 @@ DENSITY_FORCE_INLINE void density_lion_decode_chunk(density_memory_location *res
             state->deepMode = (state->deepModeBits < state->plainModeBits);  // Update choice to use deep mode or not
             break;
     }
+
+    __builtin_prefetch(&(state->dictionary.predictions[hash]), 1, 3);
 
     state->lastHash = hash;
 }
@@ -363,9 +392,13 @@ DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(densi
         const bool second_bit = density_lion_decode_read_1bit_from_signature(in, state);
         if (density_unlikely(second_bit)) {
             const bool third_bit = density_lion_decode_read_1bit_from_signature(in, state);
-            if (density_unlikely(third_bit))
-                form = &state->formData.formsPool[3];
-            else
+            if (density_unlikely(third_bit)) {
+                const bool fourth_bit = density_lion_decode_read_1bit_from_signature(in, state);
+                if (density_unlikely(fourth_bit))
+                    form = &state->formData.formsPool[4];
+                else
+                    form = &state->formData.formsPool[3];
+            } else
                 form = &state->formData.formsPool[2];
         } else
             form = &state->formData.formsPool[1];

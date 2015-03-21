@@ -39,11 +39,6 @@
  * Multiform compression algorithm
  */
 
-#include <assert.h>
-#include "memory_location.h"
-#include "kernel_lion_decode.h"
-#include "memory_teleport.h"
-
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decode_)(density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
@@ -69,7 +64,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
 
     // Check output size
     check_output_size:
-    if (DENSITY_LION_PROCESS_UNIT_SIZE > out->available_bytes)
+    if (density_unlikely(out->available_bytes < DENSITY_LION_DECODE_MINIMUM_OUTPUT_LOOKAHEAD))
         return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
 
     // Try to read the next processing unit

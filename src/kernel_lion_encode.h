@@ -59,6 +59,8 @@ typedef enum {
     DENSITY_LION_ENCODE_PROCESS_UNIT,
 } DENSITY_LION_ENCODE_PROCESS;
 
+#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD                           (1 << 15)
+
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {

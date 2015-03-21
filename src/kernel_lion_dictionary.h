@@ -59,7 +59,9 @@ typedef struct {
 } density_lion_dictionary_chunk_entry;
 
 typedef struct {
-    uint32_t next_chunk_prediction;
+    uint32_t next_chunk_a;
+    uint32_t next_chunk_b;
+    uint32_t next_chunk_c;
 } density_lion_dictionary_chunk_prediction_entry;
 
 typedef struct {
