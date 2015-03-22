@@ -71,7 +71,7 @@ On the next block the target algorithm is tried again.
 
 **Chameleon** ( *DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM* )
 
-This is a dictionary lookup based compression algorithm. It is designed for absolute speed and usually reaches a ~60% compression ratio on compressible data.
+This is a dictionary lookup based compression algorithm. It is designed for absolute speed and usually reaches a 60% compression ratio on compressible data.
 Decompression is just as fast. This algorithm is a great choice when main concern is speed.
 
 **Cheetah** ( *DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM* )
@@ -82,9 +82,9 @@ On typical compressible data compression ratio is about 50% or less. It is still
 
 **Lion** ( *DENSITY_COMPRESSION_MODE_LION_ALGORITHM* )
 
-Lion is a multiform compression algorithm, just like a variable geometry aircraft it adapts to the incoming data to try and offer the most efficient compression technique available. 
+Lion is a multiform compression algorithm, just like a variable geometry aircraft it adapts to the incoming data and tries to offer the most efficient compression technique available. 
 It uses swapped double dictionary lookups, multiple predictions, shifting sub-word dictionary lookups, symbol and forms rank entropy coding. 
-Because of this it offers the best compression ratio of all three algorithms under any circumstance, while still being very fast.
+Lion provides the best compression ratio of all three algorithms under any circumstance, and is still very fast.
 
 Quick start (a simple example using the APIs)
 ---------------------------------------------
