@@ -18,7 +18,7 @@ Platform : MacBook Pro, OSX 10.10.1, 2.3 GHz Intel Core i7, 8Go 1600 MHz DDR, SS
 
 Timing : using the *time* function, and taking the best *user* output after multiple runs
 
-Note : *sharc -c1* uses the chameleon algorithm, *sharc -c2* the cheetah algorithm, and *sharc -c3* the lion algorithm.
+Note : *sharc -c1* uses the chameleon algorithm, *sharc -c2* the cheetah algorithm, and *sharc -c3* the lion algorithm (see **About the algorithms** further down).
 
 <sub>Program</sub> | <sub>Library</sub> | <sub>Compress</sub> | <sub>Decompress</sub> | <sub>Size</sub> | <sub>Ratio</sub> | <sub>Round trip</sub>
 --- | --- | --- | --- | --- | --- | ---
