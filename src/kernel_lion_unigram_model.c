@@ -44,8 +44,11 @@
 void density_lion_unigram_model_init(density_lion_unigram_data *data) {
     data->nextAvailableUnigram = 0;
     data->lastUnigramNode = NULL;
-    for(uint8_t count = 0; count < 64; count++)
-        data->unigramsPool[count].qualified = true;
+    uint8_t count = 255;
+    do {
+        data->unigramsIndex[count] = NULL;
+        data->unigramsPool[count].qualified = (count < 64);
+    } while (count--);
 };
 
 void density_lion_unigram_model_update(density_lion_unigram_data *restrict data, const uint8_t unigram, density_lion_unigram_node *unigram_found) {

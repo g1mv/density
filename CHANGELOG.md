@@ -7,6 +7,7 @@
 * Kernel chameleon and cheetah improvements in encoding/decoding speeds
 * Generic function macros to avoid code rewrite
 * Improved memory teleport IO flexibility and speed, bytes issued by memory teleport can now be partially read
+* Various fixes and improvements
 
 0.11.3 beta
 -----------
