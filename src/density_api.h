@@ -81,7 +81,7 @@ uint8_t density_version_revision(void);
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-density_buffer_processing_result density_buffer_compress(uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+density_buffer_processing_result density_buffer_compress(const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 /*
  * Decompress an input_buffer of input_size bytes and store the result in output_buffer.
@@ -95,7 +95,7 @@ density_buffer_processing_result density_buffer_compress(uint8_t* input_buffer, 
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-density_buffer_processing_result density_buffer_decompress(uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+density_buffer_processing_result density_buffer_decompress(const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 
 
@@ -134,7 +134,7 @@ void density_stream_destroy(density_stream *stream);
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size);
+DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size);
 
 /*
  * Update the stream's input
@@ -143,7 +143,7 @@ DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, uint8_t* inp
  * @param in a byte array
  * @param availableIn the size of the byte array
  */
-DENSITY_STREAM_STATE density_stream_update_input(density_stream *stream, uint8_t *in, const uint_fast64_t availableIn);
+DENSITY_STREAM_STATE density_stream_update_input(density_stream *stream, const uint8_t *in, const uint_fast64_t availableIn);
 
 /*
  * Update the stream's output

@@ -38,7 +38,7 @@ DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_return_proc
     return result;
 }
 
-DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_compress(uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
+DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_compress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
     DENSITY_STREAM_STATE streamState;
     density_stream* stream = density_stream_create(mem_alloc, mem_free);
 
@@ -79,7 +79,7 @@ DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_compress(ui
     }
 }
 
-DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_decompress(uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
+DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_decompress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
     DENSITY_STREAM_STATE streamState;
     density_stream* stream = density_stream_create(mem_alloc, mem_free);
 

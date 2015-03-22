@@ -58,8 +58,8 @@ DENSITY_FORCE_INLINE void density_memory_teleport_free(density_memory_teleport *
     mem_free(teleport);
 }
 
-DENSITY_FORCE_INLINE void density_memory_teleport_change_input_buffer(density_memory_teleport *restrict teleport, density_byte *restrict in, const uint_fast64_t availableIn) {
-    density_memory_location_encapsulate(teleport->directMemoryLocation, in, availableIn);
+DENSITY_FORCE_INLINE void density_memory_teleport_change_input_buffer(density_memory_teleport *restrict teleport, const density_byte *restrict in, const uint_fast64_t availableIn) {
+    density_memory_location_encapsulate(teleport->directMemoryLocation, (density_byte*)in, availableIn);
 }
 
 DENSITY_FORCE_INLINE void density_memory_teleport_reset_staging_buffer(density_memory_teleport *restrict teleport) {

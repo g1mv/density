@@ -54,7 +54,7 @@ density_memory_teleport *density_memory_teleport_allocate(uint_fast64_t, void *(
 
 void density_memory_teleport_free(density_memory_teleport *, void (*)(void *));
 
-void density_memory_teleport_change_input_buffer(density_memory_teleport *, density_byte *, const uint_fast64_t);
+void density_memory_teleport_change_input_buffer(density_memory_teleport *, const density_byte *, const uint_fast64_t);
 
 void density_memory_teleport_reset_staging_buffer(density_memory_teleport *);
 
