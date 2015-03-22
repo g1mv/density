@@ -5,10 +5,12 @@ Superfast compression library
 DENSITY is a free C99, open-source, BSD licensed compression library.
 
 It is focused on high-speed compression, at the best ratio possible.
-DENSITY features a stream API to enable quick integration in any project.
+DENSITY features a buffer and stream API to enable quick integration in any project.
 
-Benchmark
----------
+Benchmarks
+----------
+
+** Quick bench **
 
 File used : enwik8 (100 MB)
 
@@ -18,14 +20,19 @@ Timing : using the *time* function, and taking the best *user* output after mult
 
 <sub>Program</sub> | <sub>Library</sub> | <sub>Compress</sub> | <sub>Decompress</sub> | <sub>Size</sub> | <sub>Ratio</sub> | <sub>Round trip</sub>
 --- | --- | --- | --- | --- | --- | ---
-<sub>**sharc** -c1</sub> | <sub>**density** 0.11.1</sub> | <sub>0,118s (847,45 MB/s)</sub> | <sub>0,095s (1052,63 MB/s)</sub> | <sub>61 524 502</sub> | <sub>61,52%</sub> | <sub>0,213s</sub>
-<sub>**sharc** -c2</sub> | <sub>**density** 0.11.1</sub> | <sub>0,219s (456,62 MB/s)</sub> | <sub>0,231s (432,90 MB/s)</sub> | <sub>53 156 782</sub> | <sub>53,16%</sub> | <sub>0,450s</sub>
-<sub>lz4 -1</sub> | <sub>lz4 r126</sub> | <sub>0,479s (208,77 MB/s)</sub> | <sub>0,091s (1098,90 MB/s)</sub> | <sub>56 995 497</sub> | <sub>57,00%</sub> | <sub>0,570s</sub>
-<sub>lz4 -9</sub> | <sub>lz4 r126</sub> | <sub>3,925s (25,48 MB/s)</sub> | <sub>0,087s (1149,43 MB/s)</sub> | <sub>44 250 986</sub> | <sub>44,25%</sub> | <sub>4,012s</sub>
-<sub>lzop -1</sub> | <sub>lzo 2.08</sub> | <sub>0,367s (272,48 MB/s)</sub> | <sub>0,309s (323,62 MB/s)</sub> | <sub>56 709 096</sub> | <sub>56,71%</sub> | <sub>0,676s</sub>
-<sub>lzop -9</sub> | <sub>lzo 2.08</sub> | <sub>14,298s (6,99 MB/s)</sub> | <sub>0,315s 317,46 MB/s)</sub> | <sub>41 217 688</sub> | <sub>41,22%</sub> | <sub>14,613s</sub>
+<sub>**[sharc](https://github.com/centaurean/sharc)** -c1 (chameleon)</sub> | <sub>**density** 0.12.0</sub> | <sub>0.112s (889 MB/s)</sub> | <sub>0.086s (1164 MB/s)</sub> | <sub>61 524 502</sub> | <sub>61,52%</sub> | <sub>0.198s</sub>
+<sub>**[sharc](https://github.com/centaurean/sharc)** -c2 (cheetah)</sub> | <sub>**density** 0.12.0</sub> | <sub>0.212s (472 MB/s)</sub> | <sub>0.221s (452 MB/s)</sub> | <sub>53 156 782</sub> | <sub>53,16%</sub> | <sub>0.433s</sub>
+<sub>**[sharc](https://github.com/centaurean/sharc)** -c3 (lion)</sub> | <sub>**density** 0.12.0</sub> | <sub>0.412s (243 MB/s)</sub> | <sub>0.429s (233 MB/s)</sub> | <sub>47 162 722</sub> | <sub>47,16%</sub> | <sub>0.841s</sub>
+<sub>[lz4](https://github.com/Cyan4973/lz4) -1</sub> | <sub>lz4 r126</sub> | <sub>0.461s ( MB/s)</sub> | <sub>0.091s ( MB/s)</sub> | <sub>56 995 497</sub> | <sub>57,00%</sub> | <sub>0.552s</sub>
+<sub>[lz4](https://github.com/Cyan4973/lz4) -3</sub> | <sub>lz4 r126</sub> | <sub>1.520s ( MB/s)</sub> | <sub>0.087s ( MB/s)</sub> | <sub>47 082 421</sub> | <sub>47,08%</sub> | <sub>1.607s</sub>
+<sub>[lzop](http://www.lzop.org) -1</sub> | <sub>lzo 2.08</sub> | <sub>0.367s ( MB/s)</sub> | <sub>0.309s ( MB/s)</sub> | <sub>56 709 096</sub> | <sub>56,71%</sub> | <sub>0.676s</sub>
+<sub>[lzop](http://www.lzop.org) -7</sub> | <sub>lzo 2.08</sub> | <sub>9.562s ( MB/s)</sub> | <sub>0.319s ( MB/s)</sub> | <sub>41 720 721</sub> | <sub>41,72%</sub> | <sub>9.881s</sub>
+
+** Squash **
 
 [Click here for a more exhaustive benchmark](http://quixdb.github.io/squash/benchmarks/core-i3-2105.html) of DENSITY's fastest mode compared to other libraries (look for the [sharc](https://github.com/centaurean/sharc) line), on an Intel® Core™ i3-2105 (x86 64), Asus P8H61-H motherboard with Fedora 19. It is possible to run yours using [this project](https://github.com/quixdb/squash).
+
+** Fsbench **
 
 Build
 -----
@@ -65,11 +72,17 @@ On the next block the target algorithm is tried again.
 This is a dictionary lookup based compression algorithm. It is designed for absolute speed and usually reaches a ~60% compression ratio on compressible data.
 Decompression is just as fast. This algorithm is a great choice when main concern is speed.
 
-**Mandala** ( *DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM* )
+**Cheetah** ( *DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM* )
 
 This algorithm was developed in conjunction with Piotr Tarsa (https://github.com/tarsa).
-It uses swapped double dictionary lookups and predictions. It can be extremely good with highly compressible data (ratio reaching ~5% or less).
-On typical compressible data compression ratio is ~50% or less. It is still extremely fast for both compression and decompression and is a great, efficient all-rounder algorithm.
+It uses swapped double dictionary lookups and predictions. It can be extremely good with highly compressible data (ratio reaching 10% or less).
+On typical compressible data compression ratio is about 50% or less. It is still extremely fast for both compression and decompression and is a great, efficient all-rounder algorithm.
+
+**Lion** ( *DENSITY_COMPRESSION_MODE_LION_ALGORITHM* )
+
+Lion is a multiform compression algorithm, just like a variable geometry aircraft it adapts to the incoming data to try and offer the most efficient compression technique available. 
+It uses swapped double dictionary lookups, multiple predictions, shifting sub-word dictionary lookups, symbol and forms rank entropy coding. 
+Because of this it offers the best compression ratio of all three algorithms under any circumstance, while still being very fast.
 
 Quick start (a simple example using the APIs)
 ---------------------------------------------
