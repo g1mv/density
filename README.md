@@ -20,9 +20,9 @@ Timing : using the *time* function, and taking the best *user* output after mult
 
 <sub>Program</sub> | <sub>Library</sub> | <sub>Compress</sub> | <sub>Decompress</sub> | <sub>Size</sub> | <sub>Ratio</sub> | <sub>Round trip</sub>
 --- | --- | --- | --- | --- | --- | ---
-<sub>**[sharc](https://github.com/centaurean/sharc)** -c1 (chameleon)</sub> | <sub>**density** 0.12.0</sub> | <sub>0.112s (889 MB/s)</sub> | <sub>0.086s (1164 MB/s)</sub> | <sub>61 524 502</sub> | <sub>61,52%</sub> | <sub>0.198s</sub>
-<sub>**[sharc](https://github.com/centaurean/sharc)** -c2 (cheetah)</sub> | <sub>**density** 0.12.0</sub> | <sub>0.212s (472 MB/s)</sub> | <sub>0.221s (452 MB/s)</sub> | <sub>53 156 782</sub> | <sub>53,16%</sub> | <sub>0.433s</sub>
-<sub>**[sharc](https://github.com/centaurean/sharc)** -c3 (lion)</sub> | <sub>**density** 0.12.0</sub> | <sub>0.412s (243 MB/s)</sub> | <sub>0.429s (233 MB/s)</sub> | <sub>47 162 722</sub> | <sub>47,16%</sub> | <sub>0.841s</sub>
+<sub>**[sharc](https://github.com/centaurean/sharc)** chameleon</sub> | <sub>**density** 0.12.0</sub> | <sub>0.112s (889 MB/s)</sub> | <sub>0.086s (1164 MB/s)</sub> | <sub>61 524 502</sub> | <sub>61,52%</sub> | <sub>0.198s</sub>
+<sub>**[sharc](https://github.com/centaurean/sharc)** cheetah</sub> | <sub>**density** 0.12.0</sub> | <sub>0.212s (472 MB/s)</sub> | <sub>0.221s (452 MB/s)</sub> | <sub>53 156 782</sub> | <sub>53,16%</sub> | <sub>0.433s</sub>
+<sub>**[sharc](https://github.com/centaurean/sharc)** lion</sub> | <sub>**density** 0.12.0</sub> | <sub>0.412s (243 MB/s)</sub> | <sub>0.429s (233 MB/s)</sub> | <sub>47 162 722</sub> | <sub>47,16%</sub> | <sub>0.841s</sub>
 <sub>[lz4](https://github.com/Cyan4973/lz4) -1</sub> | <sub>lz4 r126</sub> | <sub>0.461s ( MB/s)</sub> | <sub>0.091s ( MB/s)</sub> | <sub>56 995 497</sub> | <sub>57,00%</sub> | <sub>0.552s</sub>
 <sub>[lz4](https://github.com/Cyan4973/lz4) -3</sub> | <sub>lz4 r126</sub> | <sub>1.520s ( MB/s)</sub> | <sub>0.087s ( MB/s)</sub> | <sub>47 082 421</sub> | <sub>47,08%</sub> | <sub>1.607s</sub>
 <sub>[lzop](http://www.lzop.org) -1</sub> | <sub>lzo 2.08</sub> | <sub>0.367s ( MB/s)</sub> | <sub>0.309s ( MB/s)</sub> | <sub>56 709 096</sub> | <sub>56,71%</sub> | <sub>0.676s</sub>
