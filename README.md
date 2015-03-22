@@ -10,7 +10,7 @@ DENSITY features a buffer and stream API to enable quick integration in any proj
 Benchmarks
 ----------
 
-** Quick bench **
+**Quick bench**
 
 File used : enwik8 (100 MB)
 
@@ -18,21 +18,23 @@ Platform : MacBook Pro, OSX 10.10.1, 2.3 GHz Intel Core i7, 8Go 1600 MHz DDR, SS
 
 Timing : using the *time* function, and taking the best *user* output after multiple runs
 
+Note : *sharc -c1* uses the chameleon algorithm, *sharc -c2* the cheetah algorithm, and *sharc -c3* the lion algorithm.
+
 <sub>Program</sub> | <sub>Library</sub> | <sub>Compress</sub> | <sub>Decompress</sub> | <sub>Size</sub> | <sub>Ratio</sub> | <sub>Round trip</sub>
 --- | --- | --- | --- | --- | --- | ---
-<sub>**[sharc](https://github.com/centaurean/sharc)** chameleon</sub> | <sub>**density** 0.12.0</sub> | <sub>0.112s (889 MB/s)</sub> | <sub>0.086s (1164 MB/s)</sub> | <sub>61 524 502</sub> | <sub>61,52%</sub> | <sub>0.198s</sub>
-<sub>**[sharc](https://github.com/centaurean/sharc)** cheetah</sub> | <sub>**density** 0.12.0</sub> | <sub>0.212s (472 MB/s)</sub> | <sub>0.221s (452 MB/s)</sub> | <sub>53 156 782</sub> | <sub>53,16%</sub> | <sub>0.433s</sub>
-<sub>**[sharc](https://github.com/centaurean/sharc)** lion</sub> | <sub>**density** 0.12.0</sub> | <sub>0.412s (243 MB/s)</sub> | <sub>0.429s (233 MB/s)</sub> | <sub>47 162 722</sub> | <sub>47,16%</sub> | <sub>0.841s</sub>
+<sub>**[sharc](https://github.com/centaurean/sharc)** -c1</sub> | <sub>**density** 0.12.0</sub> | <sub>0.112s (889 MB/s)</sub> | <sub>0.086s (1164 MB/s)</sub> | <sub>61 524 502</sub> | <sub>61,52%</sub> | <sub>0.198s</sub>
+<sub>**[sharc](https://github.com/centaurean/sharc)** -c2</sub> | <sub>**density** 0.12.0</sub> | <sub>0.212s (472 MB/s)</sub> | <sub>0.221s (452 MB/s)</sub> | <sub>53 156 782</sub> | <sub>53,16%</sub> | <sub>0.433s</sub>
+<sub>**[sharc](https://github.com/centaurean/sharc)** -c3</sub> | <sub>**density** 0.12.0</sub> | <sub>0.412s (243 MB/s)</sub> | <sub>0.429s (233 MB/s)</sub> | <sub>47 162 722</sub> | <sub>47,16%</sub> | <sub>0.841s</sub>
 <sub>[lz4](https://github.com/Cyan4973/lz4) -1</sub> | <sub>lz4 r126</sub> | <sub>0.461s ( MB/s)</sub> | <sub>0.091s ( MB/s)</sub> | <sub>56 995 497</sub> | <sub>57,00%</sub> | <sub>0.552s</sub>
 <sub>[lz4](https://github.com/Cyan4973/lz4) -3</sub> | <sub>lz4 r126</sub> | <sub>1.520s ( MB/s)</sub> | <sub>0.087s ( MB/s)</sub> | <sub>47 082 421</sub> | <sub>47,08%</sub> | <sub>1.607s</sub>
 <sub>[lzop](http://www.lzop.org) -1</sub> | <sub>lzo 2.08</sub> | <sub>0.367s ( MB/s)</sub> | <sub>0.309s ( MB/s)</sub> | <sub>56 709 096</sub> | <sub>56,71%</sub> | <sub>0.676s</sub>
 <sub>[lzop](http://www.lzop.org) -7</sub> | <sub>lzo 2.08</sub> | <sub>9.562s ( MB/s)</sub> | <sub>0.319s ( MB/s)</sub> | <sub>41 720 721</sub> | <sub>41,72%</sub> | <sub>9.881s</sub>
 
-** Squash **
+**Squash**
 
 [Click here for a more exhaustive benchmark](http://quixdb.github.io/squash/benchmarks/core-i3-2105.html) of DENSITY's fastest mode compared to other libraries (look for the [sharc](https://github.com/centaurean/sharc) line), on an Intel® Core™ i3-2105 (x86 64), Asus P8H61-H motherboard with Fedora 19. It is possible to run yours using [this project](https://github.com/quixdb/squash).
 
-** Fsbench **
+**Fsbench**
 
 Build
 -----
