@@ -89,11 +89,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
     readMemoryLocation = density_memory_teleport_read_remaining_reserved(in, state->endDataOverhead);
     uint_fast8_t iterations = DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
     while (iterations--) {
-        readMemoryLocationPointerBefore = readMemoryLocation->pointer;
         bool proceed = density_lion_decode_chunk_step_by_step(readMemoryLocation, in, out, state);
         if(density_unlikely(!proceed))
             goto finish;
-        readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
         out->available_bytes -= sizeof(uint32_t);
     }
 

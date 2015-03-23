@@ -40,7 +40,6 @@
  */
 
 #include "kernel_lion_encode.h"
-#include "kernel_lion_dictionary.h"
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE exitProcess(density_lion_encode_state *state, DENSITY_LION_ENCODE_PROCESS process, DENSITY_KERNEL_ENCODE_STATE kernelEncodeState) {
     state->process = process;
@@ -61,10 +60,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_check_block
     } else if (density_unlikely(state->chunksCount >= DENSITY_LION_PREFERRED_BLOCK_CHUNKS)) {
         state->chunksCount = 0;
         state->efficiencyChecked = false;
-
-        //state->deepMode = true;
-        //state->deepModeBits = 0;
-        //state->plainModeBits = 0;
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
             if (state->resetCycle)
@@ -121,11 +116,11 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(density_mem
             *state->signature = state->proximitySignature;
 
             const uint_fast8_t remainder = (uint_fast8_t) (state->shift & 0x3F);
-            state->shift = 0;
             if (remainder) {
                 density_lion_encode_prepare_new_signature(out, state);
                 state->shift = remainder;
-            }
+            } else
+                state->shift = 0;
         }
     } else {
         density_lion_encode_prepare_new_signature(out, state);
