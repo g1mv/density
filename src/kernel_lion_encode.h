@@ -50,7 +50,6 @@
 #include "density_api.h"
 #include "memory_location.h"
 #include "memory_teleport.h"
-#include "kernel_lion_unigram_model.h"
 #include "kernel_lion_decode.h"
 
 typedef enum {
@@ -77,14 +76,9 @@ typedef struct {
     bool efficiencyChecked;
 
     density_lion_form_data formData;
-    density_lion_unigram_data unigramData;
 
     uint_fast32_t lastHash;
-    uint_fast32_t lastChunk;
-
-    bool deepMode;
-    uint_fast32_t deepModeBits;
-    uint_fast32_t plainModeBits;
+    uint32_t lastChunk;
 
     density_lion_dictionary dictionary;
 } density_lion_encode_state;

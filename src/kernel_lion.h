@@ -57,7 +57,7 @@
 #define DENSITY_LION_HASH_ALGORITHM(hash32, value32)                    hash32 = value32 * DENSITY_LION_HASH32_MULTIPLIER;\
                                                                         hash32 = (hash32 >> (32 - DENSITY_LION_CHUNK_HASH_BITS));
 
-#define DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram)                      (uint8_t) ((((bigram) * DENSITY_LION_HASH32_MULTIPLIER) >> (32 - DENSITY_LION_BIGRAM_HASH_BITS)));
+#define DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram)                      (uint8_t) ((((bigram) * DENSITY_LION_HASH32_MULTIPLIER) >> (32 - DENSITY_LION_BIGRAM_HASH_BITS)))
 
 #define DENSITY_FORMAT(v)               0##v##llu
 
@@ -82,6 +82,17 @@
                                         + (DENSITY_ISOLATE(b, 281474976710656llu) ? 0x10000 : 0)\
                                         + (DENSITY_ISOLATE(b, 2251799813685248llu) ? 0x20000 : 0))
 
+/*#define S1(x)           DENSITY_LION_BIGRAM_HASH_ALGORITHM(x)
+#define S4(x)           S1(x),          S1(x + 1),          S1(x + 2),          S1(x + 3)
+#define S16(x)          S4(x),          S4(x + 4),          S4(x + 8),          S4(x + 12)
+#define S64(x)          S16(x),         S16(x + 16),        S16(x + 32),        S16(x + 48)
+#define S256(x)         S64(x),         S64(x + 64),        S64(x + 128),       S64(x + 192)
+#define S1024(x)        S256(x),        S256(x + 256),      S256(x + 512),      S256(x + 768)
+#define S4096(x)        S1024(x),       S1024(x + 1024),    S1024(x + 2048),    S1024(x + 3072)
+#define S16384(x)       S4096(x),       S4096(x + 4096),    S4096(x + 8192),    S4096(x + 12288)
+#define S65536(x)       S16384(x),      S16384(x + 16384),  S16384(x + 32768),  S4096(x + 49152)
+static const uint8_t DENSITY_LION_BIGRAM_HASH_LOOKUP_TABLE[1 << 16] = {S65536(0)};*/
+
 typedef enum {
     DENSITY_LION_FORM_CHUNK_PREDICTIONS,
     DENSITY_LION_FORM_CHUNK_SECONDARY_PREDICTIONS,
@@ -91,19 +102,14 @@ typedef enum {
 } DENSITY_LION_FORM;
 
 typedef enum {
-    DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_DICTIONARY = 0x0,
-    DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_SECONDARY_ACCESS = 0x1,
-} DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG;
+    DENSITY_LION_BIGRAM_SIGNATURE_FLAG_DICTIONARY = 0x0,
+    DENSITY_LION_BIGRAM_SIGNATURE_FLAG_PLAIN = 0x1,
+} DENSITY_LION_BIGRAM_SIGNATURE_FLAG;
 
 typedef enum {
     DENSITY_LION_PREDICTIONS_SIGNATURE_FLAG_A = 0x0,
     DENSITY_LION_PREDICTIONS_SIGNATURE_FLAG_B = 0x1,
 } DENSITY_LION_PREDICTIONS_SIGNATURE_FLAG;
-
-typedef enum {
-    DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_ENCODED = 0x0,
-    DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_PLAIN = 0x1,
-} DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG;
 
 #pragma pack(push)
 #pragma pack(4)
