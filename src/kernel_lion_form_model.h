@@ -74,9 +74,6 @@ typedef struct {
 } density_lion_form_data;
 #pragma pack(pop)
 
-static const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUMBER_OF_FORMS] = DENSITY_LION_FORM_MODEL_ENTROPY_CODES;
-static const uint8_t density_lion_form_entropy_decodes[1 << 4] = DENSITY_LION_FORM_MODEL_ENTROPY_DECODES;
-
 void density_lion_form_model_init(density_lion_form_data *);
 void density_lion_form_model_update(density_lion_form_data *, density_lion_form_node *, density_lion_form_node *);
 density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *, const DENSITY_LION_FORM);

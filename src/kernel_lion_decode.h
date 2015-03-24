@@ -103,8 +103,6 @@ typedef struct {
 } density_lion_decode_state;
 #pragma pack(pop)
 
-static const uint8_t density_lion_decode_bitmasks[DENSITY_LION_DECODE_NUMBER_OF_BITMASK_VALUES] = DENSITY_LION_DECODE_BITMASK_VALUES;
-
 DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *, const density_main_header_parameters parameters, const uint_fast8_t);
 DENSITY_KERNEL_DECODE_STATE density_lion_decode_continue(density_memory_teleport *, density_memory_location *, density_lion_decode_state *);
 DENSITY_KERNEL_DECODE_STATE density_lion_decode_finish(density_memory_teleport *, density_memory_location *, density_lion_decode_state *);
