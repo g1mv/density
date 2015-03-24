@@ -34,7 +34,7 @@
 
 #include "density_api_data_structures.h"
 
-#define DENSITY_MINIMUM_OUT_BUFFER_SIZE         (1 << 15)
+#define DENSITY_MINIMUM_OUT_BUFFER_SIZE         (1 << 16)
 
 /***********************************************************************************************************************
  *                                                                                                                     *
