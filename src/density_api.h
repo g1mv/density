@@ -182,29 +182,15 @@ DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream, dens
 
 /*
  * Stream compression function, has to be called repetitively.
- * When the dataset in the input buffer is the last, flush has to be true. Otherwise it should be false at all times.
  *
  * @param stream the stream
- *      Please note that the input buffer size, if flush is false, *must* be a multiple of 32 otherwise an error will be returned.
- * @param flush a boolean indicating flush behaviour
- *      If set to true, this will ensure that every byte from the input buffer will have its counterpart in the output buffer.
- *      flush has to be true when the presented data is the last (end of a file for example).
- *      It can also be set to true multiple times to handle network streaming for example. In that case, please also check
- *      the block_type parameter of density_stream_compress_init to enable a better compression ratio. It is also worth noting that
- *      the *best* input buffer size for compression ratio matters should be a multiple of 256, any other size will also work but will
- *      incur a less than optimal compression ratio.
  */
 DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *stream);
 
 /*
  * Stream decompression function, has to be called repetitively.
- * When the dataset in the input buffer is the last, flush has to be true. Otherwise it should be false at all times.
  *
  * @param stream the stream
- * @param flush a boolean indicating flush behaviour
- *      If set to true, this will ensure that every byte from the input buffer will have its counterpart in the output buffer.
- *      flush has to be true when the presented data is the last (end of a file for example)
- *      It can also be set to true multiple times to handle network streaming for example.
  */
 DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *stream);
 
