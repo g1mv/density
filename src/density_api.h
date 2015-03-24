@@ -34,6 +34,7 @@
 
 #include "density_api_data_structures.h"
 
+#define DENSITY_MINIMUM_OUT_BUFFER_SIZE         (1 << 16)
 
 /***********************************************************************************************************************
  *                                                                                                                     *
@@ -80,7 +81,7 @@ uint8_t density_version_revision(void);
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-density_buffer_processing_result density_buffer_compress(uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+density_buffer_processing_result density_buffer_compress(const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 /*
  * Decompress an input_buffer of input_size bytes and store the result in output_buffer.
@@ -94,7 +95,7 @@ density_buffer_processing_result density_buffer_compress(uint8_t* input_buffer, 
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-density_buffer_processing_result density_buffer_decompress(uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+density_buffer_processing_result density_buffer_decompress(const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 
 
@@ -133,7 +134,7 @@ void density_stream_destroy(density_stream *stream);
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size);
+DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size);
 
 /*
  * Update the stream's input
@@ -142,7 +143,7 @@ DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, uint8_t* inp
  * @param in a byte array
  * @param availableIn the size of the byte array
  */
-DENSITY_STREAM_STATE density_stream_update_input(density_stream *stream, uint8_t *in, const uint_fast64_t availableIn);
+DENSITY_STREAM_STATE density_stream_update_input(density_stream *stream, const uint8_t *in, const uint_fast64_t availableIn);
 
 /*
  * Update the stream's output
@@ -181,29 +182,15 @@ DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream, dens
 
 /*
  * Stream compression function, has to be called repetitively.
- * When the dataset in the input buffer is the last, flush has to be true. Otherwise it should be false at all times.
  *
  * @param stream the stream
- *      Please note that the input buffer size, if flush is false, *must* be a multiple of 32 otherwise an error will be returned.
- * @param flush a boolean indicating flush behaviour
- *      If set to true, this will ensure that every byte from the input buffer will have its counterpart in the output buffer.
- *      flush has to be true when the presented data is the last (end of a file for example).
- *      It can also be set to true multiple times to handle network streaming for example. In that case, please also check
- *      the block_type parameter of density_stream_compress_init to enable a better compression ratio. It is also worth noting that
- *      the *best* input buffer size for compression ratio matters should be a multiple of 256, any other size will also work but will
- *      incur a less than optimal compression ratio.
  */
 DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *stream);
 
 /*
  * Stream decompression function, has to be called repetitively.
- * When the dataset in the input buffer is the last, flush has to be true. Otherwise it should be false at all times.
  *
  * @param stream the stream
- * @param flush a boolean indicating flush behaviour
- *      If set to true, this will ensure that every byte from the input buffer will have its counterpart in the output buffer.
- *      flush has to be true when the presented data is the last (end of a file for example)
- *      It can also be set to true multiple times to handle network streaming for example.
  */
 DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *stream);
 

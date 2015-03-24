@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2013, Guillaume Voirin
+ * Copyright (c) 2015, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,45 +26,56 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 06/12/13 20:20
+ * 9/03/15 12:04
  *
- * -----------------
- * Mandala algorithm
- * -----------------
+ * --------------
+ * Lion algorithm
+ * --------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
- * Piotr Tarsa (https://github.com/tarsa)
  *
  * Description
- * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
+ * Multiform compression algorithm
  */
 
-#ifndef DENSITY_MANDALA_DICTIONARY_H
-#define DENSITY_MANDALA_DICTIONARY_H
+#ifndef DENSITY_LION_FORM_MODEL_H
+#define DENSITY_LION_FORM_MODEL_H
 
 #include "globals.h"
-#include "kernel_mandala.h"
+#include "kernel_lion.h"
 
-#include <string.h>
+#define DENSITY_LION_NUMBER_OF_FORMS                                    5
+
+// Unary codes (reversed) except the last one
+#define DENSITY_LION_FORM_MODEL_ENTROPY_CODES {\
+    {DENSITY_BINARY_TO_UINT(0), 1},\
+    {DENSITY_BINARY_TO_UINT(01), 2},\
+    {DENSITY_BINARY_TO_UINT(011), 3},\
+    {DENSITY_BINARY_TO_UINT(0111), 4},\
+    {DENSITY_BINARY_TO_UINT(1111), 4},\
+}
+
+#define DENSITY_LION_FORM_MODEL_ENTROPY_DECODES {0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4}
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    uint32_t chunk_a;
-    uint32_t chunk_b;
-} density_mandala_dictionary_entry;
+    DENSITY_LION_FORM form;
+    uint32_t usage;
+    uint8_t rank;
+    void *previousForm;
+} density_lion_form_node;
 
 typedef struct {
-    uint32_t next_chunk_prediction;
-} density_mandala_dictionary_prediction_entry;
-
-typedef struct {
-    density_mandala_dictionary_entry entries[1 << DENSITY_MANDALA_HASH_BITS];
-    density_mandala_dictionary_prediction_entry prediction_entries[1 << DENSITY_MANDALA_HASH_BITS];
-} density_mandala_dictionary;
+    uint8_t nextAvailableForm;
+    density_lion_form_node formsPool[DENSITY_LION_NUMBER_OF_FORMS];
+    density_lion_form_node *formsIndex[DENSITY_LION_NUMBER_OF_FORMS];
+} density_lion_form_data;
 #pragma pack(pop)
 
-void density_mandala_dictionary_reset(density_mandala_dictionary *);
+void density_lion_form_model_init(density_lion_form_data *);
+void density_lion_form_model_update(density_lion_form_data *, density_lion_form_node *, density_lion_form_node *);
+density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *, const DENSITY_LION_FORM);
 
 #endif

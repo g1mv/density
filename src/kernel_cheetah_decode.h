@@ -26,62 +26,65 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/10/13 12:01
+ * 07/12/13 15:40
  *
- * -------------------
- * Chameleon algorithm
- * -------------------
+ * -----------------
+ * Cheetah algorithm
+ * -----------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
+ * Piotr Tarsa (https://github.com/tarsa)
  *
  * Description
- * Hash based superfast kernel
+ * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#ifndef DENSITY_CHAMELEON_ENCODE_H
-#define DENSITY_CHAMELEON_ENCODE_H
+#ifndef DENSITY_CHEETAH_DECODE_H
+#define DENSITY_CHEETAH_DECODE_H
 
-#include "kernel_chameleon_dictionary.h"
-#include "kernel_chameleon.h"
+#include "kernel_cheetah_dictionary.h"
+#include "kernel_cheetah.h"
 #include "block.h"
-#include "kernel_encode.h"
+#include "kernel_decode.h"
 #include "density_api.h"
-#include "globals.h"
 #include "memory_teleport.h"
-#include "memory_location.h"
+#include "block_footer.h"
+#include "main_footer.h"
+#include "block_mode_marker.h"
+#include "kernel_cheetah_encode.h"
+#include "main_header.h"
 
-#define DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE                    (8 * sizeof(uint64_t))
+#define DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT                      1
 
 typedef enum {
-    DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
-    DENSITY_CHAMELEON_ENCODE_PROCESS_CHECK_SIGNATURE_STATE,
-    DENSITY_CHAMELEON_ENCODE_PROCESS_READ_CHUNK,
-} DENSITY_CHAMELEON_ENCODE_PROCESS;
+    DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE,
+    DENSITY_CHEETAH_DECODE_PROCESS_READ_PROCESSING_UNIT,
+} DENSITY_CHEETAH_DECODE_PROCESS;
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_CHAMELEON_ENCODE_PROCESS process;
+    DENSITY_CHEETAH_DECODE_PROCESS process;
 
-#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
+    density_main_header_parameters parameters;
     uint_fast64_t resetCycle;
-#endif
 
+    density_cheetah_signature signature;
     uint_fast32_t shift;
-    density_chameleon_signature proximitySignature;
-    density_chameleon_signature *signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
-    density_chameleon_dictionary dictionary;
-} density_chameleon_encode_state;
+    uint_fast8_t endDataOverhead;
+
+    uint_fast16_t lastHash;
+
+    density_cheetah_dictionary dictionary;
+} density_cheetah_decode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *);
-
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_continue(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
-
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
+DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_init(density_cheetah_decode_state *, const density_main_header_parameters parameters, const uint_fast8_t);
+DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
+DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_finish(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
 
 #endif

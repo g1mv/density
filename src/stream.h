@@ -41,8 +41,7 @@
 #include "density_api.h"
 #include "memory_location.h"
 
-#define DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE  (1 << 9)
-#define DENSITY_STREAM_MEMORY_TELEPORT_BUFFER_SIZE     (1 << 10)
+#define DENSITY_STREAM_MEMORY_TELEPORT_BUFFER_SIZE     (1 << 12)
 
 typedef enum {
     DENSITY_STREAM_PROCESS_PREPARED,
@@ -67,8 +66,8 @@ typedef struct {
 density_stream *density_stream_create(void *(*)(size_t), void (*)(void *));
 void density_stream_destroy(density_stream *);
 
-DENSITY_STREAM_STATE density_stream_prepare(density_stream *, uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t);
-DENSITY_STREAM_STATE density_stream_update_input(density_stream *, uint8_t *, const uint_fast64_t);
+DENSITY_STREAM_STATE density_stream_prepare(density_stream *, const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t);
+DENSITY_STREAM_STATE density_stream_update_input(density_stream *, const uint8_t*, const uint_fast64_t);
 DENSITY_STREAM_STATE density_stream_update_output(density_stream *, uint8_t *, const uint_fast64_t);
 uint_fast64_t density_stream_output_available_for_use(density_stream* );
 

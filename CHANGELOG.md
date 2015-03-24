@@ -1,11 +1,13 @@
-0.11.4 beta
+0.12.0 beta
 -----------
-*February 10, 2015*
+*March 24, 2015*
 
-* Removed unnecessary makefile, now using a single makefile
-* Mandala kernel : reset prediction entries as required
-* Mandala kernel : convert hash to 16-bit unsigned int before storing
-* Updated SpookyHash to 1.0.2
+* Added new lion kernel
+* Renamed kernel mandala to cheetah
+* Kernel chameleon and cheetah improvements in encoding/decoding speeds
+* Generic function macros to avoid code rewrite
+* Improved memory teleport IO flexibility and speed, bytes issued by memory teleport can now be partially read
+* Various fixes and improvements
 
 0.11.3 beta
 -----------

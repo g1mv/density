@@ -37,9 +37,9 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE exitProcess(density_block_encode
 }
 
 DENSITY_FORCE_INLINE void density_block_encode_update_integrity_data(density_memory_teleport *restrict in, density_block_encode_state *restrict state) {
-    state->integrityData.stagingAvailable = density_memory_teleport_available_from_staging(in);
-    state->integrityData.stagingInputPointer = in->stagingMemoryLocation->pointer;
-    state->integrityData.directAvailable = density_memory_teleport_available_from_direct(in);
+    state->integrityData.stagingAvailable = in->stagingMemoryLocation->memoryLocation->available_bytes;
+    state->integrityData.stagingInputPointer = in->stagingMemoryLocation->memoryLocation->pointer;
+    state->integrityData.directAvailable = in->directMemoryLocation->available_bytes;
     state->integrityData.directInputPointer = in->directMemoryLocation->pointer;
 
     state->integrityData.update = false;
@@ -47,7 +47,7 @@ DENSITY_FORCE_INLINE void density_block_encode_update_integrity_data(density_mem
 
 DENSITY_FORCE_INLINE void density_block_encode_update_integrity_hash(density_memory_teleport *restrict in, density_block_encode_state *restrict state, bool pendingExit) {
     uint_fast64_t availableBefore = state->integrityData.stagingAvailable + state->integrityData.directAvailable;
-    uint_fast64_t available = density_memory_teleport_available(in);
+    uint_fast64_t available = density_memory_teleport_available_bytes(in);
     uint_fast64_t used = availableBefore - available;
 
     if (used <= state->integrityData.stagingAvailable)
@@ -116,7 +116,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_mode_
 }
 
 DENSITY_FORCE_INLINE void density_block_encode_update_totals(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_encode_state *restrict state, const uint_fast64_t availableInBefore, const uint_fast64_t availableOutBefore) {
-    state->totalRead += availableInBefore - density_memory_teleport_available(in);
+    state->totalRead += availableInBefore - density_memory_teleport_available_bytes(in);
     state->totalWritten += availableOutBefore - out->available_bytes;
 }
 
@@ -186,13 +186,13 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_continue(de
         return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER, blockEncodeState);
 
     write_data:
-    availableInBefore = density_memory_teleport_available(in);
+    availableInBefore = density_memory_teleport_available_bytes(in);
     availableOutBefore = out->available_bytes;
 
     switch (state->currentMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
             blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalRead - state->currentBlockData.inStart);
-            inRemaining = density_memory_teleport_available(in);
+            inRemaining = density_memory_teleport_available_bytes(in);
             outRemaining = out->available_bytes;
 
             if (inRemaining <= outRemaining) {
@@ -283,13 +283,13 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
         return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER, blockEncodeState);
 
     write_data:
-    availableInBefore = density_memory_teleport_available(in);
+    availableInBefore = density_memory_teleport_available_bytes(in);
     availableOutBefore = out->available_bytes;
 
     switch (state->currentMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
             blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalRead - state->currentBlockData.inStart);
-            inRemaining = density_memory_teleport_available(in);
+            inRemaining = density_memory_teleport_available_bytes(in);
             outRemaining = out->available_bytes;
 
             if (inRemaining <= outRemaining) {
@@ -337,7 +337,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
     write_block_footer:
     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) if ((blockEncodeState = density_block_encode_write_block_footer(in, out, state)))
         return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER, blockEncodeState);
-    if (density_memory_teleport_available(in))
+    if (density_memory_teleport_available_bytes(in))
         goto write_block_header;
 
     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)

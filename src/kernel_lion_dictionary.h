@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2013, Guillaume Voirin
+ * Copyright (c) 2015, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,44 +26,51 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 06/12/13 20:10
+ * 12/02/15 23:09
  *
- * -----------------
- * Mandala algorithm
- * -----------------
+ * --------------
+ * Lion algorithm
+ * --------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
- * Piotr Tarsa (https://github.com/tarsa)
  *
  * Description
- * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
+ * Multiform compression algorithm
  */
 
-#ifndef DENSITY_MANDALA_H
-#define DENSITY_MANDALA_H
+#ifndef DENSITY_LION_DICTIONARY_H
+#define DENSITY_LION_DICTIONARY_H
 
 #include "globals.h"
+#include "kernel_lion.h"
 
-#define DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES_SHIFT                    12
-#define DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES                          (1 << DENSITY_MANDALA_PREFERRED_BLOCK_SIGNATURES_SHIFT)
+#include <string.h>
 
-#define DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT         8
-#define DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES               (1 << DENSITY_MANDALA_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT)
+#pragma pack(push)
+#pragma pack(4)
+typedef struct {
+    uint16_t bigram;
+} density_lion_dictionary_bigram_entry;
 
-#define DENSITY_MANDALA_HASH_BITS                                           16
-#define DENSITY_MANDALA_HASH_MULTIPLIER                                     (uint32_t)2641295638lu
+typedef struct {
+    uint32_t chunk_a;
+    uint32_t chunk_b;
+} density_lion_dictionary_chunk_entry;
 
-#define DENSITY_MANDALA_HASH_ALGORITHM(hash32, value32)                     hash32 = value32 * DENSITY_MANDALA_HASH_MULTIPLIER;\
-                                                                            hash32 = (hash32 >> (32 - DENSITY_MANDALA_HASH_BITS));
+typedef struct {
+    uint32_t next_chunk_a;
+    uint32_t next_chunk_b;
+    uint32_t next_chunk_c;
+} density_lion_dictionary_chunk_prediction_entry;
 
-typedef enum {
-    DENSITY_MANDALA_SIGNATURE_FLAG_PREDICTED = 0x0,
-    DENSITY_MANDALA_SIGNATURE_FLAG_MAP_A = 0x1,
-    DENSITY_MANDALA_SIGNATURE_FLAG_MAP_B = 0x2,
-    DENSITY_MANDALA_SIGNATURE_FLAG_CHUNK = 0x3,
-} DENSITY_MANDALA_SIGNATURE_FLAG;
+typedef struct {
+    density_lion_dictionary_bigram_entry bigrams[1 << density_bitsizeof(uint8_t)];
+    density_lion_dictionary_chunk_entry chunks[1 << DENSITY_LION_CHUNK_HASH_BITS];
+    density_lion_dictionary_chunk_prediction_entry predictions[1 << DENSITY_LION_CHUNK_HASH_BITS];
+} density_lion_dictionary;
+#pragma pack(pop)
 
-typedef uint64_t                                                            density_mandala_signature;
+void density_lion_dictionary_reset(density_lion_dictionary *);
 
 #endif

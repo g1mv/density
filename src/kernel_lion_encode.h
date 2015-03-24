@@ -26,62 +26,65 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/10/13 12:01
+ * 06/12/13 20:20
  *
- * -------------------
- * Chameleon algorithm
- * -------------------
+ * --------------
+ * Lion algorithm
+ * --------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
  *
  * Description
- * Hash based superfast kernel
+ * Multiform compression algorithm
  */
 
-#ifndef DENSITY_CHAMELEON_ENCODE_H
-#define DENSITY_CHAMELEON_ENCODE_H
+#ifndef DENSITY_LION_ENCODE_H
+#define DENSITY_LION_ENCODE_H
 
-#include "kernel_chameleon_dictionary.h"
-#include "kernel_chameleon.h"
+#include "kernel_lion_dictionary.h"
+#include "kernel_lion.h"
+#include "kernel_lion_form_model.h"
 #include "block.h"
 #include "kernel_encode.h"
 #include "density_api.h"
-#include "globals.h"
-#include "memory_teleport.h"
 #include "memory_location.h"
-
-#define DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE                    (8 * sizeof(uint64_t))
+#include "memory_teleport.h"
+#include "kernel_lion_decode.h"
 
 typedef enum {
-    DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
-    DENSITY_CHAMELEON_ENCODE_PROCESS_CHECK_SIGNATURE_STATE,
-    DENSITY_CHAMELEON_ENCODE_PROCESS_READ_CHUNK,
-} DENSITY_CHAMELEON_ENCODE_PROCESS;
+    DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE,
+    DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE,
+    DENSITY_LION_ENCODE_PROCESS_UNIT,
+} DENSITY_LION_ENCODE_PROCESS;
+
+#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD                           (1 << 15)
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_CHAMELEON_ENCODE_PROCESS process;
+    DENSITY_LION_ENCODE_PROCESS process;
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
     uint_fast64_t resetCycle;
 #endif
 
     uint_fast32_t shift;
-    density_chameleon_signature proximitySignature;
-    density_chameleon_signature *signature;
-    uint_fast32_t signaturesCount;
-    uint_fast8_t efficiencyChecked;
+    density_lion_signature proximitySignature;
+    density_lion_signature * signature;
+    uint_fast64_t chunksCount;
+    bool efficiencyChecked;
 
-    density_chameleon_dictionary dictionary;
-} density_chameleon_encode_state;
+    density_lion_form_data formData;
+
+    uint_fast32_t lastHash;
+    uint32_t lastChunk;
+
+    density_lion_dictionary dictionary;
+} density_lion_encode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *);
-
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_continue(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
-
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
-
+DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(density_lion_encode_state *);
+DENSITY_KERNEL_ENCODE_STATE density_lion_encode_continue(density_memory_teleport *, density_memory_location *, density_lion_encode_state *);
+DENSITY_KERNEL_ENCODE_STATE density_lion_encode_finish(density_memory_teleport *, density_memory_location *, density_lion_encode_state *);
 #endif

@@ -48,9 +48,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE exitProcess(density_chameleon_e
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_write_to_signature(density_chameleon_encode_state *state) {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    *(state->signature) |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) << state->shift;
+    (state->proximitySignature) |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) << state->shift;
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    *(state->signature) |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) << ((56 - (state->shift & ~0x7)) + (state->shift & 0x7));
+    (state->proximitySignature) |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) << ((56 - (state->shift & ~0x7)) + (state->shift & 0x7));
 #endif
 }
 
@@ -58,14 +58,14 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_new_signature(density
     state->signaturesCount++;
     state->shift = 0;
     state->signature = (density_chameleon_signature *) (out->pointer);
-    *state->signature = 0;
+    state->proximitySignature = 0;
 
     out->pointer += sizeof(density_chameleon_signature);
     out->available_bytes -= sizeof(density_chameleon_signature);
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_prepare_new_block(density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
-    if (DENSITY_CHAMELEON_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD > out->available_bytes)
+    if (DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE > out->available_bytes)
         return DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT;
 
     switch (state->signaturesCount) {
@@ -102,7 +102,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_check_
     DENSITY_KERNEL_ENCODE_STATE returnState;
 
     switch (state->shift) {
-        case bitsizeof(density_chameleon_signature):
+        case density_bitsizeof(density_chameleon_signature):
+            *(state->signature) = state->proximitySignature;
             if ((returnState = density_chameleon_encode_prepare_new_block(out, state)))
                 return returnState;
             break;
@@ -135,7 +136,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_process_chunk(uint64_t *chunk
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     density_chameleon_encode_kernel(out, hash, (uint32_t) (*chunk & 0xFFFFFFFF), state);
 #endif
-    density_chameleon_encode_kernel(out, hash, (uint32_t) (*chunk >> bitsizeof(uint32_t)), state);
+    density_chameleon_encode_kernel(out, hash, (uint32_t) (*chunk >> density_bitsizeof(uint32_t)), state);
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     density_chameleon_encode_kernel(out, hash, (uint32_t)(*chunk & 0xFFFFFFFF), state);
 #endif
@@ -165,107 +166,12 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(d
     return exitProcess(state, DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK, DENSITY_KERNEL_ENCODE_STATE_READY);
 }
 
+#define DENSITY_CHAMELEON_ENCODE_CONTINUE
+#define GENERIC_NAME(name) name ## continue
+#include "kernel_chameleon_generic_encode.h"
+#undef GENERIC_NAME
+#undef DENSITY_CHAMELEON_ENCODE_CONTINUE
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
-    DENSITY_KERNEL_ENCODE_STATE returnState;
-    uint32_t hash;
-    uint64_t chunk;
-    density_byte *pointerOutBefore;
-    density_memory_location *readMemoryLocation;
-
-    // Dispatch
-    switch (state->process) {
-        case DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
-            goto prepare_new_block;
-        case DENSITY_CHAMELEON_ENCODE_PROCESS_CHECK_SIGNATURE_STATE:
-            goto check_signature_state;
-        case DENSITY_CHAMELEON_ENCODE_PROCESS_READ_CHUNK:
-            goto read_chunk;
-        default:
-            return DENSITY_KERNEL_ENCODE_STATE_ERROR;
-    }
-
-    // Prepare new block
-    prepare_new_block:
-    if ((returnState = density_chameleon_encode_prepare_new_block(out, state)))
-        return exitProcess(state, DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
-
-    // Check signature state
-    check_signature_state:
-    if ((returnState = density_chameleon_encode_check_state(out, state)))
-        return exitProcess(state, DENSITY_CHAMELEON_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
-
-    // Try to read a complete chunk unit
-    read_chunk:
-    pointerOutBefore = out->pointer;
-    if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE)))
-        return exitProcess(state, DENSITY_CHAMELEON_ENCODE_PROCESS_READ_CHUNK, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
-
-    // Chunk was read properly, process
-    density_chameleon_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
-    readMemoryLocation->available_bytes -= DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE;
-    out->available_bytes -= (out->pointer - pointerOutBefore);
-
-    // New loop
-    goto check_signature_state;
-}
-
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
-    DENSITY_KERNEL_ENCODE_STATE returnState;
-    uint32_t hash;
-    uint64_t chunk;
-    density_memory_location *readMemoryLocation;
-    density_byte *pointerOutBefore;
-
-    // Dispatch
-    switch (state->process) {
-        case DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK:
-            goto prepare_new_block;
-        case DENSITY_CHAMELEON_ENCODE_PROCESS_CHECK_SIGNATURE_STATE:
-            goto check_signature_state;
-        case DENSITY_CHAMELEON_ENCODE_PROCESS_READ_CHUNK:
-            goto read_chunk;
-        default:
-            return DENSITY_KERNEL_ENCODE_STATE_ERROR;
-    }
-
-    // Prepare new block
-    prepare_new_block:
-    if ((returnState = density_chameleon_encode_prepare_new_block(out, state)))
-        return exitProcess(state, DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
-
-    // Check signature state
-    check_signature_state:
-    if ((returnState = density_chameleon_encode_check_state(out, state)))
-        return exitProcess(state, DENSITY_CHAMELEON_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
-
-    // Try to read a complete chunk unit
-    read_chunk:
-    pointerOutBefore = out->pointer;
-    if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE)))
-        goto step_by_step;
-
-    // Chunk was read properly, process
-    density_chameleon_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
-    readMemoryLocation->available_bytes -= DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE;
-    goto exit;
-
-    // Read step by step
-    step_by_step:
-    while (state->shift != bitsizeof(density_chameleon_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
-        density_chameleon_encode_kernel(out, &hash, *(uint32_t *) (readMemoryLocation->pointer), state);
-        readMemoryLocation->pointer += sizeof(uint32_t);
-        readMemoryLocation->available_bytes -= sizeof(uint32_t);
-    }
-    exit:
-    out->available_bytes -= (out->pointer - pointerOutBefore);
-
-    // New loop
-    if (density_memory_teleport_available(in) >= sizeof(uint32_t))
-        goto check_signature_state;
-
-    // Copy the remaining bytes
-    density_memory_teleport_copy_remaining(in, out);
-
-    return DENSITY_KERNEL_ENCODE_STATE_READY;
-}
+#define GENERIC_NAME(name) name ## finish
+#include "kernel_chameleon_generic_encode.h"
+#undef GENERIC_NAME

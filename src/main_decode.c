@@ -57,7 +57,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_read_footer(density_mem
 }
 
 DENSITY_FORCE_INLINE void density_decode_update_totals(density_memory_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state, const uint_fast64_t inAvailableBefore, const uint_fast64_t outAvailableBefore) {
-    state->totalRead += inAvailableBefore - density_memory_teleport_available_reserved(in, DENSITY_DECODE_END_DATA_OVERHEAD);
+    state->totalRead += inAvailableBefore - density_memory_teleport_available_bytes_reserved(in, DENSITY_DECODE_END_DATA_OVERHEAD);
     state->totalWritten += outAvailableBefore - out->available_bytes;
 }
 
@@ -80,8 +80,12 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_tel
             density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, mem_alloc(sizeof(density_chameleon_decode_state)), (void *) density_chameleon_decode_init, (void *) density_chameleon_decode_continue, (void *) density_chameleon_decode_finish, mem_alloc);
             break;
 
-        case DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM:
-            density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_MANDALA_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, mem_alloc(sizeof(density_mandala_decode_state)), (void *) density_mandala_decode_init, (void *) density_mandala_decode_process, (void *) density_mandala_decode_finish, mem_alloc);
+        case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
+            density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, mem_alloc(sizeof(density_cheetah_decode_state)), (void *) density_cheetah_decode_init, (void *) density_cheetah_decode_continue, (void *) density_cheetah_decode_finish, mem_alloc);
+            break;
+
+        case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
+            density_block_decode_init(&state->blockDecodeState, DENSITY_COMPRESSION_MODE_LION_ALGORITHM, (DENSITY_BLOCK_TYPE) state->header.blockType, state->header.parameters, DENSITY_DECODE_END_DATA_OVERHEAD, mem_alloc(sizeof(density_lion_decode_state)), (void *) density_lion_decode_init, (void *) density_lion_decode_continue, (void *) density_lion_decode_finish, mem_alloc);
             break;
 
         default:
@@ -104,7 +108,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_continue(density_memory
     }
 
     read_blocks:
-    inAvailableBefore = density_memory_teleport_available_reserved(in, DENSITY_DECODE_END_DATA_OVERHEAD);
+    inAvailableBefore = density_memory_teleport_available_bytes_reserved(in, DENSITY_DECODE_END_DATA_OVERHEAD);
     outAvailableBefore = out->available_bytes;
 
     blockDecodeState = density_block_decode_continue(in, out, &state->blockDecodeState);
@@ -142,7 +146,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_t
     }
 
     read_blocks:
-    inAvailableBefore = density_memory_teleport_available_reserved(in, DENSITY_DECODE_END_DATA_OVERHEAD);
+    inAvailableBefore = density_memory_teleport_available_bytes_reserved(in, DENSITY_DECODE_END_DATA_OVERHEAD);
     outAvailableBefore = out->available_bytes;
 
     blockDecodeState = density_block_decode_finish(in, out, &state->blockDecodeState, mem_free);

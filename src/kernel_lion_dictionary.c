@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2013, Guillaume Voirin
+ * Copyright (c) 2015, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,24 +26,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 06/12/13 20:23
+ * 12/02/15 23:12
  *
- * -----------------
- * Mandala algorithm
- * -----------------
+ * --------------
+ * Lion algorithm
+ * --------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
- * Piotr Tarsa (https://github.com/tarsa)
  *
  * Description
- * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
+ * Multiform compression algorithm
  */
 
-#include "kernel_mandala_dictionary.h"
+#include "kernel_lion_dictionary.h"
 
-const density_mandala_dictionary density_mandala_empty_dictionary = {.entries = {{0}}, .prediction_entries = {{0}}};
+const density_lion_dictionary density_lion_empty_dictionary = {.bigrams = {{0}}, .chunks = {{0}}, .predictions = {{0}}};
 
-DENSITY_FORCE_INLINE void density_mandala_dictionary_reset(density_mandala_dictionary *dictionary) {
-    memcpy(dictionary, &density_mandala_empty_dictionary, sizeof(density_mandala_dictionary));
+DENSITY_FORCE_INLINE void density_lion_dictionary_reset(density_lion_dictionary *dictionary) {
+    memcpy(dictionary, &density_lion_empty_dictionary, sizeof(density_lion_dictionary));
 }

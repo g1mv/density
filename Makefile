@@ -32,7 +32,7 @@
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = density
-CFLAGS = -O3 -w -flto -std=c99
+CFLAGS = -Ofast -fomit-frame-pointer -w -flto -std=c99
 
 SRC_DIRECTORY = ./src/
 SPOOKYHASH_DIRECTORY = ./src/spookyhash/

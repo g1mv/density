@@ -26,10 +26,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 07/12/13 15:40
+ * 06/12/13 20:20
  *
  * -----------------
- * Mandala algorithm
+ * Cheetah algorithm
  * -----------------
  *
  * Author(s)
@@ -40,53 +40,31 @@
  * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#ifndef DENSITY_MANDALA_DECODE_H
-#define DENSITY_MANDALA_DECODE_H
+#ifndef DENSITY_CHEETAH_DICTIONARY_H
+#define DENSITY_CHEETAH_DICTIONARY_H
 
-#include "kernel_mandala_dictionary.h"
-#include "kernel_mandala.h"
-#include "block.h"
-#include "kernel_decode.h"
-#include "density_api.h"
-#include "memory_teleport.h"
-#include "block_footer.h"
-#include "main_footer.h"
-#include "block_mode_marker.h"
-#include "kernel_mandala_encode.h"
-#include "main_header.h"
+#include "globals.h"
+#include "kernel_cheetah.h"
 
-#define DENSITY_MANDALA_DECODE_MINIMUM_OUTPUT_LOOKAHEAD              (sizeof(uint32_t) * 4 * sizeof(density_mandala_signature))
-
-typedef enum {
-    DENSITY_MANDALA_DECODE_PROCESS_CHECK_SIGNATURE_STATE,
-    DENSITY_MANDALA_DECODE_PROCESS_READ_SIGNATURE,
-    DENSITY_MANDALA_DECODE_PROCESS_DECOMPRESS_BODY,
-} DENSITY_MANDALA_DECODE_PROCESS;
+#include <string.h>
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_MANDALA_DECODE_PROCESS process;
+    uint32_t chunk_a;
+    uint32_t chunk_b;
+} density_cheetah_dictionary_entry;
 
-    density_main_header_parameters parameters;
-    uint_fast64_t resetCycle;
+typedef struct {
+    uint32_t next_chunk_prediction;
+} density_cheetah_dictionary_prediction_entry;
 
-    density_mandala_signature signature;
-    uint_fast32_t bodyLength;
-    uint_fast32_t shift;
-    uint_fast32_t signaturesCount;
-    uint_fast8_t efficiencyChecked;
-
-    uint_fast64_t endDataOverhead;
-
-    uint_fast16_t lastHash;
-
-    density_mandala_dictionary dictionary;
-} density_mandala_decode_state;
+typedef struct {
+    density_cheetah_dictionary_entry entries[1 << DENSITY_CHEETAH_HASH_BITS];
+    density_cheetah_dictionary_prediction_entry prediction_entries[1 << DENSITY_CHEETAH_HASH_BITS];
+} density_cheetah_dictionary;
 #pragma pack(pop)
 
-DENSITY_KERNEL_DECODE_STATE density_mandala_decode_init(density_mandala_decode_state *, const density_main_header_parameters parameters, const uint_fast32_t);
-DENSITY_KERNEL_DECODE_STATE density_mandala_decode_process(density_memory_teleport *, density_memory_location *, density_mandala_decode_state *, const density_bool);
-DENSITY_KERNEL_DECODE_STATE density_mandala_decode_finish(density_memory_teleport *, density_memory_location *, density_mandala_decode_state *);
+void density_cheetah_dictionary_reset(density_cheetah_dictionary *);
 
 #endif

@@ -54,8 +54,8 @@ DENSITY_FORCE_INLINE void density_stream_destroy(density_stream *stream) {
     memory_free(stream);
 }
 
-DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream *restrict stream, uint8_t *restrict in, const uint_fast64_t availableIn, uint8_t *restrict out, const uint_fast64_t availableOut) {
-    density_memory_teleport_reset_staging(stream->in);
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream *restrict stream, const uint8_t *restrict in, const uint_fast64_t availableIn, uint8_t *restrict out, const uint_fast64_t availableOut) {
+    density_memory_teleport_reset_staging_buffer(stream->in);
     density_stream_update_input(stream, in, availableIn);
     density_stream_update_output(stream, out, availableOut);
 
@@ -64,8 +64,8 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_prepare(density_stream 
     return DENSITY_STREAM_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_update_input(density_stream *restrict stream, uint8_t *in, const uint_fast64_t availableIn) {
-    density_memory_teleport_store(stream->in, in, availableIn);
+DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_update_input(density_stream *restrict stream, const uint8_t *restrict in, const uint_fast64_t availableIn) {
+    density_memory_teleport_change_input_buffer(stream->in, in, availableIn);
 
     return DENSITY_STREAM_STATE_READY;
 }
@@ -81,7 +81,7 @@ DENSITY_FORCE_INLINE uint_fast64_t density_stream_output_available_for_use(densi
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_check_conformity(density_stream *stream) {
-    if (((density_memory_location *) stream->out)->initial_available_bytes < DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE)
+    if (((density_memory_location *) stream->out)->initial_available_bytes < DENSITY_MINIMUM_OUT_BUFFER_SIZE)
         return DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL;
 
     return DENSITY_STREAM_STATE_READY;

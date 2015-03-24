@@ -81,7 +81,7 @@ typedef struct {
 
     uint_fast64_t totalRead;
     uint_fast64_t totalWritten;
-    uint_fast64_t endDataOverhead;
+    uint_fast8_t endDataOverhead;
 
     density_block_header lastBlockHeader;
     density_mode_marker lastModeMarker;
@@ -91,13 +91,13 @@ typedef struct {
     density_block_decode_integrity_data integrityData;
 
     void* kernelDecodeState;
-    DENSITY_KERNEL_DECODE_STATE (*kernelDecodeInit)(void*, const density_main_header_parameters, const uint_fast64_t);
+    DENSITY_KERNEL_DECODE_STATE (*kernelDecodeInit)(void*, const density_main_header_parameters, const uint_fast8_t);
     DENSITY_KERNEL_DECODE_STATE (*kernelDecodeProcess)(density_memory_teleport *, density_memory_location*, void*);
     DENSITY_KERNEL_DECODE_STATE (*kernelDecodeFinish)(density_memory_teleport *, density_memory_location*, void*);
 } density_block_decode_state;
 #pragma pack(pop)
 
-DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters, const uint_fast32_t, void*, DENSITY_KERNEL_DECODE_STATE (*)(void*, const density_main_header_parameters, const uint_fast64_t), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_teleport *, density_memory_location*, void*), void *(*)(size_t));
+DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters, const uint_fast8_t, void*, DENSITY_KERNEL_DECODE_STATE (*)(void*, const density_main_header_parameters, const uint_fast8_t), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_teleport *, density_memory_location*, void*), void *(*)(size_t));
 DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(density_memory_teleport *, density_memory_location *, density_block_decode_state *);
 DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(density_memory_teleport *, density_memory_location *, density_block_decode_state *, void (*)(void *));
 
