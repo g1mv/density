@@ -41,7 +41,7 @@ DENSITY_FORCE_INLINE void density_memory_location_free(density_memory_location *
     mem_free(location);
 }
 
-DENSITY_FORCE_INLINE void density_memory_location_encapsulate(density_memory_location *restrict location, density_byte *restrict pointer, uint_fast64_t bytes) {
+DENSITY_FORCE_INLINE void density_memory_location_encapsulate(density_memory_location *restrict location, density_byte *restrict pointer, const uint_fast64_t bytes) {
     location->pointer = pointer;
     location->available_bytes = bytes;
     location->initial_available_bytes = bytes;
