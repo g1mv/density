@@ -14,7 +14,7 @@ Benchmarks
 
 File used : enwik8 (100 MB)
 
-Platform : MacBook Pro, OSX 10.10.1, 2.3 GHz Intel Core i7, 8Go 1600 MHz DDR, SSD
+Platform : MacBook Pro, OSX 10.10.2, 2.3 GHz Intel Core i7, 8Go 1600 MHz DDR, SSD
 
 Timing : using the *time* function, and taking the best *user* output after multiple runs
 
@@ -40,7 +40,7 @@ You can choose between system architecture and compressed file type. There are e
 FsBench is a command line utility that enables real-time testing of compression algorithms, but also hashes and much more. A fork with the latest density releases is [available here](https://github.com/centaurean/fsbench-density) for easy access.
 The original author's repository [can be found here](https://chiselapp.com/user/Justin_be_my_guide/repository/fsbench/). Very informative tool as well.
 
-Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.1, 2.3 GHz Intel Core i7, 8Go 1600 MHz DDR, SSD :
+Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.2, 2.3 GHz Intel Core i7, 8Go 1600 MHz DDR, SSD :
 
 *enwik8 (100,000,000 bytes)*
 
