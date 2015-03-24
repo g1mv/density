@@ -174,7 +174,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_process_data(density_memory_loc
     }
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_init(density_cheetah_decode_state *state, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_init(density_cheetah_decode_state *state, const density_main_header_parameters parameters, const uint_fast8_t endDataOverhead) {
     state->signaturesCount = 0;
     state->efficiencyChecked = 0;
     density_cheetah_dictionary_reset(&state->dictionary);

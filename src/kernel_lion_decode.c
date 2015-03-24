@@ -328,7 +328,7 @@ DENSITY_FORCE_INLINE bool density_lion_decode_chunk_step_by_step(density_memory_
     return true;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *state, const density_main_header_parameters parameters, const uint_fast32_t endDataOverhead) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *state, const density_main_header_parameters parameters, const uint_fast8_t endDataOverhead) {
     state->chunksCount = 0;
     state->efficiencyChecked = false;
     state->readSignature = true;

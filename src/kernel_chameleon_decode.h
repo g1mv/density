@@ -76,13 +76,13 @@ typedef struct {
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
-    uint_fast64_t endDataOverhead;
+    uint_fast8_t endDataOverhead;
 
     density_chameleon_dictionary dictionary;
 } density_chameleon_decode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *, const density_main_header_parameters, const uint_fast32_t);
+DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *, const density_main_header_parameters, const uint_fast8_t);
 
 DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_continue(density_memory_teleport *, density_memory_location *, density_chameleon_decode_state *);
 
