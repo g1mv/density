@@ -52,6 +52,7 @@ DENSITY_FORCE_INLINE density_memory_teleport *density_memory_teleport_allocate(c
 DENSITY_FORCE_INLINE void density_memory_teleport_free(density_memory_teleport *teleport, void (*mem_free)(void *)) {
     density_memory_location_free(teleport->directMemoryLocation, mem_free);
 
+    mem_free(teleport->stagingMemoryLocation->memoryLocation->pointer);
     density_memory_location_free(teleport->stagingMemoryLocation->memoryLocation, mem_free);
     mem_free(teleport->stagingMemoryLocation);
 
