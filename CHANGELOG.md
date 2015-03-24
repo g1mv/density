@@ -1,6 +1,6 @@
 0.12.0 beta
 -----------
-*March 22, 2015*
+*March 24, 2015*
 
 * Added new lion kernel
 * Renamed kernel mandala to cheetah
