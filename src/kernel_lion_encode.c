@@ -228,6 +228,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(densit
     state->chunksCount = 0;
     state->efficiencyChecked = false;
     state->signature = NULL;
+    state->shift = 0;
     density_lion_dictionary_reset(&state->dictionary);
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES

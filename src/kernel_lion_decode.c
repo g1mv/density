@@ -40,7 +40,6 @@
  */
 
 #include "kernel_lion_decode.h"
-#include "memory_location.h"
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE exitProcess(density_lion_decode_state *state, DENSITY_LION_DECODE_PROCESS process, DENSITY_KERNEL_DECODE_STATE kernelDecodeState) {
     state->process = process;
@@ -331,7 +330,7 @@ DENSITY_FORCE_INLINE bool density_lion_decode_chunk_step_by_step(density_memory_
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *state, const density_main_header_parameters parameters, const uint_fast8_t endDataOverhead) {
     state->chunksCount = 0;
     state->efficiencyChecked = false;
-    state->readSignature = true;
+    state->shift = 0;
     density_lion_dictionary_reset(&state->dictionary);
 
     state->parameters = parameters;

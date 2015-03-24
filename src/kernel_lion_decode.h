@@ -91,7 +91,6 @@ typedef struct {
     density_lion_signature signature;
     uint_fast64_t chunksCount;
     bool efficiencyChecked;
-    bool readSignature;
 
     uint_fast8_t endDataOverhead;
 
