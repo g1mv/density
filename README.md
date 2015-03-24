@@ -32,7 +32,7 @@ Note : *sharc -c1* uses the chameleon algorithm, *sharc -c2* the cheetah algorit
 
 **Squash**
 
-Squash is an abstraction layer for compression algorithms, and has a extremely exhaustive set of benchmark results, including density's, [available here](https://quixdb.github.io/squash-benchmark/#results).
+Squash is an abstraction layer for compression algorithms, and has an extremely exhaustive set of benchmark results, including density's, [available here](https://quixdb.github.io/squash-benchmark/).
 You can choose between system architecture, compressed file type. There are even ARM boards tested ! A great tool for selecting a compression library that suits you best.
 
 **FsBench**
