@@ -33,12 +33,12 @@ Note : *sharc -c1* uses the chameleon algorithm, *sharc -c2* the cheetah algorit
 **Squash**
 
 Squash is an abstraction layer for compression algorithms, and has an extremely exhaustive set of benchmark results, including density's, [available here](https://quixdb.github.io/squash-benchmark/).
-You can choose between system architecture, compressed file type. There are even ARM boards tested ! A great tool for selecting a compression library that suits you best.
+You can choose between system architecture and compressed file type. There are even ARM boards tested ! A great tool for selecting a compression library.
 
 **FsBench**
 
 FsBench is a command line utility that enables real-time testing of compression algorithms, but also hashes and much more. A fork with the latest density releases is [available here](https://github.com/centaurean/fsbench-density) for easy access.
-The original author's repository (can be found here)[https://chiselapp.com/user/Justin_be_my_guide/repository/fsbench/]. Very informative tool as well.
+The original author's repository [can be found here](https://chiselapp.com/user/Justin_be_my_guide/repository/fsbench/). Very informative tool as well.
 
 Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.1, 2.3 GHz Intel Core i7, 8Go 1600 MHz DDR, SSD :
 
