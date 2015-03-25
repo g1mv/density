@@ -152,7 +152,7 @@ When this is done you can start using the **DENSITY APIs** :
     #include "density_api.h"
 
     #define MY_TEXT "This is a simple example on how to use Density API bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla"
-    #define BUFFER_SIZE 16384
+    #define BUFFER_SIZE DENSITY_MINIMUM_OUT_BUFFER_SIZE
     
     ...
     
