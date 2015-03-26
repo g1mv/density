@@ -127,8 +127,10 @@ DENSITY_FORCE_INLINE const bool density_chameleon_decode_test_compressed(density
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
     while (density_likely(state->shift != density_bitsizeof(density_chameleon_signature))) {
-        density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state), state);
-        state->shift++;
+        DENSITY_UNROLL_8(\
+            density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state), state);\
+            state->shift++;\
+        );
     }
 }
 
@@ -149,10 +151,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(d
 
 #define DENSITY_CHAMELEON_DECODE_CONTINUE
 #define GENERIC_NAME(name) name ## continue
+
 #include "kernel_chameleon_generic_decode.h"
+
 #undef GENERIC_NAME
 #undef DENSITY_CHAMELEON_DECODE_CONTINUE
 
 #define GENERIC_NAME(name) name ## finish
+
 #include "kernel_chameleon_generic_decode.h"
+
 #undef GENERIC_NAME

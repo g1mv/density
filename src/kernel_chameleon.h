@@ -69,7 +69,7 @@ typedef uint64_t density_chameleon_signature;
 #define DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE        (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))   // Uncompressed chunks
 #define DENSITY_CHAMELEON_MAXIMUM_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE      (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))   // Standard size
 
-#define DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE                      (density_bitsizeof(density_chameleon_signature) + DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
+#define DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE                      (sizeof(density_chameleon_signature) + DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 #define DENSITY_CHAMELEON_MAXIMUM_DECOMPRESSED_UNIT_SIZE                    (DENSITY_CHAMELEON_MAXIMUM_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
 
 #endif

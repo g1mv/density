@@ -134,24 +134,17 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(density_memory_locatio
 DENSITY_FORCE_INLINE void density_chameleon_encode_process_chunk(uint64_t *chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_chameleon_encode_state *restrict state) {
     *chunk = *(uint64_t *) (in->pointer);
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    density_chameleon_encode_kernel(out, hash, (uint32_t) (*chunk & 0xFFFFFFFF), state);
+    density_chameleon_encode_kernel(out, hash, (uint32_t) (*chunk), state);
 #endif
     density_chameleon_encode_kernel(out, hash, (uint32_t) (*chunk >> density_bitsizeof(uint32_t)), state);
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    density_chameleon_encode_kernel(out, hash, (uint32_t)(*chunk & 0xFFFFFFFF), state);
+    density_chameleon_encode_kernel(out, hash, (uint32_t)(*chunk), state);
 #endif
     in->pointer += sizeof(uint64_t);
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_process_unit(uint64_t *chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_chameleon_encode_state *restrict state) {
-    density_chameleon_encode_process_chunk(chunk, in, out, hash, state);
-    density_chameleon_encode_process_chunk(chunk, in, out, hash, state);
-    density_chameleon_encode_process_chunk(chunk, in, out, hash, state);
-    density_chameleon_encode_process_chunk(chunk, in, out, hash, state);
-    density_chameleon_encode_process_chunk(chunk, in, out, hash, state);
-    density_chameleon_encode_process_chunk(chunk, in, out, hash, state);
-    density_chameleon_encode_process_chunk(chunk, in, out, hash, state);
-    density_chameleon_encode_process_chunk(chunk, in, out, hash, state);
+    DENSITY_UNROLL_16(density_chameleon_encode_process_chunk(chunk, in, out, hash, state));
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *state) {
@@ -168,10 +161,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(d
 
 #define DENSITY_CHAMELEON_ENCODE_CONTINUE
 #define GENERIC_NAME(name) name ## continue
+
 #include "kernel_chameleon_generic_encode.h"
+
 #undef GENERIC_NAME
 #undef DENSITY_CHAMELEON_ENCODE_CONTINUE
 
 #define GENERIC_NAME(name) name ## finish
+
 #include "kernel_chameleon_generic_encode.h"
+
 #undef GENERIC_NAME
