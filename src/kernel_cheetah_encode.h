@@ -51,7 +51,7 @@
 #include "memory_location.h"
 #include "memory_teleport.h"
 
-#define DENSITY_CHEETAH_ENCODE_PROCESS_UNIT_SIZE                    (2 * 4 * sizeof(uint64_t))
+#define DENSITY_CHEETAH_ENCODE_PROCESS_UNIT_SIZE                    (8 * sizeof(uint64_t))
 
 typedef enum {
     DENSITY_CHEETAH_ENCODE_PROCESS_PREPARE_NEW_BLOCK,

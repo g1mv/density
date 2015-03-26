@@ -69,7 +69,7 @@
 #error Unknow endianness
 #endif
 
-#define DENSITY_UNROLL_2(op)     op; op;
+#define DENSITY_UNROLL_2(op)     op; op
 #define DENSITY_UNROLL_4(op)     DENSITY_UNROLL_2(op);    DENSITY_UNROLL_2(op)
 #define DENSITY_UNROLL_8(op)     DENSITY_UNROLL_4(op);    DENSITY_UNROLL_4(op)
 #define DENSITY_UNROLL_16(op)    DENSITY_UNROLL_8(op);    DENSITY_UNROLL_8(op)

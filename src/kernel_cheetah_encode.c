@@ -160,16 +160,8 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_process_chunk(uint64_t *restric
     in->pointer += sizeof(uint64_t);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_encode_process_span(uint64_t *restrict chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_cheetah_encode_state *restrict state) {
-    density_cheetah_encode_process_chunk(chunk, in, out, hash, state);
-    density_cheetah_encode_process_chunk(chunk, in, out, hash, state);
-    density_cheetah_encode_process_chunk(chunk, in, out, hash, state);
-    density_cheetah_encode_process_chunk(chunk, in, out, hash, state);
-}
-
 DENSITY_FORCE_INLINE void density_cheetah_encode_process_unit(uint64_t *restrict chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_cheetah_encode_state *restrict state) {
-    density_cheetah_encode_process_span(chunk, in, out, hash, state);
-    density_cheetah_encode_process_span(chunk, in, out, hash, state);
+    DENSITY_UNROLL_8(density_cheetah_encode_process_chunk(chunk, in, out, hash, state));
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_init(density_cheetah_encode_state *state) {
@@ -188,10 +180,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_init(den
 
 #define DENSITY_CHEETAH_ENCODE_CONTINUE
 #define GENERIC_NAME(name) name ## continue
+
 #include "kernel_cheetah_generic_encode.h"
+
 #undef GENERIC_NAME
 #undef DENSITY_CHEETAH_ENCODE_CONTINUE
 
 #define GENERIC_NAME(name) name ## finish
+
 #include "kernel_cheetah_generic_encode.h"
+
 #undef GENERIC_NAME

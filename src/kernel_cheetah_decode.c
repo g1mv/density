@@ -169,8 +169,10 @@ DENSITY_FORCE_INLINE const DENSITY_CHEETAH_SIGNATURE_FLAG density_cheetah_decode
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
     while (density_likely(state->shift != density_bitsizeof(density_cheetah_signature))) {
-        density_cheetah_decode_kernel(in, out, density_cheetah_decode_get_signature_flag(state), state);
-        state->shift += 2;
+        DENSITY_UNROLL_2(\
+            density_cheetah_decode_kernel(in, out, density_cheetah_decode_get_signature_flag(state), state);\
+            state->shift += 2;\
+        );
     }
 }
 
@@ -193,10 +195,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_init(den
 
 #define DENSITY_CHEETAH_DECODE_CONTINUE
 #define GENERIC_NAME(name) name ## continue
+
 #include "kernel_cheetah_generic_decode.h"
+
 #undef GENERIC_NAME
 #undef DENSITY_CHEETAH_DECODE_CONTINUE
 
 #define GENERIC_NAME(name) name ## finish
+
 #include "kernel_cheetah_generic_decode.h"
+
 #undef GENERIC_NAME
