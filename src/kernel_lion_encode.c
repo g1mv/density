@@ -218,8 +218,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_chunk(uint64_t *restrict c
 }
 
 DENSITY_FORCE_INLINE void density_lion_encode_process_unit(uint64_t *restrict chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_lion_encode_state *restrict state) {
-    density_lion_encode_process_chunk(chunk, in, out, hash, state);
-    density_lion_encode_process_chunk(chunk, in, out, hash, state);
+    DENSITY_UNROLL_2(density_lion_encode_process_chunk(chunk, in, out, hash, state));
 
     state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
 }

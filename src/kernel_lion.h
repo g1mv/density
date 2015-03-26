@@ -42,7 +42,7 @@
 #ifndef DENSITY_LION_H
 #define DENSITY_LION_H
 
-#include <stdint.h>
+#include "globals.h"
 
 #define DENSITY_LION_PREFERRED_BLOCK_CHUNKS_SHIFT                   17
 #define DENSITY_LION_PREFERRED_BLOCK_CHUNKS                         (1 << DENSITY_LION_PREFERRED_BLOCK_CHUNKS_SHIFT)

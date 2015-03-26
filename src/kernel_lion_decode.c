@@ -303,10 +303,7 @@ DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(densi
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
-    density_lion_decode_chunk(in, out, state, density_lion_decode_read_form(in, state));
-    density_lion_decode_chunk(in, out, state, density_lion_decode_read_form(in, state));
-    density_lion_decode_chunk(in, out, state, density_lion_decode_read_form(in, state));
-    density_lion_decode_chunk(in, out, state, density_lion_decode_read_form(in, state));
+    DENSITY_UNROLL_4(density_lion_decode_chunk(in, out, state, density_lion_decode_read_form(in, state)));
 
     state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
 }
