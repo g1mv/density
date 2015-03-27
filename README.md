@@ -14,7 +14,7 @@ Benchmarks
 
 File used : enwik8 (100 MB)
 
-Platform : MacBook Pro, OSX 10.10.2, 2.3 GHz Intel Core i7, 8Go 1600 MHz DDR, SSD
+Platform : MacBook Pro, OSX 10.10.2, 2.3 GHz Intel Core i7, 8Gb 1600 MHz DDR, SSD
 
 Timing : using the *time* function, and taking the best *user* output after multiple runs
 
