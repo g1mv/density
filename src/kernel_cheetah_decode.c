@@ -119,9 +119,9 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_compressed_chunk_a(const uint32
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_compressed_chunk_b(const uint32_t *restrict hash, density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
     density_cheetah_dictionary_entry *entry = &state->dictionary.entries[DENSITY_LITTLE_ENDIAN_16(*hash)];
-    *(uint64_t*)entry = *((uint32_t*)entry + 1) | ((uint64_t)(*(uint32_t*)entry) << 32);
+    *(uint64_t *) entry = *((uint32_t *) entry + 1) | ((uint64_t) (*(uint32_t *) entry) << 32);
 
-    density_cheetah_write_decompressed_chunk((uint32_t*)entry, out, state);
+    density_cheetah_write_decompressed_chunk((uint32_t *) entry, out, state);
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_uncompressed_chunk(uint32_t *restrict hash, const uint32_t *restrict chunk, density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
@@ -129,46 +129,43 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_uncompressed_chunk(uint32_t *re
 
     DENSITY_CHEETAH_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(*chunk));
     entry = &state->dictionary.entries[*hash];
-    *(uint64_t*)entry = *chunk | ((uint64_t)entry->chunk_a << 32);
+    *(uint64_t *) entry = *chunk | ((uint64_t) entry->chunk_a << 32);
 
     density_cheetah_write_decompressed_chunk(chunk, out, state);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_kernel(density_memory_location *restrict in, density_memory_location *restrict out, const DENSITY_CHEETAH_SIGNATURE_FLAG mode, density_cheetah_decode_state *restrict state) {
+
+DENSITY_FORCE_INLINE void density_cheetah_decode_kernel(density_memory_location *restrict in, density_memory_location *restrict out, const uint8_t mode, density_cheetah_decode_state *restrict state) {
     uint32_t hash = 0;
     uint32_t chunk;
 
     switch (mode) {
-        case DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED:
-            density_cheetah_decode_predicted_chunk(&hash, out, state);
-            break;
-        case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A:
-            density_cheetah_decode_read_compressed_chunk(&hash, in);
-            density_cheetah_decode_compressed_chunk_a(&hash, out, state);
-            break;
-        case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B:
-            density_cheetah_decode_read_compressed_chunk(&hash, in);
-            density_cheetah_decode_compressed_chunk_b(&hash, out, state);
-            break;
-        case DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK:
-            density_cheetah_decode_read_uncompressed_chunk(&chunk, in);
-            density_cheetah_decode_uncompressed_chunk(&hash, &chunk, out, state);
+        DENSITY_CASE_GENERATOR_4_4_COMBINED(\
+            density_cheetah_decode_predicted_chunk(&hash, out, state);, \
+            DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED, \
+            density_cheetah_decode_read_compressed_chunk(&hash, in);\
+            density_cheetah_decode_compressed_chunk_a(&hash, out, state);, \
+            DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A, \
+            density_cheetah_decode_read_compressed_chunk(&hash, in);\
+            density_cheetah_decode_compressed_chunk_b(&hash, out, state);, \
+            DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B, \
+            density_cheetah_decode_read_uncompressed_chunk(&chunk, in);\
+            density_cheetah_decode_uncompressed_chunk(&hash, &chunk, out, state);, \
+            DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK, \
+            state->lastHash = (uint16_t) hash;, \
+            2\
+        );
+        default:
             break;
     }
 
     state->lastHash = (uint16_t) hash;
 }
 
-DENSITY_FORCE_INLINE const DENSITY_CHEETAH_SIGNATURE_FLAG density_cheetah_decode_get_signature_flag(density_cheetah_decode_state *state) {
-    return (DENSITY_CHEETAH_SIGNATURE_FLAG const) ((state->signature >> state->shift) & 0x3);
-}
-
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
     while (density_likely(state->shift != density_bitsizeof(density_cheetah_signature))) {
-        DENSITY_UNROLL_2(\
-            density_cheetah_decode_kernel(in, out, density_cheetah_decode_get_signature_flag(state), state);\
-            state->shift += 2;\
-        );
+        density_cheetah_decode_kernel(in, out, (uint8_t const) ((state->signature >> state->shift) & 0xFF), state);
+        state->shift += 8;
     }
 }
 

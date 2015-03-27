@@ -93,7 +93,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_cheetah_de
         uint32_t hash = 0;
         uint32_t chunk;
 
-        switch (density_cheetah_decode_get_signature_flag(state)) {
+        switch ((uint8_t const)((state->signature >> state->shift) & 0x3)) {
             case DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED:
                 density_cheetah_decode_predicted_chunk(&hash, out, state);
                 break;
