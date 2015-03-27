@@ -118,7 +118,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(density_memory_locatio
     DENSITY_CHAMELEON_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(chunk));
     density_chameleon_dictionary_entry *found = &state->dictionary.entries[*hash];
 
-    if (chunk ^ found->as_uint32_t) {
+    if (chunk ^ *(uint32_t*)found) {
         found->as_uint32_t = chunk;
         *(uint32_t *) (out->pointer) = chunk;
         out->pointer += sizeof(uint32_t);
