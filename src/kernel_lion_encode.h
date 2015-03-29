@@ -58,7 +58,12 @@ typedef enum {
     DENSITY_LION_ENCODE_PROCESS_UNIT,
 } DENSITY_LION_ENCODE_PROCESS;
 
-#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD                           (1 << 15)
+typedef struct {
+    uint64_t content;
+    uint_fast8_t size;
+} density_lion_encode_content;
+
+#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD                           (1 << 9)
 
 #pragma pack(push)
 #pragma pack(4)
@@ -79,6 +84,9 @@ typedef struct {
 
     uint_fast32_t lastHash;
     uint32_t lastChunk;
+
+    density_lion_encode_content transientContent;
+    bool signatureInterceptMode;
 
     density_lion_dictionary dictionary;
 } density_lion_encode_state;
