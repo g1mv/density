@@ -46,47 +46,47 @@ Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.2, 2.3
 
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
-    density::chameleon                      2015-03-27  
-       61524474 (x 1.625)      926 MB/s 1372 MB/s       356e6  527e6
-    density::cheetah                        2015-03-27  
-       53156746 (x 1.881)      470 MB/s  559 MB/s       220e6  261e6
-    density::lion                           2015-03-27  
-       47991569 (x 2.084)      285 MB/s  271 MB/s       146e6  140e6
+    density::chameleon                      2015-03-27   
+       61524474 (x 1.625)      933 MB/s 1382 MB/s       359e6  531e6
+    density::cheetah                        2015-03-27   
+       53156746 (x 1.881)      472 MB/s  569 MB/s       221e6  266e6
+    density::lion                           2015-03-27   
+       47899752 (x 2.088)      280 MB/s  282 MB/s       145e6  147e6
     LZ4                                     r127         
-       56973103 (x 1.755)      255 MB/s 1604 MB/s       109e6  690e6
+       56973103 (x 1.755)      257 MB/s 1644 MB/s       110e6  707e6
     LZF                                     3.6          very
-       53945381 (x 1.854)      191 MB/s  367 MB/s        88e6  168e6
+       53945381 (x 1.854)      192 MB/s  369 MB/s        88e6  169e6
     LZO                                     2.08         1x1
-       55792795 (x 1.792)      289 MB/s  384 MB/s       127e6  169e6
+       55792795 (x 1.792)      287 MB/s  372 MB/s       126e6  164e6
     QuickLZ                                 1.5.1b6      1
-       52334371 (x 1.911)      278 MB/s  347 MB/s       132e6  165e6
+       52334371 (x 1.911)      281 MB/s  351 MB/s       133e6  167e6
     Snappy                                  1.1.0        
-       56539845 (x 1.769)      245 MB/s  801 MB/s       106e6  348e6
+       56539845 (x 1.769)      245 MB/s  795 MB/s       106e6  345e6
     wfLZ                                    r10          
-       63521804 (x 1.574)      149 MB/s  514 MB/s        54e6  187e6
+       63521804 (x 1.574)      150 MB/s  512 MB/s        54e6  186e6
        
 *silesia (211,960,320 bytes)*
 
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
-    density::chameleon                      2015-03-27  
-      133118910 (x 1.592)     1046 MB/s 1380 MB/s       388e6  513e6
-    density::cheetah                        2015-03-27  
-      101751474 (x 2.083)      529 MB/s  660 MB/s       275e6  342e6
-    density::lion                           2015-03-27  
-       89433997 (x 2.370)      304 MB/s  275 MB/s       169e6  158e6
+    density::chameleon                      2015-03-27   
+      133118910 (x 1.592)     1049 MB/s 1396 MB/s       390e6  519e6
+    density::cheetah                        2015-03-27   
+      101751474 (x 2.083)      529 MB/s  657 MB/s       275e6  341e6
+    density::lion                           2015-03-27   
+       89502227 (x 2.368)      297 MB/s  284 MB/s       171e6  163e6
     LZ4                                     r127         
-      101634462 (x 2.086)      363 MB/s 1808 MB/s       188e6  941e6
+      101634462 (x 2.086)      362 MB/s 1808 MB/s       188e6  941e6
     LZF                                     3.6          very
-      102043866 (x 2.077)      254 MB/s  485 MB/s       131e6  251e6
+      102043866 (x 2.077)      254 MB/s  491 MB/s       131e6  254e6
     LZO                                     2.08         1x1
-      100592662 (x 2.107)      433 MB/s  603 MB/s       227e6  317e6
+      100592662 (x 2.107)      426 MB/s  583 MB/s       223e6  306e6
     QuickLZ                                 1.5.1b6      1
-       94727961 (x 2.238)      368 MB/s  424 MB/s       203e6  234e6
+       94727961 (x 2.238)      372 MB/s  431 MB/s       205e6  238e6
     Snappy                                  1.1.0        
-      101385885 (x 2.091)      359 MB/s 1093 MB/s       187e6  570e6
+      101385885 (x 2.091)      355 MB/s 1070 MB/s       185e6  557e6
     wfLZ                                    r10          
-      109610020 (x 1.934)      195 MB/s  701 MB/s        94e6  338e6
+      109610020 (x 1.934)      196 MB/s  702 MB/s        94e6  338e6
 
 Build
 -----
