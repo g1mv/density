@@ -277,9 +277,17 @@ DENSITY_FORCE_INLINE void density_lion_decode_chunk(density_memory_location *res
     state->lastHash = hash;
 }
 
-DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
-    density_lion_form_node *form;
+DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_process_form(density_lion_decode_state *restrict state, density_lion_form_node *form) {
+    const DENSITY_LION_FORM formValue = form->form;
+    form->usage++;
 
+    if (density_unlikely(form->previousForm))
+        density_lion_form_model_update(&state->formData, form, form->previousForm);
+
+    return formValue;
+}
+
+DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
     const bool first_bit = density_lion_decode_read_1bit_from_signature(in, state);
     if (density_unlikely(first_bit)) {
         const bool second_bit = density_lion_decode_read_1bit_from_signature(in, state);
@@ -288,23 +296,15 @@ DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(densi
             if (density_unlikely(third_bit)) {
                 const bool fourth_bit = density_lion_decode_read_1bit_from_signature(in, state);
                 if (density_unlikely(fourth_bit))
-                    form = &state->formData.formsPool[4];
+                    return density_lion_decode_process_form(state, (density_lion_form_node*)&state->formData + 4);
                 else
-                    form = &state->formData.formsPool[3];
+                    return density_lion_decode_process_form(state, (density_lion_form_node*)&state->formData + 3);
             } else
-                form = &state->formData.formsPool[2];
+                return density_lion_decode_process_form(state, (density_lion_form_node*)&state->formData + 2);
         } else
-            form = &state->formData.formsPool[1];
+            return density_lion_decode_process_form(state, (density_lion_form_node*)&state->formData + 1);
     } else
-        form = &state->formData.formsPool[0];
-
-    const DENSITY_LION_FORM formValue = form->form;
-    form->usage++;
-
-    if (density_unlikely(form->previousForm))
-        density_lion_form_model_update(&state->formData, form, form->previousForm);
-
-    return formValue;
+        return density_lion_decode_process_form(state, (density_lion_form_node*)&state->formData);
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {

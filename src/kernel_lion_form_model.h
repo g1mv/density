@@ -68,9 +68,9 @@ typedef struct {
 } density_lion_form_node;
 
 typedef struct {
-    uint8_t nextAvailableForm;
     density_lion_form_node formsPool[DENSITY_LION_NUMBER_OF_FORMS];
     density_lion_form_node *formsIndex[DENSITY_LION_NUMBER_OF_FORMS];
+    uint8_t nextAvailableForm;
 } density_lion_form_data;
 #pragma pack(pop)
 
