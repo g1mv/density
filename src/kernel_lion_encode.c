@@ -172,6 +172,9 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                     density_lion_encode_manage_bigram(out, state, (uint16_t) (chunk));
                     density_lion_encode_manage_bigram(out, state, (uint16_t) (chunk >> 16));
 
+                    //const uint16_t previous_bigram = (uint16_t) (chunk << 8 | state->lastChunk >> 24);
+                    //state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(previous_bigram)].bigram = previous_bigram;
+
                     const uint16_t mid_bigram = (uint16_t) (chunk >> 8);
                     state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(mid_bigram)].bigram = mid_bigram;
                 } else {
@@ -222,22 +225,6 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_unit(uint64_t *restrict ch
     DENSITY_UNROLL_2(density_lion_encode_process_chunk(chunk, in, out, hash, state));
 
     state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
-}
-
-DENSITY_FORCE_INLINE bool density_lion_encode_process_unit_with_intercept(uint64_t *restrict chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_lion_encode_state *restrict state) {
-    const uint_fast32_t start_shift = state->shift;
-
-    DENSITY_UNROLL_2(density_lion_encode_process_chunk(chunk, in, out, hash, state));
-
-    state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
-
-    if(start_shift > state->shift) {    // New signature has been created
-        const density_byte* content_start = (density_byte*)state->signature + sizeof(density_lion_signature);
-        state->transientContent.content = *(uint64_t*)content_start;
-        state->transientContent.size = (uint8_t)(out->pointer - content_start);
-        return true;
-    } else
-        return false;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(density_lion_encode_state *state) {

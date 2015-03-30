@@ -348,15 +348,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(densit
 }
 
 #define DENSITY_LION_DECODE_CONTINUE
-#define GENERIC_NAME(name) name ## continue
 
-#include "kernel_lion_generic_decode.h"
+#include "kernel_lion_decode_template.h"
 
-#undef GENERIC_NAME
 #undef DENSITY_LION_DECODE_CONTINUE
 
-#define GENERIC_NAME(name) name ## finish
-
-#include "kernel_lion_generic_decode.h"
-
-#undef GENERIC_NAME
+#include "kernel_lion_decode_template.h"

@@ -39,7 +39,15 @@
  * Multiform compression algorithm
  */
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decode_)(density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+#undef DENSITY_LION_DECODE_FUNCTION_NAME
+
+#ifdef DENSITY_LION_DECODE_CONTINUE
+#define DENSITY_LION_DECODE_FUNCTION_NAME(name) name ## continue
+#else
+#define DENSITY_LION_DECODE_FUNCTION_NAME(name) name ## finish
+#endif
+
+DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_LION_DECODE_FUNCTION_NAME(density_lion_decode_)(density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
 
@@ -64,7 +72,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE GENERIC_NAME(density_lion_decod
 
     // Check output size
     check_output_size:
-    if (density_unlikely(out->available_bytes < DENSITY_LION_DECODE_MINIMUM_OUTPUT_LOOKAHEAD))
+    if (density_unlikely(out->available_bytes < DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE))
         return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
 
     // Try to read the next processing unit

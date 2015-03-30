@@ -59,11 +59,9 @@ typedef enum {
 } DENSITY_LION_ENCODE_PROCESS;
 
 typedef struct {
-    uint64_t content;
+    density_byte content[DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE];
     uint_fast8_t size;
 } density_lion_encode_content;
-
-#define DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD                           (1 << 9)
 
 #pragma pack(push)
 #pragma pack(4)

@@ -39,7 +39,6 @@
  * Multiform compression algorithm
  */
 
-#include "kernel_lion_encode.h"
 #include "memory_location.h"
 
 #undef DENSITY_LION_ENCODE_FUNCTION_NAME
@@ -79,15 +78,20 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
     // Check output size
     check_output_size:
     if(density_unlikely(state->signatureInterceptMode)) {
-        if (out->available_bytes >= DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD) {     // New buffer
-            state->signature = (density_lion_signature*)out->pointer;
-            out->pointer += sizeof(density_lion_signature);
-            *(uint64_t*)out->pointer = state->transientContent.content;
-            out->pointer += state->transientContent.size;
+        if (out->available_bytes >= DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE) {     // New buffer
+            if(density_likely(state->shift)) {
+                state->signature = (density_lion_signature *)(out->pointer);
+                out->pointer += sizeof(density_lion_signature);
+                memcpy(out->pointer, state->transientContent.content, state->transientContent.size);
+                out->pointer += state->transientContent.size;
+                out->available_bytes -= (sizeof(density_lion_signature) + state->transientContent.size);
+            }
             state->signatureInterceptMode = false;
         }
-    } else if (density_unlikely(out->available_bytes < DENSITY_LION_ENCODE_MINIMUM_OUTPUT_LOOKAHEAD))
-        state->signatureInterceptMode = true;
+    } else {
+        if (density_unlikely(out->available_bytes < DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE))
+            state->signatureInterceptMode = true;
+    }
 
     // Try to read a complete process unit
     process_unit:
@@ -101,15 +105,26 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
 
     // Chunk was read properly, process
     if(density_unlikely(state->signatureInterceptMode)) {
-        if(density_lion_encode_process_unit_with_intercept(&chunk, readMemoryLocation, out, &hash, state)) {
-            const density_byte* content_start = (density_byte*)state->signature + sizeof(density_lion_signature);
-            state->transientContent.content = *(uint64_t*)content_start;
-            state->transientContent.size = (uint8_t)(out->pointer - content_start);
-            return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
-        }
-    } else
+        const uint_fast32_t start_shift = state->shift;
         density_lion_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
-    readMemoryLocation->available_bytes -= DENSITY_LION_PROCESS_UNIT_SIZE;
+        readMemoryLocation->available_bytes -= DENSITY_LION_PROCESS_UNIT_SIZE;
+        if(start_shift > state->shift) {
+            if(density_likely(state->shift)) {
+                const density_byte *content_start = (density_byte *) state->signature + sizeof(density_lion_signature);
+                state->transientContent.size = (uint8_t) (out->pointer - content_start);
+                memcpy(state->transientContent.content, content_start, state->transientContent.size);
+                out->pointer = (density_byte *) state->signature;
+                out->available_bytes -= (out->pointer - pointerOutBefore);
+                return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
+            } else {
+                out->available_bytes -= (out->pointer - pointerOutBefore);
+                return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);
+            }
+        }
+    } else {
+        density_lion_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
+        readMemoryLocation->available_bytes -= DENSITY_LION_PROCESS_UNIT_SIZE;
+    }
 #ifndef DENSITY_LION_ENCODE_CONTINUE
     goto exit;
 

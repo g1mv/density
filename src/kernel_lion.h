@@ -90,7 +90,7 @@ typedef uint64_t                                                        density_
 #define DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE         (density_bitsizeof(density_lion_signature) * sizeof(uint16_t))   // Dictionary * hash
 #define DENSITY_LION_MAXIMUM_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE       (density_bitsizeof(density_lion_signature) * sizeof(uint32_t))   // Predictions * chunk
 
-#define DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE                       (density_bitsizeof(density_lion_signature) + DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
+#define DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE                       (sizeof(density_lion_signature) + DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 #define DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE                     (DENSITY_LION_MAXIMUM_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
 
 #define DENSITY_LION_SIGNATURE_SHIFT_LIMIT                              (0x3C)
