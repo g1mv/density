@@ -39,8 +39,6 @@
  * Multiform compression algorithm
  */
 
-#include "memory_location.h"
-
 #undef DENSITY_LION_ENCODE_FUNCTION_NAME
 
 #ifdef DENSITY_LION_ENCODE_CONTINUE

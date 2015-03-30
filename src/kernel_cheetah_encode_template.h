@@ -40,7 +40,15 @@
  * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_cheetah_encode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
+#undef DENSITY_CHEETAH_ENCODE_FUNCTION_NAME
+
+#ifdef DENSITY_CHEETAH_ENCODE_CONTINUE
+#define DENSITY_CHEETAH_ENCODE_FUNCTION_NAME(name) name ## continue
+#else
+#define DENSITY_CHEETAH_ENCODE_FUNCTION_NAME(name) name ## finish
+#endif
+
+DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHEETAH_ENCODE_FUNCTION_NAME(density_cheetah_encode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
     DENSITY_KERNEL_ENCODE_STATE returnState;
     uint32_t hash;
     uint64_t chunk;

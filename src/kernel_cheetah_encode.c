@@ -179,15 +179,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_init(den
 }
 
 #define DENSITY_CHEETAH_ENCODE_CONTINUE
-#define GENERIC_NAME(name) name ## continue
 
-#include "kernel_cheetah_generic_encode.h"
+#include "kernel_cheetah_encode_template.h"
 
-#undef GENERIC_NAME
 #undef DENSITY_CHEETAH_ENCODE_CONTINUE
 
-#define GENERIC_NAME(name) name ## finish
-
-#include "kernel_cheetah_generic_encode.h"
-
-#undef GENERIC_NAME
+#include "kernel_cheetah_encode_template.h"

@@ -149,15 +149,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(d
 }
 
 #define DENSITY_CHAMELEON_DECODE_CONTINUE
-#define GENERIC_NAME(name) name ## continue
 
-#include "kernel_chameleon_generic_decode.h"
+#include "kernel_chameleon_decode_template.h"
 
-#undef GENERIC_NAME
 #undef DENSITY_CHAMELEON_DECODE_CONTINUE
 
-#define GENERIC_NAME(name) name ## finish
-
-#include "kernel_chameleon_generic_decode.h"
-
-#undef GENERIC_NAME
+#include "kernel_chameleon_decode_template.h"

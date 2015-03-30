@@ -39,7 +39,15 @@
  * Hash based superfast kernel
  */
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE GENERIC_NAME(density_chameleon_encode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
+#undef DENSITY_CHAMELEON_ENCODE_FUNCTION_NAME
+
+#ifdef DENSITY_CHAMELEON_ENCODE_CONTINUE
+#define DENSITY_CHAMELEON_ENCODE_FUNCTION_NAME(name) name ## continue
+#else
+#define DENSITY_CHAMELEON_ENCODE_FUNCTION_NAME(name) name ## finish
+#endif
+
+DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHAMELEON_ENCODE_FUNCTION_NAME(density_chameleon_encode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
     DENSITY_KERNEL_ENCODE_STATE returnState;
     uint32_t hash;
     uint64_t chunk;

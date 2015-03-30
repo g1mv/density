@@ -160,15 +160,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(d
 }
 
 #define DENSITY_CHAMELEON_ENCODE_CONTINUE
-#define GENERIC_NAME(name) name ## continue
 
-#include "kernel_chameleon_generic_encode.h"
+#include "kernel_chameleon_encode_template.h"
 
-#undef GENERIC_NAME
 #undef DENSITY_CHAMELEON_ENCODE_CONTINUE
 
-#define GENERIC_NAME(name) name ## finish
-
-#include "kernel_chameleon_generic_encode.h"
-
-#undef GENERIC_NAME
+#include "kernel_chameleon_encode_template.h"
