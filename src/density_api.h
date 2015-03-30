@@ -34,7 +34,18 @@
 
 #include "density_api_data_structures.h"
 
-#define DENSITY_MINIMUM_OUT_BUFFER_SIZE         (1 << 10)
+/***********************************************************************************************************************
+ *                                                                                                                     *
+ * Density condition sets                                                                                              *
+ *                                                                                                                     *
+ ***********************************************************************************************************************/
+
+/*
+ * This is the minimum output buffer size accepted (512 bytes), please use bigger buffers when possible to preserve performance
+ */
+#define DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE         (1 << 9)
+
+
 
 /***********************************************************************************************************************
  *                                                                                                                     *
@@ -73,7 +84,7 @@ uint8_t density_version_revision(void);
  * @param input_buffer a buffer of bytes
  * @param input_size the size in bytes of input_buffer
  * @param output_buffer a buffer of bytes
- * @param output_size the size of output_buffer, must be at least DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE
+ * @param output_size the size of output_buffer, must be at least DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE
  * @param compression_mode the compression mode
  * @param block_type the type of data blocks Density will generate.
  *      The option DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK adds data integrity checks in the encoded output.
@@ -91,7 +102,7 @@ density_buffer_processing_result density_buffer_compress(const uint8_t* input_bu
  * @param input_buffer a buffer of bytes
  * @param input_size the size in bytes of input_buffer
  * @param output_buffer a buffer of bytes
- * @param output_size the size of output_buffer, must be at least DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE
+ * @param output_size the size of output_buffer, must be at least DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
@@ -130,7 +141,7 @@ void density_stream_destroy(density_stream *stream);
  * @param input_buffer a buffer of bytes
  * @param input_size the size in bytes of input_buffer
  * @param output_buffer a buffer of bytes
- * @param output_size the size of output_buffer, must be at least DENSITY_STREAM_MINIMUM_OUT_BUFFER_SIZE
+ * @param output_size the size of output_buffer, must be at least DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */

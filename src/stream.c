@@ -81,7 +81,7 @@ DENSITY_FORCE_INLINE uint_fast64_t density_stream_output_available_for_use(densi
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_check_conformity(density_stream *stream) {
-    if (((density_memory_location *) stream->out)->initial_available_bytes < DENSITY_MINIMUM_OUT_BUFFER_SIZE)
+    if (((density_memory_location *) stream->out)->initial_available_bytes < DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE)
         return DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL;
 
     return DENSITY_STREAM_STATE_READY;
