@@ -26,14 +26,16 @@ Note : *sharc -c1* uses the chameleon algorithm, *sharc -c2* the cheetah algorit
 <sub>[lz4](https://github.com/Cyan4973/lz4) -1</sub> | <sub>lz4 r126</sub> | <sub>0.461s (217 MB/s)</sub> | <sub>0.091s (1099 MB/s)</sub> | <sub>56 995 497</sub> | <sub>57,00%</sub> | <sub>0.552s</sub>
 <sub>[lzop](http://www.lzop.org) -1</sub> | <sub>lzo 2.08</sub> | <sub>0.367s (272 MB/s)</sub> | <sub>0.309s (324 MB/s)</sub> | <sub>56 709 096</sub> | <sub>56,71%</sub> | <sub>0.676s</sub>
 <sub>**[sharc](https://github.com/centaurean/sharc)** -c2</sub> | <sub>**density** 0.12.1</sub> | <sub>0.211s (473 MB/s)</sub> | <sub>0.177s (565 MB/s)</sub> | <sub>53 156 782</sub> | <sub>53,16%</sub> | <sub>0.388s</sub>
-<sub>**[sharc](https://github.com/centaurean/sharc)** -c3</sub> | <sub>**density** 0.12.1</sub> | <sub>0.356s (281 MB/s)</sub> | <sub>0.364s (275 MB/s)</sub> | <sub>47 899 788</sub> | <sub>47,90%</sub> | <sub>0.720s</sub>
+<sub>**[sharc](https://github.com/centaurean/sharc)** -c3</sub> | <sub>**density** 0.12.1</sub> | <sub>0.349s (286 MB/s)</sub> | <sub>0.358s (280 MB/s)</sub> | <sub>48 101 942</sub> | <sub>48,10%</sub> | <sub>0.707s</sub>
 <sub>[lz4](https://github.com/Cyan4973/lz4) -3</sub> | <sub>lz4 r126</sub> | <sub>1.520s (66 MB/s)</sub> | <sub>0.087s (1149 MB/s)</sub> | <sub>47 082 421</sub> | <sub>47,08%</sub> | <sub>1.607s</sub>
 <sub>[lzop](http://www.lzop.org) -7</sub> | <sub>lzo 2.08</sub> | <sub>9.562s (10 MB/s)</sub> | <sub>0.319s (313 MB/s)</sub> | <sub>41 720 721</sub> | <sub>41,72%</sub> | <sub>9.881s</sub>
 
 **Squash**
 
-Squash is an abstraction layer for compression algorithms, and has an extremely exhaustive set of benchmark results, including density's, [available here](https://quixdb.github.io/squash-benchmark/).
+Squash is an abstraction layer for compression algorithms, and has an extremely exhaustive set of benchmark results, including density's, [available here](https://quixdb.github.io/squash-benchmark/?dataset=dickens&machine=s-desktop).
 You can choose between system architecture and compressed file type. There are even ARM boards tested ! A great tool for selecting a compression library.
+
+[![Screenshot of density results on Squash](http://i.imgur.com/mszWTEl.png)](https://quixdb.github.io/squash-benchmark/?dataset=dickens&machine=s-desktop)
 
 **FsBench**
 
@@ -47,46 +49,46 @@ Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.2, 2.3
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
     density::chameleon                      2015-03-30   
-       61524474 (x 1.625)      933 MB/s 1382 MB/s       359e6  531e6
+       61524474 (x 1.625)      921 MB/s 1370 MB/s       354e6  527e6
     density::cheetah                        2015-03-30   
-       53156746 (x 1.881)      472 MB/s  569 MB/s       221e6  266e6
+       53156746 (x 1.881)      473 MB/s  564 MB/s       221e6  264e6
     density::lion                           2015-03-30   
-       47899752 (x 2.088)      280 MB/s  282 MB/s       145e6  147e6
+       48101906 (x 2.079)      286 MB/s  288 MB/s       148e6  149e6
     LZ4                                     r127         
-       56973103 (x 1.755)      257 MB/s 1644 MB/s       110e6  707e6
+       56973103 (x 1.755)      256 MB/s 1647 MB/s       110e6  708e6
     LZF                                     3.6          very
-       53945381 (x 1.854)      192 MB/s  369 MB/s        88e6  169e6
+       53945381 (x 1.854)      191 MB/s  368 MB/s        87e6  169e6
     LZO                                     2.08         1x1
-       55792795 (x 1.792)      287 MB/s  372 MB/s       126e6  164e6
+       55792795 (x 1.792)      289 MB/s  373 MB/s       127e6  165e6
     QuickLZ                                 1.5.1b6      1
-       52334371 (x 1.911)      281 MB/s  351 MB/s       133e6  167e6
+       52334371 (x 1.911)      279 MB/s  353 MB/s       133e6  168e6
     Snappy                                  1.1.0        
-       56539845 (x 1.769)      245 MB/s  795 MB/s       106e6  345e6
+       56539845 (x 1.769)      245 MB/s  797 MB/s       106e6  346e6
     wfLZ                                    r10          
-       63521804 (x 1.574)      150 MB/s  512 MB/s        54e6  186e6
+       63521804 (x 1.574)      151 MB/s  515 MB/s        55e6  188e6
        
 *silesia (211,960,320 bytes)*
 
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
     density::chameleon                      2015-03-30   
-      133118910 (x 1.592)     1049 MB/s 1396 MB/s       390e6  519e6
+      133118910 (x 1.592)     1044 MB/s 1382 MB/s       388e6  514e6
     density::cheetah                        2015-03-30   
-      101751474 (x 2.083)      529 MB/s  657 MB/s       275e6  341e6
+      101751474 (x 2.083)      530 MB/s  662 MB/s       275e6  344e6
     density::lion                           2015-03-30   
-       89502227 (x 2.368)      297 MB/s  284 MB/s       171e6  163e6
+       89309921 (x 2.373)      305 MB/s  292 MB/s       176e6  169e6
     LZ4                                     r127         
-      101634462 (x 2.086)      362 MB/s 1808 MB/s       188e6  941e6
+      101634462 (x 2.086)      365 MB/s 1831 MB/s       189e6  953e6
     LZF                                     3.6          very
-      102043866 (x 2.077)      254 MB/s  491 MB/s       131e6  254e6
+      102043866 (x 2.077)      252 MB/s  495 MB/s       130e6  256e6
     LZO                                     2.08         1x1
-      100592662 (x 2.107)      426 MB/s  583 MB/s       223e6  306e6
+      100592662 (x 2.107)      429 MB/s  583 MB/s       225e6  306e6
     QuickLZ                                 1.5.1b6      1
-       94727961 (x 2.238)      372 MB/s  431 MB/s       205e6  238e6
+       94727961 (x 2.238)      374 MB/s  432 MB/s       206e6  239e6
     Snappy                                  1.1.0        
-      101385885 (x 2.091)      355 MB/s 1070 MB/s       185e6  557e6
+      101385885 (x 2.091)      356 MB/s 1085 MB/s       185e6  565e6
     wfLZ                                    r10          
-      109610020 (x 1.934)      196 MB/s  702 MB/s        94e6  338e6
+      109610020 (x 1.934)      197 MB/s  698 MB/s        95e6  337e6
 
 Build
 -----
@@ -128,7 +130,7 @@ Decompression is just as fast. This algorithm is a great choice when main concer
 
 **Cheetah** ( *DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM* )
 
-Cheetah was developed in conjunction with Piotr Tarsa (https://github.com/tarsa).
+Cheetah was developed in conjunction with [Piotr Tarsa](https://github.com/tarsa).
 It is derived from chameleon and uses swapped double dictionary lookups and predictions. It can be extremely good with highly compressible data (ratio reaching 10% or less).
 On typical compressible data compression ratio is about 50% or less. It is still extremely fast for both compression and decompression and is a great, efficient all-rounder algorithm.
 
