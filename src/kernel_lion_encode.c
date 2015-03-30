@@ -172,11 +172,10 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                     density_lion_encode_manage_bigram(out, state, (uint16_t) (chunk));
                     density_lion_encode_manage_bigram(out, state, (uint16_t) (chunk >> 16));
 
-                    //const uint16_t previous_bigram = (uint16_t) (chunk << 8 | state->lastChunk >> 24);
-                    //state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(previous_bigram)].bigram = previous_bigram;
-
-                    const uint16_t mid_bigram = (uint16_t) (chunk >> 8);
-                    state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(mid_bigram)].bigram = mid_bigram;
+                    const uint16_t intermediate_bigram_a = (uint16_t) ((chunk << 8) | (state->lastChunk >> 24));
+                    const uint16_t intermediate_bigram_b = (uint16_t) (chunk >> 8);
+                    state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(intermediate_bigram_a)].bigram = intermediate_bigram_a;
+                    state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(intermediate_bigram_b)].bigram = intermediate_bigram_b;
                 } else {
                     const density_lion_entropy_code codeDB = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
                     density_lion_encode_push_to_signature(out, state, codeDB.value, codeDB.bitLength);
@@ -223,8 +222,17 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_chunk(uint64_t *restrict c
 
 DENSITY_FORCE_INLINE void density_lion_encode_process_unit(uint64_t *restrict chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_lion_encode_state *restrict state) {
     DENSITY_UNROLL_2(density_lion_encode_process_chunk(chunk, in, out, hash, state));
-
     state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
+
+    in->available_bytes -= DENSITY_LION_PROCESS_UNIT_SIZE;
+}
+
+DENSITY_FORCE_INLINE void density_lion_encode_process_step_unit(density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_lion_encode_state *restrict state) {
+    density_lion_encode_kernel(out, hash, *(uint32_t *) (in->pointer), state);
+    state->chunksCount++;
+
+    in->pointer += sizeof(uint32_t);
+    in->available_bytes -= sizeof(uint32_t);
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(density_lion_encode_state *state) {

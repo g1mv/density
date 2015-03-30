@@ -51,6 +51,9 @@
 #include "memory_location.h"
 #include "memory_teleport.h"
 #include "kernel_lion_decode.h"
+#include "block_footer.h"
+#include "block_header.h"
+#include "block_mode_marker.h"
 
 typedef enum {
     DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE,
@@ -62,6 +65,8 @@ typedef struct {
     density_byte content[DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE];
     uint_fast8_t size;
 } density_lion_encode_content;
+
+#define DENSITY_LION_ENCODE_MINIMUM_LOOKAHEAD   (sizeof(density_block_footer) + sizeof(density_block_header) + sizeof(density_mode_marker) + DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE)
 
 #pragma pack(push)
 #pragma pack(4)

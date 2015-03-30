@@ -152,6 +152,8 @@ DENSITY_FORCE_INLINE void density_lion_decode_process_chunk(uint32_t *restrict h
 
     density_lion_dictionary_chunk_prediction_entry *p = &(state->dictionary.predictions[state->lastHash]);
     density_lion_decode_update_predictions_model(p, chunk);
+
+    state->lastChunk = *chunk;
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_predicted_chunk(uint32_t *restrict hash, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
@@ -239,6 +241,7 @@ DENSITY_FORCE_INLINE uint16_t density_lion_decode_bigram(density_memory_location
 
 DENSITY_FORCE_INLINE void density_lion_decode_chunk(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state, const DENSITY_LION_FORM form) {
     uint32_t hash = 0;
+    uint32_t chunk;
 
     __builtin_prefetch((uint32_t *) out->pointer + 1, 1, 3);
 
@@ -258,12 +261,14 @@ DENSITY_FORCE_INLINE void density_lion_decode_chunk(density_memory_location *res
             density_lion_decode_compressed_chunk_b(&hash, out, state);
             break;
         case DENSITY_LION_FORM_SECONDARY_ACCESS:
-            state->lastChunk = density_lion_decode_bigram(in, out, state) | ((uint32_t) density_lion_decode_bigram(in, out, state) << 16);
+            chunk = density_lion_decode_bigram(in, out, state) | ((uint32_t) density_lion_decode_bigram(in, out, state) << 16);
 
-            const uint16_t mid_bigram = (uint16_t) (state->lastChunk >> 8);
-            state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(mid_bigram)].bigram = mid_bigram;
+            const uint16_t intermediate_bigram_a = (uint16_t) ((chunk << 8) | (state->lastChunk >> 24));
+            const uint16_t intermediate_bigram_b = (uint16_t) (chunk >> 8);
+            state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(intermediate_bigram_a)].bigram = intermediate_bigram_a;
+            state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(intermediate_bigram_b)].bigram = intermediate_bigram_b;
 
-            density_lion_decode_process_chunk(&hash, &state->lastChunk, state);
+            density_lion_decode_process_chunk(&hash, &chunk, state);
             break;
     }
 
