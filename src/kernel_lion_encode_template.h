@@ -86,6 +86,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
     // Check block metadata
     check_block_state:
     if (density_unlikely(!state->shift)) {
+        if(density_unlikely(out->available_bytes < DENSITY_LION_ENCODE_MINIMUM_LOOKAHEAD))
+            return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);  // Direct exit possible, if coming from copy mode
         if (density_unlikely(returnState = density_lion_encode_check_block_state(state)))
             return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, returnState);
     }
@@ -95,7 +97,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
     if(density_unlikely(state->signatureInterceptMode)) {
         if (out->available_bytes >= DENSITY_LION_ENCODE_MINIMUM_LOOKAHEAD) {     // New buffer
             if(density_likely(state->shift)) {
-                state->signature = (density_lion_signature *)(out->pointer);
+                state->signature = (density_lion_signature *) (out->pointer);
                 out->pointer += sizeof(density_lion_signature);
                 memcpy(out->pointer, state->transientContent.content, state->transientContent.size);
                 out->pointer += state->transientContent.size;
