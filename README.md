@@ -46,11 +46,11 @@ Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.2, 2.3
 
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
-    density::chameleon                      2015-03-27   
+    density::chameleon                      2015-03-30   
        61524474 (x 1.625)      933 MB/s 1382 MB/s       359e6  531e6
-    density::cheetah                        2015-03-27   
+    density::cheetah                        2015-03-30   
        53156746 (x 1.881)      472 MB/s  569 MB/s       221e6  266e6
-    density::lion                           2015-03-27   
+    density::lion                           2015-03-30   
        47899752 (x 2.088)      280 MB/s  282 MB/s       145e6  147e6
     LZ4                                     r127         
        56973103 (x 1.755)      257 MB/s 1644 MB/s       110e6  707e6
@@ -69,11 +69,11 @@ Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.2, 2.3
 
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
-    density::chameleon                      2015-03-27   
+    density::chameleon                      2015-03-30   
       133118910 (x 1.592)     1049 MB/s 1396 MB/s       390e6  519e6
-    density::cheetah                        2015-03-27   
+    density::cheetah                        2015-03-30   
       101751474 (x 2.083)      529 MB/s  657 MB/s       275e6  341e6
-    density::lion                           2015-03-27   
+    density::lion                           2015-03-30   
        89502227 (x 2.368)      297 MB/s  284 MB/s       171e6  163e6
     LZ4                                     r127         
       101634462 (x 2.086)      362 MB/s 1808 MB/s       188e6  941e6
