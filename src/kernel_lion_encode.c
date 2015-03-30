@@ -171,11 +171,6 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
 
                     density_lion_encode_manage_bigram(out, state, (uint16_t) (chunk));
                     density_lion_encode_manage_bigram(out, state, (uint16_t) (chunk >> 16));
-
-                    const uint16_t intermediate_bigram_a = (uint16_t) ((chunk << 8) | (state->lastChunk >> 24));
-                    const uint16_t intermediate_bigram_b = (uint16_t) (chunk >> 8);
-                    state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(intermediate_bigram_a)].bigram = intermediate_bigram_a;
-                    state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(intermediate_bigram_b)].bigram = intermediate_bigram_b;
                 } else {
                     const density_lion_entropy_code codeDB = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
                     density_lion_encode_push_to_signature(out, state, codeDB.value, codeDB.bitLength);

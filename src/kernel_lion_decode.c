@@ -256,12 +256,6 @@ DENSITY_FORCE_INLINE void density_lion_decode_chunk(density_memory_location *res
             break;
         case DENSITY_LION_FORM_SECONDARY_ACCESS:
             chunk = density_lion_decode_bigram(in, out, state) | ((uint32_t) density_lion_decode_bigram(in, out, state) << 16);
-
-            const uint16_t intermediate_bigram_a = (uint16_t) ((chunk << 8) | (state->lastChunk >> 24));
-            const uint16_t intermediate_bigram_b = (uint16_t) (chunk >> 8);
-            state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(intermediate_bigram_a)].bigram = intermediate_bigram_a;
-            state->dictionary.bigrams[DENSITY_LION_BIGRAM_HASH_ALGORITHM(intermediate_bigram_b)].bigram = intermediate_bigram_b;
-
             density_lion_decode_process_chunk(&hash, &chunk, state);
             break;
     }
