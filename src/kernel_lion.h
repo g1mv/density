@@ -51,7 +51,7 @@
 #define DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS              (1 << DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS_SHIFT)
 
 #define DENSITY_LION_HASH32_MULTIPLIER                                  (uint32_t)0x9D6EF916lu
-#define DENSITY_LION_HASH16_MULTIPLIER                                  0x5DF2llu
+#define DENSITY_LION_HASH16_MULTIPLIER                                  0x5DF2lu
 #define DENSITY_LION_CHUNK_HASH_BITS                                    16
 #define DENSITY_LION_BIGRAM_HASH_BITS                                   8
 
@@ -59,7 +59,6 @@
                                                                         hash32 = (hash32 >> (32 - DENSITY_LION_CHUNK_HASH_BITS));
 
 #define DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram)                      (uint8_t) (((bigram) * DENSITY_LION_HASH16_MULTIPLIER) >> (16 - DENSITY_LION_BIGRAM_HASH_BITS))
-#define DENSITY_LION_BIGRAM_HASHES_ALGORITHM(chunk)                     ((chunk | ((uint64_t)chunk << 16)) & 0xFFFF0000FFFFllu) * DENSITY_LION_HASH16_MULTIPLIER
 
 typedef enum {
     DENSITY_LION_FORM_CHUNK_PREDICTIONS,
