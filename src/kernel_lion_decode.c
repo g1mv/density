@@ -210,7 +210,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_compressed_chunk_b(const uint32_t 
     density_lion_decode_write_chunk(&swapped_chunk, out, state);
 }
 
-DENSITY_FORCE_INLINE uint16_t density_lion_decode_bigram(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state/*, const uint8_t previous_unigram, uint32_t *restrict chunk, const uint8_t shift*/) {
+DENSITY_FORCE_INLINE uint16_t density_lion_decode_bigram(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     uint16_t bigram;
 
     if (density_lion_decode_read_1bit_from_signature(in, state)) {  // DENSITY_LION_BIGRAM_SIGNATURE_FLAG_PLAIN
