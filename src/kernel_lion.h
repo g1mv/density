@@ -51,7 +51,7 @@
 #define DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS              (1 << DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS_SHIFT)
 
 #define DENSITY_LION_HASH32_MULTIPLIER                                  (uint32_t)0x9D6EF916lu
-#define DENSITY_LION_HASH16_MULTIPLIER                                  0x5DF2lu
+#define DENSITY_LION_HASH16_MULTIPLIER                                  0xAD15lu
 #define DENSITY_LION_CHUNK_HASH_BITS                                    16
 #define DENSITY_LION_BIGRAM_HASH_BITS                                   8
 

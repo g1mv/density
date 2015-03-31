@@ -195,14 +195,14 @@ DENSITY_FORCE_INLINE void density_lion_decode_write_chunk(const uint32_t *restri
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_compressed_chunk_a(const uint32_t *restrict hash, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
-    uint32_t chunk = (&state->dictionary.chunks[DENSITY_LITTLE_ENDIAN_16(*hash)])->chunk_a;
+    uint32_t chunk = *(uint32_t*)(&state->dictionary.chunks[DENSITY_LITTLE_ENDIAN_16(*hash)]);
 
     density_lion_decode_write_chunk(&chunk, out, state);
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_compressed_chunk_b(const uint32_t *restrict hash, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     density_lion_dictionary_chunk_entry *entry = &state->dictionary.chunks[DENSITY_LITTLE_ENDIAN_16(*hash)];
-    uint32_t swapped_chunk = entry->chunk_b;
+    uint32_t swapped_chunk = *((uint32_t*)entry + 1);
 
     entry->chunk_b = entry->chunk_a;
     entry->chunk_a = swapped_chunk;
@@ -223,7 +223,7 @@ DENSITY_FORCE_INLINE uint16_t density_lion_decode_bigram(density_memory_location
         const uint8_t bigramHash = *in->pointer;
         in->pointer += sizeof(uint8_t);
 
-        bigram = (&state->dictionary.bigrams[bigramHash])->bigram;
+        bigram = *(uint16_t*)(&state->dictionary.bigrams[bigramHash]);
     }
 
     // Write bigram to output
