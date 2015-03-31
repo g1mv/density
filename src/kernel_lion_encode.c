@@ -170,7 +170,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                     density_lion_encode_push_to_signature(out, state, codeSA.value, codeSA.bitLength);
 
                     density_lion_encode_manage_bigram(out, state, (uint16_t)chunk);
-                    density_lion_encode_manage_bigram(out, state, *((uint16_t*)&chunk + 1));
+                    density_lion_encode_manage_bigram(out, state, (uint16_t)(chunk >> 16));
                 } else {
                     const density_lion_entropy_code codeDB = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
                     density_lion_encode_push_to_signature(out, state, codeDB.value, codeDB.bitLength);
