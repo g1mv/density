@@ -151,64 +151,66 @@ First you need to include the 2 following files in your project :
 
 When this is done you can start using the **DENSITY APIs** :
 
-    #include "density_api.h"
+```C
+#include "density_api.h"
 
-    #define MY_TEXT "This is a simple example on how to use Density API bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla"
-    #define BUFFER_SIZE DENSITY_MINIMUM_OUT_BUFFER_SIZE
-    
-    ...
-    
-    uint8_t *outCompressed   = malloc(BUFFER_SIZE * sizeof(uint8_t));
-    uint8_t *outDecompressed = malloc(BUFFER_SIZE * sizeof(uint8_t));
-    
-    /**************
-     * Buffer API *
-     **************/
-     
-    density_buffer_processing_result result;
-    result = density_buffer_compress((uint8_t *) TEXT, strlen(TEXT), outCompressed, BUFFER_SIZE, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, DENSITY_BLOCK_TYPE_DEFAULT, NULL, NULL);
-    if(!result.state)
-        printf("%llu bytes >> %llu bytes\n", result.bytesRead, result.bytesWritten);
+#define MY_TEXT "This is a simple example on how to use Density API bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla"
+#define BUFFER_SIZE DENSITY_MINIMUM_OUT_BUFFER_SIZE
 
-    result = density_buffer_decompress(outCompressed, result.bytesWritten, outDecompressed, BUFFER_SIZE, NULL, NULL);
-    if(!result.state)
-        printf("%llu bytes >> %llu bytes\n", result.bytesRead, result.bytesWritten);
-    
-    /**************
-     * Stream API *
-     **************/
+...
 
-    // We create the stream using the standard malloc and free functions
-    density_stream* stream = density_stream_create(NULL, NULL);
-    DENSITY_STREAM_STATE streamState;
-    
-    // Let's compress our text, using the Chameleon algorithm (extremely fast compression and decompression)
-    if ((streamState = density_stream_prepare(stream, (uint8_t *) TEXT, strlen(TEXT), outCompressed, BUFFER_SIZE)))
-        fprintf(stderr, "Error %i when preparing compression\n", streamState);
-    if ((streamState = density_stream_compress_init(stream, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, DENSITY_BLOCK_TYPE_DEFAULT)))
-        fprintf(stderr, "Error %i when initializing compression\n", streamState);
-    if ((streamState = density_stream_compress_continue(stream)))  if (streamState != DENSITY_STREAM_STATE_STALL_ON_INPUT)
-        fprintf(stderr, "Error %i occured during compression\n", streamState);
-    if ((streamState = density_stream_compress_finish(stream)))
-        fprintf(stderr, "Error %i occured while finishing compression\n", streamState);
-    printf("%llu bytes >> %llu bytes\n", *stream->totalBytesRead, *stream->totalBytesWritten);
+uint8_t *outCompressed   = malloc(BUFFER_SIZE * sizeof(uint8_t));
+uint8_t *outDecompressed = malloc(BUFFER_SIZE * sizeof(uint8_t));
 
-    // Now let's decompress it, using the density_stream_output_available_for_use() method to know how many bytes were made available
-    if ((streamState = density_stream_prepare(stream, outCompressed, density_stream_output_available_for_use(stream), outDecompressed, BUFFER_SIZE)))
-        fprintf(stderr, "Error %i when preparing decompression\n", streamState);
-    if ((streamState = density_stream_decompress_init(stream, NULL)))
-        fprintf(stderr, "Error %i when initializing decompression\n", streamState);
-    if ((streamState = density_stream_decompress_continue(stream))) if (streamState != DENSITY_STREAM_STATE_STALL_ON_INPUT)
-        fprintf(stderr, "Error %i occured during decompression\n", streamState);
-    if ((streamState = density_stream_decompress_finish(stream)))
-        fprintf(stderr, "Error %i occured while finishing compression\n", streamState);
-    printf("%llu bytes >> %llu bytes\n", *stream->totalBytesRead, *stream->totalBytesWritten);
+/**************
+ * Buffer API *
+ **************/
 
-    // Free memory
-    density_stream_destroy(stream);
-    
-    free(outCompressed);
-    free(outDecompressed);
+density_buffer_processing_result result;
+result = density_buffer_compress((uint8_t *) TEXT, strlen(TEXT), outCompressed, BUFFER_SIZE, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, DENSITY_BLOCK_TYPE_DEFAULT, NULL, NULL);
+if(!result.state)
+    printf("%llu bytes >> %llu bytes\n", result.bytesRead, result.bytesWritten);
+
+result = density_buffer_decompress(outCompressed, result.bytesWritten, outDecompressed, BUFFER_SIZE, NULL, NULL);
+if(!result.state)
+    printf("%llu bytes >> %llu bytes\n", result.bytesRead, result.bytesWritten);
+
+/**************
+ * Stream API *
+ **************/
+
+// We create the stream using the standard malloc and free functions
+density_stream* stream = density_stream_create(NULL, NULL);
+DENSITY_STREAM_STATE streamState;
+
+// Let's compress our text, using the Chameleon algorithm (extremely fast compression and decompression)
+if ((streamState = density_stream_prepare(stream, (uint8_t *) TEXT, strlen(TEXT), outCompressed, BUFFER_SIZE)))
+    fprintf(stderr, "Error %i when preparing compression\n", streamState);
+if ((streamState = density_stream_compress_init(stream, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM, DENSITY_BLOCK_TYPE_DEFAULT)))
+    fprintf(stderr, "Error %i when initializing compression\n", streamState);
+if ((streamState = density_stream_compress_continue(stream)))  if (streamState != DENSITY_STREAM_STATE_STALL_ON_INPUT)
+    fprintf(stderr, "Error %i occured during compression\n", streamState);
+if ((streamState = density_stream_compress_finish(stream)))
+    fprintf(stderr, "Error %i occured while finishing compression\n", streamState);
+printf("%llu bytes >> %llu bytes\n", *stream->totalBytesRead, *stream->totalBytesWritten);
+
+// Now let's decompress it, using the density_stream_output_available_for_use() method to know how many bytes were made available
+if ((streamState = density_stream_prepare(stream, outCompressed, density_stream_output_available_for_use(stream), outDecompressed, BUFFER_SIZE)))
+    fprintf(stderr, "Error %i when preparing decompression\n", streamState);
+if ((streamState = density_stream_decompress_init(stream, NULL)))
+    fprintf(stderr, "Error %i when initializing decompression\n", streamState);
+if ((streamState = density_stream_decompress_continue(stream))) if (streamState != DENSITY_STREAM_STATE_STALL_ON_INPUT)
+    fprintf(stderr, "Error %i occured during decompression\n", streamState);
+if ((streamState = density_stream_decompress_finish(stream)))
+    fprintf(stderr, "Error %i occured while finishing compression\n", streamState);
+printf("%llu bytes >> %llu bytes\n", *stream->totalBytesRead, *stream->totalBytesWritten);
+
+// Free memory
+density_stream_destroy(stream);
+
+free(outCompressed);
+free(outDecompressed);
+```
 
 And that's it ! We've done two compression/decompression round trips with a few lines !
 
