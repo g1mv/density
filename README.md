@@ -158,8 +158,8 @@ When this is done you can start using the **DENSITY APIs** :
     
     ...
     
-    uint8_t *outCompressed = (uint8_t *) malloc(BUFFER_SIZE * sizeof(uint8_t));
-    uint8_t *outDecompressed = (uint8_t *) malloc(BUFFER_SIZE * sizeof(uint8_t));
+    uint8_t *outCompressed   = malloc(BUFFER_SIZE * sizeof(uint8_t));
+    uint8_t *outDecompressed = malloc(BUFFER_SIZE * sizeof(uint8_t));
     
     /**************
      * Buffer API *
