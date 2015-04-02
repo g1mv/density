@@ -128,7 +128,6 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(density_mem
     }
 }
 
-
 DENSITY_FORCE_INLINE void density_lion_encode_manage_bigram(density_memory_location *restrict out, density_lion_encode_state *restrict state, const uint16_t bigram) {
     const uint8_t hash = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram);
 

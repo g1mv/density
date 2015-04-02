@@ -148,10 +148,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(d
     return exitProcess(state, DENSITY_CHAMELEON_DECODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_DECODE_STATE_READY);
 }
 
-#define DENSITY_CHAMELEON_DECODE_CONTINUE
-
 #include "kernel_chameleon_decode_template.h"
 
-#undef DENSITY_CHAMELEON_DECODE_CONTINUE
+#define DENSITY_CHAMELEON_DECODE_FINISH
 
 #include "kernel_chameleon_decode_template.h"
