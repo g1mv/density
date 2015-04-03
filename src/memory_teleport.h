@@ -61,6 +61,8 @@ void density_memory_teleport_change_input_buffer(density_memory_teleport *, cons
 
 void density_memory_teleport_reset_staging_buffer(density_memory_teleport *);
 
+void density_memory_teleport_copy_from_direct_buffer_to_staging_buffer(density_memory_teleport *);
+
 density_memory_location *density_memory_teleport_read(density_memory_teleport *, const uint_fast64_t);
 
 density_memory_location *density_memory_teleport_read_reserved(density_memory_teleport *, const uint_fast64_t, const uint_fast64_t);

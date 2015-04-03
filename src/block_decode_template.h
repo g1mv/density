@@ -79,11 +79,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
     switch (state->currentMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
             blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalWritten - state->currentBlockData.outStart);
-#ifndef DENSITY_BLOCK_DECODE_FINISH
-            inRemaining = density_memory_teleport_available_bytes(in);
-#else
             inRemaining = density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead);
-#endif
             outRemaining = out->available_bytes;
 
             if (inRemaining <= outRemaining) {
@@ -93,6 +89,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
                     density_memory_teleport_copy(in, out, inRemaining);
                     density_block_decode_update_totals(in, out, state, inAvailableBefore, outAvailableBefore);
 #ifndef DENSITY_BLOCK_DECODE_FINISH
+                    density_memory_teleport_copy_from_direct_buffer_to_staging_buffer(in);
                     return exitProcess(state, DENSITY_BLOCK_DECODE_PROCESS_READ_DATA, DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT);
 #else
                     goto read_block_footer;

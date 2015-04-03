@@ -91,6 +91,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
 #ifndef DENSITY_BLOCK_ENCODE_FINISH
                     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
                         density_block_encode_update_integrity_hash(in, state, true);
+                    density_memory_teleport_copy_from_direct_buffer_to_staging_buffer(in);
                     return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT);
 #else
                     goto write_block_footer;
