@@ -178,10 +178,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_init(den
     return exitProcess(state, DENSITY_CHEETAH_ENCODE_PROCESS_PREPARE_NEW_BLOCK, DENSITY_KERNEL_ENCODE_STATE_READY);
 }
 
-#define DENSITY_CHEETAH_ENCODE_CONTINUE
-
 #include "kernel_cheetah_encode_template.h"
 
-#undef DENSITY_CHEETAH_ENCODE_CONTINUE
+#define DENSITY_CHEETAH_ENCODE_FINISH
 
 #include "kernel_cheetah_encode_template.h"

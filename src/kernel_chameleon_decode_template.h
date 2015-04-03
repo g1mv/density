@@ -109,21 +109,19 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_CHAMELEON_DECODE_FUNCTI
             uint16_t chunk;
             if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
                 return DENSITY_KERNEL_DECODE_STATE_ERROR;
-            density_chameleon_decode_read_compressed_chunk(&chunk, readMemoryLocation);
-            readMemoryLocation->available_bytes -= sizeof(uint16_t);
-
             if(out->available_bytes < sizeof(uint32_t))
                 return DENSITY_KERNEL_DECODE_STATE_ERROR;
+            density_chameleon_decode_read_compressed_chunk(&chunk, readMemoryLocation);
+            readMemoryLocation->available_bytes -= sizeof(uint16_t);
             density_chameleon_decode_compressed_chunk(&chunk, out, state);
         } else {
             uint32_t chunk;
             if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint32_t), state->endDataOverhead)))
                 goto finish;
-            density_chameleon_decode_read_uncompressed_chunk(&chunk, readMemoryLocation);
-            readMemoryLocation->available_bytes -= sizeof(uint32_t);
-
             if(out->available_bytes < sizeof(uint32_t))
                 return DENSITY_KERNEL_DECODE_STATE_ERROR;
+            density_chameleon_decode_read_uncompressed_chunk(&chunk, readMemoryLocation);
+            readMemoryLocation->available_bytes -= sizeof(uint32_t);
             density_chameleon_decode_uncompressed_chunk(&chunk, out, state);
         }
         out->available_bytes -= sizeof(uint32_t);
