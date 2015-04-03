@@ -246,6 +246,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(densit
     state->lastChunk = 0;
 
     state->signatureInterceptMode = false;
+    state->endMarker = false;
 
     return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_ENCODE_STATE_READY);
 }

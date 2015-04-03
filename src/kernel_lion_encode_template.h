@@ -160,9 +160,21 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
         goto check_block_state;
 
     // Marker for decode loop exit
+    if(!state->endMarker) {
+        state->endMarker = true;
+        goto check_block_state;
+    }
+
     pointerOutBefore = out->pointer;
     const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
-    density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
+    if(density_unlikely(state->signatureInterceptMode)) {
+        const uint_fast32_t start_shift = state->shift;
+
+        density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
+
+        DENSITY_LION_ENCODE_MANAGE_INTERCEPT;
+    } else
+        density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
 
     // Copy the remaining bytes
     *(state->signature) = state->proximitySignature;
