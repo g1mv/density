@@ -64,15 +64,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_CHEETAH_DECODE_FUNCTION
     }
 
     check_signature_state:
-    if (density_unlikely((returnState = density_cheetah_decode_check_state(out, state)))) {
-#ifdef DENSITY_CHEETAH_DECODE_FINISH
-        if(returnState == DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT) {
-            if(density_memory_teleport_available_bytes(in) <= (DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT))
-                goto read_processing_unit;
-        }
-#endif
+#ifndef DENSITY_CHEETAH_DECODE_FINISH
+    if (density_unlikely((returnState = density_cheetah_decode_check_state(out, state))))
         return exitProcess(state, DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
-    }
+#endif
 
     // Try to read the next processing unit
     read_processing_unit:

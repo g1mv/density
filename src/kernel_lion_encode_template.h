@@ -41,7 +41,7 @@
 
 #undef DENSITY_LION_ENCODE_FUNCTION_NAME
 
-#ifdef DENSITY_LION_ENCODE_CONTINUE
+#ifndef DENSITY_LION_ENCODE_FINISH
 #define DENSITY_LION_ENCODE_FUNCTION_NAME(name) name ## continue
 #else
 #define DENSITY_LION_ENCODE_FUNCTION_NAME(name) name ## finish
@@ -114,7 +114,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
     process_unit:
     pointerOutBefore = out->pointer;
     if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_LION_PROCESS_UNIT_SIZE)))
-#ifdef DENSITY_LION_ENCODE_CONTINUE
+#ifndef DENSITY_LION_ENCODE_FINISH
         return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_UNIT, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
 #else
         goto step_by_step;
@@ -130,7 +130,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
     } else
         density_lion_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
 
-#ifndef DENSITY_LION_ENCODE_CONTINUE
+#ifdef DENSITY_LION_ENCODE_FINISH
     goto exit;
 
     // Read step by step
@@ -153,7 +153,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
     out->available_bytes -= (out->pointer - pointerOutBefore);
 
     // New loop
-#ifdef DENSITY_LION_ENCODE_CONTINUE
+#ifndef DENSITY_LION_ENCODE_FINISH
     goto check_block_state;
 #else
     if (density_memory_teleport_available_bytes(in) >= sizeof(uint32_t))

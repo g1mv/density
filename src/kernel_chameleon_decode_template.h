@@ -63,15 +63,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_CHAMELEON_DECODE_FUNCTI
     }
 
     check_signature_state:
-    if ((returnState = density_chameleon_decode_check_state(out, state))) {
 #ifdef DENSITY_CHAMELEON_DECODE_FINISH
-        if(returnState == DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT) {
-            if(density_memory_teleport_available_bytes(in) <= (DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE << DENSITY_CHAMELEON_DECODE_ITERATIONS_SHIFT))
-                goto read_processing_unit;
-        }
-#endif
+    if ((returnState = density_chameleon_decode_check_state(out, state)))
         return exitProcess(state, DENSITY_CHAMELEON_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
-    }
+#endif
 
     // Try to read the next processing unit
     read_processing_unit:

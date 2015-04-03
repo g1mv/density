@@ -250,10 +250,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(densit
     return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_ENCODE_STATE_READY);
 }
 
-#define DENSITY_LION_ENCODE_CONTINUE
-
 #include "kernel_lion_encode_template.h"
 
-#undef DENSITY_LION_ENCODE_CONTINUE
+#define DENSITY_LION_ENCODE_FINISH
 
 #include "kernel_lion_encode_template.h"

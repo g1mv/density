@@ -318,22 +318,24 @@ DENSITY_FORCE_INLINE void density_lion_decode_process_unit(density_memory_locati
     state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
 }
 
-DENSITY_FORCE_INLINE bool density_lion_decode_chunk_step_by_step(density_memory_location *restrict readMemoryLocation, density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode_chunk_step_by_step(density_memory_location *restrict readMemoryLocation, density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     density_byte* startPointer = readMemoryLocation->pointer;
     DENSITY_LION_FORM form = density_lion_decode_read_form(readMemoryLocation, state);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - startPointer);
     switch (form) {
         case DENSITY_LION_FORM_CHUNK_DICTIONARY_B:  // Potential end marker, we need 2 bytes for a chunk dictionary hash, if remaining bytes < 2 + 2 bytes then this form is the last one
             if (density_unlikely(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < sizeof(uint32_t)))
-                return false;
+                return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_END_MARKER;
             break;
         default:
             break;
     }
+    if(out->available_bytes < sizeof(uint32_t))
+        return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_STALL_ON_OUTPUT;
     startPointer = readMemoryLocation->pointer;
     density_lion_decode_chunk(readMemoryLocation, out, state, form);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - startPointer);
-    return true;
+    return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_PROCEED;
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *state, const density_main_header_parameters parameters, const uint_fast8_t endDataOverhead) {
@@ -357,10 +359,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(densit
     return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_DECODE_STATE_READY);
 }
 
-#define DENSITY_LION_DECODE_CONTINUE
-
 #include "kernel_lion_decode_template.h"
 
-#undef DENSITY_LION_DECODE_CONTINUE
+#define DENSITY_LION_DECODE_FINISH
 
 #include "kernel_lion_decode_template.h"
