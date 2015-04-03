@@ -73,15 +73,18 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_LION_DECODE_FUNCTION_NA
 
     // Check output size
     check_output_size:
-#ifndef DENSITY_LION_DECODE_FINISH
-    if (density_unlikely(out->available_bytes < DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE))
-        return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
+    if (density_unlikely(out->available_bytes < DENSITY_LION_PROCESS_UNIT_SIZE)) {
+#ifdef DENSITY_LION_DECODE_FINISH
+        if(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < DENSITY_LION_DECODE_MAX_BYTES_TO_READ_FOR_PROCESS_UNIT)
+            goto step_by_step;
 #endif
+        return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
+    }
 
     // Try to read the next processing unit
     process_unit:
     if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_LION_DECODE_MAX_BYTES_TO_READ_FOR_PROCESS_UNIT, state->endDataOverhead))))
-#ifdef DENSITY_LION_DECODE_CONTINUE
+#ifndef DENSITY_LION_DECODE_FINISH
         return exitProcess(state, DENSITY_LION_DECODE_PROCESS_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 #else
         goto step_by_step;

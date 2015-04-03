@@ -112,6 +112,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHEETAH_ENCODE_FUNCTION
         goto check_signature_state;
 
     // Marker for decode loop exit
+    if ((returnState = density_cheetah_encode_check_state(out, state)))
+        return exitProcess(state, DENSITY_CHEETAH_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
     density_cheetah_encode_write_to_signature(state, DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK);
 
     // Copy the remaining bytes
