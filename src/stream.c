@@ -150,8 +150,12 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_continue(densi
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *stream) {
-    if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_COMPRESSION_STARTED)
-        return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+    if(((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_COMPRESSION_STARTED) {
+        if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_COMPRESSION_INITED)
+            return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+        else
+            ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_COMPRESSION_STARTED;
+    }
 
     DENSITY_STREAM_STATE streamState = density_stream_check_conformity(stream);
     if (streamState)
@@ -243,8 +247,12 @@ DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_continue(den
 }
 
 DENSITY_FORCE_INLINE DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream) {
-    if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_DECOMPRESSION_STARTED)
-        return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+    if(((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_DECOMPRESSION_STARTED) {
+        if (((density_stream_state *) stream->internal_state)->process ^ DENSITY_STREAM_PROCESS_DECOMPRESSION_INITED)
+            return DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE;
+        else
+            ((density_stream_state *) stream->internal_state)->process = DENSITY_STREAM_PROCESS_DECOMPRESSION_STARTED;
+    }
 
     DENSITY_DECODE_STATE decodeState = density_decode_finish(stream->in, stream->out, &((density_stream_state *) stream->internal_state)->internal_decode_state, ((density_stream_state *) stream->internal_state)->mem_free);
     switch (decodeState) {

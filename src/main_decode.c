@@ -171,7 +171,8 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_t
     if ((decodeState = density_decode_read_footer(in, state)))
         return decodeState;
 #endif
-    mem_free(state->blockDecodeState.kernelDecodeState);
+    if(state->header.compressionMode != DENSITY_COMPRESSION_MODE_COPY)
+        mem_free(state->blockDecodeState.kernelDecodeState);
 
     return DENSITY_DECODE_STATE_READY;
 }

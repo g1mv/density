@@ -172,13 +172,8 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_finish(density_memory_t
         return exitProcess(state, DENSITY_ENCODE_PROCESS_WRITE_FOOTER, encodeState);
 #endif
 
-    switch (state->compressionMode) {
-        case DENSITY_COMPRESSION_MODE_COPY:
-            break;
-        default:
-            mem_free(state->blockEncodeState.kernelEncodeState);
-            break;
-    }
+    if (state->compressionMode != DENSITY_COMPRESSION_MODE_COPY)
+        mem_free(state->blockEncodeState.kernelEncodeState);
 
     return DENSITY_ENCODE_STATE_READY;
 }

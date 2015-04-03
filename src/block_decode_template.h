@@ -79,7 +79,11 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
     switch (state->currentMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
             blockRemaining = (uint_fast64_t) DENSITY_PREFERRED_COPY_BLOCK_SIZE - (state->totalWritten - state->currentBlockData.outStart);
+#ifndef DENSITY_BLOCK_DECODE_FINISH
+            inRemaining = density_memory_teleport_available_bytes(in);
+#else
             inRemaining = density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead);
+#endif
             outRemaining = out->available_bytes;
 
             if (inRemaining <= outRemaining) {
