@@ -47,7 +47,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE exitProcess(density_chameleon_d
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_check_state(density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
-    if (out->available_bytes < (DENSITY_CHAMELEON_MAXIMUM_DECOMPRESSED_UNIT_SIZE << DENSITY_CHAMELEON_DECODE_ITERATIONS_SHIFT))
+    if (out->available_bytes < (DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE << DENSITY_CHAMELEON_DECODE_ITERATIONS_SHIFT))
         return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT;
 
     switch (state->signaturesCount) {
@@ -148,10 +148,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(d
     return exitProcess(state, DENSITY_CHAMELEON_DECODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_DECODE_STATE_READY);
 }
 
-#define DENSITY_CHAMELEON_DECODE_CONTINUE
-
 #include "kernel_chameleon_decode_template.h"
 
-#undef DENSITY_CHAMELEON_DECODE_CONTINUE
+#define DENSITY_CHAMELEON_DECODE_FINISH
 
 #include "kernel_chameleon_decode_template.h"

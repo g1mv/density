@@ -41,7 +41,7 @@
 
 #undef DENSITY_CHAMELEON_ENCODE_FUNCTION_NAME
 
-#ifdef DENSITY_CHAMELEON_ENCODE_CONTINUE
+#ifndef DENSITY_CHAMELEON_ENCODE_FINISH
 #define DENSITY_CHAMELEON_ENCODE_FUNCTION_NAME(name) name ## continue
 #else
 #define DENSITY_CHAMELEON_ENCODE_FUNCTION_NAME(name) name ## finish
@@ -80,7 +80,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHAMELEON_ENCODE_FUNCTI
     read_chunk:
     pointerOutBefore = out->pointer;
     if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE)))
-#ifdef DENSITY_CHAMELEON_ENCODE_CONTINUE
+#ifndef DENSITY_CHAMELEON_ENCODE_FINISH
         return exitProcess(state, DENSITY_CHAMELEON_ENCODE_PROCESS_READ_CHUNK, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
 #else
         goto step_by_step;
@@ -89,7 +89,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHAMELEON_ENCODE_FUNCTI
     // Chunk was read properly, process
     density_chameleon_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
     readMemoryLocation->available_bytes -= DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE;
-#ifndef DENSITY_CHAMELEON_ENCODE_CONTINUE
+#ifdef DENSITY_CHAMELEON_ENCODE_FINISH
     goto exit;
 
     // Read step by step
@@ -104,7 +104,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHAMELEON_ENCODE_FUNCTI
     out->available_bytes -= (out->pointer - pointerOutBefore);
 
     // New loop
-#ifdef DENSITY_CHAMELEON_ENCODE_CONTINUE
+#ifndef DENSITY_CHAMELEON_ENCODE_FINISH
     goto check_signature_state;
 #else
     if (density_memory_teleport_available_bytes(in) >= sizeof(uint32_t))

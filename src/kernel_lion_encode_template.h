@@ -41,7 +41,7 @@
 
 #undef DENSITY_LION_ENCODE_FUNCTION_NAME
 
-#ifdef DENSITY_LION_ENCODE_CONTINUE
+#ifndef DENSITY_LION_ENCODE_FINISH
 #define DENSITY_LION_ENCODE_FUNCTION_NAME(name) name ## continue
 #else
 #define DENSITY_LION_ENCODE_FUNCTION_NAME(name) name ## finish
@@ -114,7 +114,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
     process_unit:
     pointerOutBefore = out->pointer;
     if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_LION_PROCESS_UNIT_SIZE)))
-#ifdef DENSITY_LION_ENCODE_CONTINUE
+#ifndef DENSITY_LION_ENCODE_FINISH
         return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_UNIT, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
 #else
         goto step_by_step;
@@ -130,7 +130,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
     } else
         density_lion_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
 
-#ifndef DENSITY_LION_ENCODE_CONTINUE
+#ifdef DENSITY_LION_ENCODE_FINISH
     goto exit;
 
     // Read step by step
@@ -153,16 +153,28 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
     out->available_bytes -= (out->pointer - pointerOutBefore);
 
     // New loop
-#ifdef DENSITY_LION_ENCODE_CONTINUE
+#ifndef DENSITY_LION_ENCODE_FINISH
     goto check_block_state;
 #else
     if (density_memory_teleport_available_bytes(in) >= sizeof(uint32_t))
         goto check_block_state;
 
     // Marker for decode loop exit
+    if(!state->endMarker) {
+        state->endMarker = true;
+        goto check_block_state;
+    }
+
     pointerOutBefore = out->pointer;
     const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
-    density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
+    if(density_unlikely(state->signatureInterceptMode)) {
+        const uint_fast32_t start_shift = state->shift;
+
+        density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
+
+        DENSITY_LION_ENCODE_MANAGE_INTERCEPT;
+    } else
+        density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
 
     // Copy the remaining bytes
     *(state->signature) = state->proximitySignature;

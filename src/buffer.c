@@ -101,6 +101,7 @@ DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_decompress(
     switch(streamState) {
         case DENSITY_STREAM_STATE_READY:
         case DENSITY_STREAM_STATE_STALL_ON_INPUT:
+        case DENSITY_STREAM_STATE_STALL_ON_OUTPUT:
             break;
         case DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL:
             return density_buffer_return_processing_result(stream, DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL);

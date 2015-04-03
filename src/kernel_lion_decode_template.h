@@ -41,7 +41,7 @@
 
 #undef DENSITY_LION_DECODE_FUNCTION_NAME
 
-#ifdef DENSITY_LION_DECODE_CONTINUE
+#ifndef DENSITY_LION_DECODE_FINISH
 #define DENSITY_LION_DECODE_FUNCTION_NAME(name) name ## continue
 #else
 #define DENSITY_LION_DECODE_FUNCTION_NAME(name) name ## finish
@@ -50,6 +50,7 @@
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_LION_DECODE_FUNCTION_NAME(density_lion_decode_)(density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
+    uint_fast64_t availableBytesReserved;
 
     // Dispatch
     switch (state->process) {
@@ -72,13 +73,18 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_LION_DECODE_FUNCTION_NA
 
     // Check output size
     check_output_size:
-    if (density_unlikely(out->available_bytes < DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE))
+    if (density_unlikely(out->available_bytes < DENSITY_LION_PROCESS_UNIT_SIZE)) {
+#ifdef DENSITY_LION_DECODE_FINISH
+        if(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < DENSITY_LION_DECODE_MAX_BYTES_TO_READ_FOR_PROCESS_UNIT)
+            goto step_by_step;
+#endif
         return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
+    }
 
     // Try to read the next processing unit
     process_unit:
     if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_LION_DECODE_MAX_BYTES_TO_READ_FOR_PROCESS_UNIT, state->endDataOverhead))))
-#ifdef DENSITY_LION_DECODE_CONTINUE
+#ifndef DENSITY_LION_DECODE_FINISH
         return exitProcess(state, DENSITY_LION_DECODE_PROCESS_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 #else
         goto step_by_step;
@@ -97,9 +103,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_LION_DECODE_FUNCTION_NA
     readMemoryLocation = density_memory_teleport_read_remaining_reserved(in, state->endDataOverhead);
     uint_fast8_t iterations = DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
     while (iterations--) {
-        bool proceed = density_lion_decode_chunk_step_by_step(readMemoryLocation, in, out, state);
-        if(density_unlikely(!proceed))
-            goto finish;
+        switch (density_lion_decode_chunk_step_by_step(readMemoryLocation, in, out, state)) {
+            case DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_PROCEED:
+                break;
+            case DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_STALL_ON_OUTPUT:
+                return DENSITY_KERNEL_DECODE_STATE_ERROR;
+            case DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_END_MARKER:
+                goto finish;
+        }
         out->available_bytes -= sizeof(uint32_t);
     }
 
@@ -107,7 +118,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_LION_DECODE_FUNCTION_NA
     goto check_block_state;
 
     finish:
-    density_memory_teleport_copy(in, out, density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead));
+    availableBytesReserved = density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead);
+    if (out->available_bytes < availableBytesReserved)
+        return DENSITY_KERNEL_DECODE_STATE_ERROR;
+    density_memory_teleport_copy(in, out, availableBytesReserved);
 
     return DENSITY_KERNEL_DECODE_STATE_READY;
 }

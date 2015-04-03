@@ -48,7 +48,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE exitProcess(density_cheetah_dec
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_check_state(density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
-    if (out->available_bytes < (DENSITY_CHEETAH_MAXIMUM_DECOMPRESSED_UNIT_SIZE << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT))
+    if (out->available_bytes < (DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT))
         return DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT;
 
     switch (state->signaturesCount) {
@@ -186,10 +186,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_init(den
     return exitProcess(state, DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_DECODE_STATE_READY);
 }
 
-#define DENSITY_CHEETAH_DECODE_CONTINUE
-
 #include "kernel_cheetah_decode_template.h"
 
-#undef DENSITY_CHEETAH_DECODE_CONTINUE
+#define DENSITY_CHEETAH_DECODE_FINISH
 
 #include "kernel_cheetah_decode_template.h"

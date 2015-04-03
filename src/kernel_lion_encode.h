@@ -90,6 +90,7 @@ typedef struct {
 
     density_lion_encode_content transientContent;
     bool signatureInterceptMode;
+    bool endMarker;
 
     density_lion_dictionary dictionary;
 } density_lion_encode_state;
