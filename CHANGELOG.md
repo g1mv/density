@@ -1,3 +1,15 @@
+0.12.1 beta
+-----------
+*April 3, 2015*
+
+* Better unrolling readability and efficiency
+* Improved read speed of dictionary/predictions entries
+* Implemented case generators in cheetah to speed up decoding by using less branches
+* Added signatures interception in lion to cancel the need for large output buffers
+* Improved lion decode speed with specific form data access and use of ctz in form read
+* Enabled decompression to exact-sized buffer for all algorithms
+* Various fixes and improvements
+
 0.12.0 beta
 -----------
 *March 24, 2015*
