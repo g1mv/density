@@ -39,10 +39,10 @@ DENSITY_FORCE_INLINE density_stream *density_stream_create(void *(*mem_alloc)(si
     void *(*memory_alloc)(size_t) = mem_alloc == NULL ? malloc : mem_alloc;
     void (*memory_free)(void *) = mem_free == NULL ? free : mem_free;
 
-    stream = (density_stream *) memory_alloc(sizeof(density_stream));
+    stream = memory_alloc(sizeof(density_stream));
     stream->in = density_memory_teleport_allocate(DENSITY_STREAM_MEMORY_TELEPORT_BUFFER_SIZE, memory_alloc);
     stream->out = density_memory_location_allocate(memory_alloc);
-    stream->internal_state = (density_stream_state *) memory_alloc(sizeof(density_stream_state));
+    stream->internal_state = memory_alloc(sizeof(density_stream_state));
     ((density_stream_state *) stream->internal_state)->mem_alloc = memory_alloc;
     ((density_stream_state *) stream->internal_state)->mem_free = memory_free;
 

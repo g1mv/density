@@ -36,11 +36,11 @@
 #include "memory_location.h"
 
 DENSITY_FORCE_INLINE density_memory_teleport *density_memory_teleport_allocate(const uint_fast64_t size, void *(*mem_alloc)(size_t)) {
-    density_memory_teleport *teleport = (density_memory_teleport *) mem_alloc(sizeof(density_memory_teleport));
+    density_memory_teleport *teleport = mem_alloc(sizeof(density_memory_teleport));
 
-    teleport->stagingMemoryLocation = (density_staging_memory_location *) mem_alloc(sizeof(density_staging_memory_location));
+    teleport->stagingMemoryLocation = mem_alloc(sizeof(density_staging_memory_location));
     teleport->stagingMemoryLocation->memoryLocation = density_memory_location_allocate(mem_alloc);
-    teleport->stagingMemoryLocation->memoryLocation->pointer = (density_byte *) mem_alloc(size * sizeof(density_byte));
+    teleport->stagingMemoryLocation->memoryLocation->pointer = mem_alloc(size * sizeof(density_byte));
     teleport->stagingMemoryLocation->memoryLocation->available_bytes = 0;
 
     teleport->stagingMemoryLocation->originalPointer = teleport->stagingMemoryLocation->memoryLocation->pointer;
