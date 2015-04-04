@@ -88,7 +88,7 @@ typedef struct {
 
     density_lion_form_data formData;
 
-    uint_fast32_t lastHash;
+    uint_fast16_t lastHash;
     uint32_t lastChunk;
 
     density_lion_encode_content transientContent;

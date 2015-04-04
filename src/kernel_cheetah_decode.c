@@ -101,7 +101,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_read_uncompressed_chunk(uint32_
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_predicted_chunk(uint32_t *restrict hash, density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
     uint32_t *chunk = (uint32_t *) (&state->dictionary.prediction_entries[state->lastHash]);
-    DENSITY_CHEETAH_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(*chunk));
+    *hash = DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(*chunk));
 
     *(uint32_t *) (out->pointer) = *chunk;
     out->pointer += sizeof(uint32_t);
@@ -130,7 +130,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_compressed_chunk_b(const uint32
 DENSITY_FORCE_INLINE void density_cheetah_decode_uncompressed_chunk(uint32_t *restrict hash, const uint32_t *restrict chunk, density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
     density_cheetah_dictionary_entry *entry;
 
-    DENSITY_CHEETAH_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(*chunk));
+    *hash = DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(*chunk));
     entry = &state->dictionary.entries[*hash];
     *(uint64_t *) entry = *chunk | ((uint64_t) entry->chunk_a << 32);
 

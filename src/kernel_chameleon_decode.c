@@ -104,8 +104,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_compressed_chunk(const uint16
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_uncompressed_chunk(const uint32_t *restrict chunk, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
-    uint32_t hash;
-    DENSITY_CHAMELEON_HASH_ALGORITHM(hash, DENSITY_LITTLE_ENDIAN_32(*chunk));
+    const uint32_t hash = DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(*chunk));
     (&state->dictionary.entries[hash])->as_uint32_t = *chunk;
     *(uint32_t *) (out->pointer) = *chunk;
     out->pointer += sizeof(uint32_t);
