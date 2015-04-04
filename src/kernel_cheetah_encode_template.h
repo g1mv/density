@@ -91,7 +91,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHEETAH_ENCODE_FUNCTION
 #endif
 
     // Chunk was read properly, process
-    density_cheetah_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
+    density_cheetah_encode_process_unit(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= DENSITY_CHEETAH_ENCODE_PROCESS_UNIT_SIZE;
 #ifdef DENSITY_CHEETAH_ENCODE_FINISH
     goto exit;
@@ -99,7 +99,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHEETAH_ENCODE_FUNCTION
     // Read step by step
     step_by_step:
     while (state->shift != density_bitsizeof(density_cheetah_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
-        density_cheetah_encode_kernel(out, &hash, *(uint32_t *) (readMemoryLocation->pointer), state);
+        const uint32_t chunk = *(uint32_t *) (readMemoryLocation->pointer);
+        density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(chunk)), chunk, state);
         readMemoryLocation->pointer += sizeof(uint32_t);
         readMemoryLocation->available_bytes -= sizeof(uint32_t);
     }
