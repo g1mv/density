@@ -141,7 +141,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_update_predictions_model(density_l
 DENSITY_FORCE_INLINE void density_lion_decode_process_chunk(uint32_t *restrict hash, const uint32_t *restrict chunk, density_lion_decode_state *restrict state) {
     density_lion_dictionary_chunk_entry *entry;
 
-    DENSITY_LION_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(*chunk));
+    *hash = DENSITY_LION_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(*chunk));
 
     entry = &state->dictionary.chunks[*hash];
     entry->chunk_b = entry->chunk_a;
@@ -156,7 +156,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_process_chunk(uint32_t *restrict h
 DENSITY_FORCE_INLINE void density_lion_decode_predicted_chunk(uint32_t *restrict hash, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     uint32_t chunk = *(uint32_t *) (&state->dictionary.predictions[state->lastHash]);
 
-    DENSITY_LION_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(chunk));
+    *hash = DENSITY_LION_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(chunk));
 
     *(uint32_t *) (out->pointer) = chunk;
     out->pointer += sizeof(uint32_t);
@@ -179,7 +179,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_secondary_predicted_chunk(uint32_t
     }
     density_lion_decode_update_predictions_model(p, &chunk);
 
-    DENSITY_LION_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(chunk));
+    *hash = DENSITY_LION_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(chunk));
 
     *(uint32_t *) (out->pointer) = chunk;
     out->pointer += sizeof(uint32_t);

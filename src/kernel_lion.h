@@ -58,8 +58,7 @@
 #define DENSITY_LION_CHUNK_HASH_BITS                                    16
 #define DENSITY_LION_BIGRAM_HASH_BITS                                   8
 
-#define DENSITY_LION_HASH_ALGORITHM(hash32, value32)                    hash32 = value32 * DENSITY_LION_HASH32_MULTIPLIER;\
-                                                                        hash32 = (hash32 >> (32 - DENSITY_LION_CHUNK_HASH_BITS));
+#define DENSITY_LION_HASH_ALGORITHM(value32)                            (uint16_t)(value32 * DENSITY_LION_HASH32_MULTIPLIER >> (32 - DENSITY_LION_CHUNK_HASH_BITS))
 
 #define DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram)                      (uint8_t) ((bigram * DENSITY_LION_HASH16_MULTIPLIER) >> (16 - DENSITY_LION_BIGRAM_HASH_BITS))
 
