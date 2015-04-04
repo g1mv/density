@@ -117,37 +117,50 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_check_
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(density_memory_location *restrict out, uint32_t *restrict hash, const uint32_t chunk, density_chameleon_encode_state *restrict state) {
-    DENSITY_CHAMELEON_HASH_ALGORITHM(*hash, DENSITY_LITTLE_ENDIAN_32(chunk));
-    density_chameleon_dictionary_entry *found = &state->dictionary.entries[*hash];
+DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(density_memory_location *restrict out, const uint16_t hash, const uint32_t chunk, density_chameleon_encode_state *restrict state) {
+    density_chameleon_dictionary_entry *found = &state->dictionary.entries[hash];
 
-    if (chunk ^ *(uint32_t*)found) {
+    if (chunk ^ *(uint32_t *) found) {
         found->as_uint32_t = chunk;
         *(uint32_t *) (out->pointer) = chunk;
         out->pointer += sizeof(uint32_t);
     } else {
         density_chameleon_encode_write_to_signature(state);
-        *(uint16_t *) (out->pointer) = DENSITY_LITTLE_ENDIAN_16(*hash);
+        *(uint16_t *) (out->pointer) = DENSITY_LITTLE_ENDIAN_16(hash);
         out->pointer += sizeof(uint16_t);
     }
 
     state->shift++;
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_process_chunk(uint64_t *chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_chameleon_encode_state *restrict state) {
-    *chunk = *(uint64_t *) (in->pointer);
+DENSITY_FORCE_INLINE void density_chameleon_encode_process_chunk(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    density_chameleon_encode_kernel(out, hash, (uint32_t) (*chunk), state);
+    const __uint128_t chunk = *(__uint128_t * )(in->pointer);
+    const __uint128_t hash_group = (uint32_t) (((uint32_t) chunk * DENSITY_CHAMELEON_HASH_MULTIPLIER)) | (uint64_t) (((uint64_t) (chunk & DENSITY_MASK_32_64) * DENSITY_CHAMELEON_HASH_MULTIPLIER)) | (((chunk & DENSITY_MASK_64_96) * DENSITY_CHAMELEON_HASH_MULTIPLIER) & DENSITY_MASK_64_96) | (((chunk & DENSITY_MASK_96_128) * DENSITY_CHAMELEON_HASH_MULTIPLIER));
+
+    density_chameleon_encode_kernel(out, *((uint16_t *) &hash_group + 1), (uint32_t) chunk, state);
+    density_chameleon_encode_kernel(out, *((uint16_t *) &hash_group + 3), *((uint32_t *) &chunk + 1), state);
+    density_chameleon_encode_kernel(out, *((uint16_t *) &hash_group + 5), *((uint32_t *) &chunk + 2), state);
+    density_chameleon_encode_kernel(out, *((uint16_t *) &hash_group + 7), *((uint32_t *) &chunk + 3), state);
+#else
+    const uint64_t chunk_a = *(uint64_t *) (in->pointer);
+    const uint32_t element_a = (uint32_t) (chunk_a >> density_bitsizeof(uint32_t));
+    const uint32_t element_b = (uint32_t) chunk_a;
+    density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(element_a)), element_a, state);
+    density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(element_b)), element_b, state);
+
+    const uint64_t chunk_b = *((uint64_t *) in->pointer + 1);
+    const uint32_t element_c = (uint32_t) (chunk_b >> density_bitsizeof(uint32_t));
+    const uint32_t element_d = (uint32_t) chunk_b;
+    density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(element_c)), element_c, state);
+    density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(element_d)), element_d, state);
 #endif
-    density_chameleon_encode_kernel(out, hash, (uint32_t) (*chunk >> density_bitsizeof(uint32_t)), state);
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    density_chameleon_encode_kernel(out, hash, (uint32_t)(*chunk), state);
-#endif
-    in->pointer += sizeof(uint64_t);
+
+    in->pointer += sizeof(__uint128_t);
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_process_unit(uint64_t *chunk, density_memory_location *restrict in, density_memory_location *restrict out, uint32_t *restrict hash, density_chameleon_encode_state *restrict state) {
-    DENSITY_UNROLL_16(density_chameleon_encode_process_chunk(chunk, in, out, hash, state));
+DENSITY_FORCE_INLINE void density_chameleon_encode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
+    DENSITY_UNROLL_8(density_chameleon_encode_process_chunk(in, out, state));
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *state) {

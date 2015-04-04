@@ -59,8 +59,7 @@
 #define DENSITY_CHAMELEON_HASH_BITS                                         16
 #define DENSITY_CHAMELEON_HASH_MULTIPLIER                                   (uint32_t)2641295638lu
 
-#define DENSITY_CHAMELEON_HASH_ALGORITHM(hash32, value32)                   hash32 = value32 * DENSITY_CHAMELEON_HASH_MULTIPLIER;\
-                                                                            hash32 = (hash32 >> (32 - DENSITY_CHAMELEON_HASH_BITS));
+#define DENSITY_CHAMELEON_HASH_ALGORITHM(value32)                           (uint16_t)((value32 * DENSITY_CHAMELEON_HASH_MULTIPLIER) >> (32 - DENSITY_CHAMELEON_HASH_BITS))
 
 typedef enum {
     DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK = 0x0,

@@ -52,8 +52,6 @@
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHAMELEON_ENCODE_FUNCTION_NAME(density_chameleon_encode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
     DENSITY_KERNEL_ENCODE_STATE returnState;
-    uint32_t hash;
-    uint64_t chunk;
     density_byte *pointerOutBefore;
     density_memory_location *readMemoryLocation;
 
@@ -90,7 +88,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHAMELEON_ENCODE_FUNCTI
 #endif
 
     // Chunk was read properly, process
-    density_chameleon_encode_process_unit(&chunk, readMemoryLocation, out, &hash, state);
+    density_chameleon_encode_process_unit(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE;
 #ifdef DENSITY_CHAMELEON_ENCODE_FINISH
     goto exit;
@@ -98,7 +96,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHAMELEON_ENCODE_FUNCTI
     // Read step by step
     step_by_step:
     while (state->shift != density_bitsizeof(density_chameleon_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
-        density_chameleon_encode_kernel(out, &hash, *(uint32_t *) (readMemoryLocation->pointer), state);
+        const uint32_t chunk = *(uint32_t *) (readMemoryLocation->pointer);
+        density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(chunk)), chunk, state);
         readMemoryLocation->pointer += sizeof(uint32_t);
         readMemoryLocation->available_bytes -= sizeof(uint32_t);
     }
