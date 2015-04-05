@@ -131,8 +131,8 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(density_mem
     }
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_manage_bigram(density_memory_location *restrict out, density_lion_encode_state *restrict state, const uint16_t bigram) {
-    const uint8_t hash = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram);
+DENSITY_FORCE_INLINE void density_lion_encode_manage_bigram(density_memory_location *restrict out, density_lion_encode_state *restrict state, const uint8_t hash, const uint16_t bigram) {
+    //const uint8_t hash = DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram);
 
     density_lion_dictionary_bigram_entry *bigram_entry = &state->dictionary.bigrams[hash];
     if (bigram_entry->bigram ^ bigram) {
@@ -170,8 +170,9 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                     const density_lion_entropy_code codeSA = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_SECONDARY_ACCESS);
                     density_lion_encode_push_to_signature(out, state, codeSA.value, codeSA.bitLength);
 
-                    density_lion_encode_manage_bigram(out, state, (uint16_t)chunk);
-                    density_lion_encode_manage_bigram(out, state, (uint16_t)(chunk >> 16));
+                    const uint32_t hash_group = (uint16_t)((uint16_t)chunk * DENSITY_LION_HASH16_MULTIPLIER) | ((chunk & DENSITY_MASK_16_32) * DENSITY_LION_HASH16_MULTIPLIER);
+                    density_lion_encode_manage_bigram(out, state, *((uint8_t *) &hash_group + 1), (uint16_t)chunk);
+                    density_lion_encode_manage_bigram(out, state, *((uint8_t *) &hash_group + 3), *((uint16_t *) &chunk + 1));
                 } else {
                     const density_lion_entropy_code codeDB = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
                     density_lion_encode_push_to_signature(out, state, codeDB.value, codeDB.bitLength);
