@@ -118,7 +118,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_check_st
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(density_memory_location *restrict out, const uint16_t hash, const uint32_t chunk, density_cheetah_encode_state *restrict state) {
-    uint32_t *predictedChunk = &(state->dictionary.prediction_entries[state->lastHash].next_chunk_prediction);
+    uint32_t *predictedChunk = (uint32_t*)&state->dictionary.prediction_entries[state->lastHash];
 
     if (*predictedChunk ^ chunk) {
         density_cheetah_dictionary_entry *found = &state->dictionary.entries[hash];
