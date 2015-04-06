@@ -165,6 +165,7 @@
 #define density_bitsizeof(x) (8 * sizeof(x))
 
 static const uint32_t DENSITY_MASK_0_32 = 0xFFFFFFFF;
+static const uint32_t DENSITY_MASK_16_32 = 0xFFFF0000;
 static const uint64_t DENSITY_MASK_32_64 = 0xFFFFFFFF00000000llu;
 static const __uint128_t DENSITY_MASK_64_96 = (((__uint128_t) 0xFFFFFFFF) << 64);
 static const __uint128_t DENSITY_MASK_96_128 = (((__uint128_t) 0xFFFFFFFF) << 96);
@@ -181,7 +182,7 @@ static const __uint128_t DENSITY_MASK_96_128 = (((__uint128_t) 0xFFFFFFFF) << 96
 
 #define DENSITY_MAJOR_VERSION   0
 #define DENSITY_MINOR_VERSION   12
-#define DENSITY_REVISION        1
+#define DENSITY_REVISION        2
 
 /*
  * Compile-time switches useful for pure data encoding and decoding
