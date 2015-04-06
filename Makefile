@@ -32,11 +32,14 @@
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = density
+BENCHMARK = benchmark
 CFLAGS = -Ofast -fomit-frame-pointer -w -flto -std=c99
 
 SRC_DIRECTORY = ./src/
 SPOOKYHASH_DIRECTORY = ./src/spookyhash/
 SPOOKYHASH_SRC_DIRECTORY = $(SPOOKYHASH_DIRECTORY)src/
+BENCHMARK_DIRECTORY = ./src/benchmark/
+BENCHMARK_SRC_DIRECTORY = $(BENCHMARK_DIRECTORY)src/
 
 ifeq ($(OS),Windows_NT)
     bold =
@@ -44,6 +47,7 @@ ifeq ($(OS),Windows_NT)
     DYN_EXT = .dll
     STAT_EXT = .lib
     ARROW = ^-^>
+    EXTENSION = .exe
 else
     bold = `tput bold`
     normal = `tput sgr0`
@@ -56,17 +60,27 @@ else
     endif
     STAT_EXT = .a
     ARROW = \-\>
+    EXTENSION =
 endif
 
 DENSITY_SRC = $(wildcard $(SRC_DIRECTORY)*.c)
 DENSITY_OBJ = $(DENSITY_SRC:.c=.o)
 OTHER_SRC = $(wildcard $(SPOOKYHASH_SRC_DIRECTORY)*.c)
 OTHER_OBJ = $(OTHER_SRC:.c=.o)
+BENCHMARK_SRC = $(wildcard $(BENCHMARK_SRC_DIRECTORY)*.c)
+BENCHMARK_OBJ = $(BENCHMARK_SRC:.c=.o)
 ALL_OBJ = $(DENSITY_OBJ) $(OTHER_OBJ)
 
-.PHONY: compile-header compile-library-header link-header
+.PHONY: compile-header compile-library-header link-header link-benchmark-header
 
-all: $(TARGET)$(DYN_EXT) $(TARGET)$(STAT_EXT)
+all: .nofpic $(BENCHMARK)$(EXTENSION)
+library: .fpic $(TARGET)$(DYN_EXT) $(TARGET)$(STAT_EXT)
+
+.nofpic:
+	@$(MAKE) clean
+
+.fpic:
+	@$(MAKE) clean
 
 %.o: %.c
 	@echo $^ $(ARROW) $@
@@ -74,6 +88,9 @@ all: $(TARGET)$(DYN_EXT) $(TARGET)$(STAT_EXT)
 
 compile-submodules:
 	@cd $(SPOOKYHASH_DIRECTORY) && $(MAKE) compile
+
+compile-benchmark-module:
+	@cd $(BENCHMARK_DIRECTORY) && $(MAKE) compile
 
 compile-header: compile-submodules
 	@echo ${bold}Compiling Density${normal} ...
@@ -86,15 +103,20 @@ compile-library-header: compile-submodules-library
 	@echo ${bold}Compiling Density as a library${normal} ...
 
 compile: compile-header $(DENSITY_OBJ)
+	@rm -f .fpic
 	@echo Done.
 	@echo
 
 compile-library: compile-library-header $(DENSITY_OBJ)
+	@rm -f .nofpic
 	@echo Done.
 	@echo
 
 link-header: compile-library
 	@echo ${bold}Linking Density${normal} ...
+
+link-benchmark-header: compile compile-benchmark-module
+	@echo ${bold}Linking Benchmark${normal} ...
 
 $(TARGET)$(DYN_EXT): link-header $(ALL_OBJ)
 	@echo *.o $(ARROW) ${bold}$(TARGET)$(DYN_EXT)${normal}
@@ -109,13 +131,23 @@ $(TARGET)$(STAT_EXT): link-header $(ALL_OBJ)
 	@echo Done.
 	@echo
 
+$(BENCHMARK)$(EXTENSION): link-benchmark-header $(ALL_OBJ) $(BENCHMARK_OBJ)
+	@echo *.o $(ARROW) ${bold}$(BENCHMARK)$(EXTENSION)${normal}
+	@$(CC) -o $(BENCHMARK)$(EXTENSION) $(ALL_OBJ) $(BENCHMARK_OBJ)
+	@echo Done.
+	@echo
+
 clean-submodules:
 	@cd $(SPOOKYHASH_DIRECTORY) && $(MAKE) clean
 
-clean: clean-submodules
+clean-benchmark-module:
+	@cd $(BENCHMARK_DIRECTORY) && $(MAKE) clean
+
+clean: clean-benchmark-module clean-submodules
 	@echo ${bold}Cleaning Density objects${normal} ...
 	@rm -f $(DENSITY_OBJ)
 	@rm -f $(TARGET)$(DYN_EXT)
 	@rm -f $(TARGET)$(STAT_EXT)
+	@touch .fpic .nofpic
 	@echo Done.
 	@echo
