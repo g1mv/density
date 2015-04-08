@@ -67,7 +67,7 @@ void density_benchmark_version() {
 void density_benchmark_client_usage() {
     printf("\n");
     DENSITY_BENCHMARK_BOLD(printf("Usage :\n"));
-    printf("  benchmark [OPTIONS]... [FILE]\n\n");
+    printf("  benchmark [OPTIONS ?]... [FILE]\n\n");
     DENSITY_BENCHMARK_BOLD(printf("Available options :\n"));
     printf("  -[LEVEL]                          Test file using only the specified compression LEVEL\n");
     printf("                                    If unspecified, all algorithms are tested (default).\n");
@@ -77,6 +77,7 @@ void density_benchmark_client_usage() {
     printf("                                    1 = Chameleon algorithm\n");
     printf("                                    2 = Cheetah algorithm\n");
     printf("                                    3 = Lion algorithm\n");
+    printf("  -c                                Compress only\n\n");
     printf("  -x                                Activate integrity hashsum checking\n\n");
     exit(0);
 }
@@ -108,9 +109,12 @@ int main(int argc, char *argv[]) {
     DENSITY_COMPRESSION_MODE start_mode = DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM;
     DENSITY_COMPRESSION_MODE end_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
     DENSITY_BLOCK_TYPE block_type = DENSITY_BLOCK_TYPE_DEFAULT;
-    if (argc >= 2) {
-        if (argv[1][0] == '-')
-            switch (argv[1][1]) {
+    bool compression_only = false;
+
+    unsigned int start = 1;
+    for (unsigned int count = 1; count < argc - 1; count++) {
+        if (argv[count][0] == '-') {
+            switch (argv[count][1]) {
                 case '0':
                     start_mode = DENSITY_COMPRESSION_MODE_COPY;
                     end_mode = DENSITY_COMPRESSION_MODE_COPY;
@@ -127,22 +131,18 @@ int main(int argc, char *argv[]) {
                     start_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
                     end_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
                     break;
+                case 'c':
+                    compression_only = true;
+                    break;
                 case 'x':
                     block_type = DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK;
                     break;
                 default:
                     density_benchmark_client_usage();
             }
-    } else
-        density_benchmark_client_usage();
-    if (argc >= 3 && argv[2][0] == '-')
-        switch (argv[2][1]) {
-            case 'x':
-                block_type = DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK;
-                break;
-            default:
-                density_benchmark_client_usage();
-        }
+        } else
+            density_benchmark_client_usage();
+    }
     const char *file_path = argv[argc - 1];
 
     // Open file and get infos
@@ -166,19 +166,19 @@ int main(int argc, char *argv[]) {
         // Print algorithm info
         switch (compression_mode) {
             case DENSITY_COMPRESSION_MODE_COPY:
-                DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Copy")));
+            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Copy")));
                 DENSITY_BENCHMARK_UNDERLINE(4);
                 break;
             case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-                DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Chameleon algorithm")));
+            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Chameleon algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(19);
                 break;
             case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-                DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Cheetah algorithm")));
+            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Cheetah algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(17);
                 break;
             case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
-                DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Lion algorithm")));
+            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Lion algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(14);
                 break;
         }
@@ -200,27 +200,34 @@ int main(int argc, char *argv[]) {
             DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
         }
         const uint_fast64_t compressed_size = result.bytesWritten;
-        result = density_buffer_decompress(out, compressed_size, in, uncompressed_size, NULL, NULL);
-        if (result.state) {
-            DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
-        }
-        if(result.bytesWritten != uncompressed_size) {
-            DENSITY_BENCHMARK_ERROR(
-                    printf("Round-trip size differs from original size (");
-                    density_benchmark_format_decimal(result.bytesWritten);
-                    printf(" bytes against ");
-                    density_benchmark_format_decimal(uncompressed_size);
-                    printf(" bytes).");, true
-            );
+
+        if (!compression_only) {
+            result = density_buffer_decompress(out, compressed_size, in, uncompressed_size, NULL, NULL);
+            if (result.state) {
+                DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
+            }
+            if (result.bytesWritten != uncompressed_size) {
+                DENSITY_BENCHMARK_ERROR(printf("Round-trip size differs from original size (");
+                                                density_benchmark_format_decimal(result.bytesWritten);
+                                                printf(" bytes against ");
+                                                density_benchmark_format_decimal(uncompressed_size);
+                                                printf(" bytes).");, true);
+            }
         }
         printf("Starting main bench\n");
-        printf("Round-tripping ");
+        if (compression_only)
+            printf("Compressing ");
+        else
+            printf("Round-tripping ");
         density_benchmark_format_decimal(uncompressed_size);
         printf(" bytes to ");
         density_benchmark_format_decimal(compressed_size);
         printf(" bytes (compression ratio %.2lf%% or ", (100.0 * compressed_size) / uncompressed_size);
         DENSITY_BENCHMARK_BOLD(printf("%.3fx", (1.0 * uncompressed_size) / compressed_size));
-        printf(") and back\n");
+        if (compression_only)
+            printf(")\n");
+        else
+            printf(") and back\n");
         fflush(stdout);
 
         // Main benchmark
@@ -233,48 +240,66 @@ int main(int argc, char *argv[]) {
         double total_compress_time = 0.0;
         double total_decompress_time = 0.0;
         double total_time = 0.0;
+        struct timeval stop;
+        double decompress_speed;
+        double decompress_speed_low;
+        double decompress_speed_high;
 
         while (total_time <= 15.0) {
             ++iterations;
+
             getrusage(RUSAGE_SELF, &usage);
             struct timeval start = usage.ru_utime;
             result = density_buffer_compress(in, uncompressed_size, out, compressed_size, compression_mode, block_type, NULL, NULL);
             getrusage(RUSAGE_SELF, &usage);
             struct timeval lap = usage.ru_utime;
-            result = density_buffer_decompress(out, compressed_size, in, uncompressed_size, NULL, NULL);
-            getrusage(RUSAGE_SELF, &usage);
-            struct timeval stop = usage.ru_utime;
+
+            if (!compression_only) {
+                result = density_buffer_decompress(out, compressed_size, in, uncompressed_size, NULL, NULL);
+                getrusage(RUSAGE_SELF, &usage);
+                stop = usage.ru_utime;
+            }
 
             double compress_time_elapsed = ((lap.tv_sec * DENSITY_CHRONO_MICROSECONDS + lap.tv_usec) - (start.tv_sec * DENSITY_CHRONO_MICROSECONDS + start.tv_usec)) / DENSITY_CHRONO_MICROSECONDS;
-            double decompress_time_elapsed = ((stop.tv_sec * DENSITY_CHRONO_MICROSECONDS + stop.tv_usec) - (lap.tv_sec * DENSITY_CHRONO_MICROSECONDS + lap.tv_usec)) / DENSITY_CHRONO_MICROSECONDS;
             total_compress_time += compress_time_elapsed;
-            total_decompress_time += decompress_time_elapsed;
-            total_time += (compress_time_elapsed + decompress_time_elapsed);
 
             if (compress_time_elapsed < compress_time_low)
                 compress_time_low = compress_time_elapsed;
             if (compress_time_elapsed > compress_time_high)
                 compress_time_high = compress_time_elapsed;
 
-            if (decompress_time_elapsed < decompress_time_low)
-                decompress_time_low = decompress_time_elapsed;
-            if (decompress_time_elapsed > decompress_time_high)
-                decompress_time_high = decompress_time_elapsed;
-
             double compress_speed = ((1.0 * uncompressed_size * iterations) / (total_compress_time * 1000.0 * 1000.0));
             double compress_speed_low = ((1.0 * uncompressed_size) / (compress_time_high * 1000.0 * 1000.0));
             double compress_speed_high = ((1.0 * uncompressed_size) / (compress_time_low * 1000.0 * 1000.0));
 
-            double decompress_speed = ((1.0 * uncompressed_size * iterations) / (total_decompress_time * 1000.0 * 1000.0));
-            double decompress_speed_low = ((1.0 * uncompressed_size) / (decompress_time_high * 1000.0 * 1000.0));
-            double decompress_speed_high = ((1.0 * uncompressed_size) / (decompress_time_low * 1000.0 * 1000.0));
+            total_time += compress_time_elapsed;
+
+            if (!compression_only) {
+                double decompress_time_elapsed = ((stop.tv_sec * DENSITY_CHRONO_MICROSECONDS + stop.tv_usec) - (lap.tv_sec * DENSITY_CHRONO_MICROSECONDS + lap.tv_usec)) / DENSITY_CHRONO_MICROSECONDS;
+                total_decompress_time += decompress_time_elapsed;
+
+                if (decompress_time_elapsed < decompress_time_low)
+                    decompress_time_low = decompress_time_elapsed;
+                if (decompress_time_elapsed > decompress_time_high)
+                    decompress_time_high = decompress_time_elapsed;
+
+                decompress_speed = ((1.0 * uncompressed_size * iterations) / (total_decompress_time * 1000.0 * 1000.0));
+                decompress_speed_low = ((1.0 * uncompressed_size) / (decompress_time_high * 1000.0 * 1000.0));
+                decompress_speed_high = ((1.0 * uncompressed_size) / (decompress_time_low * 1000.0 * 1000.0));
+
+                total_time += decompress_time_elapsed;
+            }
 
             DENSITY_BENCHMARK_BLUE(printf("\rCompress speed ");
                                            DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", compress_speed)));
-            printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.3lfs) <=> ", compress_speed_low, compress_speed_high, compress_time_low);
-            DENSITY_BENCHMARK_BLUE(printf("Decompress speed ");
-                                           DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", decompress_speed)));
-            printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.3lfs) ", decompress_speed_low, decompress_speed_high, decompress_time_low);
+            printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.3lfs) ", compress_speed_low, compress_speed_high, compress_time_low);
+
+            if (!compression_only) {
+                printf("<=> ");
+                DENSITY_BENCHMARK_BLUE(printf("Decompress speed ");
+                                               DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", decompress_speed)));
+                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.3lfs) ", decompress_speed_low, decompress_speed_high, decompress_time_low);
+            }
             fflush(stdout);
         }
         printf("\nRun time %.3lfs (%i iterations)\n\n", total_time, iterations);
