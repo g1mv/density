@@ -170,6 +170,8 @@ static const uint64_t DENSITY_MASK_32_64 = 0xFFFFFFFF00000000llu;
 static const __uint128_t DENSITY_MASK_64_96 = (((__uint128_t) 0xFFFFFFFF) << 64);
 static const __uint128_t DENSITY_MASK_96_128 = (((__uint128_t) 0xFFFFFFFF) << 96);
 
+typedef __uint128_t uint128_t;
+
 
 /**********************************************************************************************************************
  *                                                                                                                    *

@@ -105,7 +105,7 @@ const char *density_benchmark_convert_buffer_state_to_text(DENSITY_BUFFER_STATE 
 
 int main(int argc, char *argv[]) {
     density_benchmark_version();
-    DENSITY_COMPRESSION_MODE start_mode = DENSITY_COMPRESSION_MODE_COPY;
+    DENSITY_COMPRESSION_MODE start_mode = DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM;
     DENSITY_COMPRESSION_MODE end_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
     DENSITY_BLOCK_TYPE block_type = DENSITY_BLOCK_TYPE_DEFAULT;
     if (argc >= 2) {

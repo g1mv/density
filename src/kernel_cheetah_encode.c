@@ -152,8 +152,8 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(density_memory_location 
 
 DENSITY_FORCE_INLINE void density_cheetah_encode_process_chunk(density_memory_location *restrict in, density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    const __uint128_t chunk = *(__uint128_t * )(in->pointer);
-    const __uint128_t hash_group = (uint32_t) (((uint32_t) chunk * DENSITY_CHEETAH_HASH_MULTIPLIER)) | (uint64_t) (((uint64_t) (chunk & DENSITY_MASK_32_64) * DENSITY_CHEETAH_HASH_MULTIPLIER)) | (((chunk & DENSITY_MASK_64_96) * DENSITY_CHEETAH_HASH_MULTIPLIER) & DENSITY_MASK_64_96) | (((chunk & DENSITY_MASK_96_128) * DENSITY_CHEETAH_HASH_MULTIPLIER));
+    const uint128_t chunk = *(uint128_t * )(in->pointer);
+    const uint128_t hash_group = (uint32_t) (((uint32_t) chunk * DENSITY_CHEETAH_HASH_MULTIPLIER)) | (uint64_t) (((uint64_t) (chunk & DENSITY_MASK_32_64) * DENSITY_CHEETAH_HASH_MULTIPLIER)) | (((chunk & DENSITY_MASK_64_96) * DENSITY_CHEETAH_HASH_MULTIPLIER) & DENSITY_MASK_64_96) | (((chunk & DENSITY_MASK_96_128) * DENSITY_CHEETAH_HASH_MULTIPLIER));
 
     density_cheetah_encode_kernel(out, *((uint16_t *) &hash_group + 1), (uint32_t) chunk, state);
     density_cheetah_encode_kernel(out, *((uint16_t *) &hash_group + 3), *((uint32_t *) &chunk + 1), state);
@@ -173,7 +173,7 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_process_chunk(density_memory_lo
     density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(element_d)), element_d, state);
 #endif
 
-    in->pointer += sizeof(__uint128_t);
+    in->pointer += sizeof(uint128_t);
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_encode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
