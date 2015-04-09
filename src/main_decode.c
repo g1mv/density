@@ -34,7 +34,7 @@
 
 #include "main_decode.h"
 
-DENSITY_FORCE_INLINE DENSITY_DECODE_STATE exitProcess(density_decode_state *state, DENSITY_DECODE_PROCESS process, DENSITY_DECODE_STATE decodeState) {
+DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_exit_process(density_decode_state *state, DENSITY_DECODE_PROCESS process, DENSITY_DECODE_STATE decodeState) {
     state->process = process;
     return decodeState;
 }
@@ -71,7 +71,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_tel
 
 #if DENSITY_WRITE_MAIN_HEADER == DENSITY_YES
     if ((decodeState = density_decode_read_header(in, state)))
-        return exitProcess(state, DENSITY_DECODE_PROCESS_READ_HEADER, decodeState);
+        return density_decode_exit_process(state, DENSITY_DECODE_PROCESS_READ_HEADER, decodeState);
 #endif
 
     switch (state->header.compressionMode) {
@@ -95,7 +95,7 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_tel
             return DENSITY_DECODE_STATE_ERROR;
     }
 
-    return exitProcess(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_READY);
+    return density_decode_exit_process(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_READY);
 }
 
 DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state) {
@@ -121,11 +121,11 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_continue(density_memory
         case DENSITY_BLOCK_DECODE_STATE_READY:
             break;
         case DENSITY_BLOCK_DECODE_STATE_STALL_ON_INPUT:
-            return exitProcess(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_STALL_ON_INPUT);
+            return density_decode_exit_process(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_STALL_ON_INPUT);
         case DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT:
-            return exitProcess(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_STALL_ON_OUTPUT);
+            return density_decode_exit_process(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_STALL_ON_OUTPUT);
         case DENSITY_BLOCK_DECODE_STATE_INTEGRITY_CHECK_FAIL:
-            return exitProcess(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_INTEGRITY_CHECK_FAIL);
+            return density_decode_exit_process(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_INTEGRITY_CHECK_FAIL);
         case DENSITY_BLOCK_DECODE_STATE_ERROR:
             return DENSITY_DECODE_STATE_ERROR;
     }
@@ -159,9 +159,9 @@ DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_t
         case DENSITY_BLOCK_DECODE_STATE_READY:
             break;
         case DENSITY_BLOCK_DECODE_STATE_STALL_ON_OUTPUT:
-            return exitProcess(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_STALL_ON_OUTPUT);
+            return density_decode_exit_process(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_STALL_ON_OUTPUT);
         case DENSITY_BLOCK_DECODE_STATE_INTEGRITY_CHECK_FAIL:
-            return exitProcess(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_INTEGRITY_CHECK_FAIL);
+            return density_decode_exit_process(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_INTEGRITY_CHECK_FAIL);
         default:
             return DENSITY_DECODE_STATE_ERROR;
     }

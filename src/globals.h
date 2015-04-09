@@ -38,17 +38,17 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <stddef.h>
 
-#if defined(__INTEL_COMPILER)
-#define DENSITY_FORCE_INLINE __forceinline
+
+#if defined(__clang__)
+#define DENSITY_FORCE_INLINE static inline __attribute__((always_inline))
+#elif defined(__GNUC__)
+#define DENSITY_FORCE_INLINE static inline __attribute__((always_inline))
 #elif defined(_MSC_VER)
 #define DENSITY_FORCE_INLINE __forceinline
-#elif defined(__GNUC__)
-#define DENSITY_FORCE_INLINE inline __attribute__((always_inline))
-#elif defined(__clang__)
-#define DENSITY_FORCE_INLINE inline __attribute__((always_inline))
+#elif defined(__INTEL_COMPILER)
+#define DENSITY_FORCE_INLINE __forceinline
 #else
 #warning Impossible to force functions inlining. Expect performance issues.
 #endif

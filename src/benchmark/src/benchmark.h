@@ -68,6 +68,17 @@ struct rusage {
 #define DENSITY_BENCHMARK_ENDIAN_STRING           "Big"
 #endif
 
+#ifdef __clang__
+#define DENSITY_BENCHMARK_COMPILER                "Clang %d.%d.%d"
+#define DENSITY_BENCHMARK_COMPILER_VERSION        __clang_major__, __clang_minor__, __clang_patchlevel__
+#elif defined(__GNUC__)
+#define DENSITY_BENCHMARK_COMPILER                "GCC %d.%d.%d"
+#define DENSITY_BENCHMARK_COMPILER_VERSION        __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__
+#else
+#define DENSITY_BENCHMARK_COMPILER                "Unknown"
+#define DENSITY_BENCHMARK_COMPILER_VERSION
+#endif
+
 #if defined(_WIN64) || defined(_WIN32)
 #define DENSITY_BENCHMARK_PLATFORM_STRING         "Microsoft Windows"
 #elif defined(__APPLE__)
@@ -94,6 +105,31 @@ struct rusage {
 #endif
 
 #include "../../density_api.h"
+#include "../../buffer.c"
+#include "../../stream.c"
+#include "../../memory_teleport.c"
+#include "../../memory_location.c"
+#include "../../kernel_chameleon_encode.c"
+#include "../../kernel_cheetah_encode.c"
+#include "../../kernel_lion_encode.c"
+#include "../../kernel_chameleon_decode.c"
+#include "../../kernel_cheetah_decode.c"
+#include "../../kernel_lion_decode.c"
+#include "../../kernel_chameleon_dictionary.c"
+#include "../../kernel_cheetah_dictionary.c"
+#include "../../kernel_lion_dictionary.c"
+#include "../../kernel_lion_form_model.c"
+#include "../../block_encode.c"
+#include "../../block_decode.c"
+#include "../../main_encode.c"
+#include "../../main_decode.c"
+#include "../../main_header.c"
+#include "../../main_footer.c"
+#include "../../block_header.c"
+#include "../../block_footer.c"
+#include "../../block_mode_marker.c"
+#include "../../spookyhash/src/context.c"
+#include "../../spookyhash/src/spookyhash.c"
 
 #define DENSITY_CHRONO_MICROSECONDS         1000000.0
 #define DENSITY_ESCAPE_CHARACTER            ((char)27)

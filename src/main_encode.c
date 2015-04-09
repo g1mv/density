@@ -34,7 +34,7 @@
 
 #include "main_encode.h"
 
-DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE exitProcess(density_encode_state *state, DENSITY_ENCODE_PROCESS process, DENSITY_ENCODE_STATE encodeState) {
+DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_exit_process(density_encode_state *state, DENSITY_ENCODE_PROCESS process, DENSITY_ENCODE_STATE encodeState) {
     state->process = process;
     return encodeState;
 }
@@ -78,7 +78,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_memory_loc
 
 #if DENSITY_WRITE_MAIN_HEADER == DENSITY_YES
     if ((encodeState = density_encode_write_header(out, state, mode, blockType)))
-        return exitProcess(state, DENSITY_ENCODE_PROCESS_WRITE_HEADER, encodeState);
+        return density_encode_exit_process(state, DENSITY_ENCODE_PROCESS_WRITE_HEADER, encodeState);
 #endif
 
     switch (mode) {
@@ -99,7 +99,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_init(density_memory_loc
             break;
     }
 
-    return exitProcess(state, DENSITY_ENCODE_PROCESS_WRITE_BLOCKS, DENSITY_ENCODE_STATE_READY);
+    return density_encode_exit_process(state, DENSITY_ENCODE_PROCESS_WRITE_BLOCKS, DENSITY_ENCODE_STATE_READY);
 }
 
 DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_encode_state *restrict state) {
@@ -126,9 +126,9 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_continue(density_memory
         case DENSITY_BLOCK_ENCODE_STATE_READY:
             break;
         case DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT:
-            return exitProcess(state, DENSITY_ENCODE_PROCESS_WRITE_BLOCKS, DENSITY_ENCODE_STATE_STALL_ON_INPUT);
+            return density_encode_exit_process(state, DENSITY_ENCODE_PROCESS_WRITE_BLOCKS, DENSITY_ENCODE_STATE_STALL_ON_INPUT);
         case DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT:
-            return exitProcess(state, DENSITY_ENCODE_PROCESS_WRITE_BLOCKS, DENSITY_ENCODE_STATE_STALL_ON_OUTPUT);
+            return density_encode_exit_process(state, DENSITY_ENCODE_PROCESS_WRITE_BLOCKS, DENSITY_ENCODE_STATE_STALL_ON_OUTPUT);
         case DENSITY_BLOCK_ENCODE_STATE_ERROR:
             return DENSITY_ENCODE_STATE_ERROR;
     }
@@ -161,7 +161,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_finish(density_memory_t
         case DENSITY_BLOCK_ENCODE_STATE_READY:
             break;
         case DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT:
-            return exitProcess(state, DENSITY_ENCODE_PROCESS_WRITE_BLOCKS, DENSITY_ENCODE_STATE_STALL_ON_OUTPUT);
+            return density_encode_exit_process(state, DENSITY_ENCODE_PROCESS_WRITE_BLOCKS, DENSITY_ENCODE_STATE_STALL_ON_OUTPUT);
         default:
             return DENSITY_ENCODE_STATE_ERROR;
     }
@@ -169,7 +169,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_finish(density_memory_t
     write_footer:
 #if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES
     if ((encodeState = density_encode_write_footer(out, state)))
-        return exitProcess(state, DENSITY_ENCODE_PROCESS_WRITE_FOOTER, encodeState);
+        return density_encode_exit_process(state, DENSITY_ENCODE_PROCESS_WRITE_FOOTER, encodeState);
 #endif
 
     if (state->compressionMode != DENSITY_COMPRESSION_MODE_COPY)

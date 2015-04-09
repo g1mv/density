@@ -44,7 +44,7 @@
 
 #include "kernel_lion_form_model.h"
 
-const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUMBER_OF_FORMS] = DENSITY_LION_FORM_MODEL_ENTROPY_CODES;
+static const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUMBER_OF_FORMS] = DENSITY_LION_FORM_MODEL_ENTROPY_CODES;
 
 DENSITY_FORCE_INLINE void density_lion_form_model_init(density_lion_form_data *data) {
     density_lion_form_node* rank_0 = &data->formsPool[0];

@@ -37,7 +37,6 @@
 
 #include <stdio.h>
 #include <time.h>
-#include <utime.h>
 
 #include "globals.h"
 #include "block.h"

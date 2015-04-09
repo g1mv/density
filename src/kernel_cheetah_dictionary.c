@@ -45,7 +45,7 @@
 
 #include "kernel_cheetah_dictionary.h"
 
-const density_cheetah_dictionary density_cheetah_empty_dictionary = {.entries = {{0}}, .prediction_entries = {{0}}};
+static const density_cheetah_dictionary density_cheetah_empty_dictionary = {.entries = {{0}}, .prediction_entries = {{0}}};
 
 DENSITY_FORCE_INLINE void density_cheetah_dictionary_reset(density_cheetah_dictionary *dictionary) {
     memcpy(dictionary, &density_cheetah_empty_dictionary, sizeof(density_cheetah_dictionary));

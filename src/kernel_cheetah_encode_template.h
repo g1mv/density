@@ -71,19 +71,19 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHEETAH_ENCODE_FUNCTION
     // Prepare new block
     prepare_new_block:
     if ((returnState = density_cheetah_encode_prepare_new_block(out, state)))
-        return exitProcess(state, DENSITY_CHEETAH_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
+        return density_cheetah_encode_exit_process(state, DENSITY_CHEETAH_ENCODE_PROCESS_PREPARE_NEW_BLOCK, returnState);
 
     // Check signature state
     check_signature_state:
     if ((returnState = density_cheetah_encode_check_state(out, state)))
-        return exitProcess(state, DENSITY_CHEETAH_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
+        return density_cheetah_encode_exit_process(state, DENSITY_CHEETAH_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
 
     // Try to read a complete chunk unit
     read_chunk:
     pointerOutBefore = out->pointer;
     if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_CHEETAH_ENCODE_PROCESS_UNIT_SIZE)))
 #ifndef DENSITY_CHEETAH_ENCODE_FINISH
-        return exitProcess(state, DENSITY_CHEETAH_ENCODE_PROCESS_READ_CHUNK, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
+        return density_cheetah_encode_exit_process(state, DENSITY_CHEETAH_ENCODE_PROCESS_READ_CHUNK, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
 #else
         goto step_by_step;
 #endif
@@ -115,7 +115,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHEETAH_ENCODE_FUNCTION
 
     // Marker for decode loop exit
     if ((returnState = density_cheetah_encode_check_state(out, state)))
-        return exitProcess(state, DENSITY_CHEETAH_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
+        return density_cheetah_encode_exit_process(state, DENSITY_CHEETAH_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
     density_cheetah_encode_write_to_signature(state, DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK);
 
     // Copy the remaining bytes

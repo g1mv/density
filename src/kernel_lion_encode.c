@@ -44,7 +44,7 @@
 
 #include "kernel_lion_encode.h"
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE exitProcess(density_lion_encode_state *state, DENSITY_LION_ENCODE_PROCESS process, DENSITY_KERNEL_ENCODE_STATE kernelEncodeState) {
+DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_exit_process(density_lion_encode_state *state, DENSITY_LION_ENCODE_PROCESS process, DENSITY_KERNEL_ENCODE_STATE kernelEncodeState) {
     state->process = process;
     return kernelEncodeState;
 }
@@ -262,7 +262,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(densit
     state->signatureInterceptMode = false;
     state->endMarker = false;
 
-    return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_ENCODE_STATE_READY);
+    return density_lion_encode_exit_process(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_ENCODE_STATE_READY);
 }
 
 #include "kernel_lion_encode_template.h"

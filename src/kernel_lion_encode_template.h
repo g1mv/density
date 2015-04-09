@@ -59,10 +59,10 @@
             memcpy(state->transientContent.content, content_start, state->transientContent.size);\
             out->pointer = (density_byte *) state->signature;\
             out->available_bytes -= (out->pointer - pointerOutBefore);\
-            return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);\
+            return density_lion_encode_exit_process(state, DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);\
         } else {\
             out->available_bytes -= (out->pointer - pointerOutBefore);\
-            return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);\
+            return density_lion_encode_exit_process(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);\
         }\
     }
 #endif
@@ -88,9 +88,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
     check_block_state:
     if (density_unlikely(!state->shift)) {
         if(density_unlikely(out->available_bytes < DENSITY_LION_ENCODE_MINIMUM_LOOKAHEAD))
-            return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);  // Direct exit possible, if coming from copy mode
+            return density_lion_encode_exit_process(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);  // Direct exit possible, if coming from copy mode
         if (density_unlikely(returnState = density_lion_encode_check_block_state(state)))
-            return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, returnState);
+            return density_lion_encode_exit_process(state, DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE, returnState);
     }
 
     // Check output size
@@ -116,7 +116,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_LION_ENCODE_FUNCTION_NA
     pointerOutBefore = out->pointer;
     if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_LION_PROCESS_UNIT_SIZE)))
 #ifndef DENSITY_LION_ENCODE_FINISH
-        return exitProcess(state, DENSITY_LION_ENCODE_PROCESS_UNIT, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
+        return density_lion_encode_exit_process(state, DENSITY_LION_ENCODE_PROCESS_UNIT, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
 #else
         goto step_by_step;
 #endif

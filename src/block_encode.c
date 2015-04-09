@@ -34,7 +34,7 @@
 
 #include "block_encode.h"
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE exitProcess(density_block_encode_state *state, DENSITY_BLOCK_ENCODE_PROCESS process, DENSITY_BLOCK_ENCODE_STATE blockEncodeState) {
+DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_exit_process(density_block_encode_state *state, DENSITY_BLOCK_ENCODE_PROCESS process, DENSITY_BLOCK_ENCODE_STATE blockEncodeState) {
     state->process = process;
     return blockEncodeState;
 }
@@ -149,7 +149,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(densit
             break;
     }
 
-    return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER, DENSITY_BLOCK_ENCODE_STATE_READY);
+    return density_block_encode_exit_process(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER, DENSITY_BLOCK_ENCODE_STATE_READY);
 }
 
 #include "block_encode_template.h"

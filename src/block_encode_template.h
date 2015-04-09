@@ -65,12 +65,12 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
 
     write_mode_marker:
     if ((blockEncodeState = density_block_encode_write_mode_marker(out, state)))
-        return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER, blockEncodeState);
+        return density_block_encode_exit_process(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_MODE_MARKER, blockEncodeState);
     goto write_data;
 
     write_block_header:
     if ((blockEncodeState = density_block_encode_write_block_header(in, out, state)))
-        return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER, blockEncodeState);
+        return density_block_encode_exit_process(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER, blockEncodeState);
 
     write_data:
     availableInBefore = density_memory_teleport_available_bytes(in);
@@ -92,7 +92,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
                     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
                         density_block_encode_update_integrity_hash(in, state, true);
                     density_memory_teleport_copy_from_direct_buffer_to_staging_buffer(in);
-                    return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT);
+                    return density_block_encode_exit_process(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT);
 #else
                     goto write_block_footer;
 #endif
@@ -103,7 +103,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
                 else {
                     density_memory_teleport_copy(in, out, outRemaining);
                     density_block_encode_update_totals(in, out, state, availableInBefore, availableOutBefore);
-                    return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT);
+                    return density_block_encode_exit_process(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT);
                 }
             }
 
@@ -125,12 +125,12 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
 #ifndef DENSITY_BLOCK_ENCODE_FINISH
                     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
                         density_block_encode_update_integrity_hash(in, state, true);
-                    return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT);
+                    return density_block_encode_exit_process(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_INPUT);
 #else
                     return DENSITY_BLOCK_ENCODE_STATE_ERROR;
 #endif
                 case DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT:
-                    return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT);
+                    return density_block_encode_exit_process(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_DATA, DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT);
 #ifdef DENSITY_BLOCK_ENCODE_FINISH
                 case DENSITY_KERNEL_ENCODE_STATE_READY:
 #endif
@@ -145,7 +145,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_finish(dens
 
     write_block_footer:
     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) if ((blockEncodeState = density_block_encode_write_block_footer(in, out, state)))
-        return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER, blockEncodeState);
+        return density_block_encode_exit_process(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_FOOTER, blockEncodeState);
 #ifndef DENSITY_BLOCK_ENCODE_FINISH
     goto write_block_header;
 #else
