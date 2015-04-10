@@ -154,5 +154,6 @@ clean: clean-benchmark clean-spookyhash
 	@$(RM) $(DENSITY_OBJ)
 	@$(RM) $(DENSITY)$(DYN_EXT)
 	@$(RM) $(DENSITY)$(STAT_EXT)
+	@$(RM) $(BENCHMARK)$(EXTENSION)
 	@echo Done.
 	@echo

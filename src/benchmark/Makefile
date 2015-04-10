@@ -70,6 +70,6 @@ compile: compile-header $(BENCHMARK_OBJ)
 
 clean:
 	@echo ${bold}Cleaning Benchmark objects${normal} ...
-	@rm -f $(BENCHMARK_OBJ)
+	@$(RM) -f $(BENCHMARK_OBJ)
 	@echo Done.
 	@echo
