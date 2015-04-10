@@ -83,10 +83,10 @@ typedef struct {
 } density_decode_state;
 #pragma pack(pop)
 
-DENSITY_DECODE_STATE density_decode_init(density_memory_teleport *, density_decode_state *, void *(*mem_alloc)(size_t));
+EXPORT DENSITY_DECODE_STATE density_decode_init(density_memory_teleport *, density_decode_state *, void *(*mem_alloc)(size_t));
 
-DENSITY_DECODE_STATE density_decode_continue(density_memory_teleport *, density_memory_location *, density_decode_state *);
+EXPORT DENSITY_DECODE_STATE density_decode_continue(density_memory_teleport *, density_memory_location *, density_decode_state *);
 
-DENSITY_DECODE_STATE density_decode_finish(density_memory_teleport *, density_memory_location *, density_decode_state *, void (*mem_free)(void *));
+EXPORT DENSITY_DECODE_STATE density_decode_finish(density_memory_teleport *, density_memory_location *, density_decode_state *, void (*mem_free)(void *));
 
 #endif

@@ -34,14 +34,14 @@
 
 #include "main_footer.h"
 
-DENSITY_FORCE_INLINE uint_fast32_t density_main_footer_read(density_memory_location *restrict in, density_main_footer *restrict footer) {
+EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_main_footer_read(density_memory_location *restrict in, density_main_footer *restrict footer) {
     in->pointer += sizeof(density_main_footer);
     in->available_bytes -= sizeof(density_main_footer);
 
     return sizeof(density_main_footer);
 }
 
-DENSITY_FORCE_INLINE uint_fast32_t density_main_footer_write(density_memory_location *out) {
+EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_main_footer_write(density_memory_location *out) {
     out->pointer += sizeof(density_main_footer);
     out->available_bytes -= sizeof(density_main_footer);
 

@@ -123,7 +123,7 @@ DENSITY_FORCE_INLINE void density_block_encode_update_totals(density_memory_tele
     state->totalWritten += availableOutBefore - out->available_bytes;
 }
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, void *kernelState, DENSITY_KERNEL_ENCODE_STATE (*kernelInit)(void *), DENSITY_KERNEL_ENCODE_STATE (*kernelProcess)(density_memory_teleport *, density_memory_location *, void *), DENSITY_KERNEL_ENCODE_STATE (*kernelFinish)(density_memory_teleport *, density_memory_location *, void *), void *(*mem_alloc)(size_t)) {
+EXPORT DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, void *kernelState, DENSITY_KERNEL_ENCODE_STATE (*kernelInit)(void *), DENSITY_KERNEL_ENCODE_STATE (*kernelProcess)(density_memory_teleport *, density_memory_location *, void *), DENSITY_KERNEL_ENCODE_STATE (*kernelFinish)(density_memory_teleport *, density_memory_location *, void *), void *(*mem_alloc)(size_t)) {
     state->blockType = blockType;
     state->targetMode = mode;
     state->currentMode = mode;

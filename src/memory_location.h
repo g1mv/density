@@ -46,12 +46,12 @@ typedef struct {
     uint_fast64_t initial_available_bytes;
 } density_memory_location;
 
-density_memory_location* density_memory_location_allocate(void *(*)(size_t));
+EXPORT density_memory_location* density_memory_location_allocate(void *(*)(size_t));
 
-void density_memory_location_free(density_memory_location*, void (*)(void *));
+EXPORT void density_memory_location_free(density_memory_location*, void (*)(void *));
 
-void density_memory_location_encapsulate(density_memory_location *, density_byte *, const uint_fast64_t);
+EXPORT void density_memory_location_encapsulate(density_memory_location *, density_byte *, const uint_fast64_t);
 
-uint_fast64_t density_memory_location_used(density_memory_location *);
+EXPORT uint_fast64_t density_memory_location_used(density_memory_location *);
 
 #endif

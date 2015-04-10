@@ -114,7 +114,7 @@ DENSITY_FORCE_INLINE void density_block_decode_update_totals(density_memory_tele
     state->totalWritten += outAvailableBefore - out->available_bytes;
 }
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, const density_main_header_parameters parameters, const uint_fast8_t endDataOverhead, void *kernelState, DENSITY_KERNEL_DECODE_STATE (*kernelInit)(void *, const density_main_header_parameters, const uint_fast8_t), DENSITY_KERNEL_DECODE_STATE (*kernelProcess)(density_memory_teleport *, density_memory_location *, void *), DENSITY_KERNEL_DECODE_STATE (*kernelFinish)(density_memory_teleport *, density_memory_location *, void *), void *(*mem_alloc)(size_t)) {
+EXPORT DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, const density_main_header_parameters parameters, const uint_fast8_t endDataOverhead, void *kernelState, DENSITY_KERNEL_DECODE_STATE (*kernelInit)(void *, const density_main_header_parameters, const uint_fast8_t), DENSITY_KERNEL_DECODE_STATE (*kernelProcess)(density_memory_teleport *, density_memory_location *, void *), DENSITY_KERNEL_DECODE_STATE (*kernelFinish)(density_memory_teleport *, density_memory_location *, void *), void *(*mem_alloc)(size_t)) {
     state->targetMode = mode;
     state->currentMode = mode;
     state->blockType = blockType;

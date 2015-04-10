@@ -66,20 +66,20 @@ typedef struct {
     density_decode_state internal_decode_state;
 } density_stream_state;
 
-density_stream *density_stream_create(void *(*)(size_t), void (*)(void *));
-void density_stream_destroy(density_stream *);
+EXPORT density_stream *density_stream_create(void *(*)(size_t), void (*)(void *));
+EXPORT void density_stream_destroy(density_stream *);
 
-DENSITY_STREAM_STATE density_stream_prepare(density_stream *, const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t);
-DENSITY_STREAM_STATE density_stream_update_input(density_stream *, const uint8_t*, const uint_fast64_t);
-DENSITY_STREAM_STATE density_stream_update_output(density_stream *, uint8_t *, const uint_fast64_t);
-uint_fast64_t density_stream_output_available_for_use(density_stream* );
+EXPORT DENSITY_STREAM_STATE density_stream_prepare(density_stream *, const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t);
+EXPORT DENSITY_STREAM_STATE density_stream_update_input(density_stream *, const uint8_t*, const uint_fast64_t);
+EXPORT DENSITY_STREAM_STATE density_stream_update_output(density_stream *, uint8_t *, const uint_fast64_t);
+EXPORT uint_fast64_t density_stream_output_available_for_use(density_stream* );
 
-DENSITY_STREAM_STATE density_stream_compress_init(density_stream *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE);
-DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *);
-DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *);
+EXPORT DENSITY_STREAM_STATE density_stream_compress_init(density_stream *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE);
+EXPORT DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *);
+EXPORT DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *);
 
-DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *, density_stream_header_information *);
-DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *);
-DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *);
+EXPORT DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *, density_stream_header_information *);
+EXPORT DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *);
+EXPORT DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *);
 
 #endif

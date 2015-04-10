@@ -44,7 +44,7 @@
 
 #include "kernel_lion_decode.h"
 
-static const uint8_t density_lion_decode_bitmasks[DENSITY_LION_DECODE_NUMBER_OF_BITMASK_VALUES] = DENSITY_LION_DECODE_BITMASK_VALUES;
+const uint8_t density_lion_decode_bitmasks[DENSITY_LION_DECODE_NUMBER_OF_BITMASK_VALUES] = DENSITY_LION_DECODE_BITMASK_VALUES;
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_exit_process(density_lion_decode_state *state, DENSITY_LION_DECODE_PROCESS process, DENSITY_KERNEL_DECODE_STATE kernelDecodeState) {
     state->process = process;
@@ -341,7 +341,7 @@ DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode
     return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_PROCEED;
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *state, const density_main_header_parameters parameters, const uint_fast8_t endDataOverhead) {
+EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_init(density_lion_decode_state *state, const density_main_header_parameters parameters, const uint_fast8_t endDataOverhead) {
     state->chunksCount = 0;
     state->efficiencyChecked = false;
     state->shift = 0;

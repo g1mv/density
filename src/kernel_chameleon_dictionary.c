@@ -44,8 +44,8 @@
 
 #include "kernel_chameleon_dictionary.h"
 
-static const density_chameleon_dictionary density_chameleon_empty_dictionary = {.entries = {{0}}};
+const density_chameleon_dictionary density_chameleon_empty_dictionary = {.entries = {{0}}};
 
-DENSITY_FORCE_INLINE void density_chameleon_dictionary_reset(density_chameleon_dictionary *dictionary) {
+EXPORT DENSITY_FORCE_INLINE void density_chameleon_dictionary_reset(density_chameleon_dictionary *dictionary) {
     memcpy(dictionary, &density_chameleon_empty_dictionary, sizeof(density_chameleon_dictionary));
 }

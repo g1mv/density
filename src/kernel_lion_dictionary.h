@@ -74,6 +74,6 @@ typedef struct {
 } density_lion_dictionary;
 #pragma pack(pop)
 
-void density_lion_dictionary_reset(density_lion_dictionary *);
+EXPORT void density_lion_dictionary_reset(density_lion_dictionary *);
 
 #endif

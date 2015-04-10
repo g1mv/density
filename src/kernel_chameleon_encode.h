@@ -81,10 +81,10 @@ typedef struct {
 } density_chameleon_encode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *);
+EXPORT DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *);
 
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_continue(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
+EXPORT DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_continue(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
 
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
+EXPORT DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
 
 #endif

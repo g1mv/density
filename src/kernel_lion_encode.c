@@ -243,7 +243,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_step_unit(density_memory_l
     in->available_bytes -= sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(density_lion_encode_state *state) {
+EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_init(density_lion_encode_state *state) {
     state->chunksCount = 0;
     state->efficiencyChecked = false;
     state->signature = NULL;

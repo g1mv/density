@@ -180,7 +180,7 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_process_unit(density_memory_loc
     DENSITY_UNROLL_4(density_cheetah_encode_process_chunk(in, out, state));
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_init(density_cheetah_encode_state *state) {
+EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_init(density_cheetah_encode_state *state) {
     state->signaturesCount = 0;
     state->efficiencyChecked = 0;
     density_cheetah_dictionary_reset(&state->dictionary);

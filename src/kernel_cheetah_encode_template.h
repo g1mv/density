@@ -51,7 +51,7 @@
 #define DENSITY_CHEETAH_ENCODE_FUNCTION_NAME(name) name ## finish
 #endif
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHEETAH_ENCODE_FUNCTION_NAME(density_cheetah_encode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
+EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHEETAH_ENCODE_FUNCTION_NAME(density_cheetah_encode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
     DENSITY_KERNEL_ENCODE_STATE returnState;
     density_byte *pointerOutBefore;
     density_memory_location *readMemoryLocation;

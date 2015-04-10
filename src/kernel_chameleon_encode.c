@@ -163,7 +163,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_process_unit(density_memory_l
     DENSITY_UNROLL_8(density_chameleon_encode_process_chunk(in, out, state));
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *state) {
+EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *state) {
     state->signaturesCount = 0;
     state->efficiencyChecked = 0;
     density_chameleon_dictionary_reset(&state->dictionary);

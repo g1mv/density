@@ -38,9 +38,9 @@
 #include "stream.h"
 #include "density_api_data_structures.h"
 
-density_buffer_processing_result density_buffer_compress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*)(size_t), void (*)(void *));
+EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*)(size_t), void (*)(void *));
 
-density_buffer_processing_result density_buffer_decompress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
+EXPORT density_buffer_processing_result density_buffer_decompress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
 
 
 #endif

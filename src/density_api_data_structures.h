@@ -38,6 +38,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#if defined(_WIN64) || defined(_WIN32)
+#define EXPORT __declspec(dllexport)
+#else
+#define EXPORT
+#endif
+
 /***********************************************************************************************************************
  *                                                                                                                     *
  * API data structures                                                                                                 *

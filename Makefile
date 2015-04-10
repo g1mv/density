@@ -1,7 +1,7 @@
 #
 # Centaurean Density
 #
-# Copyright (c) 2013, Guillaume Voirin
+# Copyright (c) 2015, Guillaume Voirin
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,14 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# 19/10/13 00:27
+# 10/04/15 16:08
 #
 
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
-TARGET = density
+DENSITY = density
 BENCHMARK = benchmark
-CFLAGS = -Ofast -fomit-frame-pointer -w -flto -std=c99
+CFLAGS = -Ofast -fomit-frame-pointer -fPIC -std=c99
 
 SRC_DIRECTORY = ./src/
 SPOOKYHASH_DIRECTORY = ./src/spookyhash/
@@ -41,113 +41,119 @@ SPOOKYHASH_SRC_DIRECTORY = $(SPOOKYHASH_DIRECTORY)src/
 BENCHMARK_DIRECTORY = ./src/benchmark/
 BENCHMARK_SRC_DIRECTORY = $(BENCHMARK_DIRECTORY)src/
 
+# Search for Clang
+CLANG_COMPILER := $(@shell clang -v)
+FLTO = -flto
+ifeq ($(CLANG_COMPILER),"")
+	COMPILER = $(CC)
+else
+	COMPILER = clang
+	ifeq ($(OS),Windows_NT)
+		FLTO = 
+	endif
+endif
+
+# OS specifics
 ifeq ($(OS),Windows_NT)
     bold =
     normal =
-    DYN_EXT = .dll
     STAT_EXT = .lib
+    DYN_EXT = .dll
     ARROW = ^-^>
     EXTENSION = .exe
 else
     bold = `tput bold`
     normal = `tput sgr0`
-    UNAME_S := $(shell uname -s)
+    UNAME_S := $(@shell uname -s)
+    STAT_EXT = .a
     ifeq ($(UNAME_S),Linux)
         DYN_EXT = .so
     endif
     ifeq ($(UNAME_S),Darwin)
         DYN_EXT = .dylib
     endif
-    STAT_EXT = .a
     ARROW = \-\>
     EXTENSION =
+    FLTO = -flto
 endif
 
 DENSITY_SRC = $(wildcard $(SRC_DIRECTORY)*.c)
 DENSITY_OBJ = $(DENSITY_SRC:.c=.o)
-OTHER_SRC = $(wildcard $(SPOOKYHASH_SRC_DIRECTORY)*.c)
-OTHER_OBJ = $(OTHER_SRC:.c=.o)
+SPOOKYHASH_SRC = $(wildcard $(SPOOKYHASH_SRC_DIRECTORY)*.c)
+SPOOKYHASH_OBJ = $(SPOOKYHASH_SRC:.c=.o)
 BENCHMARK_SRC = $(wildcard $(BENCHMARK_SRC_DIRECTORY)*.c)
 BENCHMARK_OBJ = $(BENCHMARK_SRC:.c=.o)
-ALL_OBJ = $(DENSITY_OBJ) $(OTHER_OBJ)
+ALL_OBJ = $(DENSITY_OBJ) $(SPOOKYHASH_OBJ)
 
 .PHONY: compile-header compile-library-header link-header link-benchmark-header
 
-all: .nofpic $(BENCHMARK)$(EXTENSION)
-library: .fpic $(TARGET)$(DYN_EXT) $(TARGET)$(STAT_EXT)
+ifeq ($(COMPILER),)
+all: error
+library: error
+else
+all: $(BENCHMARK)$(EXTENSION)
+library: $(DENSITY)$(DYN_EXT) $(DENSITY)$(STAT_EXT)
+endif
 
-.nofpic:
-	@$(MAKE) clean
-
-.fpic:
-	@$(MAKE) clean
+error:
+	@echo ${bold}Error${normal}
+	@echo Please install one of the supported compilers (Clang, GCC).
+	exit 1
 
 %.o: %.c
 	@echo $^ $(ARROW) $@
-	@$(CC) -c $(CFLAGS) $< -o $@
+	@$(COMPILER) -c $(CFLAGS) $(FLTO) $< -o $@
 
-compile-submodules:
-	@cd $(SPOOKYHASH_DIRECTORY) && $(MAKE) compile
-
-compile-benchmark-module:
+compile-benchmark:
 	@cd $(BENCHMARK_DIRECTORY) && $(MAKE) compile
 
-compile-header: compile-submodules
-	@echo ${bold}Compiling Density${normal} ...
-
-compile-submodules-library:
+compile-spookyhash:
 	@cd $(SPOOKYHASH_DIRECTORY) && $(MAKE) compile-library
 
-compile-library-header: compile-submodules-library
-	@$(eval CFLAGS = $(CFLAGS) -fPIC)
-	@echo ${bold}Compiling Density as a library${normal} ...
+compile-density-header: compile-spookyhash
+	@echo ${bold}Compiling Density${normal} using $(COMPILER) ...
 
-compile: compile-header $(DENSITY_OBJ)
-	@rm -f .fpic
+compile-density: compile-density-header $(DENSITY_OBJ)
 	@echo Done.
 	@echo
 
-compile-library: compile-library-header $(DENSITY_OBJ)
-	@rm -f .nofpic
-	@echo Done.
-	@echo
-
-link-header: compile-library
+link-density-header: compile-density
 	@echo ${bold}Linking Density${normal} ...
 
-link-benchmark-header: compile compile-benchmark-module
+link-benchmark-header: compile-density compile-benchmark
 	@echo ${bold}Linking Benchmark${normal} ...
 
-$(TARGET)$(DYN_EXT): link-header $(ALL_OBJ)
-	@echo *.o $(ARROW) ${bold}$(TARGET)$(DYN_EXT)${normal}
-	@$(CC) -shared -o $(TARGET)$(DYN_EXT) $(ALL_OBJ)
+$(DENSITY)$(STAT_EXT): link-density-header $(ALL_OBJ)
+	@echo *.o $(ARROW) ${bold}$(DENSITY)$(STAT_EXT)${normal}
+	@ar rcs $(DENSITY)$(STAT_EXT) $(ALL_OBJ)
 	@echo Done.
 	@echo
 
-$(TARGET)$(STAT_EXT): link-header $(ALL_OBJ)
-	@echo *.o $(ARROW) ${bold}$(TARGET)$(STAT_EXT)${normal}
-	@ar r $(TARGET)$(STAT_EXT) $(ALL_OBJ)
-	@ranlib $(TARGET)$(STAT_EXT)
+$(DENSITY)$(DYN_EXT): link-density-header $(ALL_OBJ)
+	@echo *.o $(ARROW) ${bold}$(DENSITY)$(DYN_EXT)${normal}
+	@$(COMPILER) -shared $(FLTO) -o $(DENSITY)$(DYN_EXT) $(ALL_OBJ)
+	@$(RM) $(DENSITY).exp
 	@echo Done.
 	@echo
 
-$(BENCHMARK)$(EXTENSION): link-benchmark-header $(ALL_OBJ) $(BENCHMARK_OBJ)
+$(BENCHMARK)$(EXTENSION): link-benchmark-header $(BENCHMARK_OBJ) $(DENSITY)$(STAT_EXT)
 	@echo *.o $(ARROW) ${bold}$(BENCHMARK)$(EXTENSION)${normal}
-	@$(CC) -o $(BENCHMARK)$(EXTENSION) $(ALL_OBJ) $(BENCHMARK_OBJ)
+	@$(COMPILER) -ldensity $(FLTO) -o $(BENCHMARK)$(EXTENSION) $(BENCHMARK_OBJ)
+	@$(RM) $(BENCHMARK).lib
+	@$(RM) $(BENCHMARK).exp
 	@echo Done.
 	@echo
 
-clean-submodules:
+clean-spookyhash:
 	@cd $(SPOOKYHASH_DIRECTORY) && $(MAKE) clean
 
-clean-benchmark-module:
+clean-benchmark:
 	@cd $(BENCHMARK_DIRECTORY) && $(MAKE) clean
 
-clean: clean-benchmark-module clean-submodules
+clean: clean-benchmark clean-spookyhash
 	@echo ${bold}Cleaning Density objects${normal} ...
-	@rm -f $(DENSITY_OBJ)
-	@rm -f $(TARGET)$(DYN_EXT)
-	@rm -f $(TARGET)$(STAT_EXT)
-	@touch .fpic .nofpic
+	@$(RM) $(DENSITY_OBJ)
+	@$(RM) $(DENSITY)$(DYN_EXT)
+	@$(RM) $(DENSITY)$(STAT_EXT)
 	@echo Done.
 	@echo

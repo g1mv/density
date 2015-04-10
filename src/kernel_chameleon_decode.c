@@ -135,7 +135,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_process_data(density_memory_l
     }
 }
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *restrict state, const density_main_header_parameters parameters, const uint_fast8_t endDataOverhead) {
+EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *restrict state, const density_main_header_parameters parameters, const uint_fast8_t endDataOverhead) {
     state->signaturesCount = 0;
     state->efficiencyChecked = 0;
     density_chameleon_dictionary_reset(&state->dictionary);

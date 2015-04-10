@@ -20,10 +20,23 @@
 # 6/04/15 0:31
 #
 
-CFLAGS = -Ofast -fomit-frame-pointer -w -flto -std=c99
+CFLAGS = -Ofast -fomit-frame-pointer -std=c99
 
 SRC_DIRECTORY = ./src/
 
+# Search for Clang
+CLANG_COMPILER := $(@shell clang -v)
+FLTO = -flto
+ifeq ($(CLANG_COMPILER),"")
+	COMPILER = $(CC)
+else
+	COMPILER = clang
+	ifeq ($(OS),Windows_NT)
+		FLTO = 
+	endif
+endif
+
+# OS specifics
 ifeq ($(OS),Windows_NT)
     bold =
     normal =
@@ -46,10 +59,10 @@ all: compile
 
 %.o: %.c
 	@echo $^ $(ARROW) $@
-	@$(CC) -c $(CFLAGS) $< -o $@
+	@$(COMPILER) -c $(CFLAGS) $(FLTO) $< -o $@
 
 compile-header:
-	@echo ${bold}Compiling Benchmark${normal} ...
+	@echo ${bold}Compiling Benchmark${normal} using $(COMPILER) ...
 
 compile: compile-header $(BENCHMARK_OBJ)
 	@echo Done.

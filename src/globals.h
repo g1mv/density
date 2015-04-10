@@ -40,11 +40,12 @@
 #include <stdlib.h>
 #include <stddef.h>
 
+#include "density_api.h"
 
 #if defined(__clang__)
-#define DENSITY_FORCE_INLINE static inline __attribute__((always_inline))
+#define DENSITY_FORCE_INLINE inline __attribute__((always_inline))
 #elif defined(__GNUC__)
-#define DENSITY_FORCE_INLINE static inline __attribute__((always_inline))
+#define DENSITY_FORCE_INLINE inline __attribute__((always_inline))
 #elif defined(_MSC_VER)
 #define DENSITY_FORCE_INLINE __forceinline
 #elif defined(__INTEL_COMPILER)
@@ -164,13 +165,13 @@
 
 #define density_bitsizeof(x) (8 * sizeof(x))
 
-static const uint32_t DENSITY_MASK_0_32 = 0xFFFFFFFF;
-static const uint32_t DENSITY_MASK_16_32 = 0xFFFF0000;
-static const uint64_t DENSITY_MASK_32_64 = 0xFFFFFFFF00000000llu;
-static const __uint128_t DENSITY_MASK_64_96 = (((__uint128_t) 0xFFFFFFFF) << 64);
-static const __uint128_t DENSITY_MASK_96_128 = (((__uint128_t) 0xFFFFFFFF) << 96);
-
 typedef __uint128_t uint128_t;
+
+#define DENSITY_MASK_0_32    (uint32_t)0xFFFFFFFF
+#define DENSITY_MASK_16_32   (uint32_t)0xFFFF0000
+#define DENSITY_MASK_32_64   (uint64_t)0xFFFFFFFF00000000llu
+#define DENSITY_MASK_64_96   (uint128_t)(((uint128_t) 0xFFFFFFFF) << 64)
+#define DENSITY_MASK_96_128  (uint128_t)(((uint128_t) 0xFFFFFFFF) << 96)
 
 
 /**********************************************************************************************************************
