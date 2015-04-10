@@ -74,7 +74,6 @@ else
     endif
     ARROW = \-\>
     EXTENSION =
-    FLTO = -flto
 endif
 
 DENSITY_SRC = $(wildcard $(SRC_DIRECTORY)*.c)
