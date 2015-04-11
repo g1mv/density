@@ -59,17 +59,17 @@
 /*
  * Returns the major density version
  */
-EXPORT uint8_t density_version_major(void);
+DENSITY_WINDOWS_EXPORT uint8_t density_version_major(void);
 
 /*
  * Returns the minor density version
  */
-EXPORT uint8_t density_version_minor(void);
+DENSITY_WINDOWS_EXPORT uint8_t density_version_minor(void);
 
 /*
  * Returns the density revision
  */
-EXPORT uint8_t density_version_revision(void);
+DENSITY_WINDOWS_EXPORT uint8_t density_version_revision(void);
 
 
 
@@ -95,7 +95,7 @@ EXPORT uint8_t density_version_revision(void);
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 /*
  * Decompress an input_buffer of input_size bytes and store the result in output_buffer.
@@ -109,7 +109,7 @@ EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t* i
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-EXPORT density_buffer_processing_result density_buffer_decompress(const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_decompress(const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 
 
@@ -127,7 +127,7 @@ EXPORT density_buffer_processing_result density_buffer_decompress(const uint8_t*
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-EXPORT density_stream *density_stream_create(void *(*mem_alloc)(size_t), void (*mem_free)(void *));
+DENSITY_WINDOWS_EXPORT density_stream *density_stream_create(void *(*mem_alloc)(size_t), void (*mem_free)(void *));
 
 /*
  * Frees a stream from memory. This method uses a supplied memory freeing function.
@@ -135,7 +135,7 @@ EXPORT density_stream *density_stream_create(void *(*mem_alloc)(size_t), void (*
  *
  * @param stream the stream
  */
-EXPORT void density_stream_destroy(density_stream *stream);
+DENSITY_WINDOWS_EXPORT void density_stream_destroy(density_stream *stream);
 
 /*
  * Prepare a stream with the encapsulated input/output buffers. This function *must* be called upon changing either buffer pointers / sizes.
@@ -148,7 +148,7 @@ EXPORT void density_stream_destroy(density_stream *stream);
  * @param mem_alloc a pointer to a memory allocation function. If NULL, the standard malloc(size_t) is used.
  * @param mem_free a pointer to a memory freeing function. If NULL, the standard free(void*) is used.
  */
-EXPORT DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size);
+DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, const uint8_t* input_buffer, const uint_fast64_t input_size, uint8_t* output_buffer, const uint_fast64_t output_size);
 
 /*
  * Update the stream's input
@@ -157,7 +157,7 @@ EXPORT DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream, const
  * @param in a byte array
  * @param availableIn the size of the byte array
  */
-EXPORT DENSITY_STREAM_STATE density_stream_update_input(density_stream *stream, const uint8_t *in, const uint_fast64_t availableIn);
+DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_update_input(density_stream *stream, const uint8_t *in, const uint_fast64_t availableIn);
 
 /*
  * Update the stream's output
@@ -166,14 +166,14 @@ EXPORT DENSITY_STREAM_STATE density_stream_update_input(density_stream *stream, 
  * @param out a byte array
  * @param availableOut the size of the byte array
  */
-EXPORT DENSITY_STREAM_STATE density_stream_update_output(density_stream *stream, uint8_t *out, const uint_fast64_t availableOut);
+DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_update_output(density_stream *stream, uint8_t *out, const uint_fast64_t availableOut);
 
 /*
  * Returns the usable bytes (bytes that have been written by Density) on the output memory location
  *
  * @param stream the stream
  */
-EXPORT uint_fast64_t density_stream_output_available_for_use(density_stream* stream);
+DENSITY_WINDOWS_EXPORT uint_fast64_t density_stream_output_available_for_use(density_stream* stream);
 
 /*
  * Initialize compression
@@ -184,7 +184,7 @@ EXPORT uint_fast64_t density_stream_output_available_for_use(density_stream* str
  *      The option DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK adds data integrity checks in the encoded output.
  *      The output size becomes therefore slightly bigger (a few hundred bytes for huge input files).
  */
-EXPORT DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type);
+DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type);
 
 /*
  * Stream decompression initialization
@@ -192,34 +192,34 @@ EXPORT DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream,
  * @param stream the stream
  * @param header_information stream header information, use NULL if you don't need it
  */
-EXPORT DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream, density_stream_header_information *header_information);
+DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream, density_stream_header_information *header_information);
 
 /*
  * Stream compression function, has to be called repetitively.
  *
  * @param stream the stream
  */
-EXPORT DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *stream);
+DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *stream);
 
 /*
  * Stream decompression function, has to be called repetitively.
  *
  * @param stream the stream
  */
-EXPORT DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *stream);
+DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *stream);
 
 /*
  * Call once processing is finished, to clear up the environment and release eventual allocated memory.
  *
  * @param stream the stream
  */
-EXPORT DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *stream);
+DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *stream);
 
 /*
  * Call once processing is finished, to clear up the environment and release eventual allocated memory.
  *
  * @param stream the stream
  */
-EXPORT DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream);
+DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream);
 
 #endif

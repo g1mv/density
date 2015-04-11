@@ -46,6 +46,6 @@
 
 const density_lion_dictionary density_lion_empty_dictionary = {.bigrams = {{0}}, .chunks = {{0}}, .predictions = {{0}}};
 
-EXPORT DENSITY_FORCE_INLINE void density_lion_dictionary_reset(density_lion_dictionary *dictionary) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_dictionary_reset(density_lion_dictionary *dictionary) {
     memcpy(dictionary, &density_lion_empty_dictionary, sizeof(density_lion_dictionary));
 }

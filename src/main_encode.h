@@ -77,10 +77,10 @@ typedef struct {
 } density_encode_state;
 #pragma pack(pop)
 
-EXPORT DENSITY_ENCODE_STATE density_encode_init(density_memory_location *, density_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*mem_alloc)(size_t));
+DENSITY_WINDOWS_EXPORT DENSITY_ENCODE_STATE density_encode_init(density_memory_location *, density_encode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*mem_alloc)(size_t));
 
-EXPORT DENSITY_ENCODE_STATE density_encode_continue(density_memory_teleport *, density_memory_location *, density_encode_state *);
+DENSITY_WINDOWS_EXPORT DENSITY_ENCODE_STATE density_encode_continue(density_memory_teleport *, density_memory_location *, density_encode_state *);
 
-EXPORT DENSITY_ENCODE_STATE density_encode_finish(density_memory_teleport *, density_memory_location *, density_encode_state *, void (*mem_free)(void *));
+DENSITY_WINDOWS_EXPORT DENSITY_ENCODE_STATE density_encode_finish(density_memory_teleport *, density_memory_location *, density_encode_state *, void (*mem_free)(void *));
 
 #endif

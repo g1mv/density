@@ -46,6 +46,6 @@
 
 const density_chameleon_dictionary density_chameleon_empty_dictionary = {.entries = {{0}}};
 
-EXPORT DENSITY_FORCE_INLINE void density_chameleon_dictionary_reset(density_chameleon_dictionary *dictionary) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_chameleon_dictionary_reset(density_chameleon_dictionary *dictionary) {
     memcpy(dictionary, &density_chameleon_empty_dictionary, sizeof(density_chameleon_dictionary));
 }

@@ -100,8 +100,10 @@ typedef struct {
 } density_block_decode_state;
 #pragma pack(pop)
 
-EXPORT DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters, const uint_fast8_t, void*, DENSITY_KERNEL_DECODE_STATE (*)(void*, const density_main_header_parameters, const uint_fast8_t), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_teleport *, density_memory_location*, void*), void *(*)(size_t));
-EXPORT DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(density_memory_teleport *, density_memory_location *, density_block_decode_state *);
-EXPORT DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(density_memory_teleport *, density_memory_location *, density_block_decode_state *, void (*)(void *));
+DENSITY_WINDOWS_EXPORT DENSITY_BLOCK_DECODE_STATE density_block_decode_init(density_block_decode_state *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters, const uint_fast8_t, void*, DENSITY_KERNEL_DECODE_STATE (*)(void*, const density_main_header_parameters, const uint_fast8_t), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_teleport *, density_memory_location *, void*), DENSITY_KERNEL_DECODE_STATE (*)(density_memory_teleport *, density_memory_location*, void*), void *(*)(size_t));
+
+DENSITY_WINDOWS_EXPORT DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(density_memory_teleport *, density_memory_location *, density_block_decode_state *);
+
+DENSITY_WINDOWS_EXPORT DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(density_memory_teleport *, density_memory_location *, density_block_decode_state *, void (*)(void *));
 
 #endif

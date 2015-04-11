@@ -86,8 +86,10 @@ typedef struct {
 } density_cheetah_decode_state;
 #pragma pack(pop)
 
-EXPORT DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_init(density_cheetah_decode_state *, const density_main_header_parameters parameters, const uint_fast8_t);
-EXPORT DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
-EXPORT DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_finish(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_init(density_cheetah_decode_state *, const density_main_header_parameters parameters, const uint_fast8_t);
+
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
+
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_finish(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
 
 #endif

@@ -41,7 +41,7 @@
 #if defined(_WIN64) || defined(_WIN32)
 #define EXPORT __declspec(dllexport)
 #else
-#define EXPORT
+#define DENSITY_WINDOWS_EXPORT
 #endif
 
 /***********************************************************************************************************************

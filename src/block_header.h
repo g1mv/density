@@ -50,8 +50,8 @@ typedef struct {
 } density_block_header;
 #pragma pack(pop)
 
-EXPORT uint_fast32_t density_block_header_read(density_memory_location *, density_block_header *);
+DENSITY_WINDOWS_EXPORT uint_fast32_t density_block_header_read(density_memory_location *, density_block_header *);
 
-EXPORT uint_fast32_t density_block_header_write(density_memory_location *);
+DENSITY_WINDOWS_EXPORT uint_fast32_t density_block_header_write(density_memory_location *);
 
 #endif

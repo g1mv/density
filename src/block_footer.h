@@ -49,7 +49,8 @@ typedef struct {
 } density_block_footer;
 #pragma pack(pop)
 
-EXPORT uint_fast32_t density_block_footer_read(density_memory_location *, density_block_footer*);
-EXPORT uint_fast32_t density_block_footer_write(density_memory_location*, const uint_fast64_t, const uint_fast64_t);
+DENSITY_WINDOWS_EXPORT uint_fast32_t density_block_footer_read(density_memory_location *, density_block_footer*);
+
+DENSITY_WINDOWS_EXPORT uint_fast32_t density_block_footer_write(density_memory_location*, const uint_fast64_t, const uint_fast64_t);
 
 #endif

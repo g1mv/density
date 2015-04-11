@@ -64,7 +64,7 @@ DENSITY_FORCE_INLINE void density_decode_update_totals(density_memory_teleport *
     state->totalWritten += outAvailableBefore - out->available_bytes;
 }
 
-EXPORT DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_teleport *in, density_decode_state *restrict state, void *(*mem_alloc)(size_t)) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_memory_teleport *in, density_decode_state *restrict state, void *(*mem_alloc)(size_t)) {
     DENSITY_DECODE_STATE decodeState;
     state->totalRead = 0;
     state->totalWritten = 0;
@@ -98,7 +98,7 @@ EXPORT DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_init(density_mem
     return density_decode_exit_process(state, DENSITY_DECODE_PROCESS_READ_BLOCKS, DENSITY_DECODE_STATE_READY);
 }
 
-EXPORT DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state) {
     DENSITY_BLOCK_DECODE_STATE blockDecodeState;
     uint_fast64_t inAvailableBefore;
     uint_fast64_t outAvailableBefore;
@@ -133,7 +133,7 @@ EXPORT DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_continue(density
     goto read_blocks;
 }
 
-EXPORT DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state, void (*mem_free)(void *)) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_decode_state *restrict state, void (*mem_free)(void *)) {
     DENSITY_DECODE_STATE decodeState;
     DENSITY_BLOCK_DECODE_STATE blockDecodeState;
     uint_fast64_t inAvailableBefore;

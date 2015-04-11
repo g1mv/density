@@ -35,7 +35,7 @@
 #include "memory_teleport.h"
 #include "memory_location.h"
 
-EXPORT DENSITY_FORCE_INLINE density_memory_teleport *density_memory_teleport_allocate(const uint_fast64_t size, void *(*mem_alloc)(size_t)) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_memory_teleport *density_memory_teleport_allocate(const uint_fast64_t size, void *(*mem_alloc)(size_t)) {
     density_memory_teleport *teleport = mem_alloc(sizeof(density_memory_teleport));
 
     teleport->stagingMemoryLocation = mem_alloc(sizeof(density_staging_memory_location));
@@ -52,7 +52,7 @@ EXPORT DENSITY_FORCE_INLINE density_memory_teleport *density_memory_teleport_all
     return teleport;
 }
 
-EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_free(density_memory_teleport *teleport, void (*mem_free)(void *)) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_free(density_memory_teleport *teleport, void (*mem_free)(void *)) {
     density_memory_location_free(teleport->directMemoryLocation, mem_free);
 
     mem_free(teleport->stagingMemoryLocation->originalPointer);
@@ -62,17 +62,17 @@ EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_free(density_memory_tel
     mem_free(teleport);
 }
 
-EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_change_input_buffer(density_memory_teleport *restrict teleport, const density_byte *restrict in, const uint_fast64_t availableIn) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_change_input_buffer(density_memory_teleport *restrict teleport, const density_byte *restrict in, const uint_fast64_t availableIn) {
     density_memory_location_encapsulate(teleport->directMemoryLocation, (density_byte*)in, availableIn);
 }
 
-EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_reset_staging_buffer(density_memory_teleport *restrict teleport) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_reset_staging_buffer(density_memory_teleport *restrict teleport) {
     teleport->stagingMemoryLocation->memoryLocation->pointer = teleport->stagingMemoryLocation->originalPointer;
     teleport->stagingMemoryLocation->memoryLocation->available_bytes = 0;
     teleport->stagingMemoryLocation->writePointer = teleport->stagingMemoryLocation->originalPointer;
 }
 
-EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy_from_direct_buffer_to_staging_buffer(density_memory_teleport *restrict teleport) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy_from_direct_buffer_to_staging_buffer(density_memory_teleport *restrict teleport) {
     const uint_fast64_t addonBytes = teleport->directMemoryLocation->available_bytes;
 
     memcpy(teleport->stagingMemoryLocation->writePointer, teleport->directMemoryLocation->pointer, addonBytes);
@@ -83,7 +83,7 @@ EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy_from_direct_buffer
     teleport->directMemoryLocation->available_bytes = 0;
 }
 
-EXPORT DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(density_memory_teleport *restrict teleport, const uint_fast64_t bytes) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read(density_memory_teleport *restrict teleport, const uint_fast64_t bytes) {
     const uint_fast64_t directAvailableBytes = teleport->directMemoryLocation->available_bytes;
     const uint_fast64_t stagingAvailableBytes = teleport->stagingMemoryLocation->memoryLocation->available_bytes;
     uint_fast64_t addonBytes;
@@ -123,19 +123,19 @@ EXPORT DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_rea
     }
 }
 
-EXPORT DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read_reserved(density_memory_teleport *restrict teleport, const uint_fast64_t bytes, const uint_fast64_t reserved) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read_reserved(density_memory_teleport *restrict teleport, const uint_fast64_t bytes, const uint_fast64_t reserved) {
     return density_memory_teleport_read(teleport, bytes + reserved);
 }
 
-EXPORT DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read_remaining_reserved(density_memory_teleport *restrict teleport, const uint_fast64_t reserved) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_memory_location *density_memory_teleport_read_remaining_reserved(density_memory_teleport *restrict teleport, const uint_fast64_t reserved) {
     return density_memory_teleport_read_reserved(teleport, density_memory_teleport_available_bytes_reserved(teleport, reserved), reserved);
 }
 
-EXPORT DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_bytes(density_memory_teleport *teleport) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_bytes(density_memory_teleport *teleport) {
     return teleport->stagingMemoryLocation->memoryLocation->available_bytes + teleport->directMemoryLocation->available_bytes;
 }
 
-EXPORT DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_bytes_reserved(density_memory_teleport *teleport, const uint_fast64_t reserved) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_bytes_reserved(density_memory_teleport *teleport, const uint_fast64_t reserved) {
     uint_fast64_t contained = teleport->stagingMemoryLocation->memoryLocation->available_bytes + teleport->directMemoryLocation->available_bytes;
     if (density_unlikely(reserved >= contained))
         return 0;
@@ -143,7 +143,7 @@ EXPORT DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_byte
         return contained - reserved;
 }
 
-EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *restrict teleport, density_memory_location *restrict out, const uint_fast64_t bytes) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_teleport *restrict teleport, density_memory_location *restrict out, const uint_fast64_t bytes) {
     uint_fast64_t fromStaging = 0;
     uint_fast64_t fromDirect = 0;
     uint_fast64_t stagingAvailableBytes = teleport->stagingMemoryLocation->memoryLocation->available_bytes;
@@ -184,6 +184,6 @@ EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy(density_memory_tel
     out->available_bytes -= fromDirect;
 }
 
-EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy_remaining(density_memory_teleport *restrict teleport, density_memory_location *restrict out) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy_remaining(density_memory_teleport *restrict teleport, density_memory_location *restrict out) {
     return density_memory_teleport_copy(teleport, out, density_memory_teleport_available_bytes(teleport));
 }

@@ -70,12 +70,18 @@ struct rusage {
 #define DENSITY_BENCHMARK_ENDIAN_STRING           "Big"
 #endif
 
-#ifdef __clang__
+#if defined(__clang__)
 #define DENSITY_BENCHMARK_COMPILER                "Clang %d.%d.%d"
 #define DENSITY_BENCHMARK_COMPILER_VERSION        __clang_major__, __clang_minor__, __clang_patchlevel__
 #elif defined(__GNUC__)
 #define DENSITY_BENCHMARK_COMPILER                "GCC %d.%d.%d"
 #define DENSITY_BENCHMARK_COMPILER_VERSION        __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__
+#elif defined(_MSC_VER)
+#define DENSITY_BENCHMARK_COMPILER                "MSVC"
+#define DENSITY_BENCHMARK_COMPILER_VERSION
+#elif defined(__INTEL_COMPILER)
+#define DENSITY_BENCHMARK_COMPILER                "ICC"
+#define DENSITY_BENCHMARK_COMPILER_VERSION
 #else
 #define DENSITY_BENCHMARK_COMPILER                "an unknown compiler"
 #define DENSITY_BENCHMARK_COMPILER_VERSION

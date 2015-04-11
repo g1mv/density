@@ -46,7 +46,7 @@
 
 const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUMBER_OF_FORMS] = DENSITY_LION_FORM_MODEL_ENTROPY_CODES;
 
-EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_init(density_lion_form_data *data) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_init(density_lion_form_data *data) {
     density_lion_form_node* rank_0 = &data->formsPool[0];
     rank_0->form = DENSITY_LION_FORM_SECONDARY_ACCESS;
     rank_0->usage = 0;
@@ -83,7 +83,7 @@ EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_init(density_lion_form_
     data->formsIndex[DENSITY_LION_FORM_CHUNK_SECONDARY_PREDICTIONS] = rank_4;
 }
 
-EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(density_lion_form_data *restrict data, density_lion_form_node *restrict form, density_lion_form_node *restrict previous_form) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(density_lion_form_data *restrict data, density_lion_form_node *restrict form, density_lion_form_node *restrict previous_form) {
     if (density_unlikely(previous_form->usage < form->usage)) {    // Relative stability is assumed
         const DENSITY_LION_FORM form_value = form->form;
 
@@ -101,7 +101,7 @@ EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(density_lion_for
     }
 }
 
-EXPORT DENSITY_FORCE_INLINE density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *data, const DENSITY_LION_FORM form) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *data, const DENSITY_LION_FORM form) {
     density_lion_form_node *form_found = data->formsIndex[form];
     form_found->usage++;
 

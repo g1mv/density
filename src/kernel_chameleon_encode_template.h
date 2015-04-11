@@ -50,7 +50,7 @@
 #define DENSITY_CHAMELEON_ENCODE_FUNCTION_NAME(name) name ## finish
 #endif
 
-EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHAMELEON_ENCODE_FUNCTION_NAME(density_chameleon_encode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_CHAMELEON_ENCODE_FUNCTION_NAME(density_chameleon_encode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
     DENSITY_KERNEL_ENCODE_STATE returnState;
     density_byte *pointerOutBefore;
     density_memory_location *readMemoryLocation;
