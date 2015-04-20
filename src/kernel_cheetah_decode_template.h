@@ -51,7 +51,7 @@
 #define DENSITY_CHEETAH_DECODE_FUNCTION_NAME(name) name ## finish
 #endif
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_CHEETAH_DECODE_FUNCTION_NAME(density_cheetah_decode_) (density_memory_teleport *restrict in, density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_CHEETAH_DECODE_FUNCTION_NAME(density_cheetah_decode_)(density_memory_teleport *restrict in, density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
     uint_fast64_t availableBytesReserved;
@@ -70,7 +70,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     if (density_unlikely((returnState = density_cheetah_decode_check_state(out, state)))) {
 #ifdef DENSITY_CHEETAH_DECODE_FINISH
         if(returnState == DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT)
-            if(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < (DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT))
+            if(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE)
                 goto step_by_step;
 #endif
         return density_cheetah_decode_exit_process(state, DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
@@ -78,7 +78,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
 
     // Try to read the next processing unit
     read_processing_unit:
-    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT, state->endDataOverhead))))
+    if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE, state->endDataOverhead))))
 #ifndef DENSITY_CHEETAH_DECODE_FINISH
         return density_cheetah_decode_exit_process(state, DENSITY_CHEETAH_DECODE_PROCESS_READ_PROCESSING_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 #else
@@ -86,16 +86,15 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
 #endif
 
     density_byte *readMemoryLocationPointerBefore = readMemoryLocation->pointer;
-    uint_fast8_t iterations = (1 << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT);
-    while(iterations--) {
-        // Decode the signature (endian processing)
-        density_cheetah_decode_read_signature(readMemoryLocation, state);
 
-        // Process body
-        density_cheetah_decode_process_data(readMemoryLocation, out, state);
-    }
+    // Decode the signature (endian processing)
+    density_cheetah_decode_read_signature(readMemoryLocation, state);
+
+    // Process body
+    density_cheetah_decode_process_data(readMemoryLocation, out, state);
+
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
-    out->available_bytes -= (DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE << DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT);
+    out->available_bytes -= DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE;
 
     // New loop
     goto check_signature_state;
@@ -108,46 +107,41 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     readMemoryLocation->available_bytes -= sizeof(density_cheetah_signature);
 
     while (state->shift != density_bitsizeof(density_cheetah_signature)) {
-        uint32_t hash = 0;
-        uint32_t chunk;
-
-        switch ((uint8_t const)((state->signature >> state->shift) & 0x3)) {
+        switch ((uint8_t const) ((state->signature >> state->shift) & 0x3)) {
             case DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED:
-                if(out->available_bytes < sizeof(uint32_t))
+                if (out->available_bytes < sizeof(uint32_t))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                density_cheetah_decode_predicted_chunk(&hash, out, state);
+                density_cheetah_decode_process_predicted(out, state);
                 break;
             case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A:
                 if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                if(out->available_bytes < sizeof(uint32_t))
+                if (out->available_bytes < sizeof(uint32_t))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                density_cheetah_decode_read_compressed_chunk(&hash, readMemoryLocation);
+                density_cheetah_decode_process_compressed_a(density_read_2(readMemoryLocation->pointer), out, state);
+                readMemoryLocation->pointer += sizeof(uint16_t);
                 readMemoryLocation->available_bytes -= sizeof(uint16_t);
-                density_cheetah_decode_compressed_chunk_a(&hash, out, state);
                 break;
             case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B:
                 if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                if(out->available_bytes < sizeof(uint32_t))
+                if (out->available_bytes < sizeof(uint32_t))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                density_cheetah_decode_read_compressed_chunk(&hash, readMemoryLocation);
+                density_cheetah_decode_process_compressed_b(density_read_2(readMemoryLocation->pointer), out, state);
+                readMemoryLocation->pointer += sizeof(uint16_t);
                 readMemoryLocation->available_bytes -= sizeof(uint16_t);
-                density_cheetah_decode_compressed_chunk_b(&hash, out, state);
                 break;
             case DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK:
                 if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint32_t), state->endDataOverhead)))
                     goto finish;
-                if(out->available_bytes < sizeof(uint32_t))
+                if (out->available_bytes < sizeof(uint32_t))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                density_cheetah_decode_read_uncompressed_chunk(&chunk, readMemoryLocation);
+                density_cheetah_decode_process_uncompressed(density_read_4(readMemoryLocation->pointer), out, state);
+                readMemoryLocation->pointer += sizeof(uint32_t);
                 readMemoryLocation->available_bytes -= sizeof(uint32_t);
-                density_cheetah_decode_uncompressed_chunk(&hash, &chunk, out, state);
                 break;
         }
-
-        state->lastHash = (uint16_t)hash;
-
+        out->pointer += sizeof(uint32_t);
         out->available_bytes -= sizeof(uint32_t);
         state->shift += 2;
     }
@@ -157,7 +151,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
 
     finish:
     availableBytesReserved = density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead);
-    if(out->available_bytes < availableBytesReserved)
+    if (out->available_bytes < availableBytesReserved)
         return DENSITY_KERNEL_DECODE_STATE_ERROR;
     density_memory_teleport_copy(in, out, availableBytesReserved);
 

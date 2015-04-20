@@ -65,19 +65,18 @@ typedef enum {
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_CHAMELEON_ENCODE_PROCESS process;
-
-#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
-    uint_fast64_t resetCycle;
-#endif
-
-    uint_fast32_t shift;
     density_chameleon_signature proximitySignature;
+    uint_fast8_t shift;
     density_chameleon_signature *signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
+    DENSITY_CHAMELEON_ENCODE_PROCESS process;
+
     density_chameleon_dictionary dictionary;
+#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
+    uint_fast64_t resetCycle;
+#endif
 } density_chameleon_encode_state;
 #pragma pack(pop)
 

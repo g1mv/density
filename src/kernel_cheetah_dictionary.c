@@ -48,5 +48,5 @@
 const density_cheetah_dictionary density_cheetah_empty_dictionary = {.entries = {{0}}, .prediction_entries = {{0}}};
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_cheetah_dictionary_reset(density_cheetah_dictionary *dictionary) {
-    memcpy(dictionary, &density_cheetah_empty_dictionary, sizeof(density_cheetah_dictionary));
+    DENSITY_MEMCPY(dictionary, &density_cheetah_empty_dictionary, sizeof(density_cheetah_dictionary));
 }

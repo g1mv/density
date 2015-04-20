@@ -110,7 +110,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel(density_memory_locatio
     out->pointer += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE const bool density_chameleon_decode_test_compressed(density_chameleon_decode_state *state, const uint_fast32_t shift) {
+DENSITY_FORCE_INLINE const bool density_chameleon_decode_test_compressed(density_chameleon_decode_state *state, const uint_fast8_t shift) {
     return (density_bool const) ((state->signature >> shift) & DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP);
 }
 

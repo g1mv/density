@@ -75,7 +75,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_reset_s
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy_from_direct_buffer_to_staging_buffer(density_memory_teleport *restrict teleport) {
     const uint_fast64_t addonBytes = teleport->directMemoryLocation->available_bytes;
 
-    memcpy(teleport->stagingMemoryLocation->writePointer, teleport->directMemoryLocation->pointer, addonBytes);
+    DENSITY_MEMCPY(teleport->stagingMemoryLocation->writePointer, teleport->directMemoryLocation->pointer, addonBytes);
     teleport->stagingMemoryLocation->writePointer += addonBytes;
     teleport->stagingMemoryLocation->memoryLocation->available_bytes += addonBytes;
 
@@ -100,7 +100,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_memory_location *density_mem
 
                 return teleport->directMemoryLocation;
             } else { // Copy missing bytes from direct input buffer
-                memcpy(teleport->stagingMemoryLocation->writePointer, teleport->directMemoryLocation->pointer, addonBytes);
+                DENSITY_MEMCPY(teleport->stagingMemoryLocation->writePointer, teleport->directMemoryLocation->pointer, addonBytes);
                 teleport->stagingMemoryLocation->writePointer += addonBytes;
                 teleport->stagingMemoryLocation->memoryLocation->available_bytes += addonBytes;
 
@@ -167,7 +167,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy(de
         }
     }
 
-    memcpy(out->pointer, teleport->stagingMemoryLocation->memoryLocation->pointer, fromStaging);
+    DENSITY_MEMCPY(out->pointer, teleport->stagingMemoryLocation->memoryLocation->pointer, fromStaging);
     if (fromStaging == stagingAvailableBytes)
         density_memory_teleport_reset_staging_buffer(teleport);
     else {
@@ -177,7 +177,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy(de
     out->pointer += fromStaging;
     out->available_bytes -= fromStaging;
 
-    memcpy(out->pointer, teleport->directMemoryLocation->pointer, fromDirect);
+    DENSITY_MEMCPY(out->pointer, teleport->directMemoryLocation->pointer, fromDirect);
     teleport->directMemoryLocation->pointer += fromDirect;
     teleport->directMemoryLocation->available_bytes -= fromDirect;
     out->pointer += fromDirect;

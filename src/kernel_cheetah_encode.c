@@ -50,14 +50,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_exit_pro
     return kernelEncodeState;
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_encode_write_to_signature(density_cheetah_encode_state *state, uint_fast8_t flag) {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    (state->proximitySignature) |= ((uint64_t) flag) << state->shift;
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    (state->proximitySignature) |= ((uint64_t) flag) << ((56 - (state->shift & ~0x7)) + (state->shift & 0x7));
-#endif
-}
-
 DENSITY_FORCE_INLINE void density_cheetah_encode_prepare_new_signature(density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
     state->signaturesCount++;
     state->shift = 0;
@@ -106,7 +98,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_check_st
 
     switch (state->shift) {
         case density_bitsizeof(density_cheetah_signature):
-            *state->signature = state->proximitySignature;
+            density_write_8(state->signature, state->proximitySignature);
             if ((returnState = density_cheetah_encode_prepare_new_block(out, state)))
                 return returnState;
             break;
@@ -117,7 +109,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_check_st
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(density_memory_location *restrict out, const uint16_t hash, const uint32_t chunk, density_cheetah_encode_state *restrict state) {
+DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(density_memory_location *restrict out, const uint16_t hash, const uint32_t chunk, const uint_fast8_t shift, density_cheetah_encode_state *restrict state) {
     uint32_t *predictedChunk = (uint32_t*)&state->dictionary.prediction_entries[state->lastHash];
 
     if (*predictedChunk ^ chunk) {
@@ -126,58 +118,33 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(density_memory_location 
         if (*found_a ^ chunk) {
             uint32_t *found_b = &found->chunk_b;
             if (*found_b ^ chunk) {
-                density_cheetah_encode_write_to_signature(state, DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK);
-                *(uint32_t *) (out->pointer) = chunk;
+                state->proximitySignature |= ((uint64_t)DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK << shift);
+                density_write_4(out->pointer, chunk);
                 out->pointer += sizeof(uint32_t);
             } else {
-                density_cheetah_encode_write_to_signature(state, DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B);
-                *(uint16_t *) (out->pointer) = DENSITY_LITTLE_ENDIAN_16(hash);
+                state->proximitySignature |= ((uint64_t)DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B << shift);
+                density_write_2(out->pointer, hash);
                 out->pointer += sizeof(uint16_t);
             }
             *found_b = *found_a;
             *found_a = chunk;
         } else {
-            density_cheetah_encode_write_to_signature(state, DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A);
-            *(uint16_t *) (out->pointer) = DENSITY_LITTLE_ENDIAN_16(hash);
+            state->proximitySignature |= ((uint64_t)DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A << shift);
+            density_write_2(out->pointer, hash);
             out->pointer += sizeof(uint16_t);
         }
         *predictedChunk = chunk;
-    } else {
-        density_cheetah_encode_write_to_signature(state, DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED);
     }
     state->lastHash = hash;
-
-    state->shift += 2;
-}
-
-DENSITY_FORCE_INLINE void density_cheetah_encode_process_chunk(density_memory_location *restrict in, density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    const uint128_t chunk = *(uint128_t * )(in->pointer);
-    const uint128_t hash_group = (uint32_t) (((uint32_t) chunk * DENSITY_CHEETAH_HASH_MULTIPLIER)) | (uint64_t) (((uint64_t) (chunk & DENSITY_MASK_32_64) * DENSITY_CHEETAH_HASH_MULTIPLIER)) | (((chunk & DENSITY_MASK_64_96) * DENSITY_CHEETAH_HASH_MULTIPLIER) & DENSITY_MASK_64_96) | (((chunk & DENSITY_MASK_96_128) * DENSITY_CHEETAH_HASH_MULTIPLIER));
-
-    density_cheetah_encode_kernel(out, *((uint16_t *) &hash_group + 1), (uint32_t) chunk, state);
-    density_cheetah_encode_kernel(out, *((uint16_t *) &hash_group + 3), *((uint32_t *) &chunk + 1), state);
-    density_cheetah_encode_kernel(out, *((uint16_t *) &hash_group + 5), *((uint32_t *) &chunk + 2), state);
-    density_cheetah_encode_kernel(out, *((uint16_t *) &hash_group + 7), *((uint32_t *) &chunk + 3), state);
-#else
-    const uint64_t chunk_a = *(uint64_t *) (in->pointer);
-    const uint32_t element_a = (uint32_t) (chunk_a >> density_bitsizeof(uint32_t));
-    const uint32_t element_b = (uint32_t) chunk_a;
-    density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(element_a)), element_a, state);
-    density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(element_b)), element_b, state);
-
-    const uint64_t chunk_b = *((uint64_t *) in->pointer + 1);
-    const uint32_t element_c = (uint32_t) (chunk_b >> density_bitsizeof(uint32_t));
-    const uint32_t element_d = (uint32_t) chunk_b;
-    density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(element_c)), element_c, state);
-    density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(element_d)), element_d, state);
-#endif
-
-    in->pointer += sizeof(uint128_t);
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_encode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
-    DENSITY_UNROLL_4(density_cheetah_encode_process_chunk(in, out, state));
+    for(uint_fast8_t count = 0; count < density_bitsizeof(density_cheetah_signature); count += 2) {
+        const uint32_t chunk = density_read_4(in->pointer);
+        density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(chunk), chunk, count, state);
+        in->pointer += sizeof(uint32_t);
+    }
+    state->shift = density_bitsizeof(density_cheetah_signature);
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_init(density_cheetah_encode_state *state) {

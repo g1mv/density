@@ -109,7 +109,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_check_
     return DENSITY_KERNEL_ENCODE_STATE_READY;
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(density_memory_location *restrict out, const uint16_t hash, const uint32_t chunk, const uint_fast32_t shift, density_chameleon_encode_state *restrict state) {
+DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(density_memory_location *restrict out, const uint16_t hash, const uint32_t chunk, const uint_fast8_t shift, density_chameleon_encode_state *restrict state) {
     density_chameleon_dictionary_entry *const found = &state->dictionary.entries[hash];
 
     if (chunk ^ found->as_uint32_t) {

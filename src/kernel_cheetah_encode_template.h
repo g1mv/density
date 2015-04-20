@@ -98,7 +98,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
     step_by_step:
     while (state->shift != density_bitsizeof(density_cheetah_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
         const uint32_t chunk = *(uint32_t *) (readMemoryLocation->pointer);
-        density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(chunk)), chunk, state);
+        density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(chunk)), chunk, state->shift, state);
+        state->shift += 2;
         readMemoryLocation->pointer += sizeof(uint32_t);
         readMemoryLocation->available_bytes -= sizeof(uint32_t);
     }
@@ -116,10 +117,10 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
     // Marker for decode loop exit
     if ((returnState = density_cheetah_encode_check_state(out, state)))
         return density_cheetah_encode_exit_process(state, DENSITY_CHEETAH_ENCODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
-    density_cheetah_encode_write_to_signature(state, DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK);
+    state->proximitySignature |= ((uint64_t)DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK << state->shift);
 
     // Copy the remaining bytes
-    *state->signature = state->proximitySignature;
+    density_write_8(state->signature, state->proximitySignature);
     density_memory_teleport_copy_remaining(in, out);
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;
