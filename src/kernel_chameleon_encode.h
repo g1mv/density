@@ -54,7 +54,7 @@
 #include "memory_teleport.h"
 #include "memory_location.h"
 
-#define DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE                    (16 * sizeof(uint64_t))
+#define DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE                    (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
 
 typedef enum {
     DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
@@ -65,26 +65,25 @@ typedef enum {
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_CHAMELEON_ENCODE_PROCESS process;
-
-#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
-    uint_fast64_t resetCycle;
-#endif
-
-    uint_fast32_t shift;
     density_chameleon_signature proximitySignature;
+    uint_fast8_t shift;
     density_chameleon_signature *signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
+    DENSITY_CHAMELEON_ENCODE_PROCESS process;
+
     density_chameleon_dictionary dictionary;
+#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
+    uint_fast64_t resetCycle;
+#endif
 } density_chameleon_encode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *);
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_init(density_chameleon_encode_state *);
 
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_continue(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_continue(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
 
-DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_finish(density_memory_teleport *, density_memory_location *, density_chameleon_encode_state *);
 
 #endif

@@ -35,7 +35,7 @@
 #include "block_mode_marker.h"
 #include "density_api_data_structures.h"
 
-DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_read(density_memory_location *restrict in, density_mode_marker *restrict modeMarker) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_read(density_memory_location *restrict in, density_mode_marker *restrict modeMarker) {
     modeMarker->activeBlockMode = *in->pointer;
 
     in->pointer += sizeof(density_mode_marker);
@@ -44,7 +44,7 @@ DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_read(density_memory
     return sizeof(density_mode_marker);
 }
 
-DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_write(density_memory_location *out, const DENSITY_COMPRESSION_MODE mode) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_write(density_memory_location *out, const DENSITY_COMPRESSION_MODE mode) {
     *(out->pointer) = (density_byte) mode;
     *(out->pointer + 1) = 0x0;
 

@@ -50,7 +50,8 @@ typedef struct {
 } density_mode_marker;
 #pragma pack(pop)
 
-uint_fast32_t density_block_mode_marker_read(density_memory_location *, density_mode_marker *);
-uint_fast32_t density_block_mode_marker_write(density_memory_location*, const DENSITY_COMPRESSION_MODE);
+DENSITY_WINDOWS_EXPORT uint_fast32_t density_block_mode_marker_read(density_memory_location *, density_mode_marker *);
+
+DENSITY_WINDOWS_EXPORT uint_fast32_t density_block_mode_marker_write(density_memory_location*, const DENSITY_COMPRESSION_MODE);
 
 #endif

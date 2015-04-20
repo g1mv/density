@@ -34,7 +34,7 @@
 
 #include "block_encode.h"
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE exitProcess(density_block_encode_state *state, DENSITY_BLOCK_ENCODE_PROCESS process, DENSITY_BLOCK_ENCODE_STATE blockEncodeState) {
+DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_exit_process(density_block_encode_state *state, DENSITY_BLOCK_ENCODE_PROCESS process, DENSITY_BLOCK_ENCODE_STATE blockEncodeState) {
     state->process = process;
     return blockEncodeState;
 }
@@ -67,7 +67,8 @@ DENSITY_FORCE_INLINE void density_block_encode_update_integrity_hash(density_mem
 }
 
 DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_block_header(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_encode_state *restrict state) {
-    if (sizeof(density_block_header) > out->available_bytes)
+    const uint_fast8_t size = sizeof(density_block_header); // To avoid warning: comparison of unsigned expression < 0 is always false
+    if (size > out->available_bytes)
         return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT;
 
     state->currentMode = state->targetMode;
@@ -123,7 +124,7 @@ DENSITY_FORCE_INLINE void density_block_encode_update_totals(density_memory_tele
     state->totalWritten += availableOutBefore - out->available_bytes;
 }
 
-DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, void *kernelState, DENSITY_KERNEL_ENCODE_STATE (*kernelInit)(void *), DENSITY_KERNEL_ENCODE_STATE (*kernelProcess)(density_memory_teleport *, density_memory_location *, void *), DENSITY_KERNEL_ENCODE_STATE (*kernelFinish)(density_memory_teleport *, density_memory_location *, void *), void *(*mem_alloc)(size_t)) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(density_block_encode_state *restrict state, const DENSITY_COMPRESSION_MODE mode, const DENSITY_BLOCK_TYPE blockType, void *kernelState, DENSITY_KERNEL_ENCODE_STATE (*kernelInit)(void *), DENSITY_KERNEL_ENCODE_STATE (*kernelProcess)(density_memory_teleport *, density_memory_location *, void *), DENSITY_KERNEL_ENCODE_STATE (*kernelFinish)(density_memory_teleport *, density_memory_location *, void *), void *(*mem_alloc)(size_t)) {
     state->blockType = blockType;
     state->targetMode = mode;
     state->currentMode = mode;
@@ -149,7 +150,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_init(densit
             break;
     }
 
-    return exitProcess(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER, DENSITY_BLOCK_ENCODE_STATE_READY);
+    return density_block_encode_exit_process(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER, DENSITY_BLOCK_ENCODE_STATE_READY);
 }
 
 #include "block_encode_template.h"

@@ -58,8 +58,6 @@
 #include "kernel_cheetah_encode.h"
 #include "main_header.h"
 
-#define DENSITY_CHEETAH_DECODE_ITERATIONS_SHIFT                      1
-
 typedef enum {
     DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE,
     DENSITY_CHEETAH_DECODE_PROCESS_READ_PROCESSING_UNIT,
@@ -68,26 +66,25 @@ typedef enum {
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_CHEETAH_DECODE_PROCESS process;
-
-    density_main_header_parameters parameters;
-    uint_fast64_t resetCycle;
-
     density_cheetah_signature signature;
-    uint_fast32_t shift;
+    uint_fast16_t lastHash;
+    uint_fast8_t shift;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
+    DENSITY_CHEETAH_DECODE_PROCESS process;
     uint_fast8_t endDataOverhead;
-
-    uint_fast16_t lastHash;
+    density_main_header_parameters parameters;
 
     density_cheetah_dictionary dictionary;
+    uint_fast64_t resetCycle;
 } density_cheetah_decode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_init(density_cheetah_decode_state *, const density_main_header_parameters parameters, const uint_fast8_t);
-DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
-DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_finish(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_init(density_cheetah_decode_state *, const density_main_header_parameters parameters, const uint_fast8_t);
+
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
+
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_finish(density_memory_teleport *, density_memory_location *, density_cheetah_decode_state *);
 
 #endif

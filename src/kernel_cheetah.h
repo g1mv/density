@@ -55,7 +55,7 @@
 #define DENSITY_CHEETAH_PREFERRED_EFFICIENCY_CHECK_SIGNATURES               (1 << DENSITY_CHEETAH_PREFERRED_EFFICIENCY_CHECK_SIGNATURES_SHIFT)
 
 #define DENSITY_CHEETAH_HASH_BITS                                           16
-#define DENSITY_CHEETAH_HASH_MULTIPLIER                                     (uint32_t)2641295638lu
+#define DENSITY_CHEETAH_HASH_MULTIPLIER                                     (uint32_t)0x9D6EF916lu
 
 #define DENSITY_CHEETAH_HASH_ALGORITHM(value32)                             (uint16_t)(value32 * DENSITY_CHEETAH_HASH_MULTIPLIER >> (32 - DENSITY_CHEETAH_HASH_BITS))
 

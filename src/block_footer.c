@@ -34,10 +34,10 @@
 
 #include "block_footer.h"
 
-DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_read(density_memory_location *restrict in, density_block_footer *restrict blockFooter) {
-    blockFooter->hashsum1 = DENSITY_LITTLE_ENDIAN_64(*(uint64_t *) in->pointer);
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_read(density_memory_location *restrict in, density_block_footer *restrict blockFooter) {
+    blockFooter->hashsum1 = density_read_8(in->pointer);
     in->pointer += sizeof(uint64_t);
-    blockFooter->hashsum2 = DENSITY_LITTLE_ENDIAN_64(*(uint64_t *) in->pointer);
+    blockFooter->hashsum2 = density_read_8(in->pointer);
     in->pointer += sizeof(uint64_t);
 
     in->available_bytes -= sizeof(density_block_footer);
@@ -45,10 +45,10 @@ DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_read(density_memory_loca
     return sizeof(density_block_footer);
 }
 
-DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_write(density_memory_location *out, const uint_fast64_t hashsum1, const uint_fast64_t hashsum2) {
-    *(uint64_t *) out->pointer = DENSITY_LITTLE_ENDIAN_64(hashsum1);
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_write(density_memory_location *out, const uint_fast64_t hashsum1, const uint_fast64_t hashsum2) {
+    density_write_8(out->pointer, hashsum1);
     out->pointer += sizeof(uint64_t);
-    *(uint64_t *) out->pointer = DENSITY_LITTLE_ENDIAN_64(hashsum2);
+    density_write_8(out->pointer, hashsum2);
     out->pointer += sizeof(uint64_t);
 
     out->available_bytes -= sizeof(density_block_footer);

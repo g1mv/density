@@ -23,6 +23,8 @@
 #ifndef DENSITY_BENCHMARK_H
 #define DENSITY_BENCHMARK_H
 
+#define _CRT_SECURE_NO_DEPRECATE
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <stdio.h>
@@ -66,6 +68,23 @@ struct rusage {
 #define DENSITY_BENCHMARK_ENDIAN_STRING           "Little"
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define DENSITY_BENCHMARK_ENDIAN_STRING           "Big"
+#endif
+
+#if defined(__clang__)
+#define DENSITY_BENCHMARK_COMPILER                "Clang %d.%d.%d"
+#define DENSITY_BENCHMARK_COMPILER_VERSION        __clang_major__, __clang_minor__, __clang_patchlevel__
+#elif defined(__GNUC__)
+#define DENSITY_BENCHMARK_COMPILER                "GCC %d.%d.%d"
+#define DENSITY_BENCHMARK_COMPILER_VERSION        __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__
+#elif defined(_MSC_VER)
+#define DENSITY_BENCHMARK_COMPILER                "MSVC"
+#define DENSITY_BENCHMARK_COMPILER_VERSION
+#elif defined(__INTEL_COMPILER)
+#define DENSITY_BENCHMARK_COMPILER                "ICC"
+#define DENSITY_BENCHMARK_COMPILER_VERSION
+#else
+#define DENSITY_BENCHMARK_COMPILER                "an unknown compiler"
+#define DENSITY_BENCHMARK_COMPILER_VERSION
 #endif
 
 #if defined(_WIN64) || defined(_WIN32)

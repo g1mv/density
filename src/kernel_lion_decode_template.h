@@ -50,7 +50,7 @@
 #define DENSITY_LION_DECODE_FUNCTION_NAME(name) name ## finish
 #endif
 
-DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_LION_DECODE_FUNCTION_NAME(density_lion_decode_)(density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_LION_DECODE_FUNCTION_NAME(density_lion_decode_)(density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     DENSITY_KERNEL_DECODE_STATE returnState;
     density_memory_location *readMemoryLocation;
     uint_fast64_t availableBytesReserved;
@@ -71,7 +71,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_LION_DECODE_FUNCTION_NA
     check_block_state:
     if (density_unlikely(!state->shift)) {
         if (density_unlikely(returnState = density_lion_decode_check_block_state(state)))
-            return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_BLOCK_STATE, returnState);
+            return density_lion_decode_exit_process(state, DENSITY_LION_DECODE_PROCESS_CHECK_BLOCK_STATE, returnState);
     }
 
     // Check output size
@@ -81,14 +81,14 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_LION_DECODE_FUNCTION_NA
         if(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < DENSITY_LION_DECODE_MAX_BYTES_TO_READ_FOR_PROCESS_UNIT)
             goto step_by_step;
 #endif
-        return exitProcess(state, DENSITY_LION_DECODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
+        return density_lion_decode_exit_process(state, DENSITY_LION_DECODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
     }
 
     // Try to read the next processing unit
     process_unit:
     if (density_unlikely(!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_LION_DECODE_MAX_BYTES_TO_READ_FOR_PROCESS_UNIT, state->endDataOverhead))))
 #ifndef DENSITY_LION_DECODE_FINISH
-        return exitProcess(state, DENSITY_LION_DECODE_PROCESS_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
+        return density_lion_decode_exit_process(state, DENSITY_LION_DECODE_PROCESS_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 #else
         goto step_by_step;
 #endif

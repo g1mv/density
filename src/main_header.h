@@ -37,7 +37,6 @@
 
 #include <stdio.h>
 #include <time.h>
-#include <utime.h>
 
 #include "globals.h"
 #include "block.h"
@@ -66,8 +65,8 @@ typedef struct {
 
 #pragma pack(pop)
 
-uint_fast32_t density_main_header_read(density_memory_location *, density_main_header *);
+DENSITY_WINDOWS_EXPORT uint_fast32_t density_main_header_read(density_memory_location *, density_main_header *);
 
-uint_fast32_t density_main_header_write(density_memory_location *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters);
+DENSITY_WINDOWS_EXPORT uint_fast32_t density_main_header_write(density_memory_location *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters);
 
 #endif
