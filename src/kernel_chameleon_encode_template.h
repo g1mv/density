@@ -96,8 +96,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
     // Read step by step
     step_by_step:
     while (state->shift != density_bitsizeof(density_chameleon_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
-        const uint32_t chunk = *(uint32_t *) (readMemoryLocation->pointer);
-        density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(chunk)), chunk, state);
+        const uint32_t chunk = density_read_4(readMemoryLocation->pointer);
+        density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(chunk), chunk, state->shift, state);
+        state->shift ++;
         readMemoryLocation->pointer += sizeof(uint32_t);
         readMemoryLocation->available_bytes -= sizeof(uint32_t);
     }
@@ -113,7 +114,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
         goto check_signature_state;
 
     // Copy the remaining bytes
-    *(state->signature) = state->proximitySignature;
+    density_write_8(state->signature, state->proximitySignature);
     density_memory_teleport_copy_remaining(in, out);
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;

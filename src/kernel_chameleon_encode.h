@@ -54,7 +54,7 @@
 #include "memory_teleport.h"
 #include "memory_location.h"
 
-#define DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE                    (16 * sizeof(uint64_t))
+#define DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE                    (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
 
 typedef enum {
     DENSITY_CHAMELEON_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
