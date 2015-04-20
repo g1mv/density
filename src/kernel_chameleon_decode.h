@@ -58,8 +58,6 @@
 #include "main_footer.h"
 #include "main_header.h"
 
-#define DENSITY_CHAMELEON_DECODE_ITERATIONS_SHIFT                        0
-
 typedef enum {
     DENSITY_CHAMELEON_DECODE_PROCESS_CHECK_SIGNATURE_STATE,
     DENSITY_CHAMELEON_DECODE_PROCESS_READ_PROCESSING_UNIT,

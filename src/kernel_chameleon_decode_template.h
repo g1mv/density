@@ -69,7 +69,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     if ((returnState = density_chameleon_decode_check_state(out, state))) {
 #ifdef DENSITY_CHAMELEON_DECODE_FINISH
         if(returnState == DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT)
-            if(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < (DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE << DENSITY_CHAMELEON_DECODE_ITERATIONS_SHIFT))
+            if(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
                 goto step_by_step;
 #endif
         return density_chameleon_decode_exit_process(state, DENSITY_CHAMELEON_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
@@ -77,24 +77,23 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
 
     // Try to read the next processing unit
     read_processing_unit:
-    if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE << DENSITY_CHAMELEON_DECODE_ITERATIONS_SHIFT, state->endDataOverhead)))
+    if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE, state->endDataOverhead)))
 #ifndef DENSITY_CHAMELEON_DECODE_FINISH
         return density_chameleon_decode_exit_process(state, DENSITY_CHAMELEON_DECODE_PROCESS_READ_PROCESSING_UNIT, DENSITY_KERNEL_DECODE_STATE_STALL_ON_INPUT);
 #else
         goto step_by_step;
 #endif
 
-    uint_fast8_t iterations = (1 << DENSITY_CHAMELEON_DECODE_ITERATIONS_SHIFT);
     density_byte *readMemoryLocationPointerBefore = readMemoryLocation->pointer;
-    while(iterations --) {
-        // Decode the signature (endian processing)
-        density_chameleon_decode_read_signature(readMemoryLocation, state);
 
-        // Process body
-        density_chameleon_decode_process_data(readMemoryLocation, out, state);
-    }
+    // Decode the signature (endian processing)
+    density_chameleon_decode_read_signature(readMemoryLocation, state);
+
+    // Process body
+    density_chameleon_decode_process_data(readMemoryLocation, out, state);
+
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
-    out->available_bytes -= (DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE << DENSITY_CHAMELEON_DECODE_ITERATIONS_SHIFT);
+    out->available_bytes -= DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE;
 
     // New loop
     goto check_signature_state;
