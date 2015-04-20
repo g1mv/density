@@ -55,7 +55,8 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_write_header(density_me
 }
 
 DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_write_footer(density_memory_location *restrict out, density_encode_state *restrict state) {
-    if (sizeof(density_main_footer) > out->available_bytes)
+    const uint_fast8_t size = sizeof(density_main_footer); // To avoid warning: comparison of unsigned expression < 0 is always false
+    if (size > out->available_bytes)
         return DENSITY_ENCODE_STATE_STALL_ON_OUTPUT;
 
     state->totalWritten += density_main_footer_write(out);

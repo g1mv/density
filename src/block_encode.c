@@ -67,7 +67,8 @@ DENSITY_FORCE_INLINE void density_block_encode_update_integrity_hash(density_mem
 }
 
 DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_block_header(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_encode_state *restrict state) {
-    if (sizeof(density_block_header) > out->available_bytes)
+    const uint_fast8_t size = sizeof(density_block_header); // To avoid warning: comparison of unsigned expression < 0 is always false
+    if (size > out->available_bytes)
         return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT;
 
     state->currentMode = state->targetMode;
