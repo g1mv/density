@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(density)
-
 find_program(CLANG_COMPILER clang)
 if(CLANG_COMPILER)
     set(CMAKE_C_COMPILER ${CLANG_COMPILER})
 endif(CLANG_COMPILER)
+
+project(density)
 
 execute_process (COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
