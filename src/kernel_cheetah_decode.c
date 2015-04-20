@@ -44,7 +44,6 @@
  */
 
 #include "kernel_cheetah_decode.h"
-#include "kernel_cheetah_dictionary.h"
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_exit_process(density_cheetah_decode_state *state, DENSITY_CHEETAH_DECODE_PROCESS process, DENSITY_KERNEL_DECODE_STATE kernelDecodeState) {
     state->process = process;

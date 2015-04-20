@@ -74,28 +74,25 @@ typedef struct {
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_LION_ENCODE_PROCESS process;
-
-#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
-    uint_fast64_t resetCycle;
-#endif
-
-    uint_fast32_t shift;
     density_lion_signature proximitySignature;
+    density_lion_form_data formData;
+    uint_fast16_t lastHash;
+    uint32_t lastChunk;
+    uint_fast8_t shift;
     density_lion_signature * signature;
     uint_fast64_t chunksCount;
     bool efficiencyChecked;
 
-    density_lion_form_data formData;
-
-    uint_fast16_t lastHash;
-    uint32_t lastChunk;
+    DENSITY_LION_ENCODE_PROCESS process;
 
     density_lion_encode_content transientContent;
     bool signatureInterceptMode;
     bool endMarker;
 
     density_lion_dictionary dictionary;
+#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
+    uint_fast64_t resetCycle;
+#endif
 } density_lion_encode_state;
 #pragma pack(pop)
 

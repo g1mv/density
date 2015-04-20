@@ -56,7 +56,7 @@
         if(density_likely(state->shift)) {\
             const density_byte *content_start = (density_byte *) state->signature + sizeof(density_lion_signature);\
             state->transientContent.size = (uint8_t) (out->pointer - content_start);\
-            memcpy(state->transientContent.content, content_start, state->transientContent.size);\
+            DENSITY_MEMCPY(state->transientContent.content, content_start, state->transientContent.size);\
             out->pointer = (density_byte *) state->signature;\
             out->available_bytes -= (out->pointer - pointerOutBefore);\
             return density_lion_encode_exit_process(state, DENSITY_LION_ENCODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_OUTPUT);\
@@ -100,7 +100,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
             if(density_likely(state->shift)) {
                 state->signature = (density_lion_signature *) (out->pointer);
                 out->pointer += sizeof(density_lion_signature);
-                memcpy(out->pointer, state->transientContent.content, state->transientContent.size);
+                DENSITY_MEMCPY(out->pointer, state->transientContent.content, state->transientContent.size);
                 out->pointer += state->transientContent.size;
                 out->available_bytes -= (sizeof(density_lion_signature) + state->transientContent.size);
             }
@@ -178,7 +178,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
         density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
 
     // Copy the remaining bytes
-    *(state->signature) = state->proximitySignature;
+    density_write_8(state->signature, state->proximitySignature);
     out->available_bytes -= (out->pointer - pointerOutBefore);
     density_memory_teleport_copy_remaining(in, out);
 

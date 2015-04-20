@@ -89,24 +89,20 @@ typedef enum {
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_LION_DECODE_PROCESS process;
-
-    density_main_header_parameters parameters;
-    uint_fast64_t resetCycle;
-
-    uint_fast32_t shift;
     density_lion_signature signature;
+    density_lion_form_data formData;
+    uint_fast16_t lastHash;
+    uint32_t lastChunk;
+    uint_fast8_t shift;
     uint_fast64_t chunksCount;
     bool efficiencyChecked;
 
+    DENSITY_LION_DECODE_PROCESS process;
     uint_fast8_t endDataOverhead;
-
-    density_lion_form_data formData;
-
-    uint_fast16_t lastHash;
-    uint32_t lastChunk;
+    density_main_header_parameters parameters;
 
     density_lion_dictionary dictionary;
+    uint_fast64_t resetCycle;
 } density_lion_decode_state;
 #pragma pack(pop)
 

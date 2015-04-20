@@ -43,7 +43,6 @@
  */
 
 #include "kernel_chameleon_decode.h"
-#include "kernel_chameleon_dictionary.h"
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_exit_process(density_chameleon_decode_state *state, DENSITY_CHAMELEON_DECODE_PROCESS process, DENSITY_KERNEL_DECODE_STATE kernelDecodeState) {
     state->process = process;
