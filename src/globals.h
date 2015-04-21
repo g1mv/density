@@ -46,7 +46,7 @@
 #define DENSITY_FORCE_INLINE    inline __attribute__((always_inline))
 #define DENSITY_MEMCPY     __builtin_memcpy
 #elif defined(_MSC_VER) || defined(__INTEL_COMPILER)
-#include <strings.h>
+#include <string.h>
 #define DENSITY_FORCE_INLINE    __forceinline
 #define DENSITY_MEMCPY     memcpy
 #else
