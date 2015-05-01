@@ -178,7 +178,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
         density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
 
     // Copy the remaining bytes
-    density_write_8(state->signature, state->proximitySignature);
+    DENSITY_MEMCPY(state->signature, &state->proximitySignature, sizeof(density_lion_signature));
     out->available_bytes -= (out->pointer - pointerOutBefore);
     density_memory_teleport_copy_remaining(in, out);
 

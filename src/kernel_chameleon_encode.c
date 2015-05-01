@@ -98,7 +98,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_check_
 
     switch (state->shift) {
         case density_bitsizeof(density_chameleon_signature):
-            density_write_8(state->signature, state->proximitySignature);
+            DENSITY_MEMCPY(state->signature, &state->proximitySignature, sizeof(density_chameleon_signature));
             if ((returnState = density_chameleon_encode_prepare_new_block(out, state)))
                 return returnState;
             break;
@@ -114,18 +114,19 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(density_memory_locatio
 
     if (chunk ^ found->as_uint32_t) {
         found->as_uint32_t = chunk;
-        density_write_4(out->pointer, chunk);
+        DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
         out->pointer += sizeof(uint32_t);
     } else {
         state->proximitySignature |= ((uint64_t)DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP << shift);
-        density_write_2(out->pointer, hash);
+        DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
         out->pointer += sizeof(uint16_t);
     }
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
     for (uint_fast8_t count = 0; count < density_bitsizeof(density_chameleon_signature); count++) {
-        const uint32_t chunk = density_read_4(in->pointer);
+        uint32_t chunk;
+        DENSITY_MEMCPY(&chunk, in->pointer, sizeof(uint32_t));
         density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(chunk), chunk, count, state);
         in->pointer += sizeof(uint32_t);
     }
