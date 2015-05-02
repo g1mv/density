@@ -34,8 +34,24 @@
 -- 1/05/15 23:52
 --
 
-premake.gcc.cc  = 'clang'
-premake.gcc.cxx = 'clang++'
+-- Check for tools
+if os.execute("clang -v") == 0 then
+	io.write("Using Clang/LLVM to build Density.\n")
+	premake.gcc.cc  = 'clang'
+	premake.gcc.cxx = 'clang++'
+elseif os.execute("gcc -v") == 0 then
+	io.write("Clang/LLVM was not found on the command line, switching to GCC.\n !!! WARNING !!! Density was designed and optimized against Clang/LLVM, expect performance issues.\n")
+else
+	io.write("No supported compiler found on the command line. Please install Clang/LLVM or, if it's not possible, GCC.\n")
+	os.exit(0)
+end
+
+if os.execute("git --version") > 0 then
+	io.write("Please install Git, it is required to update Density's submodules.")
+	os.exit(0)
+end
+
+-- Submodules update
 os.execute("git submodule update --init --recursive")
 
 solution "Density"
