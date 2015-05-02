@@ -149,7 +149,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_b
 #ifndef DENSITY_BLOCK_DECODE_FINISH
     goto read_block_header;
 #else
-    if (density_memory_teleport_available_bytes(in))
+    if (density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead))
         goto read_block_header;
 
     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
