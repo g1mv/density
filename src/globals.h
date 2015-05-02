@@ -42,16 +42,16 @@
 
 #include "density_api.h"
 
-#if defined(__clang__) || defined(__GNUC__)
-#define DENSITY_FORCE_INLINE    inline __attribute__((always_inline))
-#define DENSITY_MEMCPY     __builtin_memcpy
-#elif defined(_MSC_VER) || defined(__INTEL_COMPILER)
-#include <strings.h>
-#define DENSITY_FORCE_INLINE    __forceinline
-#define DENSITY_MEMCPY     memcpy
+#ifdef __clang__
+#elif defined(__GNUC__)
+#warning Clang is the recommended compiler for Density. Expect performance issues.
 #else
-#warning Impossible to force functions inlining. Expect performance issues.
+#error Unsupported compiler.
 #endif
+
+#define DENSITY_FORCE_INLINE    inline __attribute__((always_inline))
+#define DENSITY_MEMCPY          __builtin_memcpy
+#define DENSITY_MEMMOVE         __builtin_memmove
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define DENSITY_LITTLE_ENDIAN_64(b)   ((uint64_t)b)
@@ -167,20 +167,10 @@
 #define DENSITY_MASK_0_32    (uint32_t)0xFFFFFFFF
 #define DENSITY_MASK_16_32   (uint32_t)0xFFFF0000
 #define DENSITY_MASK_32_64   (uint64_t)0xFFFFFFFF00000000llu
-#define DENSITY_MASK_64_96   (uint128_t)(((uint128_t) 0xFFFFFFFF) << 64)
-#define DENSITY_MASK_96_128  (uint128_t)(((uint128_t) 0xFFFFFFFF) << 96)
 
 DENSITY_WINDOWS_EXPORT uint8_t density_version_major();
 DENSITY_WINDOWS_EXPORT uint8_t density_version_minor();
 DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
-
-DENSITY_WINDOWS_EXPORT uint16_t density_read_2(void*);
-DENSITY_WINDOWS_EXPORT uint32_t density_read_4(void*);
-DENSITY_WINDOWS_EXPORT uint64_t density_read_8(void*);
-
-DENSITY_WINDOWS_EXPORT void density_write_2(void*, uint16_t);
-DENSITY_WINDOWS_EXPORT void density_write_4(void*, uint32_t);
-DENSITY_WINDOWS_EXPORT void density_write_8(void*, uint64_t);
 
 
 /**********************************************************************************************************************

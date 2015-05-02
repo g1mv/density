@@ -41,7 +41,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_main_header_re
     header->version[2] = *(pointer + 2);
     header->compressionMode = *(pointer + 3);
     header->blockType = *(pointer + 4);
-    header->parameters.as_uint64_t = density_read_8(pointer + 8);
+    DENSITY_MEMCPY(&header->parameters.as_uint64_t, pointer + 8, sizeof(uint64_t));
 
     in->pointer += sizeof(density_main_header);
     in->available_bytes -= sizeof(density_main_header);
@@ -55,7 +55,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_main_header_wr
     *(pointer + 2) = DENSITY_REVISION;
     *(pointer + 3) = compressionMode;
     *(pointer + 4) = blockType;
-    density_write_8(pointer + 8, parameters.as_uint64_t);
+    DENSITY_MEMCPY(pointer + 8, &parameters.as_uint64_t, sizeof(uint64_t));
 
     out->pointer += sizeof(density_main_header);
     out->available_bytes -= sizeof(density_main_header);

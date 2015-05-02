@@ -83,7 +83,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_check_st
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(density_memory_location *restrict in, density_cheetah_decode_state *restrict state) {
-    state->signature = density_read_8(in->pointer);
+    DENSITY_MEMCPY(&state->signature, in->pointer, sizeof(density_cheetah_signature));
     in->pointer += sizeof(density_cheetah_signature);
     state->shift = 0;
     state->signaturesCount++;
@@ -91,14 +91,14 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(density_memory_l
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_predicted(density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
     const uint32_t chunk = state->dictionary.prediction_entries[state->lastHash].next_chunk_prediction;
-    density_write_4(out->pointer, chunk);
+    DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
     state->lastHash = DENSITY_CHEETAH_HASH_ALGORITHM(chunk);
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_a(const uint16_t hash, density_memory_location *restrict out, density_cheetah_decode_state *restrict state) {
     __builtin_prefetch(&state->dictionary.prediction_entries[hash]);
     const uint32_t chunk = state->dictionary.entries[hash].chunk_a;
-    density_write_4(out->pointer, chunk);
+    DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
     state->dictionary.prediction_entries[state->lastHash].next_chunk_prediction = chunk;
     state->lastHash = hash;
 }
@@ -109,7 +109,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_b(const uint
     const uint32_t chunk = entry->chunk_b;
     entry->chunk_b = entry->chunk_a;
     entry->chunk_a = chunk;
-    density_write_4(out->pointer, chunk);
+    DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
     state->dictionary.prediction_entries[state->lastHash].next_chunk_prediction = chunk;
     state->lastHash = hash;
 }
@@ -120,23 +120,29 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_process_uncompressed(const uint
     density_cheetah_dictionary_entry *const entry = &state->dictionary.entries[hash];
     entry->chunk_b = entry->chunk_a;
     entry->chunk_a = chunk;
-    density_write_4(out->pointer, chunk);
+    DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
     state->dictionary.prediction_entries[state->lastHash].next_chunk_prediction = chunk;
     state->lastHash = hash;
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_kernel(density_memory_location *restrict in, density_memory_location *restrict out, const uint8_t mode, density_cheetah_decode_state *restrict state) {
+    uint16_t hash;
+    uint32_t chunk;
+
     switch (mode) {
         DENSITY_CASE_GENERATOR_4_4_COMBINED(\
             density_cheetah_decode_process_predicted(out, state);, \
             DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED, \
-            density_cheetah_decode_process_compressed_a(density_read_2(in->pointer), out, state);\
+            DENSITY_MEMCPY(&hash, in->pointer, sizeof(uint16_t)); \
+            density_cheetah_decode_process_compressed_a(hash, out, state);\
             in->pointer += sizeof(uint16_t);, \
             DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A, \
-            density_cheetah_decode_process_compressed_b(density_read_2(in->pointer), out, state);\
+            DENSITY_MEMCPY(&hash, in->pointer, sizeof(uint16_t)); \
+            density_cheetah_decode_process_compressed_b(hash, out, state);\
             in->pointer += sizeof(uint16_t);, \
             DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B, \
-            density_cheetah_decode_process_uncompressed(density_read_4(in->pointer), out, state);\
+            DENSITY_MEMCPY(&chunk, in->pointer, sizeof(uint32_t)); \
+            density_cheetah_decode_process_uncompressed(chunk, out, state);\
             in->pointer += sizeof(uint32_t);, \
             DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK, \
             out->pointer += sizeof(uint32_t);, \

@@ -35,9 +35,9 @@
 #include "block_footer.h"
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_read(density_memory_location *restrict in, density_block_footer *restrict blockFooter) {
-    blockFooter->hashsum1 = density_read_8(in->pointer);
+    DENSITY_MEMCPY(&blockFooter->hashsum1, in->pointer, sizeof(uint64_t));
     in->pointer += sizeof(uint64_t);
-    blockFooter->hashsum2 = density_read_8(in->pointer);
+    DENSITY_MEMCPY(&blockFooter->hashsum2, in->pointer, sizeof(uint64_t));
     in->pointer += sizeof(uint64_t);
 
     in->available_bytes -= sizeof(density_block_footer);
@@ -46,9 +46,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_r
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_write(density_memory_location *out, const uint_fast64_t hashsum1, const uint_fast64_t hashsum2) {
-    density_write_8(out->pointer, hashsum1);
+    DENSITY_MEMCPY(out->pointer, &hashsum1, sizeof(uint64_t));
     out->pointer += sizeof(uint64_t);
-    density_write_8(out->pointer, hashsum2);
+    DENSITY_MEMCPY(out->pointer, &hashsum2, sizeof(uint64_t));
     out->pointer += sizeof(uint64_t);
 
     out->available_bytes -= sizeof(density_block_footer);

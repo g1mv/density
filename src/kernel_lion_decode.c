@@ -76,7 +76,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_check_block
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_read_signature_from_memory(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
-    state->signature = density_read_8(in->pointer);
+    DENSITY_MEMCPY(&state->signature, in->pointer, sizeof(density_lion_signature));
     in->pointer += sizeof(density_lion_signature);
 }
 
@@ -130,12 +130,12 @@ DENSITY_FORCE_INLINE const bool density_lion_decode_read_1bit_from_signature(den
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_read_chunk_hash(uint32_t *restrict hash, density_memory_location *restrict in) {
-    *hash = density_read_2(in->pointer);
+    DENSITY_MEMCPY(hash, in->pointer, sizeof(uint16_t));
     in->pointer += sizeof(uint16_t);
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_update_predictions_model(density_lion_dictionary_chunk_prediction_entry *restrict predictions, const uint32_t *restrict chunk) {
-    *(uint64_t *) ((uint32_t *) predictions + 1) = *(uint64_t *) predictions;
+    DENSITY_MEMMOVE((uint32_t *) predictions + 1, predictions, sizeof(uint64_t));
     predictions->next_chunk_a = *chunk;     // Move chunk to the top of the predictions list
 }
 
@@ -159,7 +159,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_predicted_chunk(uint32_t *restrict
 
     *hash = DENSITY_LION_HASH_ALGORITHM(chunk);
 
-    density_write_4(out->pointer, chunk);
+    DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
     out->pointer += sizeof(uint32_t);
 
     state->lastChunk = chunk;
@@ -182,14 +182,14 @@ DENSITY_FORCE_INLINE void density_lion_decode_secondary_predicted_chunk(uint32_t
 
     *hash = DENSITY_LION_HASH_ALGORITHM(chunk);
 
-    density_write_4(out->pointer, chunk);
+    DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
     out->pointer += sizeof(uint32_t);
 
     state->lastChunk = chunk;
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_write_chunk(const uint32_t *restrict chunk, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
-    density_write_4(out->pointer, *chunk);
+    DENSITY_MEMCPY(out->pointer, chunk, sizeof(uint32_t));
     out->pointer += sizeof(uint32_t);
 
     density_lion_dictionary_chunk_prediction_entry *p = &(state->dictionary.predictions[state->lastHash]);
@@ -218,7 +218,7 @@ DENSITY_FORCE_INLINE uint16_t density_lion_decode_bigram(density_memory_location
     uint16_t bigram;
 
     if (density_lion_decode_read_1bit_from_signature(in, state)) {  // DENSITY_LION_BIGRAM_SIGNATURE_FLAG_PLAIN
-        bigram = density_read_2(in->pointer);
+        DENSITY_MEMCPY(&bigram, in->pointer, sizeof(uint16_t));
         in->pointer += sizeof(uint16_t);
 
         // Update dictionary value
@@ -231,7 +231,7 @@ DENSITY_FORCE_INLINE uint16_t density_lion_decode_bigram(density_memory_location
     }
 
     // Write bigram to output
-    density_write_2(out->pointer, bigram);
+    DENSITY_MEMCPY(out->pointer, &bigram, sizeof(uint16_t));
     out->pointer += sizeof(uint16_t);
 
     return bigram;

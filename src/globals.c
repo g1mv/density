@@ -45,33 +45,3 @@ DENSITY_WINDOWS_EXPORT uint8_t density_version_minor() {
 DENSITY_WINDOWS_EXPORT uint8_t density_version_revision() {
     return DENSITY_REVISION;
 }
-
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint16_t density_read_2(void *input_pointer) {
-    uint16_t result;
-    DENSITY_MEMCPY(&result, input_pointer, sizeof(uint16_t));
-    return result;
-}
-
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint32_t density_read_4(void *input_pointer) {
-    uint32_t result;
-    DENSITY_MEMCPY(&result, input_pointer, sizeof(uint32_t));
-    return result;
-}
-
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint64_t density_read_8(void *input_pointer) {
-    uint64_t result;
-    DENSITY_MEMCPY(&result, input_pointer, sizeof(uint64_t));
-    return result;
-}
-
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_write_2(void *output_pointer, const uint16_t input) {
-    DENSITY_MEMCPY(output_pointer, &input, sizeof(uint16_t));
-}
-
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_write_4(void *output_pointer, const uint32_t input) {
-    DENSITY_MEMCPY(output_pointer, &input, sizeof(uint32_t));
-}
-
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_write_8(void *output_pointer, const uint64_t input) {
-    DENSITY_MEMCPY(output_pointer, &input, sizeof(uint64_t));
-}

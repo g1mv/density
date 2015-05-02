@@ -82,28 +82,32 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_check_
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_read_signature(density_memory_location *restrict in, density_chameleon_decode_state *restrict state) {
-    state->signature = density_read_8(in->pointer);
+    DENSITY_MEMCPY(&state->signature, in->pointer, sizeof(density_chameleon_signature));
     in->pointer += sizeof(density_chameleon_signature);
     state->shift = 0;
     state->signaturesCount++;
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_compressed(const uint16_t hash, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
-    density_write_4(out->pointer, state->dictionary.entries[hash].as_uint32_t);
+    DENSITY_MEMCPY(out->pointer, &state->dictionary.entries[hash].as_uint32_t, sizeof(uint32_t));
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_uncompressed(const uint32_t chunk, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
     const uint16_t hash = DENSITY_CHAMELEON_HASH_ALGORITHM(chunk);
     (&state->dictionary.entries[hash])->as_uint32_t = chunk;
-    density_write_4(out->pointer, chunk);
+    DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_kernel(density_memory_location *restrict in, density_memory_location *restrict out, const density_bool compressed, density_chameleon_decode_state *restrict state) {
     if (compressed) {
-        density_chameleon_decode_process_compressed(density_read_2(in->pointer), out, state);
+        uint16_t hash;
+        DENSITY_MEMCPY(&hash, in->pointer, sizeof(uint16_t));
+        density_chameleon_decode_process_compressed(hash, out, state);
         in->pointer += sizeof(uint16_t);
     } else {
-        density_chameleon_decode_process_uncompressed(density_read_4(in->pointer), out, state);
+        uint32_t chunk;
+        DENSITY_MEMCPY(&chunk, in->pointer, sizeof(uint32_t));
+        density_chameleon_decode_process_uncompressed(chunk, out, state);
         in->pointer += sizeof(uint32_t);
     }
     out->pointer += sizeof(uint32_t);

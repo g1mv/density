@@ -98,7 +98,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_check_st
 
     switch (state->shift) {
         case density_bitsizeof(density_cheetah_signature):
-            density_write_8(state->signature, state->proximitySignature);
+            DENSITY_MEMCPY(state->signature, &state->proximitySignature, sizeof(density_cheetah_signature));
             if ((returnState = density_cheetah_encode_prepare_new_block(out, state)))
                 return returnState;
             break;
@@ -119,18 +119,18 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(density_memory_location 
             uint32_t *found_b = &found->chunk_b;
             if (*found_b ^ chunk) {
                 state->proximitySignature |= ((uint64_t)DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK << shift);
-                density_write_4(out->pointer, chunk);
+                DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
                 out->pointer += sizeof(uint32_t);
             } else {
                 state->proximitySignature |= ((uint64_t)DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B << shift);
-                density_write_2(out->pointer, hash);
+                DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
                 out->pointer += sizeof(uint16_t);
             }
             *found_b = *found_a;
             *found_a = chunk;
         } else {
             state->proximitySignature |= ((uint64_t)DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A << shift);
-            density_write_2(out->pointer, hash);
+            DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
             out->pointer += sizeof(uint16_t);
         }
         *predictedChunk = chunk;
@@ -140,7 +140,8 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(density_memory_location 
 
 DENSITY_FORCE_INLINE void density_cheetah_encode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_cheetah_encode_state *restrict state) {
     for(uint_fast8_t count = 0; count < density_bitsizeof(density_cheetah_signature); count += 2) {
-        const uint32_t chunk = density_read_4(in->pointer);
+        uint32_t chunk;
+        DENSITY_MEMCPY(&chunk, in->pointer, sizeof(uint32_t));
         density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(chunk), chunk, count, state);
         in->pointer += sizeof(uint32_t);
     }
