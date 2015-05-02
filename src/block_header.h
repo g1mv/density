@@ -47,6 +47,7 @@
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
+    uint8_t reserved[4];    // To be used for storage of the previous block's relative start position (parallelizable decompressible output)
 } density_block_header;
 #pragma pack(pop)
 
