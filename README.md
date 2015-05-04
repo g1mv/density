@@ -20,11 +20,11 @@ Timing : using the *time* function, and taking the best *user* output after mult
 
 <sub>Library</sub> | <sub>Compress</sub> | <sub>Decompress</sub> | <sub>Size</sub> | <sub>Ratio</sub> | <sub>Round trip</sub>
 --- | --- | --- | --- | --- | ---
-<sub>**density** 0.12.2</sub> | <sub>0.103s (974 MB/s)</sub> | <sub>0.071s (1416 MB/s)</sub> | <sub>61 525 242</sub> | <sub>61,53%</sub> | <sub>0.174s</sub>
+<sub>**density** 0.12.2 beta</sub> | <sub>0.103s (974 MB/s)</sub> | <sub>0.071s (1416 MB/s)</sub> | <sub>61 525 242</sub> | <sub>61,53%</sub> | <sub>0.174s</sub>
 <sub>lz4 r126</sub> | <sub>0.461s (217 MB/s)</sub> | <sub>0.091s (1099 MB/s)</sub> | <sub>56 995 497</sub> | <sub>57,00%</sub> | <sub>0.552s</sub>
 <sub>lzo 2.08</sub> | <sub>0.367s (272 MB/s)</sub> | <sub>0.309s (324 MB/s)</sub> | <sub>56 709 096</sub> | <sub>56,71%</sub> | <sub>0.676s</sub>
-<sub>**density** 0.12.2</sub> | <sub>0.183s (547 MB/s)</sub> | <sub>0.144s (692 MB/s)</sub> | <sub>53 157 514</sub> | <sub>53,16%</sub> | <sub>0.327s</sub>
-<sub>**density** 0.12.2</sub> | <sub>0.360s (278 MB/s)</sub> | <sub>0.352s (284 MB/s)</sub> | <sub>48 048 466</sub> | <sub>48,05%</sub> | <sub>0.712s</sub>
+<sub>**density** 0.12.2 beta</sub> | <sub>0.183s (547 MB/s)</sub> | <sub>0.144s (692 MB/s)</sub> | <sub>53 157 514</sub> | <sub>53,16%</sub> | <sub>0.327s</sub>
+<sub>**density** 0.12.2 beta</sub> | <sub>0.360s (278 MB/s)</sub> | <sub>0.352s (284 MB/s)</sub> | <sub>48 048 466</sub> | <sub>48,05%</sub> | <sub>0.712s</sub>
 <sub>lz4 r126</sub> | <sub>1.520s (66 MB/s)</sub> | <sub>0.087s (1149 MB/s)</sub> | <sub>47 082 421</sub> | <sub>47,08%</sub> | <sub>1.607s</sub>
 <sub>lzo 2.08</sub> | <sub>9.562s (10 MB/s)</sub> | <sub>0.319s (313 MB/s)</sub> | <sub>41 720 721</sub> | <sub>41,72%</sub> | <sub>9.881s</sub>
 
@@ -96,9 +96,10 @@ The following assumes you already have *git* installed.
 
 **Mac OS X**
 
-On OS X, Clang/LLVM is the default compiler which makes things simpler.
+On OS X, Clang/LLVM is the default compiler, which makes things simpler.
 
 1) Download and install [premake](http://premake.github.io/) for OS X and make it available in your path (if you have [homebrew](https://github.com/Homebrew/homebrew) installed, typing "brew install premake" in a command line should do the trick).
+
 2) Run the following from the command line :
 
     cd build
@@ -110,7 +111,9 @@ On OS X, Clang/LLVM is the default compiler which makes things simpler.
 On Linux, Clang/LLVM is not always available by default.
 
 1) Install Clang/LLVM if you don't have it already (on the Debian distribution for example, sudo apt-get install clang-3.5 should do the trick)
+
 2) Download and install [premake](http://premake.github.io/) for Linux and make it available in your path.
+
 3) Run the following from the command line :
 
     cd build
@@ -122,9 +125,13 @@ On Linux, Clang/LLVM is not always available by default.
 On Windows, things are a (little) bit more complicated.
 
 1) First, check you have git installed, if not you can [get it here](https://www.git-scm.com/download/win). Make it available in your path.
+
 2) Microsoft Visual Studio is required as we will use its linker, [get it here](https://www.visualstudio.com/en-us/products/free-developer-offers-vs.aspx).
+
 3) Now we proceed with the installation of Clang/LLVM for windows, thanks to the **ClangOnWin** project it's easy, you can [download it here](http://sourceforge.net/projects/clangonwin/).
+
 4) Download and install [premake](http://premake.github.io/) for Windows and make it available in your path (edit the Path environment variable).
+
 5) Run the following from the command line :
    
        cd build
