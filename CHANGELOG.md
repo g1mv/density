@@ -3,7 +3,7 @@
 *May 4, 2015*
 
 * Added an integrated in-memory benchmark
-* Windows compatibility
+* Better Windows compatibility
 * Fixed misaligned load/stores
 * Switched to premake build system
 * Performance optimizations (pointers, branches, loops ...)
