@@ -40,7 +40,7 @@ if os.execute("clang -v") == 0 then
 	premake.gcc.cc  = 'clang'
 	premake.gcc.cxx = 'clang++'
 elseif os.execute("gcc -v") == 0 then
-	io.write("Clang/LLVM was not found on the command line, switching to GCC.\n !!! WARNING !!! Density was designed and optimized against Clang/LLVM, expect performance issues.\n")
+	io.write("Clang/LLVM was not found on the command line, switching to GCC.\n\n !!! WARNING !!! Density was designed and optimized against Clang/LLVM, expect performance issues.\n\n")
 else
 	io.write("No supported compiler found on the command line. Please install Clang/LLVM or, if it's not possible, GCC.\n")
 	os.exit(0)
