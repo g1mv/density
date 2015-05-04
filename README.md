@@ -135,7 +135,7 @@ On Windows, things are a (little) bit more complicated.
 5) Run the following from the command line :
    
        cd build
-       premake4 gmake
+       premake4.exe gmake
        make
 
 And that's it ! You can now use the integrated in-memory benchmark to test your files (the *benchmark* or *benchmark.exe* binary).
