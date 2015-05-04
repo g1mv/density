@@ -90,8 +90,9 @@ Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.3, 2.3
 
 Build
 -----
-DENSITY is fully C99 compliant and can therefore be built on a number of platforms. It uses the [premake](http://premake.github.io/) build system.
-The library was developped ang optimized against Clang/LLVM, it is therefore *strongly* recommended to compile with Clang/LLVM to get the best performing DENSITY - especially if you intend to perform benchmarks -, but if that's not possible GCC is also supported.
+DENSITY can be built on a number of platforms. It uses the [premake](http://premake.github.io/) build system.
+
+It was developped ang optimized against Clang/LLVM, therefore it is *strongly* recommended to compile with Clang/LLVM - especially if you intend to perform benchmarks -, but if that's not possible GCC is also supported.
 The following assumes you already have *git* installed.
 
 **Mac OS X**
