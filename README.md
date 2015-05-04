@@ -124,13 +124,13 @@ On Linux, Clang/LLVM is not always available by default.
 
 On Windows, things are a (little) bit more complicated.
 
-1) First, check you have git installed, if not you can [get it here](https://www.git-scm.com/download/win). Make it available in your path.
+1) First, check if you have git installed, if not you can [get it here](https://www.git-scm.com/download/win). Make it available in your path.
 
 2) We'll use *GNU make* to build the project, on Windows it's not part of the default toolset but you can [download a port here](http://gnuwin32.sourceforge.net/packages/make.htm). Make it available in your path.
 
 3) Microsoft Visual Studio is required as we will use its linker, [get it here](https://www.visualstudio.com/en-us/products/free-developer-offers-vs.aspx).
 
-4) Now, let's proceed with Clang/LLVM for Windows, thanks to the **ClangOnWin** project it's easy to install, and you can [download it here](http://sourceforge.net/projects/clangonwin/).
+4) Now we can install Clang/LLVM for Windows, and thanks to the **ClangOnWin** project it's easy ! You can [download it here](http://sourceforge.net/projects/clangonwin/). Make it available in your path.
 
 5) Download and install [premake](http://premake.github.io/) for Windows and make it available in your path (edit the Path environment variable).
 
