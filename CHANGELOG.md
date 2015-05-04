@@ -1,3 +1,14 @@
+0.12.2 beta
+-----------
+*May 4, 2015*
+
+* Added an integrated in-memory benchmark
+* Windows compatibility
+* Fixed misaligned load/stores
+* Switched to premake build system
+* Performance optimizations (pointers, branches, loops ...)
+* Various fixes and improvements
+
 0.12.1 beta
 -----------
 *April 3, 2015*
