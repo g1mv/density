@@ -91,7 +91,7 @@ Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.3, 2.3
 Build
 -----
 DENSITY is fully C99 compliant and can therefore be built on a number of platforms. It uses the [premake](http://premake.github.io/) build system.
-The library was developped ang optimized against Clang/LLVM, it is therefore *highly* recommended to compile using Clang/LLVM for best performance, but if that's not possible GCC is also supported.
+The library was developped ang optimized against Clang/LLVM, it is therefore *strongly* recommended to compile with Clang/LLVM to get the best performing DENSITY - especially if you intend to perform benchmarks -, but if that's not possible GCC is also supported.
 The following assumes you already have *git* installed.
 
 **Mac OS X**
@@ -110,7 +110,7 @@ On OS X, Clang/LLVM is the default compiler, which makes things simpler.
 
 On Linux, Clang/LLVM is not always available by default.
 
-1) Install Clang/LLVM if you don't have it already (on the Debian distribution for example, sudo apt-get install clang-3.5 should do the trick)
+1) Install Clang/LLVM if you don't have it already (on the Debian distribution for example, *sudo apt-get install clang-3.5* should do the trick)
 
 2) Download and install [premake](http://premake.github.io/) for Linux and make it available in your path.
 
@@ -126,13 +126,15 @@ On Windows, things are a (little) bit more complicated.
 
 1) First, check you have git installed, if not you can [get it here](https://www.git-scm.com/download/win). Make it available in your path.
 
-2) Microsoft Visual Studio is required as we will use its linker, [get it here](https://www.visualstudio.com/en-us/products/free-developer-offers-vs.aspx).
+2) We'll use *GNU make* to build the project, on Windows it's not part of the default toolset but you can [download a port here](http://gnuwin32.sourceforge.net/packages/make.htm). Make it available in your path.
 
-3) Now we proceed with the installation of Clang/LLVM for windows, thanks to the **ClangOnWin** project it's easy, you can [download it here](http://sourceforge.net/projects/clangonwin/).
+3) Microsoft Visual Studio is required as we will use its linker, [get it here](https://www.visualstudio.com/en-us/products/free-developer-offers-vs.aspx).
 
-4) Download and install [premake](http://premake.github.io/) for Windows and make it available in your path (edit the Path environment variable).
+4) Now, let's proceed with Clang/LLVM for Windows, thanks to the **ClangOnWin** project it's easy to install, and you can [download it here](http://sourceforge.net/projects/clangonwin/).
 
-5) Run the following from the command line :
+5) Download and install [premake](http://premake.github.io/) for Windows and make it available in your path (edit the Path environment variable).
+
+6) Run the following from the command line :
    
        cd build
        premake4.exe gmake
