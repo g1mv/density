@@ -111,7 +111,8 @@ int main(int argc, char *argv[]) {
     DENSITY_BLOCK_TYPE block_type = DENSITY_BLOCK_TYPE_DEFAULT;
     bool compression_only = false;
 
-    unsigned int start = 1;
+    if(argc <= 1)
+        density_benchmark_client_usage();
     for (unsigned int count = 1; count < argc - 1; count++) {
         if (argv[count][0] == '-') {
             switch (argv[count][1]) {
@@ -194,7 +195,7 @@ int main(int argc, char *argv[]) {
         else {
             DENSITY_BENCHMARK_BOLD(printf("on"));
         }
-        printf("\nPre-heating\n");
+        printf("\nPre-heating ...\n");
         density_buffer_processing_result result = density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type, NULL, NULL);
         if (result.state) {
             DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
@@ -214,7 +215,7 @@ int main(int argc, char *argv[]) {
                                                 printf(" bytes).");, true);
             }
         }
-        printf("Starting main bench\n");
+        printf("Starting main bench.\n");
         if (compression_only)
             printf("Compressing ");
         else
@@ -222,7 +223,9 @@ int main(int argc, char *argv[]) {
         density_benchmark_format_decimal(uncompressed_size);
         printf(" bytes to ");
         density_benchmark_format_decimal(compressed_size);
-        printf(" bytes (compression ratio %.2lf%% or ", (100.0 * compressed_size) / uncompressed_size);
+        printf(" bytes (compression ratio ");
+        DENSITY_BENCHMARK_BOLD(printf("%.2lf%%", (100.0 * compressed_size) / uncompressed_size));
+        printf(" or ");
         DENSITY_BENCHMARK_BOLD(printf("%.3fx", (1.0 * uncompressed_size) / compressed_size));
         if (compression_only)
             printf(")\n");
@@ -244,23 +247,23 @@ int main(int argc, char *argv[]) {
         double decompress_speed;
         double decompress_speed_low;
         double decompress_speed_high;
+        double compress_time_elapsed;
+        double decompress_time_elapsed;
+        cputime_chronometer chrono;
 
         while (total_time <= 15.0) {
             ++iterations;
 
-            getrusage(RUSAGE_SELF, &usage);
-            struct timeval start = usage.ru_utime;
+            cputime_chronometer_start(&chrono);
             result = density_buffer_compress(in, uncompressed_size, out, compressed_size, compression_mode, block_type, NULL, NULL);
-            getrusage(RUSAGE_SELF, &usage);
-            struct timeval lap = usage.ru_utime;
+            compress_time_elapsed = cputime_chronometer_stop(&chrono);
 
             if (!compression_only) {
+                cputime_chronometer_start(&chrono);
                 result = density_buffer_decompress(out, compressed_size, in, uncompressed_size, NULL, NULL);
-                getrusage(RUSAGE_SELF, &usage);
-                stop = usage.ru_utime;
+                decompress_time_elapsed = cputime_chronometer_stop(&chrono);
             }
 
-            double compress_time_elapsed = ((lap.tv_sec * DENSITY_CHRONO_MICROSECONDS + lap.tv_usec) - (start.tv_sec * DENSITY_CHRONO_MICROSECONDS + start.tv_usec)) / DENSITY_CHRONO_MICROSECONDS;
             total_compress_time += compress_time_elapsed;
 
             if (compress_time_elapsed < compress_time_low)
@@ -275,7 +278,6 @@ int main(int argc, char *argv[]) {
             total_time += compress_time_elapsed;
 
             if (!compression_only) {
-                double decompress_time_elapsed = ((stop.tv_sec * DENSITY_CHRONO_MICROSECONDS + stop.tv_usec) - (lap.tv_sec * DENSITY_CHRONO_MICROSECONDS + lap.tv_usec)) / DENSITY_CHRONO_MICROSECONDS;
                 total_decompress_time += decompress_time_elapsed;
 
                 if (decompress_time_elapsed < decompress_time_low)

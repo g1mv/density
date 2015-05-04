@@ -1,3 +1,6 @@
 [submodule "src/spookyhash"]
 	path = src/spookyhash
 	url = https://github.com/centaurean/spookyhash.git
+[submodule "benchmark/src/cputime"]
+	path = benchmark/src/cputime
+	url = https://github.com/centaurean/cputime.git

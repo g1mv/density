@@ -82,7 +82,7 @@ solution "Density"
 		kind "ConsoleApp"
 		language "C"
 		files {
-			"../src/benchmark/src/*.h",
-			"../src/benchmark/src/*.c"
+			"../benchmark/src/**.h",
+			"../benchmark/src/**.c"
 		}
 		links { "spookyhash", "density" }

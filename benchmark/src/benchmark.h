@@ -34,33 +34,7 @@
 #include <inttypes.h>
 
 #if defined(_WIN64) || defined(_WIN32)
-#include <windows.h>
-#include <time.h>
-
-#define RUSAGE_SELF     0
-#define RUSAGE_THREAD   1
-
-struct rusage {
-    struct timeval ru_utime; /* user CPU time used */
-    struct timeval ru_stime; /* system CPU time used */
-    long   ru_maxrss;        /* maximum resident set size */
-    long   ru_ixrss;         /* integral shared memory size */
-    long   ru_idrss;         /* integral unshared data size */
-    long   ru_isrss;         /* integral unshared stack size */
-    long   ru_minflt;        /* page reclaims (soft page faults) */
-    long   ru_majflt;        /* page faults (hard page faults) */
-    long   ru_nswap;         /* swaps */
-    long   ru_inblock;       /* block input operations */
-    long   ru_oublock;       /* block output operations */
-    long   ru_msgsnd;        /* IPC messages sent */
-    long   ru_msgrcv;        /* IPC messages received */
-    long   ru_nsignals;      /* signals received */
-    long   ru_nvcsw;         /* voluntary context switches */
-    long   ru_nivcsw;        /* involuntary context switches */
-};
 #else
-#include <sys/resource.h>
-
 #define DENSITY_BENCHMARK_ALLOW_ANSI_ESCAPE_SEQUENCES
 #endif
 
@@ -112,7 +86,8 @@ struct rusage {
 #define DENSITY_BENCHMARK_PLATFORM_STRING         "an unknown platform"
 #endif
 
-#include "../../density_api.h"
+#include "../../src/density_api.h"
+#include "cputime/src/cputime.h"
 
 #define DENSITY_CHRONO_MICROSECONDS         1000000.0
 #define DENSITY_ESCAPE_CHARACTER            ((char)27)
