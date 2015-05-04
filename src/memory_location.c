@@ -34,22 +34,22 @@
 
 #include "memory_location.h"
 
-DENSITY_FORCE_INLINE density_memory_location *density_memory_location_allocate(void *(*mem_alloc)(size_t)) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_memory_location *density_memory_location_allocate(void *(*mem_alloc)(size_t)) {
     density_memory_location *location = mem_alloc(sizeof(density_memory_location));
 
     return location;
 }
 
-DENSITY_FORCE_INLINE void density_memory_location_free(density_memory_location *location, void (*mem_free)(void *)) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_location_free(density_memory_location *location, void (*mem_free)(void *)) {
     mem_free(location);
 }
 
-DENSITY_FORCE_INLINE void density_memory_location_encapsulate(density_memory_location *restrict location, density_byte *restrict pointer, const uint_fast64_t bytes) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_location_encapsulate(density_memory_location *restrict location, density_byte *restrict pointer, const uint_fast64_t bytes) {
     location->pointer = pointer;
     location->available_bytes = bytes;
     location->initial_available_bytes = bytes;
 }
 
-DENSITY_FORCE_INLINE uint_fast64_t density_memory_location_used(density_memory_location *location) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast64_t density_memory_location_used(density_memory_location *location) {
     return location->initial_available_bytes - location->available_bytes;
 }

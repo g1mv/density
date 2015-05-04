@@ -38,6 +38,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#if defined(_WIN64) || defined(_WIN32)
+#define DENSITY_WINDOWS_EXPORT __declspec(dllexport)
+#else
+#define DENSITY_WINDOWS_EXPORT
+#endif
+
 /***********************************************************************************************************************
  *                                                                                                                     *
  * API data structures                                                                                                 *

@@ -33,9 +33,9 @@
  */
 
 #ifndef DENSITY_BLOCK_DECODE_FINISH
-DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state) {
 #else
-DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state, void (*mem_free)(void *)) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state, void (*mem_free)(void *)) {
 #endif
     DENSITY_KERNEL_DECODE_STATE kernelDecodeState;
     DENSITY_BLOCK_DECODE_STATE blockDecodeState;
@@ -149,7 +149,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_finish(dens
 #ifndef DENSITY_BLOCK_DECODE_FINISH
     goto read_block_header;
 #else
-    if (density_memory_teleport_available_bytes(in))
+    if (density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead))
         goto read_block_header;
 
     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)

@@ -53,28 +53,28 @@ typedef struct {
     density_memory_location *directMemoryLocation;
 } density_memory_teleport;
 
-density_memory_teleport *density_memory_teleport_allocate(uint_fast64_t, void *(*)(size_t));
+DENSITY_WINDOWS_EXPORT density_memory_teleport *density_memory_teleport_allocate(uint_fast64_t, void *(*)(size_t));
 
-void density_memory_teleport_free(density_memory_teleport *, void (*)(void *));
+DENSITY_WINDOWS_EXPORT void density_memory_teleport_free(density_memory_teleport *, void (*)(void *));
 
-void density_memory_teleport_change_input_buffer(density_memory_teleport *, const density_byte *, const uint_fast64_t);
+DENSITY_WINDOWS_EXPORT void density_memory_teleport_change_input_buffer(density_memory_teleport *, const density_byte *, const uint_fast64_t);
 
-void density_memory_teleport_reset_staging_buffer(density_memory_teleport *);
+DENSITY_WINDOWS_EXPORT void density_memory_teleport_reset_staging_buffer(density_memory_teleport *);
 
-void density_memory_teleport_copy_from_direct_buffer_to_staging_buffer(density_memory_teleport *);
+DENSITY_WINDOWS_EXPORT void density_memory_teleport_copy_from_direct_buffer_to_staging_buffer(density_memory_teleport *);
 
-density_memory_location *density_memory_teleport_read(density_memory_teleport *, const uint_fast64_t);
+DENSITY_WINDOWS_EXPORT density_memory_location *density_memory_teleport_read(density_memory_teleport *, const uint_fast64_t);
 
-density_memory_location *density_memory_teleport_read_reserved(density_memory_teleport *, const uint_fast64_t, const uint_fast64_t);
+DENSITY_WINDOWS_EXPORT density_memory_location *density_memory_teleport_read_reserved(density_memory_teleport *, const uint_fast64_t, const uint_fast64_t);
 
-density_memory_location *density_memory_teleport_read_remaining_reserved(density_memory_teleport *, const uint_fast64_t);
+DENSITY_WINDOWS_EXPORT density_memory_location *density_memory_teleport_read_remaining_reserved(density_memory_teleport *, const uint_fast64_t);
 
-uint_fast64_t density_memory_teleport_available_bytes(density_memory_teleport *);
+DENSITY_WINDOWS_EXPORT uint_fast64_t density_memory_teleport_available_bytes(density_memory_teleport *);
 
-uint_fast64_t density_memory_teleport_available_bytes_reserved(density_memory_teleport *, const uint_fast64_t);
+DENSITY_WINDOWS_EXPORT uint_fast64_t density_memory_teleport_available_bytes_reserved(density_memory_teleport *, const uint_fast64_t);
 
-void density_memory_teleport_copy(density_memory_teleport *, density_memory_location *, const uint_fast64_t);
+DENSITY_WINDOWS_EXPORT void density_memory_teleport_copy(density_memory_teleport *, density_memory_location *, const uint_fast64_t);
 
-void density_memory_teleport_copy_remaining(density_memory_teleport *, density_memory_location *);
+DENSITY_WINDOWS_EXPORT void density_memory_teleport_copy_remaining(density_memory_teleport *, density_memory_location *);
 
 #endif

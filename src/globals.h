@@ -38,20 +38,20 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <stddef.h>
 
-#if defined(__INTEL_COMPILER)
-#define DENSITY_FORCE_INLINE __forceinline
-#elif defined(_MSC_VER)
-#define DENSITY_FORCE_INLINE __forceinline
+#include "density_api.h"
+
+#ifdef __clang__
 #elif defined(__GNUC__)
-#define DENSITY_FORCE_INLINE inline __attribute__((always_inline))
-#elif defined(__clang__)
-#define DENSITY_FORCE_INLINE inline __attribute__((always_inline))
+#warning Clang is the recommended compiler for Density. Expect performance issues.
 #else
-#warning Impossible to force functions inlining. Expect performance issues.
+#error Unsupported compiler.
 #endif
+
+#define DENSITY_FORCE_INLINE    inline __attribute__((always_inline))
+#define DENSITY_MEMCPY          __builtin_memcpy
+#define DENSITY_MEMMOVE         __builtin_memmove
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define DENSITY_LITTLE_ENDIAN_64(b)   ((uint64_t)b)
@@ -164,6 +164,14 @@
 
 #define density_bitsizeof(x) (8 * sizeof(x))
 
+#define DENSITY_MASK_0_32    (uint32_t)0xFFFFFFFF
+#define DENSITY_MASK_16_32   (uint32_t)0xFFFF0000
+#define DENSITY_MASK_32_64   (uint64_t)0xFFFFFFFF00000000llu
+
+DENSITY_WINDOWS_EXPORT uint8_t density_version_major();
+DENSITY_WINDOWS_EXPORT uint8_t density_version_minor();
+DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
+
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -176,7 +184,7 @@
 
 #define DENSITY_MAJOR_VERSION   0
 #define DENSITY_MINOR_VERSION   12
-#define DENSITY_REVISION        1
+#define DENSITY_REVISION        2
 
 /*
  * Compile-time switches useful for pure data encoding and decoding

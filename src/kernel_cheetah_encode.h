@@ -54,7 +54,7 @@
 #include "memory_location.h"
 #include "memory_teleport.h"
 
-#define DENSITY_CHEETAH_ENCODE_PROCESS_UNIT_SIZE                    (8 * sizeof(uint64_t))
+#define DENSITY_CHEETAH_ENCODE_PROCESS_UNIT_SIZE                    ((density_bitsizeof(density_cheetah_signature) >> 1) * sizeof(uint32_t))
 
 typedef enum {
     DENSITY_CHEETAH_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
@@ -65,25 +65,25 @@ typedef enum {
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_CHEETAH_ENCODE_PROCESS process;
-
-#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
-    uint_fast64_t resetCycle;
-#endif
-
-    uint_fast32_t shift;
     density_cheetah_signature proximitySignature;
+    uint_fast16_t lastHash;
+    uint_fast8_t shift;
     density_cheetah_signature * signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
 
-    uint_fast16_t lastHash;
+    DENSITY_CHEETAH_ENCODE_PROCESS process;
 
     density_cheetah_dictionary dictionary;
+#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
+    uint_fast64_t resetCycle;
+#endif
 } density_cheetah_encode_state;
 #pragma pack(pop)
 
-DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_init(density_cheetah_encode_state *);
-DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_encode_state *);
-DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_finish(density_memory_teleport *, density_memory_location *, density_cheetah_encode_state *);
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_init(density_cheetah_encode_state *);
+
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_encode_state *);
+
+DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_finish(density_memory_teleport *, density_memory_location *, density_cheetah_encode_state *);
 #endif
