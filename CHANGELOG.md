@@ -5,7 +5,7 @@
 * Added an integrated in-memory benchmark
 * Better Windows compatibility
 * Fixed misaligned load/stores
-* Switched to premake build system
+* Switched to the premake build system
 * Performance optimizations (pointers, branches, loops ...)
 * Various fixes and improvements
 
