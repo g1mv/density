@@ -118,17 +118,18 @@ DENSITY_FORCE_INLINE const bool density_chameleon_decode_test_compressed(density
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
-#ifdef __clang__
     uint_fast8_t count = 0;
+
+#ifdef __clang__
     for(uint_fast8_t count_b = 0; count_b < 8; count_b ++) {
         DENSITY_UNROLL_8(density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state, count++), state));
     }
 #else
-    uint_fast8_t count = 0;
     for(uint_fast8_t count_b = 0; count_b < 16; count_b ++) {
         DENSITY_UNROLL_4(density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state, count++), state));
     }
 #endif
+
     state->shift = density_bitsizeof(density_chameleon_signature);
 }
 

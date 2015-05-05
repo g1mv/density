@@ -36,7 +36,7 @@
 
 -- Check for tools
 if os.execute("clang -v") > 0 and os.execute("gcc -v") > 0 then
-	io.write("No supported compiler found on the command line. Please install Clang/LLVM or, if it's not possible, GCC.\n")
+	io.write("No supported compiler found on the command line. Please install Clang/LLVM or GCC.\n")
 	os.exit(0)
 end
 
