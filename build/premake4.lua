@@ -35,19 +35,13 @@
 --
 
 -- Check for tools
-if os.execute("clang -v") == 0 then
-	io.write("Using Clang/LLVM to build Density.\n")
-	premake.gcc.cc  = 'clang'
-	premake.gcc.cxx = 'clang++'
-elseif os.execute("gcc -v") == 0 then
-	io.write("Clang/LLVM was not found on the command line, switching to GCC.\n\n !!! WARNING !!! Density was designed and optimized against Clang/LLVM, expect performance issues.\n\n")
-else
+if os.execute("clang -v") > 0 and os.execute("gcc -v") > 0 then
 	io.write("No supported compiler found on the command line. Please install Clang/LLVM or, if it's not possible, GCC.\n")
 	os.exit(0)
 end
 
 if os.execute("git --version") > 0 then
-	io.write("Please install Git, it is required to update Density's submodules.")
+	io.write("Please install Git, it is required for submodules updating.")
 	os.exit(0)
 end
 
@@ -56,10 +50,8 @@ os.execute("git submodule update --init --recursive")
 
 solution "Density"
 	configurations { "Release" }
-	configuration { "Release", "linux or macosx", "gmake" }
-		buildoptions { "-Ofast", "-fomit-frame-pointer", "-flto", "-std=c99" }
-	configuration { "Release", "windows", "gmake" }
-		buildoptions { "-Ofast", "-fomit-frame-pointer", "-std=c99" }
+	buildoptions { "-std=c99" }
+	flags { "OptimizeSpeed", "NoFramePointer" }
 
 	project "spookyhash"
 		kind "StaticLib"

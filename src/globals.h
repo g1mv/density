@@ -42,10 +42,7 @@
 
 #include "density_api.h"
 
-#ifdef __clang__
-#elif defined(__GNUC__)
-#warning Clang is the recommended compiler for Density. Expect performance issues.
-#else
+#if !defined(__clang__) && !defined(__GNUC__)
 #error Unsupported compiler.
 #endif
 
@@ -184,7 +181,7 @@ DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
 
 #define DENSITY_MAJOR_VERSION   0
 #define DENSITY_MINOR_VERSION   12
-#define DENSITY_REVISION        2
+#define DENSITY_REVISION        3
 
 /*
  * Compile-time switches useful for pure data encoding and decoding

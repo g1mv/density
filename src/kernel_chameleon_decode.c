@@ -70,7 +70,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_check_
                 density_byte resetDictionaryCycleShift = state->parameters.as_bytes[0];
                 if (resetDictionaryCycleShift) {
                     density_chameleon_dictionary_reset(&state->dictionary);
-                    state->resetCycle = (uint_fast64_t) (1 << resetDictionaryCycleShift) - 1;
+                    state->resetCycle = (uint_fast64_t)(1 << resetDictionaryCycleShift) - 1;
                 }
             }
 
@@ -118,9 +118,17 @@ DENSITY_FORCE_INLINE const bool density_chameleon_decode_test_compressed(density
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
-    for(uint_fast8_t count = 0; count < density_bitsizeof(density_chameleon_signature); count ++)
-        density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state, count), state);
-
+#ifdef __clang__
+    uint_fast8_t count = 0;
+    for(uint_fast8_t count_b = 0; count_b < 8; count_b ++) {
+        DENSITY_UNROLL_8(density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state, count++), state));
+    }
+#else
+    uint_fast8_t count = 0;
+    for(uint_fast8_t count_b = 0; count_b < 16; count_b ++) {
+        DENSITY_UNROLL_4(density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state, count++), state));
+    }
+#endif
     state->shift = density_bitsizeof(density_chameleon_signature);
 }
 
@@ -132,7 +140,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_
     state->parameters = parameters;
     density_byte resetDictionaryCycleShift = state->parameters.as_bytes[0];
     if (resetDictionaryCycleShift)
-        state->resetCycle = (uint_fast64_t) (1 << resetDictionaryCycleShift) - 1;
+        state->resetCycle = (uint_fast64_t)(1 << resetDictionaryCycleShift) - 1;
 
     state->endDataOverhead = endDataOverhead;
 
