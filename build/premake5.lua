@@ -51,7 +51,7 @@ os.execute("git submodule update --init --recursive")
 solution "Density"
 	configurations { "Release" }
 	buildoptions { "-std=c99" }
-	flags { "OptimizeSpeed", "NoFramePointer" }
+	flags { "OptimizeSpeed", "NoFramePointer", "LinkTimeOptimization" }
 
 	project "spookyhash"
 		kind "StaticLib"
