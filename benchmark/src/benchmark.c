@@ -43,7 +43,7 @@ void density_benchmark_client_usage() {
     printf("                                    1 = Chameleon algorithm\n");
     printf("                                    2 = Cheetah algorithm\n");
     printf("                                    3 = Lion algorithm\n");
-    printf("  -c                                Compress only\n\n");
+    printf("  -c                                Compress only\n");
     printf("  -x                                Activate integrity hashsum checking\n\n");
     exit(0);
 }
