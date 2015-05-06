@@ -149,13 +149,12 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_process_unit(density_memory_loc
         in->pointer += sizeof(uint32_t);
     }
 #else
-    for(uint_fast8_t count_b = 0; count_b < 16; count_b ++) {
+    for (uint_fast8_t count_b = 0; count_b < 16; count_b++) {
         DENSITY_UNROLL_2(\
             DENSITY_MEMCPY(&chunk, in->pointer, sizeof(uint32_t));\
             density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(chunk), chunk, count, state);\
             in->pointer += sizeof(uint32_t);\
-            count += 2;\
-        );
+            count += 2);
     }
 #endif
 
