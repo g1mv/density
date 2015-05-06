@@ -48,7 +48,7 @@
 #include "globals.h"
 #include "kernel_lion.h"
 
-#define DENSITY_LION_NUMBER_OF_FORMS                                    5
+#define DENSITY_LION_NUMBER_OF_FORMS                                    8
 
 // Unary codes (reversed) except the last one
 #define DENSITY_LION_FORM_MODEL_ENTROPY_CODES {\
@@ -56,7 +56,10 @@
     {DENSITY_BINARY_TO_UINT(10), 2},\
     {DENSITY_BINARY_TO_UINT(100), 3},\
     {DENSITY_BINARY_TO_UINT(1000), 4},\
-    {DENSITY_BINARY_TO_UINT(0000), 4},\
+    {DENSITY_BINARY_TO_UINT(10000), 5},\
+    {DENSITY_BINARY_TO_UINT(100000), 6},\
+    {DENSITY_BINARY_TO_UINT(1000000), 7},\
+    {DENSITY_BINARY_TO_UINT(0000000), 7},\
 }
 
 #define DENSITY_LION_FORM_MODEL_ENTROPY_DECODES {0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4}
@@ -64,10 +67,10 @@
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    DENSITY_LION_FORM form;
     uint32_t usage;
-    uint8_t rank;
     void *previousForm;
+    DENSITY_LION_FORM form;
+    uint8_t rank;
 } density_lion_form_node;
 
 typedef struct {
@@ -77,10 +80,10 @@ typedef struct {
 } density_lion_form_data;
 #pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT void density_lion_form_model_init(density_lion_form_data *);
+DENSITY_WINDOWS_EXPORT void density_lion_form_model_init(density_lion_form_data *const);
 
-DENSITY_WINDOWS_EXPORT void density_lion_form_model_update(density_lion_form_data *, density_lion_form_node *, density_lion_form_node *);
+DENSITY_WINDOWS_EXPORT void density_lion_form_model_update(density_lion_form_data *const, density_lion_form_node *const, density_lion_form_node *const);
 
-DENSITY_WINDOWS_EXPORT density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *, const DENSITY_LION_FORM);
+DENSITY_WINDOWS_EXPORT density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *const, const DENSITY_LION_FORM);
 
 #endif

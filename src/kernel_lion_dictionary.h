@@ -59,6 +59,9 @@ typedef struct {
 typedef struct {
     uint32_t chunk_a;
     uint32_t chunk_b;
+    uint32_t chunk_c;
+    uint32_t chunk_d;
+    uint32_t chunk_e;
 } density_lion_dictionary_chunk_entry;
 
 typedef struct {

@@ -46,7 +46,7 @@
 
 const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUMBER_OF_FORMS] = DENSITY_LION_FORM_MODEL_ENTROPY_CODES;
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_init(density_lion_form_data *data) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_init(density_lion_form_data *const data) {
     density_lion_form_node* rank_0 = &data->formsPool[0];
     rank_0->form = DENSITY_LION_FORM_SECONDARY_ACCESS;
     rank_0->usage = 0;
@@ -69,21 +69,42 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_init(de
     data->formsIndex[DENSITY_LION_FORM_CHUNK_DICTIONARY_B] = rank_2;
 
     density_lion_form_node* rank_3 = &data->formsPool[3];
-    rank_3->form = DENSITY_LION_FORM_CHUNK_PREDICTIONS;
+    rank_3->form = DENSITY_LION_FORM_CHUNK_PREDICTIONS_A;
     rank_3->usage = 0;
     rank_3->rank = 3;
     rank_3->previousForm = rank_2;
-    data->formsIndex[DENSITY_LION_FORM_CHUNK_PREDICTIONS] = rank_3;
+    data->formsIndex[DENSITY_LION_FORM_CHUNK_PREDICTIONS_A] = rank_3;
 
     density_lion_form_node* rank_4 = &data->formsPool[4];
-    rank_4->form = DENSITY_LION_FORM_CHUNK_SECONDARY_PREDICTIONS;
+    rank_4->form = DENSITY_LION_FORM_CHUNK_PREDICTIONS_B;
     rank_4->usage = 0;
     rank_4->rank = 4;
     rank_4->previousForm = rank_3;
-    data->formsIndex[DENSITY_LION_FORM_CHUNK_SECONDARY_PREDICTIONS] = rank_4;
+    data->formsIndex[DENSITY_LION_FORM_CHUNK_PREDICTIONS_B] = rank_4;
+
+    density_lion_form_node* rank_5 = &data->formsPool[5];
+    rank_5->form = DENSITY_LION_FORM_CHUNK_DICTIONARY_C;
+    rank_5->usage = 0;
+    rank_5->rank = 5;
+    rank_5->previousForm = rank_4;
+    data->formsIndex[DENSITY_LION_FORM_CHUNK_DICTIONARY_C] = rank_5;
+
+    density_lion_form_node* rank_6 = &data->formsPool[6];
+    rank_6->form = DENSITY_LION_FORM_CHUNK_PREDICTIONS_C;
+    rank_6->usage = 0;
+    rank_6->rank = 6;
+    rank_6->previousForm = rank_5;
+    data->formsIndex[DENSITY_LION_FORM_CHUNK_PREDICTIONS_C] = rank_6;
+
+    density_lion_form_node* rank_7 = &data->formsPool[7];
+    rank_7->form = DENSITY_LION_FORM_CHUNK_DICTIONARY_D;
+    rank_7->usage = 0;
+    rank_7->rank = 7;
+    rank_7->previousForm = rank_6;
+    data->formsIndex[DENSITY_LION_FORM_CHUNK_DICTIONARY_D] = rank_7;
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(density_lion_form_data *restrict data, density_lion_form_node *restrict form, density_lion_form_node *restrict previous_form) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(density_lion_form_data *const restrict data, density_lion_form_node *const restrict form, density_lion_form_node *const restrict previous_form) {
     if (density_unlikely(previous_form->usage < form->usage)) {    // Relative stability is assumed
         const DENSITY_LION_FORM form_value = form->form;
 
@@ -101,12 +122,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(
     }
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *data, const DENSITY_LION_FORM form) {
-    density_lion_form_node *form_found = data->formsIndex[form];
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *const data, const DENSITY_LION_FORM form) {
+    density_lion_form_node *const form_found = data->formsIndex[form];
     form_found->usage++;
 
-    density_lion_form_node *previous_form = form_found->previousForm;
-    if (form_found->previousForm) {
+    density_lion_form_node *const previous_form = form_found->previousForm;
+    if (previous_form) {
         const uint8_t rank = form_found->rank;
 
         density_lion_form_model_update(data, form_found, previous_form);
