@@ -47,6 +47,7 @@
 #endif
 
 #define DENSITY_FORCE_INLINE    inline __attribute__((always_inline))
+
 #define DENSITY_MEMCPY          __builtin_memcpy
 #define DENSITY_MEMMOVE         __builtin_memmove
 

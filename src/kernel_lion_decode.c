@@ -86,8 +86,8 @@ DENSITY_FORCE_INLINE const uint8_t density_lion_decode_read_4bits_from_signature
 
     if (density_likely(state->shift)) {
         if (density_unlikely(projected_shift >= density_bitsizeof(density_lion_signature))) {
-            result = (uint8_t)(state->signature >> state->shift);  // Get the remaining bits from the current signature
-            uint_fast8_t overflowBits = (uint_fast8_t)(projected_shift & (density_bitsizeof(density_lion_signature) - 1));
+            result = (uint8_t) (state->signature >> state->shift);  // Get the remaining bits from the current signature
+            uint_fast8_t overflowBits = (uint_fast8_t) (projected_shift & (density_bitsizeof(density_lion_signature) - 1));
 
             if (overflowBits) {
                 density_lion_decode_read_signature_from_memory(in, state);
@@ -99,7 +99,7 @@ DENSITY_FORCE_INLINE const uint8_t density_lion_decode_read_4bits_from_signature
 
             return result;
         } else {
-            result = (uint8_t)((state->signature >> state->shift) & 0xF);   // No overflow, we return the bits requested from the current signature
+            result = (uint8_t) ((state->signature >> state->shift) & 0xF);   // No overflow, we return the bits requested from the current signature
             state->shift = projected_shift;
 
             return result;
@@ -107,7 +107,7 @@ DENSITY_FORCE_INLINE const uint8_t density_lion_decode_read_4bits_from_signature
     } else {
         density_lion_decode_read_signature_from_memory(in, state);
 
-        result = (uint8_t)((state->signature >> state->shift) & 0xF);
+        result = (uint8_t) ((state->signature >> state->shift) & 0xF);
         state->shift = projected_shift;
 
         return result;
@@ -130,7 +130,7 @@ DENSITY_FORCE_INLINE const bool density_lion_decode_read_1bit_from_signature(den
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_update_predictions_model(density_lion_dictionary_chunk_prediction_entry *const restrict predictions, const uint32_t chunk) {
-    *(uint64_t * )((uint32_t *) predictions + 1) = *(uint64_t *) predictions;
+    *(uint64_t *) ((uint32_t *) predictions + 1) = *(uint64_t *) predictions;
     //DENSITY_MEMMOVE((uint32_t *) predictions + 1, predictions, sizeof(uint64_t));
     *(uint32_t *) predictions = chunk;     // Move chunk to the top of the predictions list
 }
@@ -255,41 +255,46 @@ DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_process_form(de
 }
 
 DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
-    if (density_likely(state->shift && state->shift <= 56)) {
-        const int trailing_zeroes = __builtin_ctz(0x80 | (state->signature >> state->shift));
-        if (density_likely(!trailing_zeroes)) {
-            state->shift++;
-            return density_lion_decode_process_first_form((density_lion_form_node *) &state->formData);
-        } else if (density_likely(trailing_zeroes <= 6)) {
-            state->shift += (trailing_zeroes + 1);
-            return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + trailing_zeroes);
-        } else {
-            state->shift += 7;
-            return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 7);
-        }
+    const uint_fast8_t shift = state->shift;
+
+    if (density_unlikely(!shift))
+        density_lion_decode_read_signature_from_memory(in, state);
+
+    const int trailing_zeroes = __builtin_ctz(0x80 | (state->signature >> shift));
+    if (density_likely(!trailing_zeroes)) {
+        state->shift = (shift + 1) & 0x3f;
+        return density_lion_decode_process_first_form((density_lion_form_node *) &state->formData);
+    } else if (density_likely(trailing_zeroes <= 6)) {
+        state->shift = (shift + (trailing_zeroes + 1)) & 0x3f;
+        return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + trailing_zeroes);
     } else {
-        if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-            return density_lion_decode_process_first_form((density_lion_form_node *) &state->formData);
+        if (density_likely(shift <= 57)) {
+            state->shift = (shift + 7) & 0x3f;
+            return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 7);
         } else {
             if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-                return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 1);
+                return density_lion_decode_process_first_form((density_lion_form_node *) &state->formData);
             } else {
                 if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-                    return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 2);
+                    return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 1);
                 } else {
                     if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-                        return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 3);
+                        return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 2);
                     } else {
                         if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-                            return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 4);
+                            return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 3);
                         } else {
                             if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-                                return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 5);
+                                return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 4);
                             } else {
-                                if (density_likely(density_lion_decode_read_1bit_from_signature(in, state)))
-                                    return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 6);
-                                else
-                                    return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 7);
+                                if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
+                                    return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 5);
+                                } else {
+                                    if (density_likely(density_lion_decode_read_1bit_from_signature(in, state)))
+                                        return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 6);
+                                    else
+                                        return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 7);
+                                }
                             }
                         }
                     }
@@ -334,7 +339,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_
     state->parameters = parameters;
     density_byte resetDictionaryCycleShift = state->parameters.as_bytes[0];
     if (resetDictionaryCycleShift)
-        state->resetCycle = (uint_fast64_t)(1 << resetDictionaryCycleShift) - 1;
+        state->resetCycle = (uint_fast64_t) (1 << resetDictionaryCycleShift) - 1;
 
     state->endDataOverhead = endDataOverhead;
 
