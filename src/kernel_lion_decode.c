@@ -43,7 +43,6 @@
  */
 
 #include "kernel_lion_decode.h"
-#include "kernel_lion_dictionary.h"
 
 const uint8_t density_lion_decode_bitmasks[DENSITY_LION_DECODE_NUMBER_OF_BITMASK_VALUES] = DENSITY_LION_DECODE_BITMASK_VALUES;
 
@@ -260,7 +259,7 @@ DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(densi
     if (density_unlikely(!shift))
         density_lion_decode_read_signature_from_memory(in, state);
 
-    const int trailing_zeroes = __builtin_ctz(0x80 | (state->signature >> shift));
+    const uint_fast8_t trailing_zeroes = __builtin_ctz(0x80 | (state->signature >> shift));
     if (density_likely(!trailing_zeroes)) {
         state->shift = (shift + 1) & 0x3f;
         return density_lion_decode_process_first_form((density_lion_form_node *) &state->formData);
@@ -272,34 +271,15 @@ DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(densi
             state->shift = (shift + 7) & 0x3f;
             return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 7);
         } else {
-            if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-                return density_lion_decode_process_first_form((density_lion_form_node *) &state->formData);
-            } else {
-                if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-                    return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 1);
-                } else {
-                    if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-                        return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 2);
-                    } else {
-                        if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-                            return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 3);
-                        } else {
-                            if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-                                return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 4);
-                            } else {
-                                if (density_likely(density_lion_decode_read_1bit_from_signature(in, state))) {
-                                    return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 5);
-                                } else {
-                                    if (density_likely(density_lion_decode_read_1bit_from_signature(in, state)))
-                                        return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 6);
-                                    else
-                                        return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + 7);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            density_lion_decode_read_signature_from_memory(in, state);
+            const uint_fast8_t primary_trailing_zeroes = 64 - shift;
+            const uint_fast8_t ctz_barrier_shift = 7 - primary_trailing_zeroes;
+            const uint_fast8_t secondary_trailing_zeroes = __builtin_ctz((1 << ctz_barrier_shift) | state->signature);
+            if(density_likely(secondary_trailing_zeroes != ctz_barrier_shift))
+                state->shift = secondary_trailing_zeroes + 1;
+            else
+                state->shift = secondary_trailing_zeroes;
+            return density_lion_decode_process_form(state, (density_lion_form_node *) &state->formData + primary_trailing_zeroes + secondary_trailing_zeroes);
         }
     }
 }
