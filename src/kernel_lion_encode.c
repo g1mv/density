@@ -148,41 +148,41 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
                     if (*((uint32_t *) in_dictionary + 1) ^ chunk) {
                         if (*((uint32_t *) in_dictionary + 2) ^ chunk) {
                             if (*((uint32_t *) in_dictionary + 3) ^ chunk) {
-                                density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_SECONDARY_ACCESS));
+                                density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_PLAIN));
                                 DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
                                 out->pointer += sizeof(uint32_t);
                             } else {
-                                density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_D));
+                                density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_DICTIONARY_D));
                                 DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
                                 out->pointer += sizeof(uint16_t);
                             }
                         } else {
-                            density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_C));
+                            density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_DICTIONARY_C));
                             DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
                             out->pointer += sizeof(uint16_t);
                         }
                     } else {
-                        density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B));
+                        density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_DICTIONARY_B));
                         DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
                         out->pointer += sizeof(uint16_t);
                     }
                     *(__uint128_t *) in_dictionary = *(__uint128_t *) ((uint32_t *) in_dictionary - 1); // Safe as our dictionary is at the end of the state struct
                     *(uint32_t *) in_dictionary = chunk;
                 } else {
-                    density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_A));
+                    density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_DICTIONARY_A));
                     DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
                     out->pointer += sizeof(uint16_t);
                 }
             } else {
-                density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_PREDICTIONS_C));
+                density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_PREDICTIONS_C));
             }
         } else {
-            density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_PREDICTIONS_B));
+            density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_PREDICTIONS_B));
         }
         *(uint64_t * )((uint32_t *) predictions + 1) = *(uint64_t *) predictions;
         *(uint32_t *) predictions = chunk;
     } else
-        density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_PREDICTIONS_A));
+        density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_PREDICTIONS_A));
     state->lastHash = hash;
 }
 

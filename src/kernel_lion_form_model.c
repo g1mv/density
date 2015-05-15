@@ -48,54 +48,59 @@ const density_lion_entropy_code density_lion_form_entropy_codes[DENSITY_LION_NUM
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_init(density_lion_form_data *const data) {
     density_lion_form_node *rank_0 = &data->formsPool[0];
-    rank_0->form = DENSITY_LION_FORM_SECONDARY_ACCESS;
+    rank_0->form = DENSITY_LION_FORM_PLAIN;
     rank_0->rank = 0;
     rank_0->previousForm = NULL;
-    data->formsIndex[DENSITY_LION_FORM_SECONDARY_ACCESS] = rank_0;
+    data->formsIndex[DENSITY_LION_FORM_PLAIN] = rank_0;
 
     density_lion_form_node *rank_1 = &data->formsPool[1];
-    rank_1->form = DENSITY_LION_FORM_CHUNK_DICTIONARY_A;
+    rank_1->form = DENSITY_LION_FORM_DICTIONARY_A;
     rank_1->rank = 1;
     rank_1->previousForm = rank_0;
-    data->formsIndex[DENSITY_LION_FORM_CHUNK_DICTIONARY_A] = rank_1;
+    data->formsIndex[DENSITY_LION_FORM_DICTIONARY_A] = rank_1;
 
     density_lion_form_node *rank_2 = &data->formsPool[2];
-    rank_2->form = DENSITY_LION_FORM_CHUNK_DICTIONARY_B;
+    rank_2->form = DENSITY_LION_FORM_DICTIONARY_B;
     rank_2->rank = 2;
     rank_2->previousForm = rank_1;
-    data->formsIndex[DENSITY_LION_FORM_CHUNK_DICTIONARY_B] = rank_2;
+    data->formsIndex[DENSITY_LION_FORM_DICTIONARY_B] = rank_2;
 
     density_lion_form_node *rank_3 = &data->formsPool[3];
-    rank_3->form = DENSITY_LION_FORM_CHUNK_PREDICTIONS_A;
+    rank_3->form = DENSITY_LION_FORM_PREDICTIONS_A;
     rank_3->rank = 3;
     rank_3->previousForm = rank_2;
-    data->formsIndex[DENSITY_LION_FORM_CHUNK_PREDICTIONS_A] = rank_3;
+    data->formsIndex[DENSITY_LION_FORM_PREDICTIONS_A] = rank_3;
 
     density_lion_form_node *rank_4 = &data->formsPool[4];
-    rank_4->form = DENSITY_LION_FORM_CHUNK_PREDICTIONS_B;
+    rank_4->form = DENSITY_LION_FORM_PREDICTIONS_B;
     rank_4->rank = 4;
     rank_4->previousForm = rank_3;
-    data->formsIndex[DENSITY_LION_FORM_CHUNK_PREDICTIONS_B] = rank_4;
+    data->formsIndex[DENSITY_LION_FORM_PREDICTIONS_B] = rank_4;
 
     density_lion_form_node *rank_5 = &data->formsPool[5];
-    rank_5->form = DENSITY_LION_FORM_CHUNK_DICTIONARY_C;
+    rank_5->form = DENSITY_LION_FORM_DICTIONARY_C;
     rank_5->rank = 5;
     rank_5->previousForm = rank_4;
-    data->formsIndex[DENSITY_LION_FORM_CHUNK_DICTIONARY_C] = rank_5;
+    data->formsIndex[DENSITY_LION_FORM_DICTIONARY_C] = rank_5;
 
     density_lion_form_node *rank_6 = &data->formsPool[6];
-    rank_6->form = DENSITY_LION_FORM_CHUNK_PREDICTIONS_C;
+    rank_6->form = DENSITY_LION_FORM_PREDICTIONS_C;
     rank_6->rank = 6;
     rank_6->previousForm = rank_5;
-    data->formsIndex[DENSITY_LION_FORM_CHUNK_PREDICTIONS_C] = rank_6;
+    data->formsIndex[DENSITY_LION_FORM_PREDICTIONS_C] = rank_6;
 
     density_lion_form_node *rank_7 = &data->formsPool[7];
-    rank_7->form = DENSITY_LION_FORM_CHUNK_DICTIONARY_D;
+    rank_7->form = DENSITY_LION_FORM_DICTIONARY_D;
     rank_7->rank = 7;
     rank_7->previousForm = rank_6;
-    data->formsIndex[DENSITY_LION_FORM_CHUNK_DICTIONARY_D] = rank_7;
+    data->formsIndex[DENSITY_LION_FORM_DICTIONARY_D] = rank_7;
 
     *(uint64_t *) data->usages = 0;
+}
+
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_attach(density_lion_form_data *const data, void (*attachments[DENSITY_LION_NUMBER_OF_FORMS])(void *, void *, void *, void *const, void* const)) {
+    for(uint_fast8_t count = 0; count < DENSITY_LION_NUMBER_OF_FORMS; count ++)
+        data->attachments[count] = attachments[count];
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(density_lion_form_data *const restrict data, density_lion_form_node *const restrict form, const uint8_t usage, density_lion_form_node *const restrict previous_form, const uint8_t previous_usage) {
