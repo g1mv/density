@@ -12,6 +12,8 @@ Benchmarks
 
 **Quick bench**
 
+DENSITY features an **integrated in-memory benchmark**. After building the project (see [build](#build)), a *benchmark* executable will be present in the build directory. If run without arguments, usage help will be displayed.
+
 File used : enwik8 (100 MB)
 
 Platform : MacBook Pro, OSX 10.10.3, 2.3 GHz Intel Core i7, 8Gb 1600 MHz DDR, SSD, compiling with Clang/LLVM 6.1.0
