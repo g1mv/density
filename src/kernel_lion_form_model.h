@@ -62,18 +62,17 @@
     {DENSITY_BINARY_TO_UINT(0000000), 7},\
 }
 
-#define DENSITY_LION_FORM_MODEL_ENTROPY_DECODES {0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4}
-
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    uint32_t usage;
-    void *previousForm;
+    void* previousForm;
     DENSITY_LION_FORM form;
     uint8_t rank;
 } density_lion_form_node;
 
 typedef struct {
+    uint8_t usages[DENSITY_LION_NUMBER_OF_FORMS];
+    void* attachments[DENSITY_LION_NUMBER_OF_FORMS];
     density_lion_form_node formsPool[DENSITY_LION_NUMBER_OF_FORMS];
     density_lion_form_node *formsIndex[DENSITY_LION_NUMBER_OF_FORMS];
     uint8_t nextAvailableForm;
@@ -82,7 +81,9 @@ typedef struct {
 
 DENSITY_WINDOWS_EXPORT void density_lion_form_model_init(density_lion_form_data *const);
 
-DENSITY_WINDOWS_EXPORT void density_lion_form_model_update(density_lion_form_data *const, density_lion_form_node *const, density_lion_form_node *const);
+DENSITY_WINDOWS_EXPORT void density_lion_form_model_update(density_lion_form_data *const, density_lion_form_node *const, const uint8_t, density_lion_form_node *const, const uint8_t);
+
+DENSITY_WINDOWS_EXPORT const DENSITY_LION_FORM density_lion_form_model_increment_usage(density_lion_form_data *const, density_lion_form_node *const restrict);
 
 DENSITY_WINDOWS_EXPORT density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *const, const DENSITY_LION_FORM);
 

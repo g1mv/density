@@ -43,6 +43,7 @@
  */
 
 #include "kernel_lion_decode.h"
+#include "kernel_lion_form_model.h"
 
 const uint8_t density_lion_decode_bitmasks[DENSITY_LION_DECODE_NUMBER_OF_BITMASK_VALUES] = DENSITY_LION_DECODE_BITMASK_VALUES;
 
@@ -259,23 +260,9 @@ DENSITY_FORCE_INLINE void density_lion_decode_chunk(density_memory_location *res
     state->lastHash = hash;
 }
 
-DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_process_first_form(density_lion_form_node *form) {
-    form->usage++;
-    return form->form;
-}
-
-DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_process_form(density_lion_decode_state *restrict state, density_lion_form_node *form) {
-    const DENSITY_LION_FORM formValue = form->form;
-    form->usage++;
-
-    density_lion_form_model_update(&state->formData, form, form->previousForm);
-
-    return formValue;
-}
-
 DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
     const uint_fast8_t shift = state->shift;
-    const density_lion_form_data* const form_data = &state->formData;
+    density_lion_form_data* const form_data = &state->formData;
 
     if (density_unlikely(!shift))
         density_lion_decode_read_signature_from_memory(in, state);
@@ -283,14 +270,14 @@ DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(densi
     const uint_fast8_t trailing_zeroes = __builtin_ctz(0x80 | (state->signature >> shift));
     if (density_likely(!trailing_zeroes)) {
         state->shift = (shift + 1) & 0x3f;
-        return density_lion_decode_process_first_form((density_lion_form_node *) form_data);
+        return density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool);
     } else if (density_likely(trailing_zeroes <= 6)) {
         state->shift = (shift + (trailing_zeroes + 1)) & 0x3f;
-        return density_lion_decode_process_form(state, (density_lion_form_node *) form_data + trailing_zeroes);
+        return density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool + trailing_zeroes);
     } else {
         if (density_likely(shift <= 57)) {
             state->shift = (shift + 7) & 0x3f;
-            return density_lion_decode_process_form(state, (density_lion_form_node *) form_data + 7);
+            return density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool + 7);
         } else {
             density_lion_decode_read_signature_from_memory(in, state);
             const uint_fast8_t primary_trailing_zeroes = 64 - shift;
@@ -300,7 +287,7 @@ DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(densi
                 state->shift = secondary_trailing_zeroes + 1;
             else
                 state->shift = secondary_trailing_zeroes;
-            return density_lion_decode_process_form(state, (density_lion_form_node *) form_data + primary_trailing_zeroes + secondary_trailing_zeroes);
+            return density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool + primary_trailing_zeroes + secondary_trailing_zeroes);
         }
     }
 }
