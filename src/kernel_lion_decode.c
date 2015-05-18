@@ -255,12 +255,8 @@ DENSITY_FORCE_INLINE void density_lion_decode_chunk(density_memory_location *res
 }
 
 DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
-    const uint_fast8_t shift = state->shift;
     density_lion_form_data *const form_data = &state->formData;
-
-    if (density_unlikely(!shift))
-        density_lion_decode_read_signature_from_memory(in, state);
-
+    const uint_fast8_t shift = state->shift;
     const uint_fast8_t trailing_zeroes = __builtin_ctz(0x80 | (state->signature >> shift));
     if (density_likely(!trailing_zeroes)) {
         state->shift = (shift + 1) & 0x3f;
@@ -286,42 +282,7 @@ DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(densi
     }
 }
 
-DENSITY_FORCE_INLINE void secondary(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
-    uint16_t hash;
-    uint32_t chunk;
-
-    const uint_fast8_t shift = state->shift;
-    density_lion_form_data *const form_data = &state->formData;
-
-    const uint_fast8_t trailing_zeroes = __builtin_ctz(0x80 | (state->signature >> shift));
-    if (density_likely(!trailing_zeroes)) {
-        state->shift = (shift + 1) & 0x3f;
-        form_data->attachments[density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool)](in, out, state, &hash, &chunk);
-    } else if (density_likely(trailing_zeroes <= 6)) {
-        state->shift = (shift + (trailing_zeroes + 1)) & 0x3f;
-        form_data->attachments[density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool + trailing_zeroes)](in, out, state, &hash, &chunk);
-    } else {
-        if (density_likely(shift <= (density_bitsizeof(density_lion_signature) - 7))) {
-            state->shift = (shift + 7) & 0x3f;
-            form_data->attachments[density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool + 7)](in, out, state, &hash, &chunk);
-        } else {
-            density_lion_decode_read_signature_from_memory(in, state);
-            const uint_fast8_t primary_trailing_zeroes = density_bitsizeof(density_lion_signature) - shift;
-            const uint_fast8_t ctz_barrier_shift = 7 - primary_trailing_zeroes;
-            const uint_fast8_t secondary_trailing_zeroes = __builtin_ctz((1 << ctz_barrier_shift) | state->signature);
-            if (density_likely(secondary_trailing_zeroes != ctz_barrier_shift))
-                state->shift = secondary_trailing_zeroes + 1;
-            else
-                state->shift = secondary_trailing_zeroes;
-            form_data->attachments[density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool + primary_trailing_zeroes + secondary_trailing_zeroes)](in, out, state, &hash, &chunk);
-        }
-    }
-}
-
-DENSITY_FORCE_INLINE void primary(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
-    uint16_t hash;
-    uint32_t chunk;
-
+DENSITY_FORCE_INLINE void density_lion_decode_process_form(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     const uint_fast8_t shift = state->shift;
     density_lion_form_data *const form_data = &state->formData;
 
@@ -330,25 +291,33 @@ DENSITY_FORCE_INLINE void primary(density_memory_location *restrict in, density_
 
     switch ((state->signature >> shift) & 0x1) {
         case 0:
-            secondary(in, out, state);
+            density_lion_decode_chunk(in, out, state, density_lion_decode_read_form(in, state));
             break;
         default:
-            form_data->attachments[density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool)](in, out, state, &hash, &chunk);
+            density_lion_decode_chunk(in, out, state, density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool));
             state->shift = (shift + 1) & 0x3f;
             break;
     }
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
+#ifdef __clang__
     for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT >> 2); count++) {
-        DENSITY_UNROLL_4(primary(in, out, state));
+        DENSITY_UNROLL_4(density_lion_decode_process_form(in, out, state));
     }
+#else
+    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT >> 2); count++) {
+        DENSITY_UNROLL_4(density_lion_decode_process_form(in, out, state));
+    }
+#endif
 
     state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
 }
 
 DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode_chunk_step_by_step(density_memory_location *restrict readMemoryLocation, density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
     density_byte *startPointer = readMemoryLocation->pointer;
+    if (density_unlikely(!state->shift))
+        density_lion_decode_read_signature_from_memory(readMemoryLocation, state);
     DENSITY_LION_FORM form = density_lion_decode_read_form(readMemoryLocation, state);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - startPointer);
     switch (form) {
