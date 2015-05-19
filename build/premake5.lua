@@ -35,9 +35,12 @@
 --
 
 -- Check for tools
-if os.execute("clang -v") > 0 and os.execute("gcc -v") > 0 then
+if os.execute("clang -v") == 0 then
+	premake.cc  = 'clang'
+	premake.cxx = 'clang++'
+elseif os.execute("gcc -v") > 0 then
 	io.write("No supported compiler found on the command line. Please install Clang/LLVM or GCC.\n")
-	os.exit(0)
+    os.exit(0)
 end
 
 if os.execute("git --version") > 0 then
