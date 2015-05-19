@@ -22,12 +22,12 @@ Timing : using the *time* function, and taking the best *user* output after mult
 
 <sub>Library</sub> | <sub>Algorithm</sub> | <sub>Compress</sub> | <sub>Decompress</sub> | <sub>Size</sub> | <sub>Ratio</sub> | <sub>Round trip</sub>
 --- | --- | --- | --- | --- | --- | ---
-<sub>**density** 0.12.2 beta</sub> | <sub>Chameleon</sub> | <sub>0.103s (974 MB/s)</sub> | <sub>0.071s (1416 MB/s)</sub> | <sub>61 525 242</sub> | <sub>61,53%</sub> | <sub>0.174s</sub>
-<sub>lz4 r126</sub> | <sub>-1</sub> | <sub>0.461s (217 MB/s)</sub> | <sub>0.091s (1099 MB/s)</sub> | <sub>56 995 497</sub> | <sub>57,00%</sub> | <sub>0.552s</sub>
+<sub>**density** 0.12.3 beta</sub> | <sub>Chameleon</sub> | <sub>0.099s (1005 MB/s)</sub> | <sub>0.064s (1551 MB/s)</sub> | <sub>61 525 242</sub> | <sub>61,53%</sub> | <sub>0.163s</sub>
+<sub>lz4 r129</sub> | <sub>-1</sub> | <sub>0.468s (214 MB/s)</sub> | <sub>0.115s (870 MB/s)</sub> | <sub>57 285 990</sub> | <sub>57,29%</sub> | <sub>0.583s</sub>
 <sub>lzo 2.08</sub> | <sub>-1</sub> | <sub>0.367s (272 MB/s)</sub> | <sub>0.309s (324 MB/s)</sub> | <sub>56 709 096</sub> | <sub>56,71%</sub> | <sub>0.676s</sub>
-<sub>**density** 0.12.2 beta</sub> | <sub>Cheetah</sub> | <sub>0.183s (547 MB/s)</sub> | <sub>0.144s (692 MB/s)</sub> | <sub>53 157 514</sub> | <sub>53,16%</sub> | <sub>0.327s</sub>
-<sub>**density** 0.12.2 beta</sub> | <sub>Lion</sub> | <sub>0.360s (278 MB/s)</sub> | <sub>0.352s (284 MB/s)</sub> | <sub>48 048 466</sub> | <sub>48,05%</sub> | <sub>0.712s</sub>
-<sub>lz4 r126</sub> | <sub>-3</sub> | <sub>1.520s (66 MB/s)</sub> | <sub>0.087s (1149 MB/s)</sub> | <sub>47 082 421</sub> | <sub>47,08%</sub> | <sub>1.607s</sub>
+<sub>**density** 0.12.3 beta</sub> | <sub>Cheetah</sub> | <sub>0.179s (558 MB/s)</sub> | <sub>0.148 (677 MB/s)</sub> | <sub>53 157 514</sub> | <sub>53,16%</sub> | <sub>0.327s</sub>
+<sub>**density** 0.12.3 beta</sub> | <sub>Lion</sub> | <sub>0.351s (285 MB/s)</sub> | <sub>0.345s (290 MB/s)</sub> | <sub>47 818 820</sub> | <sub>47,82%</sub> | <sub>0.696s</sub>
+<sub>lz4 r129</sub> | <sub>-3</sub> | <sub>1.685s (59 MB/s)</sub> | <sub>0.118s (847 MB/s)</sub> | <sub>44 539 940</sub> | <sub>44,54%</sub> | <sub>1.803s</sub>
 <sub>lzo 2.08</sub> | <sub>-7</sub> | <sub>9.562s (10 MB/s)</sub> | <sub>0.319s (313 MB/s)</sub> | <sub>41 720 721</sub> | <sub>41,72%</sub> | <sub>9.881s</sub>
 
 **Squash**
