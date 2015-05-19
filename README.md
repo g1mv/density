@@ -105,12 +105,12 @@ The following assumes you already have *git* installed.
 
 On OS X, Clang/LLVM is the default compiler, which makes things simpler.
 
-1) Download and install [premake](http://premake.github.io/) for OS X and make it available in your path (if you have [homebrew](https://github.com/Homebrew/homebrew) installed, typing "brew install premake" in a command line should do the trick).
+1) Download and install [premake5](http://premake.github.io/) for OS X and make it available in your path (if you have [homebrew](https://github.com/Homebrew/homebrew) installed, typing "brew install premake" in a command line should do the trick).
 
 2) Run the following from the command line :
 
     cd build
-    premake4 gmake
+    premake5 gmake
     make
 
 **Linux**
@@ -119,12 +119,12 @@ On Linux, Clang/LLVM is not always available by default.
 
 1) Install Clang/LLVM if you don't have it already (on the Debian distribution for example, *sudo apt-get install clang-3.5* should do the trick)
 
-2) Download and install [premake](http://premake.github.io/) for Linux and make it available in your path.
+2) Download and install [premake5](http://premake.github.io/) for Linux and make it available in your path.
 
 3) Run the following from the command line :
 
     cd build
-    premake4 gmake
+    premake5 gmake
     make
     
 **Windows**
@@ -139,12 +139,12 @@ On Windows, things are a (little) bit more complicated.
 
 4) Now we can install Clang/LLVM for Windows, and thanks to the **ClangOnWin** project it's easy ! You can [download it here](http://sourceforge.net/projects/clangonwin/). Make it available in your path.
 
-5) Download and install [premake](http://premake.github.io/) for Windows and make it available in your path (edit the Path environment variable).
+5) Download and install [premake5](http://premake.github.io/) for Windows and make it available in your path (edit the Path environment variable).
 
 6) Run the following from the command line :
    
        cd build
-       premake4.exe gmake
+       premake5.exe gmake
        make
 
 And that's it ! You can now use the integrated in-memory benchmark to test your files (the *benchmark* or *benchmark.exe* binary).
