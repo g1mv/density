@@ -43,7 +43,6 @@
  */
 
 #include "kernel_lion_decode.h"
-#include "kernel_lion_form_model.h"
 
 const uint8_t density_lion_decode_bitmasks[DENSITY_LION_DECODE_NUMBER_OF_BITMASK_VALUES] = DENSITY_LION_DECODE_BITMASK_VALUES;
 
@@ -78,55 +77,6 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_check_block
 DENSITY_FORCE_INLINE void density_lion_decode_read_signature_from_memory(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
     DENSITY_MEMCPY(&state->signature, in->pointer, sizeof(density_lion_signature));
     in->pointer += sizeof(density_lion_signature);
-}
-
-DENSITY_FORCE_INLINE const uint8_t density_lion_decode_read_4bits_from_signature(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
-    uint_fast8_t result;
-    const uint_fast32_t projected_shift = state->shift + 4;
-
-    if (density_likely(state->shift)) {
-        if (density_unlikely(projected_shift >= density_bitsizeof(density_lion_signature))) {
-            result = (uint8_t) (state->signature >> state->shift);  // Get the remaining bits from the current signature
-            uint_fast8_t overflowBits = (uint_fast8_t) (projected_shift & (density_bitsizeof(density_lion_signature) - 1));
-
-            if (overflowBits) {
-                density_lion_decode_read_signature_from_memory(in, state);
-
-                result |= (state->signature & density_lion_decode_bitmasks[overflowBits]) << (density_bitsizeof(density_lion_signature) - state->shift);   // Add bits from the new signature
-            }
-
-            state->shift = overflowBits;
-
-            return result;
-        } else {
-            result = (uint8_t) ((state->signature >> state->shift) & 0xF);   // No overflow, we return the bits requested from the current signature
-            state->shift = projected_shift;
-
-            return result;
-        }
-    } else {
-        density_lion_decode_read_signature_from_memory(in, state);
-
-        result = (uint8_t) ((state->signature >> state->shift) & 0xF);
-        state->shift = projected_shift;
-
-        return result;
-    }
-}
-
-DENSITY_FORCE_INLINE const bool density_lion_decode_read_1bit_from_signature(density_memory_location *restrict in, density_lion_decode_state *restrict state) {
-    if (density_likely(state->shift)) {
-        if (density_likely(state->shift ^ (density_bitsizeof(density_lion_signature) - 1)))
-            return (bool const) ((state->signature >> (state->shift++)) & 0x1);
-        else {
-            state->shift = 0;
-            return (bool const) (state->signature >> (density_bitsizeof(density_lion_signature) - 1));
-        }
-    } else {
-        density_lion_decode_read_signature_from_memory(in, state);
-
-        return (bool const) ((state->signature >> (state->shift++)) & 0x1);
-    }
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_update_predictions_model(density_lion_dictionary_chunk_prediction_entry *const restrict predictions, const uint32_t chunk) {
