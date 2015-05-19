@@ -38,7 +38,10 @@
 if os.execute("clang -v") == 0 then
 	premake.cc  = 'clang'
 	premake.cxx = 'clang++'
-elseif os.execute("gcc -v") > 0 then
+elseif os.execute("gcc -v") == 0 then
+	premake.cc  = 'gcc'
+	premake.cxx = 'g++'
+else
 	io.write("No supported compiler found on the command line. Please install Clang/LLVM or GCC.\n")
     os.exit(0)
 end
