@@ -43,6 +43,7 @@
  */
 
 #include "kernel_lion_decode.h"
+#include "kernel_lion_dictionary.h"
 
 const uint8_t density_lion_decode_bitmasks[DENSITY_LION_DECODE_NUMBER_OF_BITMASK_VALUES] = DENSITY_LION_DECODE_BITMASK_VALUES;
 
