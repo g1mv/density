@@ -1,3 +1,12 @@
+0.12.3 beta
+-----------
+*May 20, 2015*
+
+* New lion algorithm, faster and more efficient
+* Compiler specific optimizations
+* Switched to premake 5 to benefit from link time optimizations
+* Various fixes and improvements
+
 0.12.2 beta
 -----------
 *May 4, 2015*

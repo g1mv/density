@@ -98,7 +98,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(density_memory_l
         if (density_unlikely(state->shift >= density_bitsizeof(density_lion_signature))) {
             DENSITY_MEMCPY(state->signature, &state->proximitySignature, sizeof(density_lion_signature));
 
-            const uint_fast8_t remainder = (uint_fast8_t) (state->shift & 0x3F);
+            const uint_fast8_t remainder = (uint_fast8_t)(state->shift & 0x3f);
             state->shift = 0;
             if (remainder) {
                 density_lion_encode_prepare_new_signature(out, state);
@@ -118,7 +118,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(density_mem
         if (density_unlikely(state->shift >= density_bitsizeof(density_lion_signature))) {
             DENSITY_MEMCPY(state->signature, &state->proximitySignature, sizeof(density_lion_signature));
 
-            const uint_fast8_t remainder = (uint_fast8_t) (state->shift & 0x3F);
+            const uint_fast8_t remainder = (uint_fast8_t)(state->shift & 0x3f);
             if (remainder) {
                 density_lion_encode_prepare_new_signature(out, state);
                 state->shift = remainder;
@@ -135,81 +135,77 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_code_to_signature(density_mem
     density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_manage_bigram(density_memory_location *restrict out, density_lion_encode_state *restrict state, const uint8_t hash, const uint16_t bigram) {
-    density_lion_dictionary_bigram_entry *bigram_entry = &state->dictionary.bigrams[hash];
-    if (bigram_entry->bigram != bigram) {
-        density_lion_encode_push_to_signature(out, state, DENSITY_LION_BIGRAM_SIGNATURE_FLAG_PLAIN, 1);
-
-        DENSITY_MEMCPY(out->pointer, &bigram, sizeof(uint16_t));
-        out->pointer += sizeof(uint16_t);
-
-        bigram_entry->bigram = bigram;
-    } else {
-        density_lion_encode_push_zero_to_signature(out, state, 1);  // DENSITY_LION_BIGRAM_SIGNATURE_FLAG_DICTIONARY
-
-        *(out->pointer) = hash;
-        out->pointer += sizeof(uint8_t);
-    }
-}
-
 DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *restrict out, const uint16_t hash, const uint32_t chunk, density_lion_encode_state *restrict state) {
-    density_lion_dictionary_chunk_prediction_entry *p = &(state->dictionary.predictions[state->lastHash]);
-    __builtin_prefetch(&(state->dictionary.predictions[hash]), 1, 3);
+    density_lion_dictionary *const dictionary = &state->dictionary;
+    density_lion_dictionary_chunk_prediction_entry *const predictions = &dictionary->predictions[state->lastHash];
+    __builtin_prefetch(&dictionary->predictions[hash]);
 
-    if (*(uint32_t *) p != chunk) {
-        if (!density_likely(*((uint32_t *) p + 1) != chunk)) {
-            const density_lion_entropy_code codePb = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_SECONDARY_PREDICTIONS);
-            density_lion_encode_push_to_signature(out, state, codePb.value, codePb.bitLength + (uint8_t) 1);   // DENSITY_LION_PREDICTIONS_SIGNATURE_FLAG_A
-        } else if (!density_likely(*((uint32_t *) p + 2) != chunk)) {
-            const density_lion_entropy_code codePb = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_SECONDARY_PREDICTIONS);
-            density_lion_encode_push_to_signature(out, state, codePb.value | (DENSITY_LION_PREDICTIONS_SIGNATURE_FLAG_B << codePb.bitLength), codePb.bitLength + (uint8_t) 1);
-        } else {
-            density_lion_dictionary_chunk_entry *found = &state->dictionary.chunks[hash];
-            uint32_t *found_a = &found->chunk_a;
-            if (*found_a ^ chunk) {
-                uint32_t *found_b = &found->chunk_b;
-                if (*found_b ^ chunk) {
-                    density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_SECONDARY_ACCESS));
-
-                    const uint32_t hash_group = (uint16_t)((uint16_t)chunk * DENSITY_LION_HASH16_MULTIPLIER) | ((chunk & DENSITY_MASK_16_32) * DENSITY_LION_HASH16_MULTIPLIER);
-                    density_lion_encode_manage_bigram(out, state, *((uint8_t *) &hash_group + 1), (uint16_t)chunk);
-                    density_lion_encode_manage_bigram(out, state, *((uint8_t *) &hash_group + 3), *((uint16_t *) &chunk + 1));
+    if (*(uint32_t *) predictions ^ chunk) {
+        if (*((uint32_t *) predictions + 1) ^ chunk) {
+            if (*((uint32_t *) predictions + 2) ^ chunk) {
+                density_lion_dictionary_chunk_entry *const in_dictionary = &dictionary->chunks[hash];
+                if (*(uint32_t *) in_dictionary ^ chunk) {
+                    if (*((uint32_t *) in_dictionary + 1) ^ chunk) {
+                        if (*((uint32_t *) in_dictionary + 2) ^ chunk) {
+                            if (*((uint32_t *) in_dictionary + 3) ^ chunk) {
+                                density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_PLAIN));
+                                DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
+                                out->pointer += sizeof(uint32_t);
+                            } else {
+                                density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_DICTIONARY_D));
+                                DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
+                                out->pointer += sizeof(uint16_t);
+                            }
+                        } else {
+                            density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_DICTIONARY_C));
+                            DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
+                            out->pointer += sizeof(uint16_t);
+                        }
+                    } else {
+                        density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_DICTIONARY_B));
+                        DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
+                        out->pointer += sizeof(uint16_t);
+                    }
+                    *(__uint128_t *) in_dictionary = *(__uint128_t *) ((uint32_t *) in_dictionary - 1); // Safe as our dictionary is at the end of the state struct
+                    *(uint32_t *) in_dictionary = chunk;
                 } else {
-                    density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B));
-
+                    density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_DICTIONARY_A));
                     DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
                     out->pointer += sizeof(uint16_t);
                 }
-                *found_b = *found_a;
-                *found_a = chunk;
             } else {
-                density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_A));
-
-                DENSITY_MEMCPY(out->pointer, &hash, sizeof(uint16_t));
-                out->pointer += sizeof(uint16_t);
+                density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_PREDICTIONS_C));
             }
+        } else {
+            density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_PREDICTIONS_B));
         }
-
-        DENSITY_MEMMOVE((uint32_t *) p + 1, p, sizeof(uint64_t));
-        p->next_chunk_a = chunk;    // Move chunk to the top of the predictions list
-    } else {
-        density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_PREDICTIONS));
-    }
-
+        *(uint64_t * )((uint32_t *) predictions + 1) = *(uint64_t *) predictions;
+        *(uint32_t *) predictions = chunk;
+    } else
+        density_lion_encode_push_code_to_signature(out, state, density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_PREDICTIONS_A));
     state->lastHash = hash;
-    state->lastChunk = chunk;
 }
 
 DENSITY_FORCE_INLINE void density_lion_encode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_encode_state *restrict state) {
-    for(uint_fast8_t count = 0; count < DENSITY_LION_CHUNKS_PER_PROCESS_UNIT; count ++) {
-        uint32_t chunk;
-        DENSITY_MEMCPY(&chunk, in->pointer, sizeof(uint32_t));
-        density_lion_encode_kernel(out, DENSITY_LION_HASH_ALGORITHM(chunk), chunk, state);
-        in->pointer += sizeof(uint32_t);
+    uint32_t chunk;
+
+#ifdef __clang__
+    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT >> 2); count++) {
+        DENSITY_UNROLL_4(\
+            DENSITY_MEMCPY(&chunk, in->pointer, sizeof(uint32_t));\
+            density_lion_encode_kernel(out, DENSITY_LION_HASH_ALGORITHM(chunk), chunk, state);\
+            in->pointer += sizeof(uint32_t));
     }
+#else
+    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT >> 1); count++) {
+        DENSITY_UNROLL_2(\
+            DENSITY_MEMCPY(&chunk, in->pointer, sizeof(uint32_t));\
+            density_lion_encode_kernel(out, DENSITY_LION_HASH_ALGORITHM(chunk), chunk, state);\
+            in->pointer += sizeof(uint32_t));
+    }
+#endif
 
     state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
-
     in->available_bytes -= DENSITY_LION_PROCESS_UNIT_SIZE;
 }
 

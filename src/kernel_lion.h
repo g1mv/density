@@ -54,20 +54,19 @@
 #define DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS              (1 << DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS_SHIFT)
 
 #define DENSITY_LION_HASH32_MULTIPLIER                                  (uint32_t)0x9D6EF916lu
-#define DENSITY_LION_HASH16_MULTIPLIER                                  (uint32_t)0xAD15lu
 #define DENSITY_LION_CHUNK_HASH_BITS                                    16
-#define DENSITY_LION_BIGRAM_HASH_BITS                                   8
 
 #define DENSITY_LION_HASH_ALGORITHM(value32)                            (uint16_t)(value32 * DENSITY_LION_HASH32_MULTIPLIER >> (32 - DENSITY_LION_CHUNK_HASH_BITS))
 
-#define DENSITY_LION_BIGRAM_HASH_ALGORITHM(bigram)                      (uint8_t) ((bigram * DENSITY_LION_HASH16_MULTIPLIER) >> (16 - DENSITY_LION_BIGRAM_HASH_BITS))
-
 typedef enum {
-    DENSITY_LION_FORM_CHUNK_PREDICTIONS,
-    DENSITY_LION_FORM_CHUNK_SECONDARY_PREDICTIONS,
-    DENSITY_LION_FORM_CHUNK_DICTIONARY_A,
-    DENSITY_LION_FORM_CHUNK_DICTIONARY_B,
-    DENSITY_LION_FORM_SECONDARY_ACCESS,
+    DENSITY_LION_FORM_PREDICTIONS_A = 0,
+    DENSITY_LION_FORM_PREDICTIONS_B,
+    DENSITY_LION_FORM_PREDICTIONS_C,
+    DENSITY_LION_FORM_DICTIONARY_A,
+    DENSITY_LION_FORM_DICTIONARY_B,
+    DENSITY_LION_FORM_DICTIONARY_C,
+    DENSITY_LION_FORM_DICTIONARY_D,
+    DENSITY_LION_FORM_PLAIN,
 } DENSITY_LION_FORM;
 
 typedef enum {
@@ -93,7 +92,7 @@ typedef uint64_t                                                        density_
 #define DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE         (density_bitsizeof(density_lion_signature) * sizeof(uint16_t))   // Dictionary * hash
 #define DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE                       (sizeof(density_lion_signature) + DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 
-#define DENSITY_LION_CHUNKS_PER_PROCESS_UNIT                            4
+#define DENSITY_LION_CHUNKS_PER_PROCESS_UNIT                            64
 #define DENSITY_LION_PROCESS_UNIT_SIZE                                  (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT * sizeof(uint32_t))
 
 #endif

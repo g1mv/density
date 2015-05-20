@@ -167,7 +167,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
     }
 
     pointerOutBefore = out->pointer;
-    const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_CHUNK_DICTIONARY_B);
+    const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_DICTIONARY_B);
     if(density_unlikely(state->signatureInterceptMode)) {
         const uint_fast32_t start_shift = state->shift;
 

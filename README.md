@@ -12,6 +12,8 @@ Benchmarks
 
 **Quick bench**
 
+DENSITY features an **integrated in-memory benchmark**. After building the project (see [build](#build)), a *benchmark* executable will be present in the build directory. If run without arguments, usage help will be displayed.
+
 File used : enwik8 (100 MB)
 
 Platform : MacBook Pro, OSX 10.10.3, 2.3 GHz Intel Core i7, 8Gb 1600 MHz DDR, SSD, compiling with Clang/LLVM 6.1.0
@@ -20,12 +22,12 @@ Timing : using the *time* function, and taking the best *user* output after mult
 
 <sub>Library</sub> | <sub>Algorithm</sub> | <sub>Compress</sub> | <sub>Decompress</sub> | <sub>Size</sub> | <sub>Ratio</sub> | <sub>Round trip</sub>
 --- | --- | --- | --- | --- | --- | ---
-<sub>**density** 0.12.2 beta</sub> | <sub>Chameleon</sub> | <sub>0.103s (974 MB/s)</sub> | <sub>0.071s (1416 MB/s)</sub> | <sub>61 525 242</sub> | <sub>61,53%</sub> | <sub>0.174s</sub>
-<sub>lz4 r126</sub> | <sub>-1</sub> | <sub>0.461s (217 MB/s)</sub> | <sub>0.091s (1099 MB/s)</sub> | <sub>56 995 497</sub> | <sub>57,00%</sub> | <sub>0.552s</sub>
+<sub>**density** 0.12.3</sub> | <sub>Chameleon</sub> | <sub>0.099s (1005 MB/s)</sub> | <sub>0.064s (1551 MB/s)</sub> | <sub>61 525 242</sub> | <sub>61,53%</sub> | <sub>0.163s</sub>
+<sub>lz4 r129</sub> | <sub>-1</sub> | <sub>0.468s (214 MB/s)</sub> | <sub>0.115s (870 MB/s)</sub> | <sub>57 285 990</sub> | <sub>57,29%</sub> | <sub>0.583s</sub>
 <sub>lzo 2.08</sub> | <sub>-1</sub> | <sub>0.367s (272 MB/s)</sub> | <sub>0.309s (324 MB/s)</sub> | <sub>56 709 096</sub> | <sub>56,71%</sub> | <sub>0.676s</sub>
-<sub>**density** 0.12.2 beta</sub> | <sub>Cheetah</sub> | <sub>0.183s (547 MB/s)</sub> | <sub>0.144s (692 MB/s)</sub> | <sub>53 157 514</sub> | <sub>53,16%</sub> | <sub>0.327s</sub>
-<sub>**density** 0.12.2 beta</sub> | <sub>Lion</sub> | <sub>0.360s (278 MB/s)</sub> | <sub>0.352s (284 MB/s)</sub> | <sub>48 048 466</sub> | <sub>48,05%</sub> | <sub>0.712s</sub>
-<sub>lz4 r126</sub> | <sub>-3</sub> | <sub>1.520s (66 MB/s)</sub> | <sub>0.087s (1149 MB/s)</sub> | <sub>47 082 421</sub> | <sub>47,08%</sub> | <sub>1.607s</sub>
+<sub>**density** 0.12.3</sub> | <sub>Cheetah</sub> | <sub>0.179s (558 MB/s)</sub> | <sub>0.148 (677 MB/s)</sub> | <sub>53 157 514</sub> | <sub>53,16%</sub> | <sub>0.327s</sub>
+<sub>**density** 0.12.3</sub> | <sub>Lion</sub> | <sub>0.351s (285 MB/s)</sub> | <sub>0.345s (290 MB/s)</sub> | <sub>47 818 820</sub> | <sub>47,82%</sub> | <sub>0.696s</sub>
+<sub>lz4 r129</sub> | <sub>-3</sub> | <sub>1.685s (59 MB/s)</sub> | <sub>0.118s (847 MB/s)</sub> | <sub>44 539 940</sub> | <sub>44,54%</sub> | <sub>1.803s</sub>
 <sub>lzo 2.08</sub> | <sub>-7</sub> | <sub>9.562s (10 MB/s)</sub> | <sub>0.319s (313 MB/s)</sub> | <sub>41 720 721</sub> | <sub>41,72%</sub> | <sub>9.881s</sub>
 
 **Squash**
@@ -46,47 +48,55 @@ Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.3, 2.3
 
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
-    density::chameleon                      0.12.2 beta  
-       61525242 (x 1.625)      958 MB/s 1445 MB/s       368e6  555e6
-    density::cheetah                        0.12.2 beta  
-       53157514 (x 1.881)      528 MB/s  660 MB/s       247e6  309e6
-    density::lion                           0.12.2 beta  
-       48048466 (x 2.081)      223 MB/s  278 MB/s       115e6  144e6
-    LZ4                                     r127         
-       56973103 (x 1.755)      246 MB/s 1004 MB/s       106e6  431e6
+    density::chameleon                      0.12.3 beta  
+       61525242 (x 1.625)      944 MB/s 1467 MB/s       363e6  564e6
+    density::cheetah                        0.12.3 beta  
+       53157514 (x 1.881)      516 MB/s  637 MB/s       241e6  298e6
+    density::lion                           0.12.3 beta  
+       47818820 (x 2.091)      291 MB/s  297 MB/s       151e6  154e6
+    LZ4 fast 17                             r129         
+       86208275 (x 1.160)      717 MB/s 2639 MB/s        98e6  363e6
+    LZ4 fast 3                              r129         
+       63557747 (x 1.573)      317 MB/s 1610 MB/s       115e6  586e6
+    LZ4                                     r129         
+       57262281 (x 1.746)      260 MB/s 1644 MB/s       111e6  702e6
     LZF                                     3.6          very
-       53945381 (x 1.854)      192 MB/s  367 MB/s        88e6  168e6
+       53945381 (x 1.854)      187 MB/s  357 MB/s        86e6  164e6
     LZO                                     2.08         1x1
-       55792795 (x 1.792)      288 MB/s  369 MB/s       127e6  163e6
+       55792795 (x 1.792)      282 MB/s  365 MB/s       124e6  161e6
     QuickLZ                                 1.5.1b6      1
-       52334371 (x 1.911)      279 MB/s  351 MB/s       133e6  167e6
+       52334371 (x 1.911)      274 MB/s  344 MB/s       130e6  164e6
     Snappy                                  1.1.0        
-       56539845 (x 1.769)      237 MB/s  800 MB/s       102e6  347e6
+       56539845 (x 1.769)      233 MB/s  789 MB/s       101e6  343e6
     wfLZ                                    r10          
-       63521804 (x 1.574)      149 MB/s  505 MB/s        54e6  184e6
+       63521804 (x 1.574)      146 MB/s  515 MB/s        53e6  188e6
        
 *silesia (211,960,320 bytes)*
 
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
-    density::chameleon                      0.12.2 beta  
-      133120534 (x 1.592)     1117 MB/s 1570 MB/s       415e6  583e6
-    density::cheetah                        0.12.2 beta  
-      101753098 (x 2.083)      590 MB/s  706 MB/s       306e6  366e6
-    density::lion                           0.12.2 beta  
-       89220526 (x 2.376)      248 MB/s  278 MB/s       143e6  161e6
-    LZ4                                     r127         
-      101634462 (x 2.086)      348 MB/s 1244 MB/s       181e6  647e6
+    density::chameleon                      0.12.3 beta  
+      133120534 (x 1.592)     1109 MB/s 1585 MB/s       412e6  589e6
+    density::cheetah                        0.12.3 beta  
+      101753098 (x 2.083)      578 MB/s  677 MB/s       300e6  352e6
+    density::lion                           0.12.3 beta  
+       87678576 (x 2.417)      323 MB/s  314 MB/s       189e6  184e6
+    LZ4 fast 17                             r129         
+      131735121 (x 1.609)      669 MB/s 2383 MB/s       253e6  901e6
+    LZ4 fast 3                              r129         
+      107062945 (x 1.980)      426 MB/s 1966 MB/s       211e6  973e6
+    LZ4                                     r129         
+      100883640 (x 2.101)      352 MB/s 1911 MB/s       184e6 1001e6
     LZF                                     3.6          very
-      102043866 (x 2.077)      252 MB/s  487 MB/s       130e6  252e6
+      102043866 (x 2.077)      250 MB/s  477 MB/s       129e6  247e6
     LZO                                     2.08         1x1
-      100592662 (x 2.107)      425 MB/s  572 MB/s       223e6  300e6
+      100592662 (x 2.107)      416 MB/s  573 MB/s       218e6  300e6
     QuickLZ                                 1.5.1b6      1
-       94727961 (x 2.238)      368 MB/s  428 MB/s       203e6  236e6
+       94727961 (x 2.238)      361 MB/s  420 MB/s       199e6  232e6
     Snappy                                  1.1.0        
-      101385885 (x 2.091)      346 MB/s 1109 MB/s       180e6  578e6
+      101385885 (x 2.091)      341 MB/s 1093 MB/s       178e6  570e6
     wfLZ                                    r10          
-      109610020 (x 1.934)      196 MB/s  692 MB/s        94e6  334e6
+      109610020 (x 1.934)      194 MB/s  702 MB/s        93e6  338e6
 
 Build
 -----
@@ -99,12 +109,12 @@ The following assumes you already have *git* installed.
 
 On OS X, Clang/LLVM is the default compiler, which makes things simpler.
 
-1) Download and install [premake](http://premake.github.io/) for OS X and make it available in your path (if you have [homebrew](https://github.com/Homebrew/homebrew) installed, typing "brew install premake" in a command line should do the trick).
+1) Download and install [premake5](http://premake.github.io/) for OS X and make it available in your path (if you have [homebrew](https://github.com/Homebrew/homebrew) installed, typing "brew install premake" in a command line should do the trick).
 
 2) Run the following from the command line :
 
     cd build
-    premake4 gmake
+    premake5 gmake
     make
 
 **Linux**
@@ -113,12 +123,12 @@ On Linux, Clang/LLVM is not always available by default.
 
 1) Install Clang/LLVM if you don't have it already (on the Debian distribution for example, *sudo apt-get install clang-3.5* should do the trick)
 
-2) Download and install [premake](http://premake.github.io/) for Linux and make it available in your path.
+2) Download and install [premake5](http://premake.github.io/) for Linux and make it available in your path.
 
 3) Run the following from the command line :
 
     cd build
-    premake4 gmake
+    premake5 gmake
     make
     
 **Windows**
@@ -133,12 +143,12 @@ On Windows, things are a (little) bit more complicated.
 
 4) Now we can install Clang/LLVM for Windows, and thanks to the **ClangOnWin** project it's easy ! You can [download it here](http://sourceforge.net/projects/clangonwin/). Make it available in your path.
 
-5) Download and install [premake](http://premake.github.io/) for Windows and make it available in your path (edit the Path environment variable).
+5) Download and install [premake5](http://premake.github.io/) for Windows and make it available in your path (edit the Path environment variable).
 
 6) Run the following from the command line :
    
        cd build
-       premake4.exe gmake
+       premake5.exe gmake
        make
 
 And that's it ! You can now use the integrated in-memory benchmark to test your files (the *benchmark* or *benchmark.exe* binary).
@@ -150,7 +160,7 @@ Inside the main header and footer, a number of blocks can be found, each having 
 Inside each block, compressed data has a structure determined by the compression algorithm used.
 
 It is possible to add an integrity checksum to the compressed output by using the *DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK* block type.
-The 128-bit checksum is calculated using the excellent [SpookyHash algorithm](https://github.com/centaurean/spookyhash), which is extremely fast and offers a near-zero performance penalty.
+The 128-bit checksum is calculated using the excellent [SpookyHash algorithm](https://github.com/centaurean/spookyhash), which is extremely fast and offers a very small performance penalty.
 An additional integrity check will then be automatically performed during decompression.
 
 APIs
