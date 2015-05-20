@@ -191,7 +191,7 @@ On typical compressible data compression ratio is about 50% or less. It is still
 **Lion** ( *DENSITY_COMPRESSION_MODE_LION_ALGORITHM* )
 
 Lion is a multiform compression algorithm derived from cheetah. It goes further in the areas of dynamic adaptation and fine-grained analysis. 
-It uses swapped double dictionary lookups, multiple predictions, shifting sub-word dictionary lookups and forms rank entropy coding. 
+It uses multiple swapped dictionary lookups and predictions, and forms rank entropy coding. 
 Lion provides the best compression ratio of all three algorithms under any circumstance, and is still very fast.
 
 Quick start (a simple example using the APIs)
