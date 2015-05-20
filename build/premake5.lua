@@ -36,11 +36,9 @@
 
 -- Check for tools
 if os.execute("clang -v") == 0 then
-	premake.cc  = 'clang'
-	premake.cxx = 'clang++'
+	toolset "clang"
 elseif os.execute("gcc -v") == 0 then
-	premake.cc  = 'gcc'
-	premake.cxx = 'g++'
+	toolset "gcc"
 else
 	io.write("No supported compiler found on the command line. Please install Clang/LLVM or GCC.\n")
     os.exit(0)
@@ -83,4 +81,4 @@ solution "Density"
 			"../benchmark/src/**.h",
 			"../benchmark/src/**.c"
 		}
-		links { "spookyhash", "density" }
+		links { "density", "spookyhash" }
