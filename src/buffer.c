@@ -35,7 +35,10 @@
 #include "buffer.h"
 
 DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_return_processing_result(density_stream* stream, DENSITY_BUFFER_STATE state) {
-    density_buffer_processing_result result = {state, *stream->totalBytesRead, *stream->totalBytesWritten};
+    density_buffer_processing_result result;
+    result.state = state;
+    DENSITY_MEMCPY(&result.bytesRead, stream->totalBytesRead, sizeof(uint64_t));
+    DENSITY_MEMCPY(&result.bytesWritten, stream->totalBytesWritten, sizeof(uint64_t));
     density_stream_destroy(stream);
 
     return result;

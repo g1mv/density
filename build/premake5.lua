@@ -41,7 +41,7 @@ elseif os.execute("gcc -v") == 0 then
 	toolset "gcc"
 else
 	io.write("No supported compiler found on the command line. Please install Clang/LLVM or GCC.\n")
-    os.exit(0)
+	os.exit(0)
 end
 
 if os.execute("git --version") > 0 then
