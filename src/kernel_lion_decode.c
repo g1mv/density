@@ -43,7 +43,6 @@
  */
 
 #include "kernel_lion_decode.h"
-#include "kernel_lion_dictionary.h"
 
 const uint8_t density_lion_decode_bitmasks[DENSITY_LION_DECODE_NUMBER_OF_BITMASK_VALUES] = DENSITY_LION_DECODE_BITMASK_VALUES;
 
@@ -81,13 +80,14 @@ DENSITY_FORCE_INLINE void density_lion_decode_read_signature_from_memory(density
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_update_predictions_model(density_lion_dictionary_chunk_prediction_entry *const restrict predictions, const uint32_t chunk) {
-    *(uint64_t *) ((uint32_t *) predictions + 1) = *(uint64_t *) predictions;
-    //DENSITY_MEMMOVE((uint32_t *) predictions + 1, predictions, sizeof(uint64_t));
+    //*(uint64_t *) ((uint32_t *) predictions + 1) = *(uint64_t *) predictions;
+    DENSITY_MEMMOVE((uint32_t *) predictions + 1, predictions, 2 * sizeof(uint32_t));
     *(uint32_t *) predictions = chunk;     // Move chunk to the top of the predictions list
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_update_dictionary_model(density_lion_dictionary_chunk_entry *const restrict entry, const uint32_t chunk) {
-    *(__uint128_t *) entry = *(__uint128_t *) ((uint32_t *) entry - 1); // Safe as our dictionary is at the end of the state struct
+    DENSITY_MEMMOVE((uint32_t*)entry + 1, entry, 3 * sizeof(uint32_t));
+    //*(__uint128_t *) entry = *(__uint128_t *) ((uint32_t *) entry - 1); // Safe as our dictionary is at the end of the state struct
     *(uint32_t *) entry = chunk;
 }
 
