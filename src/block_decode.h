@@ -86,6 +86,7 @@ typedef struct {
     uint_fast64_t totalWritten;
     uint_fast8_t endDataOverhead;
 
+    bool readBlockHeaderContent;
     density_block_header lastBlockHeader;
     density_mode_marker lastModeMarker;
     density_block_footer lastBlockFooter;

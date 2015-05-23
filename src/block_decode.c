@@ -33,6 +33,7 @@
  */
 
 #include "block_decode.h"
+#include "main_header.h"
 
 DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE exitProcess(density_block_decode_state *state, DENSITY_BLOCK_DECODE_PROCESS process, DENSITY_BLOCK_DECODE_STATE blockDecodeState) {
     state->process = process;
@@ -53,7 +54,7 @@ DENSITY_FORCE_INLINE void density_block_decode_update_integrity_hash(density_mem
 
     spookyhash_update(state->integrityData.context, state->integrityData.outputPointer, used);
 
-    if(pendingExit)
+    if (pendingExit)
         state->integrityData.update = true;
     else
         density_block_decode_update_integrity_data(out, state);
@@ -67,7 +68,8 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_read_block_
     state->currentBlockData.inStart = state->totalRead;
     state->currentBlockData.outStart = state->totalWritten;
 
-    state->totalRead += density_block_header_read(readLocation, &state->lastBlockHeader);
+    if (state->readBlockHeaderContent)
+        state->totalRead += density_block_header_read(readLocation, &state->lastBlockHeader);
 
     state->currentMode = state->targetMode;
 
@@ -118,6 +120,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_b
     state->targetMode = mode;
     state->currentMode = mode;
     state->blockType = blockType;
+    state->readBlockHeaderContent = (parameters.as_bytes[0] ? true : false);
 
     state->totalRead = 0;
     state->totalWritten = 0;

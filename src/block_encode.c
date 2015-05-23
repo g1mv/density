@@ -60,7 +60,7 @@ DENSITY_FORCE_INLINE void density_block_encode_update_integrity_hash(density_mem
         spookyhash_update(state->integrityData.context, state->integrityData.directInputPointer, used - state->integrityData.stagingAvailable);
     }
 
-    if(pendingExit)
+    if (pendingExit)
         state->integrityData.update = true;
     else
         density_block_encode_update_integrity_data(in, state);
@@ -72,10 +72,12 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_block
 
     state->currentMode = state->targetMode;
 
+#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
+    state->totalWritten += density_block_header_write(out, state->totalRead > 0 ? (uint32_t)(state->totalRead - state->currentBlockData.inStart) : 0);
+#endif
+
     state->currentBlockData.inStart = state->totalRead;
     state->currentBlockData.outStart = state->totalWritten;
-
-    state->totalWritten += density_block_header_write(out);
 
     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) {
         spookyhash_context_init(state->integrityData.context, DENSITY_SPOOKYHASH_SEED_1, DENSITY_SPOOKYHASH_SEED_2);
