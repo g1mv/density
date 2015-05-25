@@ -22,11 +22,11 @@ Timing : using the *time* function, and taking the best *user* output after mult
 
 <sub>Library</sub> | <sub>Algorithm</sub> | <sub>Compress</sub> | <sub>Decompress</sub> | <sub>Size</sub> | <sub>Ratio</sub> | <sub>Round trip</sub>
 --- | --- | --- | --- | --- | --- | ---
-<sub>**density** 0.12.3</sub> | <sub>Chameleon</sub> | <sub>0.099s (1005 MB/s)</sub> | <sub>0.064s (1551 MB/s)</sub> | <sub>61 525 242</sub> | <sub>61,53%</sub> | <sub>0.163s</sub>
+<sub>**density** 0.12.4</sub> | <sub>Chameleon</sub> | <sub>0.098s (1023 MB/s)</sub> | <sub>0.062s (1619 MB/s)</sub> | <sub>61 524 478</sub> | <sub>61,52%</sub> | <sub>0.160s</sub>
 <sub>lz4 r129</sub> | <sub>-1</sub> | <sub>0.468s (214 MB/s)</sub> | <sub>0.115s (870 MB/s)</sub> | <sub>57 285 990</sub> | <sub>57,29%</sub> | <sub>0.583s</sub>
 <sub>lzo 2.08</sub> | <sub>-1</sub> | <sub>0.367s (272 MB/s)</sub> | <sub>0.309s (324 MB/s)</sub> | <sub>56 709 096</sub> | <sub>56,71%</sub> | <sub>0.676s</sub>
-<sub>**density** 0.12.3</sub> | <sub>Cheetah</sub> | <sub>0.179s (558 MB/s)</sub> | <sub>0.148 (677 MB/s)</sub> | <sub>53 157 514</sub> | <sub>53,16%</sub> | <sub>0.327s</sub>
-<sub>**density** 0.12.3</sub> | <sub>Lion</sub> | <sub>0.351s (285 MB/s)</sub> | <sub>0.345s (290 MB/s)</sub> | <sub>47 818 820</sub> | <sub>47,82%</sub> | <sub>0.696s</sub>
+<sub>**density** 0.12.4</sub> | <sub>Cheetah</sub> | <sub>0.179s (560 MB/s)</sub> | <sub>0.142 (706 MB/s)</sub> | <sub>53 156 750</sub> | <sub>53,16%</sub> | <sub>0.321s</sub>
+<sub>**density** 0.12.4</sub> | <sub>Lion</sub> | <sub>0.344s (291 MB/s)</sub> | <sub>0.357s (280 MB/s)</sub> | <sub>47 818 076</sub> | <sub>47,82%</sub> | <sub>0.701s</sub>
 <sub>lz4 r129</sub> | <sub>-3</sub> | <sub>1.685s (59 MB/s)</sub> | <sub>0.118s (847 MB/s)</sub> | <sub>44 539 940</sub> | <sub>44,54%</sub> | <sub>1.803s</sub>
 <sub>lzo 2.08</sub> | <sub>-7</sub> | <sub>9.562s (10 MB/s)</sub> | <sub>0.319s (313 MB/s)</sub> | <sub>41 720 721</sub> | <sub>41,72%</sub> | <sub>9.881s</sub>
 
@@ -48,61 +48,61 @@ Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.3, 2.3
 
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
-    density::chameleon                      0.12.3 beta  
-       61525242 (x 1.625)      944 MB/s 1467 MB/s       363e6  564e6
-    density::cheetah                        0.12.3 beta  
-       53157514 (x 1.881)      516 MB/s  637 MB/s       241e6  298e6
-    density::lion                           0.12.3 beta  
-       47818820 (x 2.091)      291 MB/s  297 MB/s       151e6  154e6
+    density::chameleon                      0.12.4 beta  
+       61524478 (x 1.625)      981 MB/s 1549 MB/s       377e6  596e6
+    density::cheetah                        0.12.4 beta  
+       53156750 (x 1.881)      545 MB/s  668 MB/s       255e6  312e6
+    density::lion                           0.12.4 beta  
+       47818076 (x 2.091)      296 MB/s  302 MB/s       154e6  157e6
     LZ4 fast 17                             r129         
-       86208275 (x 1.160)      717 MB/s 2639 MB/s        98e6  363e6
+       86208275 (x 1.160)      741 MB/s 2756 MB/s       102e6  380e6
     LZ4 fast 3                              r129         
-       63557747 (x 1.573)      317 MB/s 1610 MB/s       115e6  586e6
+       63557747 (x 1.573)      321 MB/s 1680 MB/s       116e6  612e6
     LZ4                                     r129         
-       57262281 (x 1.746)      260 MB/s 1644 MB/s       111e6  702e6
+       57262281 (x 1.746)      261 MB/s 1700 MB/s       111e6  726e6
     LZF                                     3.6          very
-       53945381 (x 1.854)      187 MB/s  357 MB/s        86e6  164e6
+       53945381 (x 1.854)      191 MB/s  365 MB/s        87e6  167e6
     LZO                                     2.08         1x1
-       55792795 (x 1.792)      282 MB/s  365 MB/s       124e6  161e6
+       55792795 (x 1.792)      289 MB/s  370 MB/s       127e6  163e6
     QuickLZ                                 1.5.1b6      1
-       52334371 (x 1.911)      274 MB/s  344 MB/s       130e6  164e6
+       52334371 (x 1.911)      280 MB/s  353 MB/s       133e6  168e6
     Snappy                                  1.1.0        
-       56539845 (x 1.769)      233 MB/s  789 MB/s       101e6  343e6
+       56539845 (x 1.769)      240 MB/s  810 MB/s       104e6  351e6
     wfLZ                                    r10          
-       63521804 (x 1.574)      146 MB/s  515 MB/s        53e6  188e6
+       63521804 (x 1.574)      151 MB/s  528 MB/s        55e6  192e6
        
 *silesia (211,960,320 bytes)*
 
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
-    density::chameleon                      0.12.3 beta  
-      133120534 (x 1.592)     1109 MB/s 1585 MB/s       412e6  589e6
-    density::cheetah                        0.12.3 beta  
-      101753098 (x 2.083)      578 MB/s  677 MB/s       300e6  352e6
-    density::lion                           0.12.3 beta  
-       87678576 (x 2.417)      323 MB/s  314 MB/s       189e6  184e6
+    density::chameleon                      0.12.4 beta  
+      133118914 (x 1.592)     1162 MB/s 1657 MB/s       432e6  616e6
+    density::cheetah                        0.12.4 beta  
+      101751478 (x 2.083)      603 MB/s  716 MB/s       313e6  372e6
+    density::lion                           0.12.4 beta  
+       87677008 (x 2.418)      328 MB/s  323 MB/s       192e6  189e6
     LZ4 fast 17                             r129         
-      131735121 (x 1.609)      669 MB/s 2383 MB/s       253e6  901e6
+      131735121 (x 1.609)      696 MB/s 2487 MB/s       263e6  941e6
     LZ4 fast 3                              r129         
-      107062945 (x 1.980)      426 MB/s 1966 MB/s       211e6  973e6
+      107062945 (x 1.980)      434 MB/s 2038 MB/s       214e6 1008e6
     LZ4                                     r129         
-      100883640 (x 2.101)      352 MB/s 1911 MB/s       184e6 1001e6
+      100883640 (x 2.101)      360 MB/s 1990 MB/s       188e6 1042e6
     LZF                                     3.6          very
-      102043866 (x 2.077)      250 MB/s  477 MB/s       129e6  247e6
+      102043866 (x 2.077)      252 MB/s  486 MB/s       130e6  251e6
     LZO                                     2.08         1x1
-      100592662 (x 2.107)      416 MB/s  573 MB/s       218e6  300e6
+      100592662 (x 2.107)      428 MB/s  573 MB/s       225e6  301e6
     QuickLZ                                 1.5.1b6      1
-       94727961 (x 2.238)      361 MB/s  420 MB/s       199e6  232e6
+       94727961 (x 2.238)      368 MB/s  434 MB/s       203e6  239e6
     Snappy                                  1.1.0        
-      101385885 (x 2.091)      341 MB/s 1093 MB/s       178e6  570e6
+      101385885 (x 2.091)      349 MB/s 1115 MB/s       181e6  581e6
     wfLZ                                    r10          
-      109610020 (x 1.934)      194 MB/s  702 MB/s        93e6  338e6
+      109610020 (x 1.934)      196 MB/s  719 MB/s        94e6  347e6
 
 Build
 -----
 DENSITY can be built on a number of platforms. It uses the [premake](http://premake.github.io/) build system.
 
-It was developped ang optimized against Clang/LLVM, therefore it is *strongly* recommended to compile with Clang/LLVM - especially if you intend to perform benchmarks -, but if that's not possible GCC is also supported, GCC version 5.1 or earlier being recommended for performance.
+It was developped ang optimized against Clang/LLVM, therefore it is *strongly* recommended to compile with Clang/LLVM - especially if you intend to perform benchmarks -, but if that's not possible GCC is also supported, GCC version 5.1 or later being the preferred choice for performance.
 The following assumes you already have *git* installed.
 
 **Mac OS X**

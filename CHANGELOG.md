@@ -1,3 +1,10 @@
+0.12.4 beta
+-----------
+*May 25, 2015*
+
+* Removed remaining undefined behavior potential occurences
+* Implemented parallelizable decompressible output block header reads/writes (disabled by default)
+
 0.12.3 beta
 -----------
 *May 20, 2015*

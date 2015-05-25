@@ -78,7 +78,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_prepar
             if (state->resetCycle)
                 state->resetCycle--;
             else {
-                density_chameleon_dictionary_reset();
+                density_chameleon_dictionary_reset(&state->dictionary);
 
                 state-> resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
             }
