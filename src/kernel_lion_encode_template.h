@@ -125,7 +125,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
     if(density_unlikely(state->signatureInterceptMode)) {
         const uint_fast32_t start_shift = state->shift;
 
-        density_lion_encode_process_unit(readMemoryLocation, out, state);
+        density_lion_encode_process_unit_for_interception(readMemoryLocation, out, state);
 
         DENSITY_LION_ENCODE_MANAGE_INTERCEPT;
     } else
