@@ -69,7 +69,7 @@ typedef struct {
     uint_fast8_t size;
 } density_lion_encode_content;
 
-#define DENSITY_LION_ENCODE_MINIMUM_LOOKAHEAD   (sizeof(density_block_footer) + sizeof(density_block_header) + sizeof(density_mode_marker) + DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE)
+#define DENSITY_LION_ENCODE_MINIMUM_LOOKAHEAD   (sizeof(density_block_footer) + sizeof(density_block_header) + sizeof(density_mode_marker) + (DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE << 1))  // On a normal cycle, DENSITY_LION_CHUNKS_PER_PROCESS_UNIT = 64 chunks = 256 bytes can be compressed at once, before being in intercept mode where another 256 input bytes could be processed before ending the signature
 
 #pragma pack(push)
 #pragma pack(4)
