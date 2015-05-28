@@ -89,7 +89,7 @@ typedef struct {
 
 typedef uint64_t                                                        density_lion_signature;
 
-#define DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE         (density_bitsizeof(density_lion_signature) * sizeof(uint16_t))   // Dictionary * hash
+#define DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE         (density_bitsizeof(density_lion_signature) * sizeof(uint32_t))   // Plain writes
 #define DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE                       (sizeof(density_lion_signature) + DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 
 #define DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_FOR_INTERCEPTION           8   // Cannot be higher than density_bitsizeof(density_lion_signature) / (max form length) or signature interception won't work and has to be > 4 for unrolling
