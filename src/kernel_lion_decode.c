@@ -52,25 +52,23 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_exit_proces
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_check_block_state(density_lion_decode_state *restrict state) {
-    if(density_unlikely(!(state->chunksCount & (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT - 1)))) {
-        if (density_unlikely((state->chunksCount >= DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS) && (!state->efficiencyChecked))) {
-            state->efficiencyChecked = true;
-            return DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK;
-        } else if (density_unlikely(state->chunksCount >= DENSITY_LION_PREFERRED_BLOCK_CHUNKS)) {
-            state->chunksCount = 0;
-            state->efficiencyChecked = false;
+    if (density_unlikely((state->chunksCount >= DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS) && (!state->efficiencyChecked))) {
+        state->efficiencyChecked = true;
+        return DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK;
+    } else if (density_unlikely(state->chunksCount >= DENSITY_LION_PREFERRED_BLOCK_CHUNKS)) {
+        state->chunksCount = 0;
+        state->efficiencyChecked = false;
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
-            if (state->resetCycle)
-                state->resetCycle--;
-            else {
-                density_lion_dictionary_reset(&state->dictionary);
-                state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
-            }
+        if (state->resetCycle)
+            state->resetCycle--;
+        else {
+            density_lion_dictionary_reset(&state->dictionary);
+            state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
+        }
 #endif
 
-            return DENSITY_KERNEL_DECODE_STATE_INFO_NEW_BLOCK;
-        }
+        return DENSITY_KERNEL_DECODE_STATE_INFO_NEW_BLOCK;
     }
 
     return DENSITY_KERNEL_DECODE_STATE_READY;
