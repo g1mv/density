@@ -129,10 +129,10 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
 
         DENSITY_LION_ENCODE_MANAGE_INTERCEPT;
     } else {
-        if(density_likely(!(state->chunksCount & (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT - 1))))
-            density_lion_encode_process_unit(readMemoryLocation, out, state);
+        if(density_unlikely(state->chunksCount & (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT - 1)))
+            density_lion_encode_process_unit_for_interception(readMemoryLocation, out, state);  // Attempt to resync the chunks count with a multiple of DENSITY_LION_CHUNKS_PER_PROCESS_UNIT
         else
-            density_lion_encode_process_unit_for_interception(readMemoryLocation, out, state);
+            density_lion_encode_process_unit(readMemoryLocation, out, state);
     }
 
 #ifdef DENSITY_LION_ENCODE_FINISH
@@ -161,7 +161,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
 #ifndef DENSITY_LION_ENCODE_FINISH
     goto check_block_state;
 #else
-    if (density_memory_teleport_available_bytes(in) >= sizeof(uint32_t))
+    if (density_memory_teleport_available_bytes(in) > sizeof(uint32_t))
         goto check_block_state;
 
     // Marker for decode loop exit

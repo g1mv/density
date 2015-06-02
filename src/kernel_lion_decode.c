@@ -52,12 +52,13 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_exit_proces
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_check_block_state(density_lion_decode_state *restrict state) {
-    if (density_unlikely((state->chunksCount >= DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS) && (!state->efficiencyChecked))) {
-        state->efficiencyChecked = true;
-        return DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK;
-    } else if (density_unlikely(state->chunksCount >= DENSITY_LION_PREFERRED_BLOCK_CHUNKS)) {
-        state->chunksCount = 0;
-        state->efficiencyChecked = false;
+    if(density_unlikely(!(state->chunksCount & (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT - 1)))) {
+        if (density_unlikely((state->chunksCount >= DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS) && (!state->efficiencyChecked))) {
+            state->efficiencyChecked = true;
+            return DENSITY_KERNEL_DECODE_STATE_INFO_EFFICIENCY_CHECK;
+        } else if (density_unlikely(state->chunksCount >= DENSITY_LION_PREFERRED_BLOCK_CHUNKS)) {
+            state->chunksCount = 0;
+            state->efficiencyChecked = false;
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
             if (state->resetCycle)
@@ -68,7 +69,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_check_block
             }
 #endif
 
-        return DENSITY_KERNEL_DECODE_STATE_INFO_NEW_BLOCK;
+            return DENSITY_KERNEL_DECODE_STATE_INFO_NEW_BLOCK;
+        }
     }
 
     return DENSITY_KERNEL_DECODE_STATE_READY;
@@ -271,7 +273,7 @@ DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - startPointer);
     switch (form) {
         case DENSITY_LION_FORM_PLAIN:  // Potential end marker, we need 2 bytes for a chunk dictionary hash, if remaining bytes < 2 + 2 bytes then this form is the last one
-            if (density_unlikely(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < sizeof(uint32_t)))
+            if (density_unlikely(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) <= sizeof(uint32_t)))
                 return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_END_MARKER;
             break;
         default:
@@ -281,6 +283,7 @@ DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode
         return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_STALL_ON_OUTPUT;
     startPointer = readMemoryLocation->pointer;
     density_lion_decode_chunk(readMemoryLocation, out, state, form);
+    state->chunksCount ++;
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - startPointer);
     return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_PROCEED;
 }

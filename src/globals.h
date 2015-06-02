@@ -181,8 +181,8 @@ DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
 #define DENSITY_NO  0
 
 #define DENSITY_MAJOR_VERSION   0
-#define DENSITY_MINOR_VERSION   13
-#define DENSITY_REVISION        0
+#define DENSITY_MINOR_VERSION   12
+#define DENSITY_REVISION        5
 
 /*
  * Compile-time switches useful for pure data encoding and decoding
