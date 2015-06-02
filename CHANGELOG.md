@@ -2,10 +2,10 @@
 -----------
 *June 2, 2015*
 
-* Corrected a signature interception problem due to an increase of chunks per process unit
-* Corrected maximum body size per signature
-* Modified the minimum lookahead in lion, and the resulting minimum buffer size in the API
-* Corrected chunk count conditions for new block/ mode marker detection and end of stream marker conditions
+* Lion : Corrected a signature interception problem due to an increase of chunks per process unit
+* Lion : Corrected maximum body size per signature
+* Lion : Modified the minimum lookahead, and the resulting minimum buffer size in the API
+* Lion : Corrected chunk count conditions for new block/ mode marker detection and end of stream marker conditions
 
 0.12.4 beta
 -----------
