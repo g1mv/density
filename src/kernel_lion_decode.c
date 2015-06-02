@@ -270,7 +270,7 @@ DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode
     DENSITY_LION_FORM form = density_lion_decode_read_form(readMemoryLocation, state);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - startPointer);
     switch (form) {
-        case DENSITY_LION_FORM_DICTIONARY_B:  // Potential end marker, we need 2 bytes for a chunk dictionary hash, if remaining bytes < 2 + 2 bytes then this form is the last one
+        case DENSITY_LION_FORM_PLAIN:  // Potential end marker, we need 2 bytes for a chunk dictionary hash, if remaining bytes < 2 + 2 bytes then this form is the last one
             if (density_unlikely(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < sizeof(uint32_t)))
                 return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_END_MARKER;
             break;
