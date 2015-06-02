@@ -60,12 +60,12 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_lion_decode_check_block
         state->efficiencyChecked = false;
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
-            if (state->resetCycle)
-                state->resetCycle--;
-            else {
-                density_lion_dictionary_reset(&state->dictionary);
-                state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
-            }
+        if (state->resetCycle)
+            state->resetCycle--;
+        else {
+            density_lion_dictionary_reset(&state->dictionary);
+            state->resetCycle = DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE - 1;
+        }
 #endif
 
         return DENSITY_KERNEL_DECODE_STATE_INFO_NEW_BLOCK;
@@ -251,16 +251,16 @@ DENSITY_FORCE_INLINE void density_lion_decode_process_form(density_memory_locati
 
 DENSITY_FORCE_INLINE void density_lion_decode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
 #ifdef __clang__
-    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT >> 2); count++) {
+    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG >> 2); count++) {
         DENSITY_UNROLL_4(density_lion_decode_process_form(in, out, state));
     }
 #else
-    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT >> 2); count++) {
+    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG >> 2); count++) {
         DENSITY_UNROLL_4(density_lion_decode_process_form(in, out, state));
     }
 #endif
 
-    state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
+    state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG;
 }
 
 DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode_chunk_step_by_step(density_memory_location *restrict readMemoryLocation, density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
@@ -270,8 +270,8 @@ DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode
     DENSITY_LION_FORM form = density_lion_decode_read_form(readMemoryLocation, state);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - startPointer);
     switch (form) {
-        case DENSITY_LION_FORM_DICTIONARY_B:  // Potential end marker, we need 2 bytes for a chunk dictionary hash, if remaining bytes < 2 + 2 bytes then this form is the last one
-            if (density_unlikely(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < sizeof(uint32_t)))
+        case DENSITY_LION_FORM_PLAIN:  // Potential end marker, we need 2 bytes for a chunk dictionary hash, if remaining bytes < 2 + 2 bytes then this form is the last one
+            if (density_unlikely(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) <= sizeof(uint32_t)))
                 return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_END_MARKER;
             break;
         default:
@@ -281,6 +281,7 @@ DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode
         return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_STALL_ON_OUTPUT;
     startPointer = readMemoryLocation->pointer;
     density_lion_decode_chunk(readMemoryLocation, out, state, form);
+    state->chunksCount ++;
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - startPointer);
     return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_PROCEED;
 }

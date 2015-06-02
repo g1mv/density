@@ -1,3 +1,12 @@
+0.12.5 beta
+-----------
+*June 2, 2015*
+
+* Modified the minimum lookahead and the resulting minimum buffer size in the API
+* Lion : corrected a signature interception problem due to an increase in process unit size
+* Lion : corrected chunk count conditions for new block / mode marker detection
+* Lion : modified end of stream marker conditions
+
 0.12.4 beta
 -----------
 *May 25, 2015*

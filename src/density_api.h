@@ -44,9 +44,9 @@
  ***********************************************************************************************************************/
 
 /*
- * This is the minimum output buffer size accepted (512 bytes), please use bigger buffers when possible to preserve performance
+ * This is the minimum output buffer size accepted (1024 bytes), please use bigger buffers when possible to preserve performance
  */
-#define DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE         (1 << 9)
+#define DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE         (1 << 10)
 
 
 

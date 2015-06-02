@@ -57,12 +57,13 @@ DENSITY_FORCE_INLINE void density_lion_encode_prepare_new_signature(density_memo
 }
 
 DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_check_block_state(density_lion_encode_state *restrict state) {
-    if (density_unlikely((state->chunksCount >= DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS) && (!state->efficiencyChecked))) {
-        state->efficiencyChecked = true;
-        return DENSITY_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK;
-    } else if (density_unlikely(state->chunksCount >= DENSITY_LION_PREFERRED_BLOCK_CHUNKS)) {
-        state->chunksCount = 0;
-        state->efficiencyChecked = false;
+    if(density_unlikely(!(state->chunksCount & (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG - 1)))) {
+        if (density_unlikely((state->chunksCount >= DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS) && (!state->efficiencyChecked))) {
+            state->efficiencyChecked = true;
+            return DENSITY_KERNEL_ENCODE_STATE_INFO_EFFICIENCY_CHECK;
+        } else if (density_unlikely(state->chunksCount >= DENSITY_LION_PREFERRED_BLOCK_CHUNKS)) {
+            state->chunksCount = 0;
+            state->efficiencyChecked = false;
 
 #if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
             if (state->resetCycle)
@@ -73,7 +74,8 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_lion_encode_check_block
             }
 #endif
 
-        return DENSITY_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK;
+            return DENSITY_KERNEL_ENCODE_STATE_INFO_NEW_BLOCK;
+        }
     }
 
     return DENSITY_KERNEL_ENCODE_STATE_READY;
@@ -186,18 +188,18 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel(density_memory_location *re
     state->lastHash = hash;
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_encode_state *restrict state) {
+DENSITY_FORCE_INLINE void density_lion_encode_process_unit_generic(const uint_fast8_t chunks_per_process_unit, const uint_fast16_t process_unit_size, density_memory_location *restrict in, density_memory_location *restrict out, density_lion_encode_state *restrict state) {
     uint32_t chunk;
 
 #ifdef __clang__
-    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT >> 2); count++) {
+    for (uint_fast8_t count = 0; count < (chunks_per_process_unit >> 2); count++) {
         DENSITY_UNROLL_4(\
             DENSITY_MEMCPY(&chunk, in->pointer, sizeof(uint32_t));\
             density_lion_encode_kernel(out, DENSITY_LION_HASH_ALGORITHM(chunk), chunk, state);\
             in->pointer += sizeof(uint32_t));
     }
 #else
-    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT >> 1); count++) {
+    for (uint_fast8_t count = 0; count < (chunks_per_process_unit >> 1); count++) {
         DENSITY_UNROLL_2(\
             DENSITY_MEMCPY(&chunk, in->pointer, sizeof(uint32_t));\
             density_lion_encode_kernel(out, DENSITY_LION_HASH_ALGORITHM(chunk), chunk, state);\
@@ -205,8 +207,16 @@ DENSITY_FORCE_INLINE void density_lion_encode_process_unit(density_memory_locati
     }
 #endif
 
-    state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
-    in->available_bytes -= DENSITY_LION_PROCESS_UNIT_SIZE;
+    state->chunksCount += chunks_per_process_unit;
+    in->available_bytes -= process_unit_size;
+}
+
+DENSITY_FORCE_INLINE void density_lion_encode_process_unit_small(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_encode_state *restrict state) {
+    density_lion_encode_process_unit_generic(DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_SMALL, DENSITY_LION_PROCESS_UNIT_SIZE_SMALL, in, out, state);
+}
+
+DENSITY_FORCE_INLINE void density_lion_encode_process_unit_big(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_encode_state *restrict state) {
+    density_lion_encode_process_unit_generic(DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG, DENSITY_LION_PROCESS_UNIT_SIZE_BIG, in, out, state);
 }
 
 DENSITY_FORCE_INLINE void density_lion_encode_process_step_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_encode_state *restrict state) {

@@ -109,7 +109,7 @@ The following assumes you already have *git* installed.
 
 On OS X, Clang/LLVM is the default compiler, which makes things simpler.
 
-1) Download and install [premake5](http://premake.github.io/) for OS X and make it available in your path (if you have [homebrew](https://github.com/Homebrew/homebrew) installed, typing "brew install premake" in a command line should do the trick).
+1) Download and install [premake5](http://premake.github.io/) for OS X and make it available in your path.
 
 2) Run the following from the command line :
 

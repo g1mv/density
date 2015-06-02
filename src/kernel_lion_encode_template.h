@@ -114,7 +114,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
     // Try to read a complete process unit
     process_unit:
     pointerOutBefore = out->pointer;
-    if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_LION_PROCESS_UNIT_SIZE)))
+    if (!(readMemoryLocation = density_memory_teleport_read(in, DENSITY_LION_PROCESS_UNIT_SIZE_BIG)))
 #ifndef DENSITY_LION_ENCODE_FINISH
         return density_lion_encode_exit_process(state, DENSITY_LION_ENCODE_PROCESS_UNIT, DENSITY_KERNEL_ENCODE_STATE_STALL_ON_INPUT);
 #else
@@ -125,11 +125,15 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
     if(density_unlikely(state->signatureInterceptMode)) {
         const uint_fast32_t start_shift = state->shift;
 
-        density_lion_encode_process_unit(readMemoryLocation, out, state);
+        density_lion_encode_process_unit_small(readMemoryLocation, out, state);
 
         DENSITY_LION_ENCODE_MANAGE_INTERCEPT;
-    } else
-        density_lion_encode_process_unit(readMemoryLocation, out, state);
+    } else {
+        if(density_unlikely(state->chunksCount & (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG - 1)))
+            density_lion_encode_process_unit_small(readMemoryLocation, out, state);  // Attempt to resync the chunks count with a multiple of DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG
+        else
+            density_lion_encode_process_unit_big(readMemoryLocation, out, state);
+    }
 
 #ifdef DENSITY_LION_ENCODE_FINISH
     goto exit;
@@ -157,7 +161,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
 #ifndef DENSITY_LION_ENCODE_FINISH
     goto check_block_state;
 #else
-    if (density_memory_teleport_available_bytes(in) >= sizeof(uint32_t))
+    if (density_memory_teleport_available_bytes(in) > sizeof(uint32_t))
         goto check_block_state;
 
     // Marker for decode loop exit
@@ -167,7 +171,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
     }
 
     pointerOutBefore = out->pointer;
-    const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_DICTIONARY_B);
+    const density_lion_entropy_code code = density_lion_form_model_get_encoding(&state->formData, DENSITY_LION_FORM_PLAIN);
     if(density_unlikely(state->signatureInterceptMode)) {
         const uint_fast32_t start_shift = state->shift;
 
