@@ -47,11 +47,11 @@
 
 #include "globals.h"
 
-#define DENSITY_LION_PREFERRED_BLOCK_CHUNKS_SHIFT                   17
-#define DENSITY_LION_PREFERRED_BLOCK_CHUNKS                         (1 << DENSITY_LION_PREFERRED_BLOCK_CHUNKS_SHIFT)
+#define DENSITY_LION_PREFERRED_BLOCK_CHUNKS_SHIFT                       17
+#define DENSITY_LION_PREFERRED_BLOCK_CHUNKS                             (1 << DENSITY_LION_PREFERRED_BLOCK_CHUNKS_SHIFT)
 
-#define DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS_SHIFT        13
-#define DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS              (1 << DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS_SHIFT)
+#define DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS_SHIFT            13
+#define DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS                  (1 << DENSITY_LION_PREFERRED_EFFICIENCY_CHECK_CHUNKS_SHIFT)
 
 #define DENSITY_LION_HASH32_MULTIPLIER                                  (uint32_t)0x9D6EF916lu
 #define DENSITY_LION_CHUNK_HASH_BITS                                    16
@@ -92,9 +92,9 @@ typedef uint64_t                                                        density_
 #define DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE         (density_bitsizeof(density_lion_signature) * sizeof(uint32_t))   // Plain writes
 #define DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE                       (sizeof(density_lion_signature) + DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 
-#define DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_FOR_INTERCEPTION           8   // Cannot be higher than density_bitsizeof(density_lion_signature) / (max form length) or signature interception won't work and has to be > 4 for unrolling
-#define DENSITY_LION_CHUNKS_PER_PROCESS_UNIT                            64
-#define DENSITY_LION_PROCESS_UNIT_SIZE_FOR_INTERCEPTION                 (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_FOR_INTERCEPTION * sizeof(uint32_t))
-#define DENSITY_LION_PROCESS_UNIT_SIZE                                  (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT * sizeof(uint32_t))
+#define DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_SMALL                      8   // Cannot be higher than density_bitsizeof(density_lion_signature) / (max form length) or signature interception won't work and has to be > 4 for unrolling
+#define DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG                        64
+#define DENSITY_LION_PROCESS_UNIT_SIZE_SMALL                            (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_SMALL * sizeof(uint32_t))
+#define DENSITY_LION_PROCESS_UNIT_SIZE_BIG                              (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG * sizeof(uint32_t))
 
 #endif

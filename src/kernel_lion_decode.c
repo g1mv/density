@@ -251,16 +251,16 @@ DENSITY_FORCE_INLINE void density_lion_decode_process_form(density_memory_locati
 
 DENSITY_FORCE_INLINE void density_lion_decode_process_unit(density_memory_location *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {
 #ifdef __clang__
-    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT >> 2); count++) {
+    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG >> 2); count++) {
         DENSITY_UNROLL_4(density_lion_decode_process_form(in, out, state));
     }
 #else
-    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT >> 2); count++) {
+    for (uint_fast8_t count = 0; count < (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG >> 2); count++) {
         DENSITY_UNROLL_4(density_lion_decode_process_form(in, out, state));
     }
 #endif
 
-    state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
+    state->chunksCount += DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG;
 }
 
 DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode_chunk_step_by_step(density_memory_location *restrict readMemoryLocation, density_memory_teleport *restrict in, density_memory_location *restrict out, density_lion_decode_state *restrict state) {

@@ -76,7 +76,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
 
     // Check output size
     check_output_size:
-    if (density_unlikely(out->available_bytes < DENSITY_LION_PROCESS_UNIT_SIZE)) {
+    if (density_unlikely(out->available_bytes < DENSITY_LION_PROCESS_UNIT_SIZE_BIG)) {
 #ifdef DENSITY_LION_DECODE_FINISH
         if(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < DENSITY_LION_DECODE_MAX_BYTES_TO_READ_FOR_PROCESS_UNIT)
             goto step_by_step;
@@ -96,7 +96,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     density_byte *readMemoryLocationPointerBefore = readMemoryLocation->pointer;
     density_lion_decode_process_unit(readMemoryLocation, out, state);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
-    out->available_bytes -= DENSITY_LION_PROCESS_UNIT_SIZE;
+    out->available_bytes -= DENSITY_LION_PROCESS_UNIT_SIZE_BIG;
 
     // New loop
     goto check_block_state;
@@ -104,7 +104,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     // Try to read and process units step by step
     step_by_step:
     readMemoryLocation = density_memory_teleport_read_remaining_reserved(in, state->endDataOverhead);
-    uint_fast8_t iterations = DENSITY_LION_CHUNKS_PER_PROCESS_UNIT;
+    uint_fast8_t iterations = DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG;
     while (iterations--) {
         switch (density_lion_decode_chunk_step_by_step(readMemoryLocation, in, out, state)) {
             case DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_PROCEED:
