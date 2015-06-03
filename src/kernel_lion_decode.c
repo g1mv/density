@@ -85,7 +85,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_update_predictions_model(density_l
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_update_dictionary_model(density_lion_dictionary_chunk_entry *const restrict entry, const uint32_t chunk) {
-    DENSITY_MEMMOVE((uint32_t*)entry + 1, entry, 3 * sizeof(uint32_t));
+    DENSITY_MEMMOVE((uint32_t *) entry + 1, entry, 3 * sizeof(uint32_t));
     *(uint32_t *) entry = chunk;
 }
 
@@ -281,7 +281,7 @@ DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode
         return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_STALL_ON_OUTPUT;
     startPointer = readMemoryLocation->pointer;
     density_lion_decode_chunk(readMemoryLocation, out, state, form);
-    state->chunksCount ++;
+    state->chunksCount++;
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - startPointer);
     return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_PROCEED;
 }
@@ -306,6 +306,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_
 
     state->lastHash = 0;
     state->lastChunk = 0;
+    state->iterations = 0;
 
     return density_lion_decode_exit_process(state, DENSITY_LION_DECODE_PROCESS_CHECK_BLOCK_STATE, DENSITY_KERNEL_DECODE_STATE_READY);
 }

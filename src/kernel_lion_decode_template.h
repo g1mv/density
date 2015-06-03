@@ -104,17 +104,20 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     // Try to read and process units step by step
     step_by_step:
     readMemoryLocation = density_memory_teleport_read_remaining_reserved(in, state->endDataOverhead);
-    uint_fast8_t iterations = DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG;
-    while (iterations--) {
+    if(!state->iterations)
+        state->iterations = DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG;
+    while (state->iterations) {
         switch (density_lion_decode_chunk_step_by_step(readMemoryLocation, in, out, state)) {
             case DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_PROCEED:
                 break;
             case DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_STALL_ON_OUTPUT:
-                return DENSITY_KERNEL_DECODE_STATE_ERROR;
+                //return DENSITY_KERNEL_DECODE_STATE_ERROR;
+                return density_lion_decode_exit_process(state, DENSITY_LION_DECODE_PROCESS_CHECK_OUTPUT_SIZE, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
             case DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_END_MARKER:
                 goto finish;
         }
         out->available_bytes -= sizeof(uint32_t);
+        state->iterations --;
     }
 
     // New loop
