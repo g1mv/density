@@ -61,25 +61,13 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
             goto check_signature_state;
         case DENSITY_CHAMELEON_DECODE_PROCESS_READ_PROCESSING_UNIT:
             goto read_processing_unit;
-#ifdef DENSITY_CHAMELEON_DECODE_FINISH
-        case DENSITY_CHAMELEON_DECODE_PROCESS_STEP_BY_STEP_LOOP:
-            goto step_by_step_loop;
-        case DENSITY_CHAMELEON_DECODE_PROCESS_FINISH:
-            goto finish;
-#endif
         default:
             return DENSITY_KERNEL_DECODE_STATE_ERROR;
     }
 
     check_signature_state:
-    if ((returnState = density_chameleon_decode_check_state(out, state))) {
-#ifdef DENSITY_CHAMELEON_DECODE_FINISH
-        if(returnState == DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT)
-            if(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
-                goto step_by_step;
-#endif
+    if ((returnState = density_chameleon_decode_check_state(out, state)))
         return density_chameleon_decode_exit_process(state, DENSITY_CHAMELEON_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
-    }
 
     // Try to read the next processing unit
     read_processing_unit:
@@ -112,13 +100,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     density_chameleon_decode_read_signature(readMemoryLocation, state);
     readMemoryLocation->available_bytes -= sizeof(density_chameleon_signature);
 
-    step_by_step_loop:
     while (state->shift != density_bitsizeof(density_chameleon_signature)) {
         if (density_chameleon_decode_test_compressed(state, state->shift)) {
             if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
                 return DENSITY_KERNEL_DECODE_STATE_ERROR;
             if(out->available_bytes < sizeof(uint32_t))
-                return density_chameleon_decode_exit_process(state, DENSITY_CHAMELEON_DECODE_PROCESS_STEP_BY_STEP_LOOP, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
+                return DENSITY_KERNEL_DECODE_STATE_ERROR;
             uint16_t hash;
             DENSITY_MEMCPY(&hash, readMemoryLocation->pointer, sizeof(uint16_t));
             density_chameleon_decode_process_compressed(hash, out, state);
@@ -128,7 +115,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
             if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint32_t), state->endDataOverhead)))
                 goto finish;
             if(out->available_bytes < sizeof(uint32_t))
-                return density_chameleon_decode_exit_process(state, DENSITY_CHAMELEON_DECODE_PROCESS_STEP_BY_STEP_LOOP, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
+                return DENSITY_KERNEL_DECODE_STATE_ERROR;
             uint32_t chunk;
             DENSITY_MEMCPY(&chunk, readMemoryLocation->pointer, sizeof(uint32_t));
             density_chameleon_decode_process_uncompressed(chunk, out, state);

@@ -175,11 +175,11 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
     if(density_unlikely(state->signatureInterceptMode)) {
         const uint_fast32_t start_shift = state->shift;
 
-        density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
+        density_lion_encode_push_code_to_signature(out, state, code);
 
         DENSITY_LION_ENCODE_MANAGE_INTERCEPT;
     } else
-        density_lion_encode_push_to_signature(out, state, code.value, code.bitLength);
+        density_lion_encode_push_code_to_signature(out, state, code);
 
     // Copy the remaining bytes
     DENSITY_MEMCPY(state->signature, &state->proximitySignature, sizeof(density_lion_signature));

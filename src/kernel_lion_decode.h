@@ -96,7 +96,6 @@ typedef struct {
     uint_fast8_t shift;
     uint_fast64_t chunksCount;
     bool efficiencyChecked;
-    uint_fast8_t iterations;
 
     DENSITY_LION_DECODE_PROCESS process;
     uint_fast8_t endDataOverhead;

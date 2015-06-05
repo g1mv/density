@@ -136,7 +136,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast64_t density_memory_telepor
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_bytes_reserved(density_memory_teleport *teleport, const uint_fast64_t reserved) {
-    uint_fast64_t contained = teleport->stagingMemoryLocation->memoryLocation->available_bytes + teleport->directMemoryLocation->available_bytes;
+    const uint_fast64_t contained = teleport->stagingMemoryLocation->memoryLocation->available_bytes + teleport->directMemoryLocation->available_bytes;
     if (density_unlikely(reserved >= contained))
         return 0;
     else
