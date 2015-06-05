@@ -133,7 +133,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     finish:
     availableBytesReserved = density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead);
     if(out->available_bytes < availableBytesReserved)
-        return density_chameleon_decode_exit_process(state, DENSITY_CHAMELEON_DECODE_PROCESS_FINISH, DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT);
+        return DENSITY_KERNEL_DECODE_STATE_ERROR;
     density_memory_teleport_copy(in, out, availableBytesReserved);
 
     return DENSITY_KERNEL_DECODE_STATE_READY;
