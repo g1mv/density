@@ -44,7 +44,7 @@
 #include "density_api.h"
 #include "memory_location.h"
 
-#define DENSITY_STREAM_MEMORY_TELEPORT_BUFFER_SIZE     (1 << 12)
+#define DENSITY_STREAM_MEMORY_TELEPORT_BUFFER_SIZE     (1 << 16)
 
 typedef enum {
     DENSITY_STREAM_PROCESS_PREPARED,
