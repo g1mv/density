@@ -35,6 +35,10 @@
 #ifndef DENSITY_API_H
 #define DENSITY_API_H
 
+# if defined (__cplusplus)
+extern "C" {
+# endif
+
 #include "density_api_data_structures.h"
 
 /***********************************************************************************************************************
@@ -221,5 +225,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_finish(densi
  * @param stream the stream
  */
 DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream);
+
+# if defined (__cplusplus)
+}
+# endif
 
 #endif

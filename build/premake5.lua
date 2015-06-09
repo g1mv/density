@@ -54,7 +54,7 @@ os.execute("git submodule update --init --recursive")
 
 solution "Density"
 	configurations { "Release" }
-	buildoptions { "-std=c99" }
+	buildoptions { "-fPIC -std=c99" }
 	flags { "OptimizeSpeed", "NoFramePointer", "LinkTimeOptimization" }
 
 	project "spookyhash"
@@ -73,6 +73,7 @@ solution "Density"
 			"../src/*.c"
 		}
 		links { "spookyhash" }
+		includedirs { "../src/spookyhash/src" }
 
 	project "benchmark"
 		kind "ConsoleApp"
