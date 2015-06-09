@@ -40,8 +40,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_exit_proces
 }
 
 DENSITY_FORCE_INLINE void density_block_encode_update_integrity_data(density_memory_teleport *restrict in, density_block_encode_state *restrict state) {
-    state->integrityData.stagingAvailable = in->stagingMemoryLocation->memoryLocation->available_bytes;
-    state->integrityData.stagingInputPointer = in->stagingMemoryLocation->memoryLocation->pointer;
+    spookyhash_update(state->integrityData.context, in->stagingMemoryLocation->memoryLocation->pointer, in->stagingMemoryLocation->memoryLocation->available_bytes);
     state->integrityData.directAvailable = in->directMemoryLocation->available_bytes;
     state->integrityData.directInputPointer = in->directMemoryLocation->pointer;
 
@@ -49,16 +48,11 @@ DENSITY_FORCE_INLINE void density_block_encode_update_integrity_data(density_mem
 }
 
 DENSITY_FORCE_INLINE void density_block_encode_update_integrity_hash(density_memory_teleport *restrict in, density_block_encode_state *restrict state, bool pendingExit) {
-    uint_fast64_t availableBefore = state->integrityData.stagingAvailable + state->integrityData.directAvailable;
+    uint_fast64_t availableBefore = state->integrityData.directAvailable;
     uint_fast64_t available = density_memory_teleport_available_bytes(in);
     uint_fast64_t used = availableBefore - available;
 
-    if (used <= state->integrityData.stagingAvailable)
-        spookyhash_update(state->integrityData.context, state->integrityData.stagingInputPointer, used);
-    else {
-        spookyhash_update(state->integrityData.context, state->integrityData.stagingInputPointer, state->integrityData.stagingAvailable);
-        spookyhash_update(state->integrityData.context, state->integrityData.directInputPointer, used - state->integrityData.stagingAvailable);
-    }
+    spookyhash_update(state->integrityData.context, state->integrityData.directInputPointer, used);
 
     if (pendingExit)
         state->integrityData.update = true;

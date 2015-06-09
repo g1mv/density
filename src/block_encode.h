@@ -69,8 +69,6 @@ typedef struct {
 
 typedef struct {
     bool update;
-    density_byte* stagingInputPointer;
-    uint_fast64_t stagingAvailable;
     density_byte* directInputPointer;
     uint_fast64_t directAvailable;
     spookyhash_context* context;
