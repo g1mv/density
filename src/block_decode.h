@@ -44,8 +44,8 @@
 #include "memory_teleport.h"
 #include "memory_location.h"
 #include "memory_teleport.h"
-#include "spookyhash/src/context.h"
-#include "spookyhash/src/spookyhash.h"
+#include "context.h"
+#include "spookyhash.h"
 
 typedef enum {
     DENSITY_BLOCK_DECODE_STATE_READY = 0,
@@ -86,6 +86,7 @@ typedef struct {
     uint_fast64_t totalWritten;
     uint_fast8_t endDataOverhead;
 
+    bool readBlockHeaderContent;
     density_block_header lastBlockHeader;
     density_mode_marker lastModeMarker;
     density_block_footer lastBlockFooter;
