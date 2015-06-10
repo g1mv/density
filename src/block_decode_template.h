@@ -32,6 +32,9 @@
  * 3/04/15 16:22
  */
 
+#include "memory_teleport.h"
+#include "memory_location.h"
+
 #ifndef DENSITY_BLOCK_DECODE_FINISH
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE density_block_decode_continue(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_decode_state *restrict state) {
 #else

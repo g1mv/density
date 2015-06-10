@@ -72,7 +72,6 @@ typedef struct {
 typedef struct {
     bool update;
     density_byte* outputPointer;
-    uint_fast64_t available;
     spookyhash_context* context;
 } density_block_decode_integrity_data;
 

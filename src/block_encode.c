@@ -40,24 +40,23 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_exit_proces
 }
 
 DENSITY_FORCE_INLINE void density_block_encode_update_integrity_data(density_memory_teleport *restrict in, density_block_encode_state *restrict state) {
-    spookyhash_update(state->integrityData.context, in->stagingMemoryLocation->memoryLocation->pointer, in->stagingMemoryLocation->memoryLocation->available_bytes);
-    state->integrityData.directAvailable = in->directMemoryLocation->available_bytes;
-    state->integrityData.directInputPointer = in->directMemoryLocation->pointer;
+    state->integrityData.inputPointer = in->directMemoryLocation->pointer;
 
     state->integrityData.update = false;
 }
 
 DENSITY_FORCE_INLINE void density_block_encode_update_integrity_hash(density_memory_teleport *restrict in, density_block_encode_state *restrict state, bool pendingExit) {
-    uint_fast64_t availableBefore = state->integrityData.directAvailable;
-    uint_fast64_t available = density_memory_teleport_available_bytes(in);
-    uint_fast64_t used = availableBefore - available;
+    const density_byte *const  pointerBefore = state->integrityData.inputPointer;
+    const density_byte *const pointerAfter = in->directMemoryLocation->pointer;
+    const uint_fast64_t processed = pointerAfter - pointerBefore;
 
-    spookyhash_update(state->integrityData.context, state->integrityData.directInputPointer, used);
-
-    if (pendingExit)
+    if (pendingExit) {
+        spookyhash_update(state->integrityData.context, state->integrityData.inputPointer, processed);
         state->integrityData.update = true;
-    else
+    } else {
+        spookyhash_update(state->integrityData.context, state->integrityData.inputPointer, processed - in->stagingMemoryLocation->memoryLocation->available_bytes);
         density_block_encode_update_integrity_data(in, state);
+    }
 }
 
 DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_block_header(density_memory_teleport *restrict in, density_memory_location *restrict out, density_block_encode_state *restrict state) {
@@ -75,6 +74,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_block
 
     if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) {
         spookyhash_context_init(state->integrityData.context, DENSITY_SPOOKYHASH_SEED_1, DENSITY_SPOOKYHASH_SEED_2);
+        spookyhash_update(state->integrityData.context, in->stagingMemoryLocation->memoryLocation->pointer, in->stagingMemoryLocation->memoryLocation->available_bytes);
         density_block_encode_update_integrity_data(in, state);
     }
 
@@ -86,6 +86,7 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_block
         return DENSITY_BLOCK_ENCODE_STATE_STALL_ON_OUTPUT;
 
     density_block_encode_update_integrity_hash(in, state, false);
+
 
     uint64_t hashsum1, hashsum2;
     spookyhash_final(state->integrityData.context, &hashsum1, &hashsum2);
