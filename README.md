@@ -11,24 +11,30 @@ Why is it so fast ?
 -------------------
 
 One of the biggest assets of DENSITY is that its work unit is **not a byte** like other libraries, but **a group of 4 bytes**.
+
 That is, when other libraries consume one byte of data and then apply an algorithmic processing to it, DENSITY consumes 4 bytes and then applies its algorithmic processing.
+
 As one can easily see, with DENSITY processing happens 4 times less often, therefore it is potentially much faster.
 But on the other side it also makes DENSITY more difficult to craft, as all well-known compression techniques scale poorly to groups of 4 bytes.
+
 For example, let's take a simple input sequence (24 symbols) that we want to encode using RLE (Run-Length Encoding) :
 
 > EEEEEFAAAFAAAAAAEEEEEEEE
 
 Our RLE will cost 1 output size unit for each symbol count.
 
-Work unit size | Work unit groups | RLE result | RLE output size
+<sub>Work unit size</sub> | <sub>Work unit groups</sub> | <sub>RLE result</sub> | <sub>RLE output size</sub>
 --- | --- | --- | ---
-1 symbol | E E E E E F A A A F A A A A A A E E E E E E E E | 5 x E, 1 x F, 3 x A, 1 x F, 6 x A, 8 x E | 12
-4 symbols | EEEE EFAA AFAA AAAA EEEE EEEE | 1 x EEEE, 1 x EFAA, 1 x AFAA, 1 x AAAA, 2 x EEEE | 25
+<sub>1 symbol</sub> | <sub>E E E E E F A A A F A A A A A A E E E E E E E E</sub> | <sub>5 x E, 1 x F, 3 x A, 1 x F, 6 x A, 8 x E</sub> | <sub>12</sub>
+<sub>4 symbols</sub> | <sub>EEEE EFAA AFAA AAAA EEEE EEEE</sub> | <sub>1 x EEEE, 1 x EFAA, 1 x AFAA, 1 x AAAA, 2 x EEEE</sub> | <sub>25</sub>
 
 It's immediately obvious that RLE performs much worse with 4-symbol work units in our example.
 
-That is why DENSITY's algorithms were designed from scratch. They have to alleviate for 4-byte work units while still providing great speed.
+That is why DENSITY's algorithms were designed from scratch.
+They have to alleviate for 4-byte work units while still providing great speed.
+
 Because what's the point of having 4-times less processing if your processing takes 4 times as long ? Well ... there's none. Zero. Nada !
+
 But the good news is, that's not the case, and that's one of the reasons DENSITY is so fast.
 
 Let's finish with a list of DENSITY's speed pedigree traits :
