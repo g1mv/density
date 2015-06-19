@@ -87,7 +87,6 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_write_block
 
     density_block_encode_update_integrity_hash(in, state, false);
 
-
     uint64_t hashsum1, hashsum2;
     spookyhash_final(state->integrityData.context, &hashsum1, &hashsum2);
 

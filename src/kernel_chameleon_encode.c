@@ -54,6 +54,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_new_signature(density
     state->shift = 0;
     state->signature = (density_chameleon_signature *) (out->pointer);
     state->proximitySignature = 0;
+    state->signature_copied_to_memory = false;
 
     out->pointer += sizeof(density_chameleon_signature);
     out->available_bytes -= sizeof(density_chameleon_signature);
@@ -98,7 +99,10 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_check_
 
     switch (state->shift) {
         case density_bitsizeof(density_chameleon_signature):
-            DENSITY_MEMCPY(state->signature, &state->proximitySignature, sizeof(density_chameleon_signature));
+            if(density_likely(!state->signature_copied_to_memory)) {  // Avoid dual copying in case of mode reversion
+                DENSITY_MEMCPY(state->signature, &state->proximitySignature, sizeof(density_chameleon_signature));
+                state->signature_copied_to_memory = true;
+            }
             if ((returnState = density_chameleon_encode_prepare_new_block(out, state)))
                 return returnState;
             break;

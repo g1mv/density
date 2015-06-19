@@ -71,6 +71,7 @@ typedef struct {
     density_cheetah_signature * signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
+    bool signature_copied_to_memory;
 
     DENSITY_CHEETAH_ENCODE_PROCESS process;
 

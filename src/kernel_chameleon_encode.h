@@ -70,6 +70,7 @@ typedef struct {
     density_chameleon_signature *signature;
     uint_fast32_t signaturesCount;
     uint_fast8_t efficiencyChecked;
+    bool signature_copied_to_memory;
 
     DENSITY_CHAMELEON_ENCODE_PROCESS process;
 
