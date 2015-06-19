@@ -31,11 +31,7 @@ Our RLE will cost 1 output size unit for each symbol count.
 It's immediately obvious that RLE performs much worse with 4-symbol work units in our example.
 
 That is why DENSITY's algorithms were designed from scratch.
-They have to alleviate for 4-byte work units while still providing great speed.
-
-Because what's the point of having 4-times less processing if your processing takes 4 times as long ? Well ... there's none. Zero. Nada !
-
-But the good news is, that's not the case, and that's one of the reasons DENSITY is so fast.
+They have to alleviate for 4-byte work units and still provide great speed.
 
 **Speed pedigree traits**
 
