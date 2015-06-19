@@ -17,19 +17,6 @@ That is, when other libraries consume one byte of data and then apply an algorit
 As one can easily see, with DENSITY processing happens 4 times less often, therefore it is potentially much faster.
 But on the other side it also makes DENSITY more difficult to craft, as all well-known compression techniques scale poorly to groups of 4 bytes.
 
-For example, let's take a simple input sequence (**24** symbols) and encode it using RLE (Run-Length Encoding) :
-
-> EEEEEFAAAFAAAAAAEEEEEEEE
-
-Our RLE will cost 1 output size unit for each symbol count.
-
-<sub>Work unit size</sub> | <sub>Work unit groups</sub> | <sub>RLE result</sub> | <sub>RLE output size</sub>
---- | --- | --- | ---
-<sub>1 symbol</sub> | <sub>E E E E E F A A A F A A A A A A E E E E E E E E</sub> | <sub>5 x E, 1 x F, 3 x A, 1 x F, 6 x A, 8 x E</sub> | <sub>**12**</sub>
-<sub>4 symbols</sub> | <sub>EEEE EFAA AFAA AAAA EEEE EEEE</sub> | <sub>1 x EEEE, 1 x EFAA, 1 x AFAA, 1 x AAAA, 2 x EEEE</sub> | <sub>**25**</sub>
-
-It's immediately obvious that RLE performs much worse with 4-symbol work units in our example.
-
 That is why DENSITY's algorithms were designed from scratch.
 They have to alleviate for 4-byte work units and still provide great speed.
 
