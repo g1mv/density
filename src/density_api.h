@@ -35,7 +35,7 @@
 #ifndef DENSITY_API_H
 #define DENSITY_API_H
 
-#if defined (__cplusplus)
+#ifdef __cplusplus
 extern "C" {
 #endif
 
