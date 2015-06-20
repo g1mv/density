@@ -168,11 +168,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_
     }
 
     read_footer:
-#if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES
-#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
+#if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES && DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
     if ((decodeState = density_decode_read_footer(in, state)))
         return decodeState;
-#endif
 #endif
     if (state->header.compressionMode != DENSITY_COMPRESSION_MODE_COPY)
         mem_free(state->blockDecodeState.kernelDecodeState);

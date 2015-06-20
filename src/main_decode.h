@@ -48,7 +48,7 @@
 #include "block_encode.h"
 #include "memory_location.h"
 
-#if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES
+#if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES && DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
 #define DENSITY_DECODE_END_DATA_OVERHEAD                           (sizeof(density_main_footer))
 #else
 #define DENSITY_DECODE_END_DATA_OVERHEAD                           0
