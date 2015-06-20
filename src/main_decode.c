@@ -33,6 +33,7 @@
  */
 
 #include "main_decode.h"
+#include "main_header.h"
 
 DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_exit_process(density_decode_state *state, DENSITY_DECODE_PROCESS process, DENSITY_DECODE_STATE decodeState) {
     state->process = process;
@@ -168,10 +169,10 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_
 
     read_footer:
 #if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES
-    if ((decodeState = density_decode_read_footer(in, state)))
+    if (state->header.blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) if ((decodeState = density_decode_read_footer(in, state)))
         return decodeState;
 #endif
-    if(state->header.compressionMode != DENSITY_COMPRESSION_MODE_COPY)
+    if (state->header.compressionMode != DENSITY_COMPRESSION_MODE_COPY)
         mem_free(state->blockDecodeState.kernelDecodeState);
 
     return DENSITY_DECODE_STATE_READY;

@@ -168,7 +168,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_
 
     write_footer:
 #if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES
-    if ((encodeState = density_encode_write_footer(out, state)))
+    if (state->blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) if ((encodeState = density_encode_write_footer(out, state)))
         return density_encode_exit_process(state, DENSITY_ENCODE_PROCESS_WRITE_FOOTER, encodeState);
 #endif
 
