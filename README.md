@@ -12,7 +12,7 @@ Why is it so fast ?
 
 One of the biggest assets of DENSITY is that its work unit is **not a byte** like other libraries, but **a group of 4 bytes**.
 
-That is, when other libraries consume one byte of data and then apply an algorithmic processing to it, DENSITY consumes 4 bytes and then applies its algorithmic processing.
+When other libraries consume one byte of data and then apply an algorithmic processing to it, DENSITY consumes 4 bytes and then applies its algorithmic processing.
 
 That's why DENSITY's algorithms were designed from scratch. They have to alleviate for 4-byte work units and still provide great speed.
 
