@@ -43,6 +43,7 @@
  */
 
 #include "kernel_lion_decode.h"
+#include "memory_location.h"
 
 const uint8_t density_lion_decode_bitmasks[DENSITY_LION_DECODE_NUMBER_OF_BITMASK_VALUES] = DENSITY_LION_DECODE_BITMASK_VALUES;
 
@@ -85,7 +86,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_update_predictions_model(density_l
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_update_dictionary_model(density_lion_dictionary_chunk_entry *const restrict entry, const uint32_t chunk) {
-    DENSITY_MEMMOVE((uint32_t*)entry + 1, entry, 3 * sizeof(uint32_t));
+    DENSITY_MEMMOVE((uint32_t *) entry + 1, entry, 3 * sizeof(uint32_t));
     *(uint32_t *) entry = chunk;
 }
 
@@ -270,7 +271,7 @@ DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode
     DENSITY_LION_FORM form = density_lion_decode_read_form(readMemoryLocation, state);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - startPointer);
     switch (form) {
-        case DENSITY_LION_FORM_PLAIN:  // Potential end marker, we need 2 bytes for a chunk dictionary hash, if remaining bytes < 2 + 2 bytes then this form is the last one
+        case DENSITY_LION_FORM_PLAIN:  // Potential end marker
             if (density_unlikely(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) <= sizeof(uint32_t)))
                 return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_END_MARKER;
             break;
@@ -281,7 +282,7 @@ DENSITY_FORCE_INLINE DENSITY_LION_DECODE_STEP_BY_STEP_STATUS density_lion_decode
         return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_STALL_ON_OUTPUT;
     startPointer = readMemoryLocation->pointer;
     density_lion_decode_chunk(readMemoryLocation, out, state, form);
-    state->chunksCount ++;
+    state->chunksCount++;
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - startPointer);
     return DENSITY_LION_DECODE_STEP_BY_STEP_STATUS_PROCEED;
 }

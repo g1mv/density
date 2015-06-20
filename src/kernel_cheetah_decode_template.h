@@ -67,14 +67,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     }
 
     check_signature_state:
-    if (density_unlikely((returnState = density_cheetah_decode_check_state(out, state)))) {
-#ifdef DENSITY_CHEETAH_DECODE_FINISH
-        if(returnState == DENSITY_KERNEL_DECODE_STATE_STALL_ON_OUTPUT)
-            if(density_memory_teleport_available_bytes_reserved(in, state->endDataOverhead) < DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE)
-                goto step_by_step;
-#endif
+    if (density_unlikely((returnState = density_cheetah_decode_check_state(out, state))))
         return density_cheetah_decode_exit_process(state, DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE, returnState);
-    }
 
     // Try to read the next processing unit
     read_processing_unit:
@@ -99,6 +93,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     // New loop
     goto check_signature_state;
 
+#ifdef DENSITY_CHEETAH_DECODE_FINISH
     // Try to read and process signature and body, step by step
     step_by_step:
     if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(density_cheetah_signature), state->endDataOverhead)))
@@ -161,4 +156,5 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     density_memory_teleport_copy(in, out, availableBytesReserved);
 
     return DENSITY_KERNEL_DECODE_STATE_READY;
+#endif
 }

@@ -33,7 +33,6 @@
  */
 
 #include "memory_teleport.h"
-#include "memory_location.h"
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_memory_teleport *density_memory_teleport_allocate(const uint_fast64_t size, void *(*mem_alloc)(size_t)) {
     density_memory_teleport *teleport = mem_alloc(sizeof(density_memory_teleport));
@@ -66,10 +65,14 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_change_
     density_memory_location_encapsulate(teleport->directMemoryLocation, (density_byte*)in, availableIn);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_reset_staging_buffer(density_memory_teleport *restrict teleport) {
+DENSITY_FORCE_INLINE void density_memory_teleport_rewind_staging_pointers(density_memory_teleport *restrict teleport) {
     teleport->stagingMemoryLocation->memoryLocation->pointer = teleport->stagingMemoryLocation->originalPointer;
-    teleport->stagingMemoryLocation->memoryLocation->available_bytes = 0;
     teleport->stagingMemoryLocation->writePointer = teleport->stagingMemoryLocation->originalPointer;
+}
+
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_reset_staging_buffer(density_memory_teleport *restrict teleport) {
+    density_memory_teleport_rewind_staging_pointers(teleport);
+    teleport->stagingMemoryLocation->memoryLocation->available_bytes = 0;
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_memory_teleport_copy_from_direct_buffer_to_staging_buffer(density_memory_teleport *restrict teleport) {
@@ -117,6 +120,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_memory_location *density_mem
         if (density_likely(directAvailableBytes >= bytes)) {
             return teleport->directMemoryLocation;
         } else {  // Copy what we have in our staging buffer
+            density_memory_teleport_rewind_staging_pointers(teleport);  // Free some space in case the staging memory location has been used and bytes available subsequently set to zero
             density_memory_teleport_copy_from_direct_buffer_to_staging_buffer(teleport);
             return NULL;
         }
@@ -136,7 +140,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast64_t density_memory_telepor
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast64_t density_memory_teleport_available_bytes_reserved(density_memory_teleport *teleport, const uint_fast64_t reserved) {
-    uint_fast64_t contained = teleport->stagingMemoryLocation->memoryLocation->available_bytes + teleport->directMemoryLocation->available_bytes;
+    const uint_fast64_t contained = teleport->stagingMemoryLocation->memoryLocation->available_bytes + teleport->directMemoryLocation->available_bytes;
     if (density_unlikely(reserved >= contained))
         return 0;
     else

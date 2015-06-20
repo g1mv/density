@@ -58,7 +58,7 @@ DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_write_footer(density_me
     if (sizeof(density_main_footer) > out->available_bytes)
         return DENSITY_ENCODE_STATE_STALL_ON_OUTPUT;
 
-    state->totalWritten += density_main_footer_write(out);
+    state->totalWritten += density_main_footer_write(out, state->blockEncodeState.totalRead > 0 ? (uint32_t)(state->blockEncodeState.totalRead - state->blockEncodeState.currentBlockData.inStart) : 0);
 
     return DENSITY_ENCODE_STATE_READY;
 }
@@ -167,7 +167,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_
     }
 
     write_footer:
-#if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES
+#if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES && DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
     if ((encodeState = density_encode_write_footer(out, state)))
         return density_encode_exit_process(state, DENSITY_ENCODE_PROCESS_WRITE_FOOTER, encodeState);
 #endif

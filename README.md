@@ -7,6 +7,30 @@ DENSITY is a free C99, open-source, BSD licensed compression library.
 It is focused on high-speed compression, at the best ratio possible. Streaming is fully supported.
 DENSITY features a buffer and a stream API to enable quick integration in any project.
 
+Why is it so fast ?
+-------------------
+
+One of the biggest assets of DENSITY is that its work unit is **not a byte** like other libraries, but **a group of 4 bytes**.
+
+That is, when other libraries consume one byte of data and then apply an algorithmic processing to it, DENSITY consumes 4 bytes and then applies its algorithmic processing.
+
+As one can easily see, with DENSITY processing happens 4 times less often, therefore it is potentially much faster.
+But on the other side it also makes DENSITY more difficult to craft, as all well-known compression techniques scale poorly to groups of 4 bytes.
+
+That is why DENSITY's algorithms were designed from scratch.
+They have to alleviate for 4-byte work units and still provide great speed.
+
+**Speed pedigree traits**
+
+* 4-byte work units
+* heavy use of registers as opposed to memory for processing
+* avoidance of or use of minimal branching when possible
+* use of low memory data structures to favor processor cache Lx accesses
+* library wide inlining
+* specific unrollings
+* prefetching and branching hints
+* restricted pointers to maximize compiler optimizations
+
 Benchmarks
 ----------
 
@@ -22,11 +46,11 @@ Timing : using the *time* function, and taking the best *user* output after mult
 
 <sub>Library</sub> | <sub>Algorithm</sub> | <sub>Compress</sub> | <sub>Decompress</sub> | <sub>Size</sub> | <sub>Ratio</sub> | <sub>Round trip</sub>
 --- | --- | --- | --- | --- | --- | ---
-<sub>**density** 0.12.4</sub> | <sub>Chameleon</sub> | <sub>0.098s (1023 MB/s)</sub> | <sub>0.062s (1619 MB/s)</sub> | <sub>61 524 478</sub> | <sub>61,52%</sub> | <sub>0.160s</sub>
+<sub>**density** 0.12.5</sub> | <sub>Chameleon</sub> | <sub>0.098s (1023 MB/s)</sub> | <sub>0.062s (1619 MB/s)</sub> | <sub>61 524 478</sub> | <sub>61,52%</sub> | <sub>0.160s</sub>
 <sub>lz4 r129</sub> | <sub>-1</sub> | <sub>0.468s (214 MB/s)</sub> | <sub>0.115s (870 MB/s)</sub> | <sub>57 285 990</sub> | <sub>57,29%</sub> | <sub>0.583s</sub>
 <sub>lzo 2.08</sub> | <sub>-1</sub> | <sub>0.367s (272 MB/s)</sub> | <sub>0.309s (324 MB/s)</sub> | <sub>56 709 096</sub> | <sub>56,71%</sub> | <sub>0.676s</sub>
-<sub>**density** 0.12.4</sub> | <sub>Cheetah</sub> | <sub>0.179s (560 MB/s)</sub> | <sub>0.142 (706 MB/s)</sub> | <sub>53 156 750</sub> | <sub>53,16%</sub> | <sub>0.321s</sub>
-<sub>**density** 0.12.4</sub> | <sub>Lion</sub> | <sub>0.344s (291 MB/s)</sub> | <sub>0.357s (280 MB/s)</sub> | <sub>47 818 076</sub> | <sub>47,82%</sub> | <sub>0.701s</sub>
+<sub>**density** 0.12.5</sub> | <sub>Cheetah</sub> | <sub>0.179s (560 MB/s)</sub> | <sub>0.142 (706 MB/s)</sub> | <sub>53 156 750</sub> | <sub>53,16%</sub> | <sub>0.321s</sub>
+<sub>**density** 0.12.5</sub> | <sub>Lion</sub> | <sub>0.356s (281 MB/s)</sub> | <sub>0.348s (288 MB/s)</sub> | <sub>47 818 076</sub> | <sub>47,82%</sub> | <sub>0.704s</sub>
 <sub>lz4 r129</sub> | <sub>-3</sub> | <sub>1.685s (59 MB/s)</sub> | <sub>0.118s (847 MB/s)</sub> | <sub>44 539 940</sub> | <sub>44,54%</sub> | <sub>1.803s</sub>
 <sub>lzo 2.08</sub> | <sub>-7</sub> | <sub>9.562s (10 MB/s)</sub> | <sub>0.319s (313 MB/s)</sub> | <sub>41 720 721</sub> | <sub>41,72%</sub> | <sub>9.881s</sub>
 
@@ -48,55 +72,55 @@ Here are the results of a couple of test runs on a MacBook Pro, OSX 10.10.3, 2.3
 
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
-    density::chameleon                      0.12.4 beta  
-       61524478 (x 1.625)      981 MB/s 1549 MB/s       377e6  596e6
-    density::cheetah                        0.12.4 beta  
-       53156750 (x 1.881)      545 MB/s  668 MB/s       255e6  312e6
-    density::lion                           0.12.4 beta  
-       47818076 (x 2.091)      296 MB/s  302 MB/s       154e6  157e6
+    density::chameleon                      0.12.5 beta  
+       61524478 (x 1.625)      973 MB/s 1487 MB/s       374e6  572e6
+    density::cheetah                        0.12.5 beta  
+       53156750 (x 1.881)      524 MB/s  655 MB/s       245e6  307e6
+    density::lion                           0.12.5 beta  
+       47818076 (x 2.091)      292 MB/s  295 MB/s       152e6  153e6
     LZ4 fast 17                             r129         
-       86208275 (x 1.160)      741 MB/s 2756 MB/s       102e6  380e6
+       86208275 (x 1.160)      741 MB/s 2689 MB/s       102e6  370e6
     LZ4 fast 3                              r129         
-       63557747 (x 1.573)      321 MB/s 1680 MB/s       116e6  612e6
+       63557747 (x 1.573)      319 MB/s 1651 MB/s       116e6  601e6
     LZ4                                     r129         
-       57262281 (x 1.746)      261 MB/s 1700 MB/s       111e6  726e6
+       57262281 (x 1.746)      260 MB/s 1676 MB/s       111e6  716e6
     LZF                                     3.6          very
-       53945381 (x 1.854)      191 MB/s  365 MB/s        87e6  167e6
+       53945381 (x 1.854)      192 MB/s  365 MB/s        88e6  168e6
     LZO                                     2.08         1x1
-       55792795 (x 1.792)      289 MB/s  370 MB/s       127e6  163e6
+       55792795 (x 1.792)      286 MB/s  370 MB/s       126e6  163e6
     QuickLZ                                 1.5.1b6      1
        52334371 (x 1.911)      280 MB/s  353 MB/s       133e6  168e6
     Snappy                                  1.1.0        
-       56539845 (x 1.769)      240 MB/s  810 MB/s       104e6  351e6
+       56539845 (x 1.769)      238 MB/s  799 MB/s       103e6  347e6
     wfLZ                                    r10          
-       63521804 (x 1.574)      151 MB/s  528 MB/s        55e6  192e6
+       63521804 (x 1.574)      149 MB/s  512 MB/s        54e6  186e6
        
 *silesia (211,960,320 bytes)*
 
     Codec                                   version      args
     C.Size      (C.Ratio)        E.Speed   D.Speed      E.Eff. D.Eff.
-    density::chameleon                      0.12.4 beta  
-      133118914 (x 1.592)     1162 MB/s 1657 MB/s       432e6  616e6
-    density::cheetah                        0.12.4 beta  
-      101751478 (x 2.083)      603 MB/s  716 MB/s       313e6  372e6
-    density::lion                           0.12.4 beta  
-       87677008 (x 2.418)      328 MB/s  323 MB/s       192e6  189e6
+    density::chameleon                      0.12.5 beta  
+      133118914 (x 1.592)     1129 MB/s 1601 MB/s       420e6  595e6
+    density::cheetah                        0.12.5 beta  
+      101751478 (x 2.083)      578 MB/s  693 MB/s       300e6  360e6
+    density::lion                           0.12.5 beta  
+       87677008 (x 2.418)      323 MB/s  319 MB/s       189e6  187e6
     LZ4 fast 17                             r129         
-      131735121 (x 1.609)      696 MB/s 2487 MB/s       263e6  941e6
+      131735121 (x 1.609)      685 MB/s 2491 MB/s       259e6  942e6
     LZ4 fast 3                              r129         
-      107062945 (x 1.980)      434 MB/s 2038 MB/s       214e6 1008e6
+      107062945 (x 1.980)      430 MB/s 2052 MB/s       212e6 1015e6
     LZ4                                     r129         
-      100883640 (x 2.101)      360 MB/s 1990 MB/s       188e6 1042e6
+      100883640 (x 2.101)      358 MB/s 2013 MB/s       187e6 1055e6
     LZF                                     3.6          very
-      102043866 (x 2.077)      252 MB/s  486 MB/s       130e6  251e6
+      102043866 (x 2.077)      254 MB/s  492 MB/s       131e6  255e6
     LZO                                     2.08         1x1
-      100592662 (x 2.107)      428 MB/s  573 MB/s       225e6  301e6
+      100592662 (x 2.107)      427 MB/s  573 MB/s       224e6  300e6
     QuickLZ                                 1.5.1b6      1
-       94727961 (x 2.238)      368 MB/s  434 MB/s       203e6  239e6
+       94727961 (x 2.238)      368 MB/s  429 MB/s       203e6  237e6
     Snappy                                  1.1.0        
-      101385885 (x 2.091)      349 MB/s 1115 MB/s       181e6  581e6
+      101385885 (x 2.091)      346 MB/s 1113 MB/s       180e6  580e6
     wfLZ                                    r10          
-      109610020 (x 1.934)      196 MB/s  719 MB/s        94e6  347e6
+      109610020 (x 1.934)      195 MB/s  698 MB/s        94e6  337e6
 
 Build
 -----

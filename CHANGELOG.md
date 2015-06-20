@@ -1,11 +1,15 @@
 0.12.5 beta
 -----------
-*June 2, 2015*
+*June 20, 2015*
 
+* Added conditional main footer read/write
+* Improved teleport staging buffer management
+* Regression - a minimum buffer output size has to be ensured to avoid signature loss
 * Modified the minimum lookahead and the resulting minimum buffer size in the API
 * Lion : corrected a signature interception problem due to an increase in process unit size
 * Lion : corrected chunk count conditions for new block / mode marker detection
 * Lion : modified end of stream marker conditions
+* Stability fixes and improvements
 
 0.12.4 beta
 -----------

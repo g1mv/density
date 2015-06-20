@@ -33,7 +33,6 @@
  */
 
 #include "block_decode.h"
-#include "main_header.h"
 
 DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE exitProcess(density_block_decode_state *state, DENSITY_BLOCK_DECODE_PROCESS process, DENSITY_BLOCK_DECODE_STATE blockDecodeState) {
     state->process = process;
@@ -41,18 +40,17 @@ DENSITY_FORCE_INLINE DENSITY_BLOCK_DECODE_STATE exitProcess(density_block_decode
 }
 
 DENSITY_FORCE_INLINE void density_block_decode_update_integrity_data(density_memory_location *restrict out, density_block_decode_state *restrict state) {
-    state->integrityData.available = out->available_bytes;
     state->integrityData.outputPointer = out->pointer;
 
     state->integrityData.update = false;
 }
 
 DENSITY_FORCE_INLINE void density_block_decode_update_integrity_hash(density_memory_location *restrict out, density_block_decode_state *restrict state, bool pendingExit) {
-    uint_fast64_t availableBefore = state->integrityData.available;
-    uint_fast64_t available = out->available_bytes;
-    uint_fast64_t used = availableBefore - available;
+    const density_byte *const pointerBefore = state->integrityData.outputPointer;
+    const density_byte *const pointerAfter = out->pointer;
+    const uint_fast64_t processed = pointerAfter - pointerBefore;
 
-    spookyhash_update(state->integrityData.context, state->integrityData.outputPointer, used);
+    spookyhash_update(state->integrityData.context, state->integrityData.outputPointer, processed);
 
     if (pendingExit)
         state->integrityData.update = true;
