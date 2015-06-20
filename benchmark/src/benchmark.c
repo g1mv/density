@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
         const uint_fast64_t compressed_size = result.bytesWritten;
 
         if (!compression_only) {
-            result = density_buffer_decompress(out, compressed_size, in, uncompressed_size, NULL, NULL);
+            result = density_buffer_decompress(out, compressed_size, in, memory_allocated, NULL, NULL);
             if (result.state) {
                 DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
             }
@@ -220,12 +220,12 @@ int main(int argc, char *argv[]) {
             ++iterations;
 
             cputime_chronometer_start(&chrono);
-            result = density_buffer_compress(in, uncompressed_size, out, compressed_size, compression_mode, block_type, NULL, NULL);
+            result = density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type, NULL, NULL);
             compress_time_elapsed = cputime_chronometer_stop(&chrono);
 
             if (!compression_only) {
                 cputime_chronometer_start(&chrono);
-                result = density_buffer_decompress(out, compressed_size, in, uncompressed_size, NULL, NULL);
+                result = density_buffer_decompress(out, compressed_size, in, memory_allocated, NULL, NULL);
                 decompress_time_elapsed = cputime_chronometer_stop(&chrono);
             }
 
