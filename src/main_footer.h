@@ -44,12 +44,12 @@
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    uint8_t reserved[4];    // To be used for storage of the previous block's relative start position (parallelizable decompressible output)
+    uint32_t previousBlockRelativeStartPosition;    // Previous block's relative start position (parallelizable decompressible output)
 } density_main_footer;
 #pragma pack(pop)
 
 DENSITY_WINDOWS_EXPORT uint_fast32_t density_main_footer_read(density_memory_location *, density_main_footer *);
 
-DENSITY_WINDOWS_EXPORT uint_fast32_t density_main_footer_write(density_memory_location *);
+DENSITY_WINDOWS_EXPORT uint_fast32_t density_main_footer_write(density_memory_location *, const uint32_t);
 
 #endif
