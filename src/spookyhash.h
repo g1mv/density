@@ -30,9 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * 21/06/15 13:06
- *
- * SpookyHash include file
- *
  */
 
 #ifndef SPOOKYHASH_H
