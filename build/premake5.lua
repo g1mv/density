@@ -58,15 +58,15 @@ solution "Density"
 	flags { "OptimizeSpeed", "NoFramePointer", "LinkTimeOptimization" }
 
 	project "spookyhash"
-		kind "StaticLib"
+		kind "SharedLib"
 		language "C"
 		files {
-			"../src/spookyhash/src/*.h",
-			"../src/spookyhash/src/*.c"
+			"../spookyhash/src/*.h",
+			"../spookyhash/src/*.c"
 		}
 
 	project "density"
-		kind "StaticLib"
+		kind "SharedLib"
 		language "C"
 		files {
 			"../src/*.h",
