@@ -57,29 +57,16 @@ solution "Density"
 	buildoptions { "-std=c99" }
 	flags { "OptimizeSpeed", "NoFramePointer", "LinkTimeOptimization" }
 
-	project "spookyhash"
-		kind "SharedLib"
-		language "C"
-		files {
-			"../spookyhash/src/*.h",
-			"../spookyhash/src/*.c"
-		}
-
 	project "density"
 		kind "SharedLib"
 		language "C"
 		files {
+			"../cputime/src/*.h",
+			"../cputime/src/*.c",
+			"../spookyhash/src/*.h",
+			"../spookyhash/src/*.c",
 			"../src/*.h",
 			"../src/*.c"
-		}
-		links { "spookyhash" }
-
-	project "cputime"
-		kind "SharedLib"
-		language "C"
-		files {
-			"../cputime/src/*.h",
-			"../cputime/src/*.c"
 		}
 
 	project "benchmark"
@@ -89,4 +76,4 @@ solution "Density"
 			"../benchmark/src/*.h",
 			"../benchmark/src/*.c"
 		}
-		links { "density", "spookyhash", "cputime" }
+		links { "density" }
