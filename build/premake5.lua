@@ -74,11 +74,19 @@ solution "Density"
 		}
 		links { "spookyhash" }
 
+	project "cputime"
+		kind "SharedLib"
+		language "C"
+		files {
+			"../cputime/src/*.h",
+			"../cputime/src/*.c"
+		}
+
 	project "benchmark"
 		kind "ConsoleApp"
 		language "C"
 		files {
-			"../benchmark/src/**.h",
-			"../benchmark/src/**.c"
+			"../benchmark/src/*.h",
+			"../benchmark/src/*.c"
 		}
-		links { "density", "spookyhash" }
+		links { "density", "spookyhash", "cputime" }

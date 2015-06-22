@@ -87,7 +87,7 @@
 #endif
 
 #include "../../src/density_api.h"
-#include "cputime/src/cputime.h"
+#include "../../cputime/src/cputime.h"
 
 #define DENSITY_CHRONO_MICROSECONDS         1000000.0
 #define DENSITY_ESCAPE_CHARACTER            ((char)27)
