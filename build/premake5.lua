@@ -61,8 +61,6 @@ solution "Density"
 		kind "SharedLib"
 		language "C"
 		files {
-			"../cputime/src/*.h",
-			"../cputime/src/*.c",
 			"../spookyhash/src/*.h",
 			"../spookyhash/src/*.c",
 			"../src/*.h",
@@ -73,6 +71,8 @@ solution "Density"
 		kind "ConsoleApp"
 		language "C"
 		files {
+			"../benchmark/cputime/src/*.h",
+			"../benchmark/cputime/src/*.c",
 			"../benchmark/src/*.h",
 			"../benchmark/src/*.c"
 		}

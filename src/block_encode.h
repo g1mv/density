@@ -69,7 +69,7 @@ typedef struct {
 typedef struct {
     bool update;
     density_byte*inputPointer;
-    spookyhash_context* context;
+    void* context;
 } density_block_encode_integrity_data;
 
 typedef struct {

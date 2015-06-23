@@ -57,6 +57,7 @@
 #include "block_footer.h"
 #include "main_footer.h"
 #include "main_header.h"
+#include "kernel_chameleon_decode_bulk.h"
 
 typedef enum {
     DENSITY_CHAMELEON_DECODE_PROCESS_CHECK_SIGNATURE_STATE,

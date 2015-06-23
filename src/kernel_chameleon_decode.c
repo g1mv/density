@@ -82,55 +82,9 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_check_
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_read_signature(density_memory_location *restrict in, density_chameleon_decode_state *restrict state) {
-    DENSITY_MEMCPY(&state->signature, in->pointer, sizeof(density_chameleon_signature));
-    in->pointer += sizeof(density_chameleon_signature);
+    density_chameleon_decode_bulk_read_signature((const uint8_t**)&in->pointer, &state->signature);
     state->shift = 0;
     state->signaturesCount++;
-}
-
-DENSITY_FORCE_INLINE void density_chameleon_decode_process_compressed(const uint16_t hash, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
-    DENSITY_MEMCPY(out->pointer, &state->dictionary.entries[hash].as_uint32_t, sizeof(uint32_t));
-}
-
-DENSITY_FORCE_INLINE void density_chameleon_decode_process_uncompressed(const uint32_t chunk, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
-    const uint16_t hash = DENSITY_CHAMELEON_HASH_ALGORITHM(chunk);
-    (&state->dictionary.entries[hash])->as_uint32_t = chunk;
-    DENSITY_MEMCPY(out->pointer, &chunk, sizeof(uint32_t));
-}
-
-DENSITY_FORCE_INLINE void density_chameleon_decode_kernel(density_memory_location *restrict in, density_memory_location *restrict out, const density_bool compressed, density_chameleon_decode_state *restrict state) {
-    if (compressed) {
-        uint16_t hash;
-        DENSITY_MEMCPY(&hash, in->pointer, sizeof(uint16_t));
-        density_chameleon_decode_process_compressed(hash, out, state);
-        in->pointer += sizeof(uint16_t);
-    } else {
-        uint32_t chunk;
-        DENSITY_MEMCPY(&chunk, in->pointer, sizeof(uint32_t));
-        density_chameleon_decode_process_uncompressed(chunk, out, state);
-        in->pointer += sizeof(uint32_t);
-    }
-    out->pointer += sizeof(uint32_t);
-}
-
-DENSITY_FORCE_INLINE const bool density_chameleon_decode_test_compressed(density_chameleon_decode_state *state, const uint_fast8_t shift) {
-    return (density_bool const) ((state->signature >> shift) & DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP);
-}
-
-DENSITY_FORCE_INLINE void density_chameleon_decode_process_data(density_memory_location *restrict in, density_memory_location *restrict out, density_chameleon_decode_state *restrict state) {
-    uint_fast8_t count = 0;
-
-#ifdef __clang__
-    for(uint_fast8_t count_b = 0; count_b < 8; count_b ++) {
-        DENSITY_UNROLL_8(density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state, count++), state));
-    }
-#else
-    for(uint_fast8_t count_b = 0; count_b < 16; count_b ++) {
-        DENSITY_UNROLL_4(density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(state, count++), state));
-    }
-#endif
-
-    state->shift = density_bitsizeof(density_chameleon_signature);
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_init(density_chameleon_decode_state *restrict state, const density_main_header_parameters parameters, const uint_fast8_t endDataOverhead) {

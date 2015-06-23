@@ -71,7 +71,7 @@ typedef struct {
 typedef struct {
     bool update;
     density_byte* outputPointer;
-    spookyhash_context* context;
+    void* context;
 } density_block_decode_integrity_data;
 
 typedef struct {

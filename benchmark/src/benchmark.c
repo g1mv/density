@@ -259,13 +259,13 @@ int main(int argc, char *argv[]) {
 
             DENSITY_BENCHMARK_BLUE(printf("\rCompress speed ");
                                            DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", compress_speed)));
-            printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.3lfs) ", compress_speed_low, compress_speed_high, compress_time_low);
+            printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs) ", compress_speed_low, compress_speed_high, compress_time_low);
 
             if (!compression_only) {
                 printf("<=> ");
                 DENSITY_BENCHMARK_BLUE(printf("Decompress speed ");
                                                DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", decompress_speed)));
-                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.3lfs) ", decompress_speed_low, decompress_speed_high, decompress_time_low);
+                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs) ", decompress_speed_low, decompress_speed_high, decompress_time_low);
             }
             fflush(stdout);
         }

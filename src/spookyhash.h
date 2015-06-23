@@ -35,13 +35,11 @@
 #ifndef SPOOKYHASH_H
 #define SPOOKYHASH_H
 
-typedef struct {} spookyhash_context;
+void *spookyhash_context_allocate(void *(*)(size_t));
 
-spookyhash_context *spookyhash_context_allocate(void *(*)(size_t));
+void spookyhash_context_free(void *, void (*)(void *));
 
-void spookyhash_context_free(spookyhash_context *, void (*)(void *));
-
-void spookyhash_context_init(spookyhash_context *, uint64_t, uint64_t);
+void spookyhash_context_init(void *, uint64_t, uint64_t);
 
 void spookyhash_update(void *, const void *, size_t);
 

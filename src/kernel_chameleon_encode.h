@@ -53,6 +53,7 @@
 #include "globals.h"
 #include "memory_teleport.h"
 #include "memory_location.h"
+#include "kernel_chameleon_encode_bulk.h"
 
 #define DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE                    (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
 

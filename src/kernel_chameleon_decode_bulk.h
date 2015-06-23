@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2015, Guillaume Voirin
+ * Copyright (c) 2013, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,50 +29,38 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 12/02/15 23:09
+ * 23/06/15 21:49
  *
- * --------------
- * Lion algorithm
- * --------------
+ * -------------------
+ * Chameleon algorithm
+ * -------------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
  *
  * Description
- * Multiform compression algorithm
+ * Hash based superfast kernel
  */
 
-#ifndef DENSITY_LION_DICTIONARY_H
-#define DENSITY_LION_DICTIONARY_H
+#ifndef DENSITY_CHAMELEON_DECODE_BULK_H
+#define DENSITY_CHAMELEON_DECODE_BULK_H
 
-#include "globals.h"
-#include "kernel_lion.h"
+#include "kernel_chameleon_dictionary.h"
 
-#include <string.h>
+void density_chameleon_decode_bulk_process_compressed(const uint16_t, uint8_t **, density_chameleon_dictionary *const);
 
-#pragma pack(push)
-#pragma pack(4)
+void density_chameleon_decode_bulk_process_uncompressed(const uint32_t, uint8_t **, density_chameleon_dictionary *const);
 
-typedef struct {
-    uint32_t chunk_a;
-    uint32_t chunk_b;
-    uint32_t chunk_c;
-    uint32_t chunk_d;
-    uint32_t chunk_e;
-} density_lion_dictionary_chunk_entry;
+void density_chameleon_decode_bulk_kernel(const uint8_t **, uint8_t **, const density_bool, density_chameleon_dictionary *const);
 
-typedef struct {
-    uint32_t next_chunk_a;
-    uint32_t next_chunk_b;
-    uint32_t next_chunk_c;
-} density_lion_dictionary_chunk_prediction_entry;
+const bool density_chameleon_decode_bulk_test_compressed(const uint_fast64_t, const uint_fast8_t);
 
-typedef struct {
-    density_lion_dictionary_chunk_entry chunks[1 << DENSITY_LION_CHUNK_HASH_BITS];
-    density_lion_dictionary_chunk_prediction_entry predictions[1 << DENSITY_LION_CHUNK_HASH_BITS];
-} density_lion_dictionary;
-#pragma pack(pop)
+void density_chameleon_decode_bulk_4(const uint8_t **, uint8_t **, const uint_fast64_t, const uint_fast8_t, density_chameleon_dictionary *const);
 
-DENSITY_WINDOWS_EXPORT void density_lion_dictionary_reset(density_lion_dictionary *);
+void density_chameleon_decode_bulk_256(const uint8_t **, uint8_t **, const uint_fast64_t, density_chameleon_dictionary *const);
+
+void density_chameleon_decode_bulk_read_signature(const uint8_t **, density_chameleon_signature *);
+
+const bool density_chameleon_decode_bulk_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **);
 
 #endif
