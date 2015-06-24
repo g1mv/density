@@ -32,6 +32,8 @@
  * 18/10/13 23:48
  */
 
+#include "main_encode.h"
+
 DENSITY_FORCE_INLINE DENSITY_ENCODE_STATE density_encode_exit_process(density_encode_state *state, DENSITY_ENCODE_PROCESS process, DENSITY_ENCODE_STATE encodeState) {
     state->process = process;
     return encodeState;

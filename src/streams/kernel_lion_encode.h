@@ -45,18 +45,17 @@
 #ifndef DENSITY_LION_ENCODE_H
 #define DENSITY_LION_ENCODE_H
 
-#include "core/kernel_lion_dictionary.h"
-#include "core/kernel_lion.h"
-#include "core/kernel_lion_form_model.h"
-#include "Block.h"
+#include "../core/kernel_lion_dictionary.h"
+#include "../core/kernel_lion.h"
+#include "../core/kernel_lion_form_model.h"
 #include "kernel_encode.h"
-#include "density_api.h"
-#include "memory_location.h"
-#include "memory_teleport.h"
+#include "../density_api.h"
+#include "../utils/memory_location.h"
+#include "../utils/memory_teleport.h"
 #include "kernel_lion_decode.h"
-#include "block_footer.h"
-#include "block_header.h"
-#include "block_mode_marker.h"
+#include "../structures/blocks/block_footer.h"
+#include "../structures/blocks/block_header.h"
+#include "../structures/blocks/block_mode_marker.h"
 
 typedef enum {
     DENSITY_LION_ENCODE_PROCESS_CHECK_BLOCK_STATE,

@@ -45,19 +45,18 @@
 #ifndef DENSITY_CHAMELEON_DECODE_H
 #define DENSITY_CHAMELEON_DECODE_H
 
-#include "core/kernel_chameleon_dictionary.h"
-#include "core/kernel_chameleon.h"
-#include "core/kernel_chameleon_decode_bulk.h"
-#include "Block.h"
+#include "../core/kernel_chameleon_dictionary.h"
+#include "../core/kernel_chameleon.h"
+#include "../core/kernel_chameleon_decode_bulk.h"
 #include "kernel_decode.h"
-#include "density_api.h"
-#include "block_mode_marker.h"
-#include "block_header.h"
+#include "../density_api.h"
+#include "../structures/blocks/block_mode_marker.h"
+#include "../structures/blocks/block_header.h"
 #include "kernel_chameleon_encode.h"
-#include "density_api_data_structures.h"
-#include "block_footer.h"
-#include "main_footer.h"
-#include "main_header.h"
+#include "../density_api_data_structures.h"
+#include "../structures/blocks/block_footer.h"
+#include "../structures/main/main_footer.h"
+#include "../structures/main/main_header.h"
 
 typedef enum {
     DENSITY_CHAMELEON_DECODE_PROCESS_CHECK_SIGNATURE_STATE,

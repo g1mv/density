@@ -32,6 +32,8 @@
  * 18/10/13 22:36
  */
 
+#include "stream.h"
+
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_stream *density_stream_create(void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
     density_stream *stream;
     void *(*memory_alloc)(size_t) = mem_alloc == NULL ? malloc : mem_alloc;

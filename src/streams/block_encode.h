@@ -35,15 +35,15 @@
 #ifndef DENSITY_BLOCK_ENCODE_H
 #define DENSITY_BLOCK_ENCODE_H
 
-#include "block_footer.h"
-#include "block_header.h"
-#include "main_header.h"
-#include "main_footer.h"
-#include "block_mode_marker.h"
+#include "../structures/blocks/block_footer.h"
+#include "../structures/blocks/block_header.h"
+#include "../structures/main/main_header.h"
+#include "../structures/main/main_footer.h"
+#include "../structures/blocks/block_mode_marker.h"
 #include "kernel_encode.h"
-#include "memory_location.h"
-#include "memory_teleport.h"
-#include "spookyhash.h"
+#include "../utils/memory_location.h"
+#include "../utils/memory_teleport.h"
+#include "../spookyhash.h"
 
 typedef enum {
     DENSITY_BLOCK_ENCODE_STATE_READY = 0,

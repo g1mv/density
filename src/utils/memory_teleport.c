@@ -32,6 +32,8 @@
  * 23/12/14 17:01
  */
 
+#include "memory_teleport.h"
+
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_memory_teleport *density_memory_teleport_allocate(const uint_fast64_t size, void *(*mem_alloc)(size_t)) {
     density_memory_teleport *teleport = mem_alloc(sizeof(density_memory_teleport));
 

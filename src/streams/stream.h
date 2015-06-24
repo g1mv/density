@@ -37,12 +37,11 @@
 
 #include <stdint.h>
 
-#include "Block.h"
-#include "globals.h"
+#include "../globals.h"
 #include "main_encode.h"
 #include "main_decode.h"
-#include "density_api.h"
-#include "memory_location.h"
+#include "../density_api.h"
+#include "../utils/memory_location.h"
 
 #define DENSITY_STREAM_MEMORY_TELEPORT_BUFFER_SIZE     (1 << 16)
 

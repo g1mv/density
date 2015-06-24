@@ -46,14 +46,13 @@
 #ifndef DENSITY_CHEETAH_ENCODE_H
 #define DENSITY_CHEETAH_ENCODE_H
 
-#include "core/kernel_cheetah_dictionary.h"
-#include "core/kernel_cheetah.h"
-#include "core/kernel_cheetah_encode_bulk.h"
-#include "Block.h"
+#include "../core/kernel_cheetah_dictionary.h"
+#include "../core/kernel_cheetah.h"
+#include "../core/kernel_cheetah_encode_bulk.h"
 #include "kernel_encode.h"
-#include "density_api.h"
-#include "memory_location.h"
-#include "memory_teleport.h"
+#include "../density_api.h"
+#include "../utils/memory_location.h"
+#include "../utils/memory_teleport.h"
 
 #define DENSITY_CHEETAH_ENCODE_PROCESS_UNIT_SIZE                    ((density_bitsizeof(density_cheetah_signature) >> 1) * sizeof(uint32_t))
 

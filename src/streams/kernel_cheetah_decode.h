@@ -46,18 +46,17 @@
 #ifndef DENSITY_CHEETAH_DECODE_H
 #define DENSITY_CHEETAH_DECODE_H
 
-#include "core/kernel_cheetah_dictionary.h"
-#include "core/kernel_cheetah.h"
-#include "core/kernel_cheetah_decode_bulk.h"
-#include "Block.h"
+#include "../core/kernel_cheetah_dictionary.h"
+#include "../core/kernel_cheetah.h"
+#include "../core/kernel_cheetah_decode_bulk.h"
 #include "kernel_decode.h"
-#include "density_api.h"
-#include "memory_teleport.h"
-#include "block_footer.h"
-#include "main_footer.h"
-#include "block_mode_marker.h"
+#include "../density_api.h"
+#include "../utils/memory_teleport.h"
+#include "../structures/blocks/block_footer.h"
+#include "../structures/main/main_footer.h"
+#include "../structures/blocks/block_mode_marker.h"
 #include "kernel_cheetah_encode.h"
-#include "main_header.h"
+#include "../structures/main/main_header.h"
 
 typedef enum {
     DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE,

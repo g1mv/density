@@ -43,8 +43,6 @@
  * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#include "kernel_cheetah_encode.h"
-
 #undef DENSITY_CHEETAH_ENCODE_FUNCTION_NAME
 
 #ifndef DENSITY_CHEETAH_ENCODE_FINISH

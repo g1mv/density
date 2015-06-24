@@ -35,18 +35,18 @@
 #ifndef DENSITY_MAIN_DECODE_H
 #define DENSITY_MAIN_DECODE_H
 
-#include "block_header.h"
-#include "block_footer.h"
-#include "main_header.h"
-#include "main_footer.h"
-#include "block_mode_marker.h"
+#include "../structures/blocks/block_header.h"
+#include "../structures/blocks/block_footer.h"
+#include "../structures/main/main_header.h"
+#include "../structures/main/main_footer.h"
+#include "../structures/blocks/block_mode_marker.h"
 #include "block_decode.h"
 #include "kernel_chameleon_decode.h"
 #include "kernel_cheetah_decode.h"
 #include "kernel_lion_decode.h"
-#include "density_api.h"
+#include "../density_api.h"
 #include "block_encode.h"
-#include "memory_location.h"
+#include "../utils/memory_location.h"
 
 #if DENSITY_WRITE_MAIN_FOOTER == DENSITY_YES && DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
 #define DENSITY_DECODE_END_DATA_OVERHEAD                           (sizeof(density_main_footer))

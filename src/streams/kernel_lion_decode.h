@@ -45,18 +45,17 @@
 #ifndef DENSITY_LION_DECODE_H
 #define DENSITY_LION_DECODE_H
 
-#include "core/kernel_lion_dictionary.h"
-#include "core/kernel_lion.h"
-#include "core/kernel_lion_form_model.h"
-#include "Block.h"
+#include "../core/kernel_lion_dictionary.h"
+#include "../core/kernel_lion.h"
+#include "../core/kernel_lion_form_model.h"
 #include "kernel_decode.h"
-#include "density_api.h"
-#include "memory_teleport.h"
-#include "block_footer.h"
-#include "main_footer.h"
-#include "block_mode_marker.h"
+#include "../density_api.h"
+#include "../utils/memory_teleport.h"
+#include "../structures/blocks/block_footer.h"
+#include "../structures/main/main_footer.h"
+#include "../structures/blocks/block_mode_marker.h"
 #include "kernel_lion_encode.h"
-#include "main_header.h"
+#include "../structures/main/main_header.h"
 
 #define DENSITY_LION_DECODE_MAX_BITS_TO_READ_FOR_CHUNK              (density_bitsizeof(density_lion_signature) + 3 + 2 * (3 + density_bitsizeof(uint16_t)))  // 8 bytes (new signature) + 3 bits (lowest rank form) + 2 * (3 bit flags (DENSITY_LION_FORM_SECONDARY_ACCESS + DENSITY_LION_BIGRAM_PRIMARY_SIGNATURE_FLAG_SECONDARY_ACCESS + DENSITY_LION_BIGRAM_SECONDARY_SIGNATURE_FLAG_PLAIN) + 2 bytes)
 #define DENSITY_LION_DECODE_MAX_BYTES_TO_READ_FOR_PROCESS_UNIT      (1 + ((DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG * DENSITY_LION_DECODE_MAX_BITS_TO_READ_FOR_CHUNK) >> 3))

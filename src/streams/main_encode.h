@@ -37,17 +37,17 @@
 
 #include <string.h>
 
-#include "memory_location.h"
-#include "block_footer.h"
-#include "block_header.h"
-#include "main_header.h"
-#include "main_footer.h"
-#include "block_mode_marker.h"
+#include "../utils/memory_location.h"
+#include "../structures/blocks/block_footer.h"
+#include "../structures/blocks/block_header.h"
+#include "../structures/main/main_header.h"
+#include "../structures/main/main_footer.h"
+#include "../structures/blocks/block_mode_marker.h"
 #include "block_encode.h"
 #include "kernel_chameleon_encode.h"
 #include "kernel_cheetah_encode.h"
 #include "kernel_lion_encode.h"
-#include "density_api.h"
+#include "../density_api.h"
 
 typedef enum {
     DENSITY_ENCODE_STATE_READY = 0,

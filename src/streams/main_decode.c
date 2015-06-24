@@ -32,7 +32,7 @@
  * 19/10/13 00:06
  */
 
-#include "main_header.h"
+#include "main_decode.h"
 
 DENSITY_FORCE_INLINE DENSITY_DECODE_STATE density_decode_exit_process(density_decode_state *state, DENSITY_DECODE_PROCESS process, DENSITY_DECODE_STATE decodeState) {
     state->process = process;

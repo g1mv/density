@@ -45,15 +45,14 @@
 #ifndef DENSITY_CHAMELEON_ENCODE_H
 #define DENSITY_CHAMELEON_ENCODE_H
 
-#include "core/kernel_chameleon_dictionary.h"
-#include "core/kernel_chameleon.h"
-#include "core/kernel_chameleon_encode_bulk.h"
-#include "Block.h"
+#include "../core/kernel_chameleon_dictionary.h"
+#include "../core/kernel_chameleon.h"
+#include "../core/kernel_chameleon_encode_bulk.h"
 #include "kernel_encode.h"
-#include "density_api.h"
-#include "globals.h"
-#include "memory_teleport.h"
-#include "memory_location.h"
+#include "../density_api.h"
+#include "../globals.h"
+#include "../utils/memory_teleport.h"
+#include "../utils/memory_location.h"
 
 #define DENSITY_CHAMELEON_ENCODE_PROCESS_UNIT_SIZE                    (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
 

@@ -32,6 +32,8 @@
  * 25/12/14 16:02
  */
 
+#include "memory_location.h"
+
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_memory_location *density_memory_location_allocate(void *(*mem_alloc)(size_t)) {
     density_memory_location *location = mem_alloc(sizeof(density_memory_location));
 

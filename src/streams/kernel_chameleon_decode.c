@@ -42,6 +42,8 @@
  * Hash based superfast kernel
  */
 
+#include "kernel_chameleon_decode.h"
+
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_exit_process(density_chameleon_decode_state *state, DENSITY_CHAMELEON_DECODE_PROCESS process, DENSITY_KERNEL_DECODE_STATE kernelDecodeState) {
     state->process = process;
     return kernelDecodeState;
@@ -100,5 +102,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_
     return density_chameleon_decode_exit_process(state, DENSITY_CHAMELEON_DECODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_DECODE_STATE_READY);
 }
 
+#include "kernel_chameleon_decode_template.h"
+
 #define DENSITY_CHAMELEON_DECODE_FINISH
 
+#include "kernel_chameleon_decode_template.h"

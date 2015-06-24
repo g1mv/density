@@ -35,12 +35,11 @@
 #ifndef DENSITY_BLOCK_MODE_MARKER_H
 #define DENSITY_BLOCK_MODE_MARKER_H
 
-#include "globals.h"
+#include "../../globals.h"
 #include "block.h"
-#include "density_api.h"
-#include "memory_teleport.h"
-#include "memory_location.h"
-#include "memory_teleport.h"
+#include "../../density_api.h"
+#include "../../utils/memory_teleport.h"
+#include "../../utils/memory_location.h"
 
 #pragma pack(push)
 #pragma pack(4)

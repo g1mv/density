@@ -43,6 +43,8 @@
  * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
+#include "kernel_cheetah_decode.h"
+
 DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_cheetah_decode_exit_process(density_cheetah_decode_state *state, DENSITY_CHEETAH_DECODE_PROCESS process, DENSITY_KERNEL_DECODE_STATE kernelDecodeState) {
     state->process = process;
     return kernelDecodeState;
@@ -104,5 +106,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_
     return density_cheetah_decode_exit_process(state, DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE, DENSITY_KERNEL_DECODE_STATE_READY);
 }
 
+#include "kernel_cheetah_decode_template.h"
+
 #define DENSITY_CHEETAH_DECODE_FINISH
 
+#include "kernel_cheetah_decode_template.h"

@@ -32,6 +32,8 @@
  * 18/10/13 00:03
  */
 
+#include "block_encode.h"
+
 DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_block_encode_exit_process(density_block_encode_state *state, DENSITY_BLOCK_ENCODE_PROCESS process, DENSITY_BLOCK_ENCODE_STATE blockEncodeState) {
     state->process = process;
     return blockEncodeState;
@@ -146,5 +148,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_BLOCK_ENCODE_STATE density_b
     return density_block_encode_exit_process(state, DENSITY_BLOCK_ENCODE_PROCESS_WRITE_BLOCK_HEADER, DENSITY_BLOCK_ENCODE_STATE_READY);
 }
 
+#include "block_encode_template.h"
+
 #define DENSITY_BLOCK_ENCODE_FINISH
 
+#include "block_encode_template.h"

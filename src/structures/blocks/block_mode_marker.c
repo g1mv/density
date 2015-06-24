@@ -32,6 +32,8 @@
  * 19/10/13 00:01
  */
 
+#include "block_mode_marker.h"
+
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_block_mode_marker_read(density_memory_location *restrict in, density_mode_marker *restrict modeMarker) {
     modeMarker->activeBlockMode = *in->pointer;
 
