@@ -61,18 +61,18 @@ solution "Density"
 		kind "SharedLib"
 		language "C"
 		files {
-			"../spookyhash/src/*.h",
-			"../spookyhash/src/*.c",
-			"../src/*.h",
-			"../src/*.c"
+			"../libs/spookyhash/src/*.h",
+			"../libs/spookyhash/src/*.c",
+			"../src/**.h",
+			"../src/**.c"
 		}
 
 	project "benchmark"
 		kind "ConsoleApp"
 		language "C"
 		files {
-			"../benchmark/cputime/src/*.h",
-			"../benchmark/cputime/src/*.c",
+			"../benchmark/libs/cputime/src/*.h",
+			"../benchmark/libs/cputime/src/*.c",
 			"../benchmark/src/*.h",
 			"../benchmark/src/*.c"
 		}
