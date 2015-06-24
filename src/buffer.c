@@ -38,7 +38,16 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
 
-    density_chameleon_encode_unrestricted(&in, input_size, &out);
+    switch(compression_mode) {
+        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
+            density_chameleon_encode_unrestricted(&in, input_size, &out);
+            break;
+        case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
+            density_cheetah_encode_unrestricted(&in, input_size, &out);
+            break;
+        default:
+            break;
+    }
 
     density_buffer_processing_result result;
     result.state = DENSITY_BUFFER_STATE_OK;
@@ -51,7 +60,18 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
 
-    bool valid = density_chameleon_decode_bulk_unrestricted(&in, input_size, &out);
+    bool valid = false;
+
+    switch(DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM) {
+        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
+            valid = density_chameleon_decode_bulk_unrestricted(&in, input_size, &out);
+            break;
+        case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
+            valid = density_cheetah_decode_bulk_unrestricted(&in, input_size, &out);
+            break;
+        default:
+            break;
+    }
 
     density_buffer_processing_result result;
     result.state = valid ? DENSITY_BUFFER_STATE_OK : DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING;

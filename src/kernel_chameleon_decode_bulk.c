@@ -105,7 +105,7 @@ DENSITY_FORCE_INLINE const bool density_chameleon_decode_bulk_unrestricted(const
 
     const uint8_t *start = *in;
 
-    if(in_size < (8 + 256))
+    if (in_size < (8 + 256))
         goto read_signature;
 
     while (*in - start <= in_size - (8 + 256)) {
@@ -114,37 +114,25 @@ DENSITY_FORCE_INLINE const bool density_chameleon_decode_bulk_unrestricted(const
     }
 
     read_signature:
-    switch (in_size - (*in - start)) {
-        case 0:
-            return true;
-        case 1:
-        case 2:
-        case 3:
-            goto process_remaining_bytes;
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-            return false;   // No room for signature + at least one dictionary hash (2 bytes)
-        default:
-            break;
-    }
-
+    if (in_size - (*in - start) < 8)
+        return false;
     shift = 0;
     density_chameleon_decode_bulk_read_signature(in, &signature);
     read_and_decode_4:
     switch (in_size - (*in - start)) {
         case 0:
-            return true;
         case 1:
-            goto process_remaining_bytes;
+            if (density_chameleon_decode_bulk_test_compressed(signature, shift))
+                return false;
+            else    // End marker
+                goto process_remaining_bytes;
         case 2:
         case 3:
-            if (density_chameleon_decode_bulk_test_compressed(signature, shift))
+            if (density_chameleon_decode_bulk_test_compressed(signature, shift ++))
                 density_chameleon_decode_bulk_kernel(in, out, true, &dictionary);
-            goto process_remaining_bytes;
+            else    // End marker
+                goto process_remaining_bytes;
+            break;
         default:
             density_chameleon_decode_bulk_4(in, out, signature, shift++, &dictionary);
             break;

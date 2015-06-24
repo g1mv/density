@@ -47,7 +47,7 @@
 
 #include "kernel_chameleon_dictionary.h"
 
-void density_chameleon_encode_bulk_ready_signature(uint8_t **, uint_fast64_t **, uint_fast64_t *const);
+void density_chameleon_encode_bulk_prepare_signature(uint8_t **, uint_fast64_t **, uint_fast64_t *const);
 
 void density_chameleon_encode_bulk_kernel(uint8_t **, const uint16_t, const uint_fast8_t, uint_fast64_t *const, density_chameleon_dictionary *const, uint32_t *);
 

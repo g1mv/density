@@ -42,9 +42,6 @@
  * Hash based superfast kernel
  */
 
-#include "memory_location.h"
-#include "kernel_chameleon_decode.h"
-
 #undef DENSITY_CHAMELEON_DECODE_FUNCTION_NAME
 
 #ifndef DENSITY_CHAMELEON_DECODE_FINISH

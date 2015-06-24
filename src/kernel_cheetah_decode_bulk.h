@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 06/12/13 20:20
+ * 24/06/15 0:31
  *
  * -----------------
  * Cheetah algorithm
@@ -43,49 +43,28 @@
  * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#ifndef DENSITY_CHEETAH_ENCODE_H
-#define DENSITY_CHEETAH_ENCODE_H
+#ifndef DENSITY_CHEETAH_DECODE_BULK_H
+#define DENSITY_CHEETAH_DECODE_BULK_H
 
 #include "kernel_cheetah_dictionary.h"
-#include "kernel_cheetah.h"
-#include "block.h"
-#include "kernel_encode.h"
-#include "density_api.h"
-#include "memory_location.h"
-#include "memory_teleport.h"
-#include "kernel_cheetah_encode_bulk.h"
 
-#define DENSITY_CHEETAH_ENCODE_PROCESS_UNIT_SIZE                    ((density_bitsizeof(density_cheetah_signature) >> 1) * sizeof(uint32_t))
+void density_cheetah_decode_bulk_process_predicted(uint8_t **, uint_fast16_t*, density_cheetah_dictionary *const);
 
-typedef enum {
-    DENSITY_CHEETAH_ENCODE_PROCESS_PREPARE_NEW_BLOCK,
-    DENSITY_CHEETAH_ENCODE_PROCESS_CHECK_SIGNATURE_STATE,
-    DENSITY_CHEETAH_ENCODE_PROCESS_READ_CHUNK,
-} DENSITY_CHEETAH_ENCODE_PROCESS;
+void density_cheetah_decode_bulk_process_compressed_a(uint8_t **, uint_fast16_t*, density_cheetah_dictionary *const, const uint16_t);
 
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    density_cheetah_signature proximitySignature;
-    uint_fast16_t lastHash;
-    uint_fast8_t shift;
-    density_cheetah_signature * signature;
-    uint_fast32_t signaturesCount;
-    uint_fast8_t efficiencyChecked;
-    bool signature_copied_to_memory;
+void density_cheetah_decode_bulk_process_compressed_b(uint8_t **, uint_fast16_t*, density_cheetah_dictionary *const, const uint16_t);
 
-    DENSITY_CHEETAH_ENCODE_PROCESS process;
+void density_cheetah_decode_bulk_process_uncompressed(uint8_t **, uint_fast16_t*, density_cheetah_dictionary *const, const uint32_t);
 
-    density_cheetah_dictionary dictionary;
-#if DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT == DENSITY_YES
-    uint_fast64_t resetCycle;
+void density_cheetah_decode_bulk_kernel_16(const uint8_t **, uint8_t **, uint_fast16_t*, const uint8_t, density_cheetah_dictionary *const);
+
+void density_cheetah_decode_bulk_16(const uint8_t **, uint8_t **, uint_fast16_t*, const uint_fast64_t, const uint_fast8_t, density_cheetah_dictionary *const);
+
+void density_cheetah_decode_bulk_128(const uint8_t **, uint8_t **, uint_fast16_t*, const uint_fast64_t, density_cheetah_dictionary *const);
+
+void density_cheetah_decode_bulk_read_signature(const uint8_t **, density_cheetah_signature *);
+
+const bool density_cheetah_decode_bulk_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **);
+
 #endif
-} density_cheetah_encode_state;
-#pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_init(density_cheetah_encode_state *);
-
-DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_continue(density_memory_teleport *, density_memory_location *, density_cheetah_encode_state *);
-
-DENSITY_WINDOWS_EXPORT DENSITY_KERNEL_ENCODE_STATE density_cheetah_encode_finish(density_memory_teleport *, density_memory_location *, density_cheetah_encode_state *);
-#endif

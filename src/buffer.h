@@ -39,6 +39,8 @@
 #include "density_api_data_structures.h"
 #include "kernel_chameleon_encode_bulk.h"
 #include "kernel_chameleon_decode_bulk.h"
+#include "kernel_cheetah_encode_bulk.h"
+#include "kernel_cheetah_decode_bulk.h"
 
 DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*)(size_t), void (*)(void *));
 

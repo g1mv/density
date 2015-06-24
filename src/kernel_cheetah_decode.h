@@ -57,6 +57,7 @@
 #include "block_mode_marker.h"
 #include "kernel_cheetah_encode.h"
 #include "main_header.h"
+#include "kernel_cheetah_decode_bulk.h"
 
 typedef enum {
     DENSITY_CHEETAH_DECODE_PROCESS_CHECK_SIGNATURE_STATE,

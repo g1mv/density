@@ -85,7 +85,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     density_cheetah_decode_read_signature(readMemoryLocation, state);
 
     // Process body
-    density_cheetah_decode_process_data(readMemoryLocation, out, state);
+    density_cheetah_decode_bulk_128((const uint8_t**)&readMemoryLocation->pointer, &out->pointer, &state->lastHash, state->signature, &state->dictionary);
 
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
     out->available_bytes -= DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE;
@@ -101,14 +101,14 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
     density_cheetah_decode_read_signature(readMemoryLocation, state);
     readMemoryLocation->available_bytes -= sizeof(density_cheetah_signature);
     uint16_t hash;
-    uint32_t chunk;
+    uint32_t unit;
 
     while (state->shift != density_bitsizeof(density_cheetah_signature)) {
         switch ((uint8_t const) ((state->signature >> state->shift) & 0x3)) {
             case DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED:
                 if (out->available_bytes < sizeof(uint32_t))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                density_cheetah_decode_process_predicted(out, state);
+                density_cheetah_decode_bulk_process_predicted(&out->pointer, &state->lastHash, &state->dictionary);
                 break;
             case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A:
                 if (!(readMemoryLocation = density_memory_teleport_read_reserved(in, sizeof(uint16_t), state->endDataOverhead)))
@@ -116,7 +116,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
                 if (out->available_bytes < sizeof(uint32_t))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
                 DENSITY_MEMCPY(&hash, readMemoryLocation->pointer, sizeof(uint16_t));
-                density_cheetah_decode_process_compressed_a(hash, out, state);
+                density_cheetah_decode_bulk_process_compressed_a(&out->pointer, &state->lastHash, &state->dictionary, hash);
                 readMemoryLocation->pointer += sizeof(uint16_t);
                 readMemoryLocation->available_bytes -= sizeof(uint16_t);
                 break;
@@ -126,7 +126,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
                 if (out->available_bytes < sizeof(uint32_t))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
                 DENSITY_MEMCPY(&hash, readMemoryLocation->pointer, sizeof(uint16_t));
-                density_cheetah_decode_process_compressed_b(hash, out, state);
+                density_cheetah_decode_bulk_process_compressed_b(&out->pointer, &state->lastHash, &state->dictionary, hash);
                 readMemoryLocation->pointer += sizeof(uint16_t);
                 readMemoryLocation->available_bytes -= sizeof(uint16_t);
                 break;
@@ -135,8 +135,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
                     goto finish;
                 if (out->available_bytes < sizeof(uint32_t))
                     return DENSITY_KERNEL_DECODE_STATE_ERROR;
-                DENSITY_MEMCPY(&chunk, readMemoryLocation->pointer, sizeof(uint32_t));
-                density_cheetah_decode_process_uncompressed(chunk, out, state);
+                DENSITY_MEMCPY(&unit, readMemoryLocation->pointer, sizeof(uint32_t));
+                density_cheetah_decode_bulk_process_uncompressed(&out->pointer, &state->lastHash, &state->dictionary, unit);
                 readMemoryLocation->pointer += sizeof(uint32_t);
                 readMemoryLocation->available_bytes -= sizeof(uint32_t);
                 break;

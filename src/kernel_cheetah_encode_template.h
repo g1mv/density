@@ -43,6 +43,8 @@
  * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
+#include "kernel_cheetah_encode.h"
+
 #undef DENSITY_CHEETAH_ENCODE_FUNCTION_NAME
 
 #ifndef DENSITY_CHEETAH_ENCODE_FINISH
@@ -89,7 +91,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
 #endif
 
     // Chunk was read properly, process
-    density_cheetah_encode_process_unit(readMemoryLocation, out, state);
+    uint32_t unit;
+    density_cheetah_encode_bulk_128((const uint8_t**)readMemoryLocation->pointer, &out->pointer, &state->lastHash, state->signature, &state->dictionary, &unit);
     readMemoryLocation->available_bytes -= DENSITY_CHEETAH_ENCODE_PROCESS_UNIT_SIZE;
 #ifdef DENSITY_CHEETAH_ENCODE_FINISH
     goto exit;
@@ -97,9 +100,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
     // Read step by step
     step_by_step:
     while (state->shift != density_bitsizeof(density_cheetah_signature) && (readMemoryLocation = density_memory_teleport_read(in, sizeof(uint32_t)))) {
-        uint32_t chunk;
-        DENSITY_MEMCPY(&chunk, readMemoryLocation->pointer, sizeof(uint32_t));
-        density_cheetah_encode_kernel(out, DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(chunk)), chunk, state->shift, state);
+        uint32_t unit;
+        DENSITY_MEMCPY(&unit, readMemoryLocation->pointer, sizeof(uint32_t));
+        density_cheetah_encode_bulk_kernel(&out->pointer, &state->lastHash, DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(unit)), state->shift, state->signature, &state->dictionary, &unit);
         state->shift += 2;
         readMemoryLocation->pointer += sizeof(uint32_t);
         readMemoryLocation->available_bytes -= sizeof(uint32_t);

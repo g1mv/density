@@ -50,7 +50,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE density_chameleon_encode_exit_p
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_new_signature(density_memory_location *restrict out, density_chameleon_encode_state *restrict state) {
-    density_chameleon_encode_bulk_ready_signature(&out->pointer, &state->signature, &state->proximitySignature);
+    density_chameleon_encode_bulk_prepare_signature(&out->pointer, &state->signature, &state->proximitySignature);
 
     state->signaturesCount++;
     state->shift = 0;
