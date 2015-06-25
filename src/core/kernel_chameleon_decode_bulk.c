@@ -105,16 +105,16 @@ DENSITY_FORCE_INLINE const bool density_chameleon_decode_bulk_unrestricted(const
 
     const uint8_t *start = *in;
 
-    if (in_size < (8 + 256))
+    if (in_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
         goto read_signature;
 
-    while (*in - start <= in_size - (8 + 256)) {
+    while (*in - start <= in_size - DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE) {
         density_chameleon_decode_bulk_read_signature(in, &signature);
         density_chameleon_decode_bulk_256(in, out, signature, &dictionary);
     }
 
     read_signature:
-    if (in_size - (*in - start) < 8)
+    if (in_size - (*in - start) < sizeof(density_chameleon_signature))
         return false;
     shift = 0;
     density_chameleon_decode_bulk_read_signature(in, &signature);

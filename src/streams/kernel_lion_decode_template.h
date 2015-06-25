@@ -42,6 +42,8 @@
  * Multiform compression algorithm
  */
 
+#include "kernel_lion_decode.h"
+
 #undef DENSITY_LION_DECODE_FUNCTION_NAME
 
 #ifndef DENSITY_LION_DECODE_FINISH
@@ -89,7 +91,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE DENSITY_
 #endif
 
     density_byte *readMemoryLocationPointerBefore = readMemoryLocation->pointer;
-    density_lion_decode_process_unit(readMemoryLocation, out, state);
+    density_lion_decode_bulk_256((const uint8_t **) &readMemoryLocation->pointer, &out->pointer, &state->lastHash, &state->dictionary, &state->formData, &state->signature, &state->shift);
     readMemoryLocation->available_bytes -= (readMemoryLocation->pointer - readMemoryLocationPointerBefore);
     out->available_bytes -= DENSITY_LION_PROCESS_UNIT_SIZE_BIG;
 

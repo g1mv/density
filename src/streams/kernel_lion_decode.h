@@ -48,6 +48,7 @@
 #include "../core/kernel_lion_dictionary.h"
 #include "../core/kernel_lion.h"
 #include "../core/kernel_lion_form_model.h"
+#include "../core/kernel_lion_decode_bulk.h"
 #include "kernel_decode.h"
 #include "../density_api.h"
 #include "../utils/memory_teleport.h"

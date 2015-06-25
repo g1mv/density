@@ -29,24 +29,33 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 3/02/15 19:51
+ * 24/06/15 18:56
+ *
+ * --------------
+ * Lion algorithm
+ * --------------
+ *
+ * Author(s)
+ * Guillaume Voirin (https://github.com/gpnuma)
+ *
+ * Description
+ * Multiform compression algorithm
  */
 
-#ifndef DENSITY_BUFFER_H
-#define DENSITY_BUFFER_H
+#ifndef DENSITY_LION_ENCODE_BULK_H
+#define DENSITY_LION_ENCODE_BULK_H
 
-#include "../globals.h"
-#include "../density_api.h"
-#include "../core/kernel_chameleon_encode_bulk.h"
-#include "../core/kernel_chameleon_decode_bulk.h"
-#include "../core/kernel_cheetah_encode_bulk.h"
-#include "../core/kernel_cheetah_decode_bulk.h"
-#include "../core/kernel_lion_encode_bulk.h"
-#include "../core/kernel_lion_decode_bulk.h"
+#include "kernel_lion_dictionary.h"
+#include "kernel_lion_form_model.h"
 
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*)(size_t), void (*)(void *));
+void density_lion_encode_bulk_push_code_to_signature(uint8_t **, uint_fast64_t **, uint_fast64_t *const, uint_fast8_t *const, const density_lion_entropy_code code);
 
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_decompress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
+void density_lion_encode_bulk_kernel_4(uint8_t **, uint_fast16_t *, uint_fast64_t **, uint_fast64_t *const, uint_fast8_t *const, density_lion_dictionary *const, const uint16_t, density_lion_form_data *const, const uint32_t);
 
+void density_lion_encode_bulk_32(const uint8_t **, uint8_t **, uint_fast16_t *, uint_fast64_t **, uint_fast64_t *const, uint_fast8_t *const, density_lion_dictionary *const, density_lion_form_data *const, uint32_t *);
+
+void density_lion_encode_bulk_256(const uint8_t **, uint8_t **, uint_fast16_t *, uint_fast64_t **, uint_fast64_t *const, uint_fast8_t *const, density_lion_dictionary *const, density_lion_form_data *const, uint32_t *);
+
+void density_lion_encode_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **);
 
 #endif

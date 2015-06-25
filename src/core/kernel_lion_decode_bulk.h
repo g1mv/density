@@ -1,0 +1,77 @@
+/*
+ * Centaurean Density
+ *
+ * Copyright (c) 2015, Guillaume Voirin
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *     1. Redistributions of source code must retain the above copyright notice, this
+ *        list of conditions and the following disclaimer.
+ *
+ *     2. Redistributions in binary form must reproduce the above copyright notice,
+ *        this list of conditions and the following disclaimer in the documentation
+ *        and/or other materials provided with the distribution.
+ *
+ *     3. Neither the name of the copyright holder nor the names of its
+ *        contributors may be used to endorse or promote products derived from
+ *        this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * 24/06/15 20:55
+ *
+ * --------------
+ * Lion algorithm
+ * --------------
+ *
+ * Author(s)
+ * Guillaume Voirin (https://github.com/gpnuma)
+ *
+ * Description
+ * Multiform compression algorithm
+ */
+
+#ifndef DENSITY_LION_DECODE_BULK_H
+#define DENSITY_LION_DECODE_BULK_H
+
+#include "kernel_lion_dictionary.h"
+#include "kernel_lion_form_model.h"
+
+void density_lion_decode_bulk_read_signature(const uint8_t **, uint_fast64_t *const);
+
+void density_lion_decode_bulk_prediction_a(const uint8_t **, uint8_t **, uint_fast16_t *, density_lion_dictionary *const, uint16_t *restrict, uint32_t *restrict);
+
+void density_lion_decode_bulk_prediction_b(const uint8_t **, uint8_t **, uint_fast16_t *, density_lion_dictionary *const, uint16_t *restrict, uint32_t *restrict);
+
+void density_lion_decode_bulk_prediction_c(const uint8_t **, uint8_t **, uint_fast16_t *, density_lion_dictionary *const, uint16_t *restrict, uint32_t *restrict);
+
+void density_lion_decode_bulk_dictionary_a(const uint8_t **, uint8_t **, uint_fast16_t *, density_lion_dictionary *const, uint16_t *restrict, uint32_t *restrict);
+
+void density_lion_decode_bulk_dictionary_b(const uint8_t **, uint8_t **, uint_fast16_t *, density_lion_dictionary *const, uint16_t *restrict, uint32_t *restrict);
+
+void density_lion_decode_bulk_dictionary_c(const uint8_t **, uint8_t **, uint_fast16_t *, density_lion_dictionary *const, uint16_t *restrict, uint32_t *restrict);
+
+void density_lion_decode_bulk_dictionary_d(const uint8_t **, uint8_t **, uint_fast16_t *, density_lion_dictionary *const, uint16_t *restrict, uint32_t *restrict);
+
+void density_lion_decode_bulk_plain(const uint8_t **, uint8_t **, uint_fast16_t *, density_lion_dictionary *const, uint16_t *restrict, uint32_t *restrict);
+
+const DENSITY_LION_FORM density_lion_decode_bulk_read_form(const uint8_t **, uint_fast64_t *const, uint_fast8_t *const, density_lion_form_data *const);
+
+void density_lion_decode_bulk_4(const uint8_t **, uint8_t **, uint_fast16_t *, density_lion_dictionary *const, density_lion_form_data *const, const DENSITY_LION_FORM);
+
+void density_lion_decode_bulk_256(const uint8_t **, uint8_t **, uint_fast16_t *, density_lion_dictionary *const, density_lion_form_data *const, uint_fast64_t *const, uint_fast8_t *const);
+
+const bool density_lion_decode_bulk_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **);
+
+#endif

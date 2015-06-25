@@ -72,7 +72,8 @@ typedef struct {
 
 typedef struct {
     uint8_t usages[DENSITY_LION_NUMBER_OF_FORMS];
-    void (*attachments[DENSITY_LION_NUMBER_OF_FORMS])(void *, void *, void *, void *const, void* const);
+
+    void (*attachments[DENSITY_LION_NUMBER_OF_FORMS])(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const);
     density_lion_form_node formsPool[DENSITY_LION_NUMBER_OF_FORMS];
     density_lion_form_node *formsIndex[DENSITY_LION_NUMBER_OF_FORMS];
     uint8_t nextAvailableForm;
@@ -81,7 +82,7 @@ typedef struct {
 
 DENSITY_WINDOWS_EXPORT void density_lion_form_model_init(density_lion_form_data *const);
 
-DENSITY_WINDOWS_EXPORT void density_lion_form_model_attach(density_lion_form_data *const, void (*[DENSITY_LION_NUMBER_OF_FORMS])(void *, void *, void *, void *const, void* const));
+DENSITY_WINDOWS_EXPORT void density_lion_form_model_attach(density_lion_form_data *const, void (*[DENSITY_LION_NUMBER_OF_FORMS])(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const));
 
 DENSITY_WINDOWS_EXPORT void density_lion_form_model_update(density_lion_form_data *const, density_lion_form_node *const, const uint8_t, density_lion_form_node *const, const uint8_t);
 

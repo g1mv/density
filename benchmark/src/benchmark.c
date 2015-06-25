@@ -23,7 +23,8 @@
 #include "benchmark.h"
 
 void density_benchmark_version() {
-    DENSITY_BENCHMARK_BOLD(printf("In-memory benchmark"));
+    printf("Single threaded ");
+    DENSITY_BENCHMARK_BOLD(printf("in-memory benchmark"));
     printf(" powered by ");
     DENSITY_BENCHMARK_BOLD(printf("Centaurean Density %i.%i.%i beta\n", density_version_major(), density_version_minor(), density_version_revision()));
     printf("Copyright (C) 2015 Guillaume Voirin\n");

@@ -42,6 +42,8 @@
  * Multiform compression algorithm
  */
 
+#include "kernel_lion_encode.h"
+
 #undef DENSITY_LION_ENCODE_FUNCTION_NAME
 
 #ifndef DENSITY_LION_ENCODE_FINISH
@@ -122,17 +124,18 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
 #endif
 
     // Chunk was read properly, process
+    uint32_t unit;
     if(density_unlikely(state->signatureInterceptMode)) {
         const uint_fast32_t start_shift = state->shift;
 
-        density_lion_encode_process_unit_small(readMemoryLocation, out, state);
+        density_lion_encode_bulk_32((const uint8_t **) &readMemoryLocation->pointer, &out->pointer, &state->lastHash, &state->signature, &state->proximitySignature, &state->shift, &state->dictionary, &state->formData, &unit);
 
         DENSITY_LION_ENCODE_MANAGE_INTERCEPT;
     } else {
         if(density_unlikely(state->chunksCount & (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG - 1)))
-            density_lion_encode_process_unit_small(readMemoryLocation, out, state);  // Attempt to resync the chunks count with a multiple of DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG
+            density_lion_encode_bulk_32((const uint8_t **) &readMemoryLocation->pointer, &out->pointer, &state->lastHash, &state->signature, &state->proximitySignature, &state->shift, &state->dictionary, &state->formData, &unit);  // Attempt to resync the chunks count with a multiple of DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG
         else
-            density_lion_encode_process_unit_big(readMemoryLocation, out, state);
+            density_lion_encode_bulk_256((const uint8_t **) &readMemoryLocation->pointer, &out->pointer, &state->lastHash, &state->signature, &state->proximitySignature, &state->shift, &state->dictionary, &state->formData, &unit);
     }
 
 #ifdef DENSITY_LION_ENCODE_FINISH
@@ -175,11 +178,11 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_ENCODE_STATE DENSITY_
     if(density_unlikely(state->signatureInterceptMode)) {
         const uint_fast32_t start_shift = state->shift;
 
-        density_lion_encode_push_code_to_signature(out, state, code);
+        density_lion_encode_bulk_push_code_to_signature(&out->pointer, &state->signature, &state->proximitySignature, &state->shift, code);
 
         DENSITY_LION_ENCODE_MANAGE_INTERCEPT;
     } else
-        density_lion_encode_push_code_to_signature(out, state, code);
+        density_lion_encode_bulk_push_code_to_signature(&out->pointer, &state->signature, &state->proximitySignature, &state->shift, code);
 
     // Copy the remaining bytes
     DENSITY_MEMCPY(state->signature, &state->proximitySignature, sizeof(density_lion_signature));

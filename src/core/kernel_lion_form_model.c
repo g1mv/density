@@ -98,7 +98,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_init(de
     *(uint64_t *) data->usages = 0;
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_attach(density_lion_form_data *const data, void (*attachments[DENSITY_LION_NUMBER_OF_FORMS])(void *, void *, void *, void *const, void* const)) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_attach(density_lion_form_data *const data, void (*attachments[DENSITY_LION_NUMBER_OF_FORMS])(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const)) {
     for(uint_fast8_t count = 0; count < DENSITY_LION_NUMBER_OF_FORMS; count ++)
         data->attachments[count] = attachments[count];
 }

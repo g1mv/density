@@ -90,14 +90,17 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_bulk_kernel_4(const uint8_t **r
             density_cheetah_decode_bulk_process_predicted(out, last_hash, dictionary);
             break;
         case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A:
+            DENSITY_MEMCPY(&hash, *in, sizeof(uint16_t));
             density_cheetah_decode_bulk_process_compressed_a(out, last_hash, dictionary, hash);
             *in += sizeof(uint16_t);
             break;
         case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B:
+            DENSITY_MEMCPY(&hash, *in, sizeof(uint16_t));
             density_cheetah_decode_bulk_process_compressed_b(out, last_hash, dictionary, hash);
             *in += sizeof(uint16_t);
             break;
-        case DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK:
+        default:    // DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK
+            DENSITY_MEMCPY(&unit, *in, sizeof(uint32_t));
             density_cheetah_decode_bulk_process_uncompressed(out, last_hash, dictionary, unit);
             *in += sizeof(uint32_t);
             break;
@@ -178,16 +181,16 @@ DENSITY_FORCE_INLINE const bool density_cheetah_decode_bulk_unrestricted(const u
 
     const uint8_t *start = *in;
 
-    if (in_size < (8 + 128))
+    if (in_size < DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE)
         goto read_signature;
 
-    while (*in - start <= in_size - (8 + 128)) {
+    while (*in - start <= in_size - DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE) {
         density_cheetah_decode_bulk_read_signature(in, &signature);
         density_cheetah_decode_bulk_128(in, out, &last_hash, signature, &dictionary);
     }
 
     read_signature:
-    if (in_size - (*in - start) < 8)
+    if (in_size - (*in - start) < sizeof(density_cheetah_signature))
         return false;
     shift = 0;
     density_cheetah_decode_bulk_read_signature(in, &signature);
@@ -211,7 +214,7 @@ DENSITY_FORCE_INLINE const bool density_cheetah_decode_bulk_unrestricted(const u
             flag = density_cheetah_decode_bulk_read_flag(signature, shift);
             switch (flag) {
                 case DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK:
-                    goto process_remaining_bytes;
+                    goto process_remaining_bytes;   // End marker
                 default:
                     density_cheetah_decode_bulk_kernel_4(in, out, &last_hash, flag, &dictionary);
                     shift += 2;
