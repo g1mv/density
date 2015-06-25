@@ -56,6 +56,6 @@ void density_lion_encode_bulk_32(const uint8_t **, uint8_t **, uint_fast16_t *, 
 
 void density_lion_encode_bulk_256(const uint8_t **, uint8_t **, uint_fast16_t *, uint_fast64_t **, uint_fast64_t *const, uint_fast8_t *const, density_lion_dictionary *const, density_lion_form_data *const, uint32_t *);
 
-void density_lion_encode_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **);
+void density_lion_encode_bulk_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **);
 
 #endif

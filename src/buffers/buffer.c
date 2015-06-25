@@ -40,13 +40,13 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
 
     switch (DENSITY_COMPRESSION_MODE_LION_ALGORITHM) {
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            density_chameleon_encode_unrestricted(&in, input_size, &out);
+            density_chameleon_encode_bulk_unrestricted(&in, input_size, &out, NULL);
             break;
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            density_cheetah_encode_unrestricted(&in, input_size, &out);
+            density_cheetah_encode_bulk_unrestricted(&in, input_size, &out, NULL);
             break;
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
-            density_lion_encode_unrestricted(&in, input_size, &out);
+            density_lion_encode_bulk_unrestricted(&in, input_size, &out);
             break;
         default:
             break;

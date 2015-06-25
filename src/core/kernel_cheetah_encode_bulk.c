@@ -102,42 +102,42 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_bulk_128(const uint8_t **restri
 #endif
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_encode_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out) {
+DENSITY_FORCE_INLINE void density_cheetah_encode_bulk_coarse_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, uint_fast16_t *restrict last_hash, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, density_cheetah_dictionary *const restrict dictionary) {
     uint32_t unit;
-    density_cheetah_signature signature;
-    density_cheetah_signature *signature_pointer;
-    density_cheetah_dictionary dictionary;
-    density_cheetah_dictionary_reset(&dictionary);
-    uint_fast16_t last_hash = 0;
-    uint_fast64_t remaining;
 
     uint_fast64_t limit_128 = (in_size >> 7);
     while (limit_128--) {
-        density_cheetah_encode_bulk_prepare_signature(out, &signature_pointer, &signature);
-        density_cheetah_encode_bulk_128(in, out, &last_hash, &signature, &dictionary, &unit);
-        DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
+        density_cheetah_encode_bulk_prepare_signature(out, signature_pointer, signature);
+        __builtin_prefetch(*in + 128);
+        density_cheetah_encode_bulk_128(in, out, last_hash, signature, dictionary, &unit);
+        DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_cheetah_signature));
     }
+}
+
+DENSITY_FORCE_INLINE void density_cheetah_encode_bulk_fine_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, uint_fast16_t *restrict last_hash, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, density_cheetah_dictionary *const restrict dictionary) {
+    uint32_t unit;
+    uint_fast64_t remaining;
 
     switch (in_size & 0x7f) {
         case 0:
         case 1:
         case 2:
         case 3:
-            density_cheetah_encode_bulk_prepare_signature(out, &signature_pointer, &signature);
-            signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK);   // End marker
-            DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
+            density_cheetah_encode_bulk_prepare_signature(out, signature_pointer, signature);
+            *signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK);   // End marker
+            DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_cheetah_signature));
             goto process_remaining_bytes;
         default:
             break;
     }
 
     const uint_fast64_t limit_4 = ((in_size & 0x7f) >> 2) << 1; // 4-byte units times number of signature flag bits
-    density_cheetah_encode_bulk_prepare_signature(out, &signature_pointer, &signature);
+    density_cheetah_encode_bulk_prepare_signature(out, signature_pointer, signature);
     for (uint_fast8_t shift = 0; shift != limit_4; shift += 2)
-        density_cheetah_encode_bulk_4(in, out, &last_hash, shift, &signature, &dictionary, &unit);
+        density_cheetah_encode_bulk_4(in, out, last_hash, shift, signature, dictionary, &unit);
 
-    signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK << limit_4);   // End marker
-    DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
+    *signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK << limit_4);   // End marker
+    DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_cheetah_signature));
 
     process_remaining_bytes:
     remaining = in_size & 0x3;
@@ -146,4 +146,18 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_unrestricted(const uint8_t **re
         *in += remaining;
         *out += remaining;
     }
+}
+
+DENSITY_FORCE_INLINE void density_cheetah_encode_bulk_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, density_cheetah_dictionary *restrict dictionary) {
+    density_cheetah_signature signature;
+    density_cheetah_signature *signature_pointer;
+    if (dictionary == NULL) {
+        density_cheetah_dictionary new_dictionary;
+        dictionary = &new_dictionary;
+        density_cheetah_dictionary_reset(dictionary);
+    }
+    uint_fast16_t last_hash = 0;
+
+    density_cheetah_encode_bulk_coarse_unrestricted(in, in_size, out, &last_hash, &signature_pointer, &signature, dictionary);
+    density_cheetah_encode_bulk_fine_unrestricted(in, in_size, out, &last_hash, &signature_pointer, &signature, dictionary);
 }

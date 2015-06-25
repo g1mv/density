@@ -55,6 +55,6 @@ void density_chameleon_encode_bulk_4(const uint8_t **, uint8_t **, const uint_fa
 
 void density_chameleon_encode_bulk_256(const uint8_t **, uint8_t **, uint_fast64_t *const, density_chameleon_dictionary *const, uint32_t *);
 
-void density_chameleon_encode_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **);
+void density_chameleon_encode_bulk_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **, density_chameleon_dictionary *);
 
 #endif

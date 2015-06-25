@@ -182,29 +182,27 @@ DENSITY_FORCE_INLINE void density_lion_encode_bulk_256(const uint8_t **restrict 
     density_lion_encode_bulk_generic(in, out, last_hash, signature_pointer, signature, shift, dictionary, DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG, data, unit);
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out) {
+DENSITY_FORCE_INLINE void density_lion_encode_bulk_coarse_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, uint_fast16_t *restrict last_hash, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, density_lion_form_data *const data, density_lion_dictionary *const restrict dictionary) {
     uint32_t unit;
-    density_lion_signature signature;
-    density_lion_signature *signature_pointer;
-    uint_fast8_t shift = 0;
-    density_lion_dictionary dictionary;
-    density_lion_dictionary_reset(&dictionary);
-    density_lion_form_data data;
-    density_lion_form_model_init(&data);
-    uint_fast16_t last_hash = 0;
-    uint_fast64_t remaining;
 
     uint_fast64_t limit_256 = (in_size >> 8);
-    while (limit_256--)
-        density_lion_encode_bulk_256(in, out, &last_hash, &signature_pointer, &signature, &shift, &dictionary, &data, &unit);
+    while (limit_256--) {
+        __builtin_prefetch(*in + 256);
+        density_lion_encode_bulk_256(in, out, last_hash, signature_pointer, signature, shift, dictionary, data, &unit);
+    }
+}
+
+DENSITY_FORCE_INLINE void density_lion_encode_bulk_fine_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, uint_fast16_t *restrict last_hash, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, density_lion_form_data *const data, density_lion_dictionary *const restrict dictionary) {
+    uint32_t unit;
+    uint_fast64_t remaining;
 
     switch (in_size & 0xff) {
         case 0:
         case 1:
         case 2:
         case 3:
-            density_lion_encode_bulk_push_code_to_signature(out, &signature_pointer, &signature, &shift, density_lion_form_model_get_encoding(&data, DENSITY_LION_FORM_PLAIN)); // End marker
-            DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_lion_signature));
+            density_lion_encode_bulk_push_code_to_signature(out, signature_pointer, signature, shift, density_lion_form_model_get_encoding(data, DENSITY_LION_FORM_PLAIN)); // End marker
+            DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
             goto process_remaining_bytes;
         default:
             break;
@@ -212,10 +210,10 @@ DENSITY_FORCE_INLINE void density_lion_encode_unrestricted(const uint8_t **restr
 
     uint_fast64_t limit_4 = (in_size & 0xff) >> 2;
     while (limit_4--)
-        density_lion_encode_bulk_4(in, out, &last_hash, &signature_pointer, &signature, &shift, &dictionary, &data, &unit);
+        density_lion_encode_bulk_4(in, out, last_hash, signature_pointer, signature, shift, dictionary, data, &unit);
 
-    density_lion_encode_bulk_push_code_to_signature(out, &signature_pointer, &signature, &shift, density_lion_form_model_get_encoding(&data, DENSITY_LION_FORM_PLAIN)); // End marker
-    DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_lion_signature));
+    density_lion_encode_bulk_push_code_to_signature(out, signature_pointer, signature, shift, density_lion_form_model_get_encoding(data, DENSITY_LION_FORM_PLAIN)); // End marker
+    DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
 
     process_remaining_bytes:
     remaining = in_size & 0x3;
@@ -224,4 +222,18 @@ DENSITY_FORCE_INLINE void density_lion_encode_unrestricted(const uint8_t **restr
         *in += remaining;
         *out += remaining;
     }
+}
+
+DENSITY_FORCE_INLINE void density_lion_encode_bulk_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out) {
+    density_lion_signature signature;
+    density_lion_signature *signature_pointer;
+    uint_fast8_t shift = 0;
+    density_lion_dictionary dictionary;
+    density_lion_dictionary_reset(&dictionary);
+    density_lion_form_data data;
+    density_lion_form_model_init(&data);
+    uint_fast16_t last_hash = 0;
+
+    density_lion_encode_bulk_coarse_unrestricted(in, in_size, out, &last_hash, &signature_pointer, &signature, &shift, &data, &dictionary);
+    density_lion_encode_bulk_fine_unrestricted(in, in_size, out, &last_hash, &signature_pointer, &signature, &shift, &data, &dictionary);
 }

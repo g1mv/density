@@ -240,6 +240,8 @@ DENSITY_FORCE_INLINE const bool density_lion_decode_bulk_unrestricted(const uint
         density_lion_decode_bulk_256(in, out, &last_hash, &dictionary, &data, &signature, &shift);
 
     read_and_decode_4:
+    if (density_unlikely(!shift))
+        density_lion_decode_bulk_read_signature(in, &signature);
     form = density_lion_decode_bulk_read_form(in, &signature, &shift, &data);
     switch (in_size - (*in - start)) {
         case 0:
