@@ -166,6 +166,9 @@
 #define DENSITY_MASK_16_32   (uint32_t)0xFFFF0000
 #define DENSITY_MASK_32_64   (uint64_t)0xFFFFFFFF00000000llu
 
+#define DENSITY_SPOOKYHASH_SEED_1                                 (0xabc)
+#define DENSITY_SPOOKYHASH_SEED_2                                 (0xdef)
+
 DENSITY_WINDOWS_EXPORT uint8_t density_version_major();
 DENSITY_WINDOWS_EXPORT uint8_t density_version_minor();
 DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();

@@ -40,7 +40,6 @@
 #include "../globals.h"
 #include "../density_api.h"
 #include "memory_location.h"
-#include "../density_api_data_structures.h"
 
 typedef struct {
     density_byte *originalPointer;
