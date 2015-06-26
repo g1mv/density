@@ -56,6 +56,6 @@ void density_cheetah_encode_bulk_4(const uint8_t **, uint8_t **, uint_fast16_t*,
 
 void density_cheetah_encode_bulk_128(const uint8_t **, uint8_t **, uint_fast16_t*, uint_fast64_t *const, density_cheetah_dictionary *const, uint32_t *);
 
-void density_cheetah_encode_bulk_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **, density_cheetah_dictionary *);
+void density_cheetah_encode_bulk_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **);
 
 #endif

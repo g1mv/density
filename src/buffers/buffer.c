@@ -38,12 +38,13 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
 
-    switch (DENSITY_COMPRESSION_MODE_LION_ALGORITHM) {
+    density_main_header_write_unrestricted(&out, compression_mode, block_type);
+    switch (compression_mode) {
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            density_chameleon_encode_bulk_unrestricted(&in, input_size, &out, NULL);
+            density_chameleon_encode_bulk_unrestricted(&in, input_size, &out);
             break;
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            density_cheetah_encode_bulk_unrestricted(&in, input_size, &out, NULL);
+            density_cheetah_encode_bulk_unrestricted(&in, input_size, &out);
             break;
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
             density_lion_encode_bulk_unrestricted(&in, input_size, &out);
@@ -60,20 +61,25 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_decompress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
+    if(input_size < 16)
+        exit(0);
+
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
 
     bool valid = false;
-
-    switch (DENSITY_COMPRESSION_MODE_LION_ALGORITHM) {
+    density_main_header main_header;
+    density_main_header_read_unrestricted(&in, &main_header);
+    const uint_fast64_t remaining = input_size - (in - input_buffer);
+    switch (main_header.compressionMode) {
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            valid = density_chameleon_decode_bulk_unrestricted(&in, input_size, &out);
+            valid = density_chameleon_decode_bulk_unrestricted(&in, remaining, &out);
             break;
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            valid = density_cheetah_decode_bulk_unrestricted(&in, input_size, &out);
+            valid = density_cheetah_decode_bulk_unrestricted(&in, remaining, &out);
             break;
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
-            valid = density_lion_decode_bulk_unrestricted(&in, input_size, &out);
+            valid = density_lion_decode_bulk_unrestricted(&in, remaining, &out);
             break;
         default:
             break;

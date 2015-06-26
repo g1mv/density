@@ -148,16 +148,13 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_bulk_fine_unrestricted(const ui
     }
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_encode_bulk_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, density_cheetah_dictionary *restrict dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_encode_bulk_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out) {
     density_cheetah_signature signature;
     density_cheetah_signature *signature_pointer;
-    if (dictionary == NULL) {
-        density_cheetah_dictionary new_dictionary;
-        dictionary = &new_dictionary;
-        density_cheetah_dictionary_reset(dictionary);
-    }
+    density_cheetah_dictionary dictionary;
+    density_cheetah_dictionary_reset(&dictionary);
     uint_fast16_t last_hash = 0;
 
-    density_cheetah_encode_bulk_coarse_unrestricted(in, in_size, out, &last_hash, &signature_pointer, &signature, dictionary);
-    density_cheetah_encode_bulk_fine_unrestricted(in, in_size, out, &last_hash, &signature_pointer, &signature, dictionary);
+    density_cheetah_encode_bulk_coarse_unrestricted(in, in_size, out, &last_hash, &signature_pointer, &signature, &dictionary);
+    density_cheetah_encode_bulk_fine_unrestricted(in, in_size, out, &last_hash, &signature_pointer, &signature, &dictionary);
 }

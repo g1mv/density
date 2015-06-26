@@ -37,6 +37,7 @@
 
 #include "../globals.h"
 #include "../density_api.h"
+#include "../structures/main/main_header.h"
 #include "../core/kernel_chameleon_encode_bulk.h"
 #include "../core/kernel_chameleon_decode_bulk.h"
 #include "../core/kernel_cheetah_encode_bulk.h"

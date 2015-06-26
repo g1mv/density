@@ -34,30 +34,25 @@
 
 #include "main_header.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_main_header_read(density_memory_location *restrict in, density_main_header *restrict header) {
-    density_byte *pointer = in->pointer;
-    header->version[0] = *(pointer);
-    header->version[1] = *(pointer + 1);
-    header->version[2] = *(pointer + 2);
-    header->compressionMode = *(pointer + 3);
-    header->blockType = *(pointer + 4);
-    DENSITY_MEMCPY(&header->parameters.as_uint64_t, pointer + 8, sizeof(uint64_t));
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_main_header_read_unrestricted(const uint8_t** restrict in, density_main_header *restrict header) {
+    header->version[0] = *(*in);
+    header->version[1] = *(*in + 1);
+    header->version[2] = *(*in + 2);
+    header->compressionMode = *(*in + 3);
+    header->blockType = *(*in + 4);
 
-    in->pointer += sizeof(density_main_header);
-    in->available_bytes -= sizeof(density_main_header);
-    return sizeof(density_main_header);
+    *in += sizeof(density_main_header);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_main_header_write(density_memory_location *restrict out, const DENSITY_COMPRESSION_MODE compressionMode, const DENSITY_BLOCK_TYPE blockType, const density_main_header_parameters parameters) {
-    density_byte *pointer = out->pointer;
-    *(pointer) = DENSITY_MAJOR_VERSION;
-    *(pointer + 1) = DENSITY_MINOR_VERSION;
-    *(pointer + 2) = DENSITY_REVISION;
-    *(pointer + 3) = compressionMode;
-    *(pointer + 4) = blockType;
-    DENSITY_MEMCPY(pointer + 8, &parameters.as_uint64_t, sizeof(uint64_t));
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_main_header_write_unrestricted(uint8_t **restrict out, const DENSITY_COMPRESSION_MODE compressionMode, const DENSITY_BLOCK_TYPE blockType) {
+    *(*out) = DENSITY_MAJOR_VERSION;
+    *(*out + 1) = DENSITY_MINOR_VERSION;
+    *(*out + 2) = DENSITY_REVISION;
+    *(*out + 3) = compressionMode;
+    *(*out + 4) = blockType;
+    *(*out + 5) = 0;
+    *(*out + 6) = 0;
+    *(*out + 7) = 0;
 
-    out->pointer += sizeof(density_main_header);
-    out->available_bytes -= sizeof(density_main_header);
-    return sizeof(density_main_header);
+    *out += sizeof(density_main_header);
 }

@@ -39,16 +39,18 @@
 #include "../../density_api.h"
 #include "../../utils/memory_teleport.h"
 #include "../../utils/memory_location.h"
+#include "main_header.h"
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    uint32_t previousBlockRelativeStartPosition;    // Previous block's relative start position (parallelizable decompressible output)
+    uint64_t hashsum1;
+    uint64_t hashsum2;
 } density_main_footer;
 #pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT uint_fast32_t density_main_footer_read(density_memory_location *, density_main_footer *);
+DENSITY_WINDOWS_EXPORT void density_main_footer_read_unrestricted(const uint8_t**, const bool, density_main_footer *);
 
-DENSITY_WINDOWS_EXPORT uint_fast32_t density_main_footer_write(density_memory_location *, const uint32_t);
+DENSITY_WINDOWS_EXPORT void density_main_footer_write_unrestricted(uint8_t**, const bool, const uint_fast64_t, const uint_fast64_t);
 
 #endif

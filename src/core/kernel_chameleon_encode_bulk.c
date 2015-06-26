@@ -133,15 +133,12 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_bulk_fine_unrestricted(const 
     }
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_bulk_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, density_chameleon_dictionary *restrict dictionary) {
+DENSITY_FORCE_INLINE void density_chameleon_encode_bulk_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out) {
     density_chameleon_signature signature;
     density_chameleon_signature *signature_pointer;
-    if (dictionary == NULL) {
-        density_chameleon_dictionary new_dictionary;
-        dictionary = &new_dictionary;
-        density_chameleon_dictionary_reset(dictionary);
-    }
+    density_chameleon_dictionary dictionary;
+    density_chameleon_dictionary_reset(&dictionary);
 
-    density_chameleon_encode_bulk_coarse_unrestricted(in, in_size, out, &signature_pointer, &signature, dictionary);
-    density_chameleon_encode_bulk_fine_unrestricted(in, in_size, out, &signature_pointer, &signature, dictionary);
+    density_chameleon_encode_bulk_coarse_unrestricted(in, in_size, out, &signature_pointer, &signature, &dictionary);
+    density_chameleon_encode_bulk_fine_unrestricted(in, in_size, out, &signature_pointer, &signature, &dictionary);
 }

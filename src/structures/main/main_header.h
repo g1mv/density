@@ -47,24 +47,16 @@
 #pragma pack(4)
 
 typedef struct {
-    union {
-        uint64_t as_uint64_t;
-        density_byte as_bytes[8];
-    };
-} density_main_header_parameters;
-
-typedef struct {
     density_byte version[3];
     density_byte compressionMode;
     density_byte blockType;
     density_byte reserved[3];
-    density_main_header_parameters parameters;
 } density_main_header;
 
 #pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT uint_fast32_t density_main_header_read(density_memory_location *, density_main_header *);
+DENSITY_WINDOWS_EXPORT void density_main_header_read_unrestricted(const uint8_t **, density_main_header *);
 
-DENSITY_WINDOWS_EXPORT uint_fast32_t density_main_header_write(density_memory_location *, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, const density_main_header_parameters);
+DENSITY_WINDOWS_EXPORT void density_main_header_write_unrestricted(uint8_t **, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE);
 
 #endif

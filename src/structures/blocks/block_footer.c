@@ -34,24 +34,20 @@
 
 #include "block_footer.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_read(density_memory_location *restrict in, density_block_footer *restrict blockFooter) {
-    DENSITY_MEMCPY(&blockFooter->hashsum1, in->pointer, sizeof(uint64_t));
-    in->pointer += sizeof(uint64_t);
-    DENSITY_MEMCPY(&blockFooter->hashsum2, in->pointer, sizeof(uint64_t));
-    in->pointer += sizeof(uint64_t);
-
-    in->available_bytes -= sizeof(density_block_footer);
-
-    return sizeof(density_block_footer);
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_block_footer_read_unrestricted(const uint8_t **restrict in, const bool integrity_checks, density_block_footer *restrict block_footer) {
+    if (integrity_checks) {
+        DENSITY_MEMCPY(&block_footer->hashsum1, *in, sizeof(uint64_t));
+        *in += sizeof(uint64_t);
+        DENSITY_MEMCPY(&block_footer->hashsum2, *in, sizeof(uint64_t));
+        *in += sizeof(uint64_t);
+    }
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE uint_fast32_t density_block_footer_write(density_memory_location *out, const uint_fast64_t hashsum1, const uint_fast64_t hashsum2) {
-    DENSITY_MEMCPY(out->pointer, &hashsum1, sizeof(uint64_t));
-    out->pointer += sizeof(uint64_t);
-    DENSITY_MEMCPY(out->pointer, &hashsum2, sizeof(uint64_t));
-    out->pointer += sizeof(uint64_t);
-
-    out->available_bytes -= sizeof(density_block_footer);
-
-    return sizeof(density_block_footer);
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_block_footer_write_unrestricted(uint8_t **restrict out, const bool integrity_checks, const uint_fast64_t hashsum1, const uint_fast64_t hashsum2) {
+    if (integrity_checks) {
+        DENSITY_MEMCPY(*out, &hashsum1, sizeof(uint64_t));
+        *out += sizeof(uint64_t);
+        DENSITY_MEMCPY(*out, &hashsum2, sizeof(uint64_t));
+        *out += sizeof(uint64_t);
+    }
 }
