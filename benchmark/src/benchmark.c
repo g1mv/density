@@ -45,7 +45,8 @@ void density_benchmark_client_usage() {
     printf("                                    2 = Cheetah algorithm\n");
     printf("                                    3 = Lion algorithm\n");
     printf("  -c                                Compress only\n");
-    printf("  -x                                Activate integrity hashsum checking\n\n");
+    printf("  -x                                Activate integrity hashsum checking\n");
+    printf("  -f                                Activate fuzzer mode (generated data)\n\n");
     exit(0);
 }
 
@@ -77,10 +78,12 @@ int main(int argc, char *argv[]) {
     DENSITY_COMPRESSION_MODE end_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
     DENSITY_BLOCK_TYPE block_type = DENSITY_BLOCK_TYPE_DEFAULT;
     bool compression_only = false;
+    bool fuzzer = false;
+    char *file_path = NULL;
 
-    if(argc <= 1)
+    if (argc <= 1)
         density_benchmark_client_usage();
-    for (unsigned int count = 1; count < argc - 1; count++) {
+    for (unsigned int count = 1; count < argc; count++) {
         if (argv[count][0] == '-') {
             switch (argv[count][1]) {
                 case '0':
@@ -105,29 +108,49 @@ int main(int argc, char *argv[]) {
                 case 'x':
                     block_type = DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK;
                     break;
+                case 'f':
+                    fuzzer = true;
+                    break;
                 default:
                     density_benchmark_client_usage();
             }
         } else
-            density_benchmark_client_usage();
+            file_path = argv[argc - 1];
     }
-    const char *file_path = argv[argc - 1];
 
-    // Open file and get infos
-    FILE *file = fopen(file_path, "rb");
-    if (file == NULL) {
-        DENSITY_BENCHMARK_ERROR(printf("Error opening file %s.", file_path), false);
+    uint8_t *in;
+    uint8_t *out;
+    uint_fast64_t uncompressed_size;
+    uint_fast64_t memory_allocated;
+    if (fuzzer) {
+        srand((unsigned int) (time(NULL) * 14521937821257379531llu));
+        uncompressed_size = (uint_fast64_t) (((uint64_t) (rand() * 100000000llu)) / RAND_MAX);
+        memory_allocated = (3 * uncompressed_size) / 2;
+        in = malloc(memory_allocated * sizeof(uint8_t));
+        uint8_t value = (uint8_t) rand();
+        for (int count = 0; count < uncompressed_size; count++) {
+            if (!(rand() & 0xf))
+                value += rand();
+            in[count] = value;
+        }
+        out = malloc(memory_allocated * sizeof(uint8_t));
+    } else {
+        // Open file and get infos
+        FILE *file = fopen(file_path, "rb");
+        if (file == NULL) {
+            DENSITY_BENCHMARK_ERROR(printf("Error opening file %s.", file_path), false);
+        }
+        struct stat file_attributes;
+        stat(file_path, &file_attributes);
+
+        // Allocate memory and copy file to memory
+        uncompressed_size = (uint_fast64_t) file_attributes.st_size;
+        memory_allocated = (3 * uncompressed_size) / 2;
+        in = malloc(memory_allocated * sizeof(uint8_t));
+        fread(in, sizeof(uint8_t), uncompressed_size, file);
+        fclose(file);
+        out = malloc(memory_allocated * sizeof(uint8_t));
     }
-    struct stat file_attributes;
-    stat(file_path, &file_attributes);
-
-    // Allocate memory and copy file to memory
-    const uint_fast64_t uncompressed_size = file_attributes.st_size;
-    const uint32_t memory_allocated = (3 * uncompressed_size) / 2;
-    uint8_t *in = malloc(memory_allocated * sizeof(uint8_t));
-    fread(in, sizeof(uint8_t), uncompressed_size, file);
-    fclose(file);
-    uint8_t *out = malloc(memory_allocated * sizeof(uint8_t));
 
     printf("\n");
     for (DENSITY_COMPRESSION_MODE compression_mode = start_mode; compression_mode <= end_mode; compression_mode++) {
@@ -153,8 +176,13 @@ int main(int argc, char *argv[]) {
         fflush(stdout);
 
         // Pre-heat
-        printf("\nUsing file ");
-        DENSITY_BENCHMARK_BOLD(printf("%s", file_path));
+        printf("\nUsing ");
+        if (fuzzer) {
+            DENSITY_BENCHMARK_BOLD(printf("generated data"));
+        } else {
+            printf("file ");
+            DENSITY_BENCHMARK_BOLD(printf("%s", file_path));
+        }
         printf(" copied in memory\n");
         printf("Hashsum integrity check is ");
         if (block_type != DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
@@ -221,12 +249,12 @@ int main(int argc, char *argv[]) {
             ++iterations;
 
             cputime_chronometer_start(&chrono);
-            result = density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type, NULL, NULL);
+            density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type, NULL, NULL);
             compress_time_elapsed = cputime_chronometer_stop(&chrono);
 
             if (!compression_only) {
                 cputime_chronometer_start(&chrono);
-                result = density_buffer_decompress(out, compressed_size, in, memory_allocated, NULL, NULL);
+                density_buffer_decompress(out, compressed_size, in, memory_allocated, NULL, NULL);
                 decompress_time_elapsed = cputime_chronometer_stop(&chrono);
             }
 
