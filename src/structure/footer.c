@@ -34,14 +34,14 @@
 
 #include "footer.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_main_footer_read_unrestricted(const uint8_t **restrict in, density_main_footer *restrict main_footer) {
-    DENSITY_MEMCPY(&main_footer->hashsum1, *in, sizeof(uint64_t));
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_footer_read_unrestricted(const uint8_t **restrict in, density_footer *restrict footer) {
+    DENSITY_MEMCPY(&footer->hashsum1, *in, sizeof(uint64_t));
     *in += sizeof(uint64_t);
-    DENSITY_MEMCPY(&main_footer->hashsum2, *in, sizeof(uint64_t));
+    DENSITY_MEMCPY(&footer->hashsum2, *in, sizeof(uint64_t));
     *in += sizeof(uint64_t);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_main_footer_write_unrestricted(uint8_t **restrict out, const uint_fast64_t hashsum1, const uint_fast64_t hashsum2) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_footer_write_unrestricted(uint8_t **restrict out, const uint_fast64_t hashsum1, const uint_fast64_t hashsum2) {
     DENSITY_MEMCPY(*out, &hashsum1, sizeof(uint64_t));
     *out += sizeof(uint64_t);
     DENSITY_MEMCPY(*out, &hashsum2, sizeof(uint64_t));

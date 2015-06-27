@@ -44,11 +44,11 @@
 typedef struct {
     uint64_t hashsum1;
     uint64_t hashsum2;
-} density_main_footer;
+} density_footer;
 #pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT void density_main_footer_read_unrestricted(const uint8_t **, density_main_footer *);
+DENSITY_WINDOWS_EXPORT void density_footer_read_unrestricted(const uint8_t **, density_footer *);
 
-DENSITY_WINDOWS_EXPORT void density_main_footer_write_unrestricted(uint8_t **, const uint_fast64_t, const uint_fast64_t);
+DENSITY_WINDOWS_EXPORT void density_footer_write_unrestricted(uint8_t **, const uint_fast64_t, const uint_fast64_t);
 
 #endif

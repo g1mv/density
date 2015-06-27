@@ -48,7 +48,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
     uint8_t *out = output_buffer;
 
     // Header
-    density_main_header_write_unrestricted(&out, compression_mode, block_type);
+    density_header_write_unrestricted(&out, compression_mode, block_type);
 
     // Compression
     switch (compression_mode) {
@@ -76,7 +76,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
         hash1 = DENSITY_SPOOKYHASH_SEED_1;
         hash2 = DENSITY_SPOOKYHASH_SEED_2;
         spookyhash_128(input_buffer, input_size, &hash1, &hash2);
-        density_main_footer_write_unrestricted(&out, hash1, hash2);
+        density_footer_write_unrestricted(&out, hash1, hash2);
     }
 
     // Result
@@ -84,7 +84,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_decompress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
-    if (input_size < 8)
+    if (input_size < sizeof(density_header))
         exit(0);
 
     // Variables setup
@@ -93,12 +93,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
     DENSITY_BUFFER_STATE state;
 
     // Header
-    density_main_header main_header;
-    density_main_header_read_unrestricted(&in, &main_header);
+    density_header main_header;
+    density_header_read_unrestricted(&in, &main_header);
     const bool integrity_checks = (main_header.blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK);
     uint_fast64_t remaining = input_size - (in - input_buffer);
     if (integrity_checks)
-        remaining -= sizeof(density_main_footer);
+        remaining -= sizeof(density_footer);
 
     // Decompression
     switch (main_header.compressionMode) {
@@ -129,8 +129,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
         hash1 = DENSITY_SPOOKYHASH_SEED_1;
         hash2 = DENSITY_SPOOKYHASH_SEED_2;
         spookyhash_128(output_buffer, out - output_buffer, &hash1, &hash2);
-        density_main_footer footer;
-        density_main_footer_read_unrestricted(&in, &footer);
+        density_footer footer;
+        density_footer_read_unrestricted(&in, &footer);
         if (footer.hashsum1 != hash1 || footer.hashsum2 != hash2)
             density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_INTEGRITY_CHECK_FAIL, in - input_buffer, out - output_buffer);
     }
