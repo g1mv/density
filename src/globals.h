@@ -162,10 +162,6 @@
 
 #define density_bitsizeof(x) (8 * sizeof(x))
 
-#define DENSITY_MASK_0_32    (uint32_t)0xFFFFFFFF
-#define DENSITY_MASK_16_32   (uint32_t)0xFFFF0000
-#define DENSITY_MASK_32_64   (uint64_t)0xFFFFFFFF00000000llu
-
 #define DENSITY_SPOOKYHASH_SEED_1                                 (0xabc)
 #define DENSITY_SPOOKYHASH_SEED_2                                 (0xdef)
 
@@ -180,25 +176,9 @@ DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
  *                                                                                                                    *
  **********************************************************************************************************************/
 
-#define DENSITY_YES 1
-#define DENSITY_NO  0
-
 #define DENSITY_MAJOR_VERSION   0
 #define DENSITY_MINOR_VERSION   13
 #define DENSITY_REVISION        0
-
-/*
- * Compile-time switches useful for pure data encoding and decoding
- * They enable/disable writing of the main headers and footers
- */
-#define DENSITY_WRITE_MAIN_HEADER   DENSITY_YES
-#define DENSITY_WRITE_MAIN_FOOTER   DENSITY_YES
-
-/*
- * If set to yes, created output's decompression is parallelizable.
- * If set to no, compression dictionary resets are disabled and therefore compression ratio is improved
- */
-#define DENSITY_ENABLE_PARALLELIZABLE_DECOMPRESSIBLE_OUTPUT DENSITY_NO
 
 
 

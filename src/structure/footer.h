@@ -37,8 +37,6 @@
 
 #include "../globals.h"
 #include "../density_api.h"
-#include "../utils/memory_teleport.h"
-#include "../utils/memory_location.h"
 #include "header.h"
 
 #pragma pack(push)
