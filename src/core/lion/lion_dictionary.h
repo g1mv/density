@@ -29,27 +29,50 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 3/02/15 19:51
+ * 12/02/15 23:09
+ *
+ * --------------
+ * Lion algorithm
+ * --------------
+ *
+ * Author(s)
+ * Guillaume Voirin (https://github.com/gpnuma)
+ *
+ * Description
+ * Multiform compression algorithm
  */
 
-#ifndef DENSITY_BUFFER_H
-#define DENSITY_BUFFER_H
+#ifndef DENSITY_LION_DICTIONARY_H
+#define DENSITY_LION_DICTIONARY_H
 
-#include "../globals.h"
-#include "../density_api.h"
-#include "../../libs/spookyhash/src/spookyhash_api.h"
-#include "../structure/header.h"
-#include "../structure/footer.h"
-#include "../core/chameleon/chameleon_encode.h"
-#include "../core/chameleon/chameleon_decode.h"
-#include "../core/cheetah/cheetah_encode.h"
-#include "../core/cheetah/cheetah_decode.h"
-#include "../core/lion/lion_encode.h"
-#include "../core/lion/lion_decode.h"
+#include "../../globals.h"
+#include "lion.h"
 
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*)(size_t), void (*)(void *));
+#include <string.h>
 
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_decompress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
+#pragma pack(push)
+#pragma pack(4)
 
+typedef struct {
+    uint32_t chunk_a;
+    uint32_t chunk_b;
+    uint32_t chunk_c;
+    uint32_t chunk_d;
+    uint32_t chunk_e;
+} density_lion_dictionary_chunk_entry;
+
+typedef struct {
+    uint32_t next_chunk_a;
+    uint32_t next_chunk_b;
+    uint32_t next_chunk_c;
+} density_lion_dictionary_chunk_prediction_entry;
+
+typedef struct {
+    density_lion_dictionary_chunk_entry chunks[1 << DENSITY_LION_CHUNK_HASH_BITS];
+    density_lion_dictionary_chunk_prediction_entry predictions[1 << DENSITY_LION_CHUNK_HASH_BITS];
+} density_lion_dictionary;
+#pragma pack(pop)
+
+DENSITY_WINDOWS_EXPORT void density_lion_dictionary_reset(density_lion_dictionary *);
 
 #endif

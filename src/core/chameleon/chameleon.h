@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2015, Guillaume Voirin
+ * Copyright (c) 2013, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,27 +29,40 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 3/02/15 19:51
+ * 24/10/13 11:57
+ *
+ * -------------------
+ * Chameleon algorithm
+ * -------------------
+ *
+ * Author(s)
+ * Guillaume Voirin (https://github.com/gpnuma)
+ *
+ * Description
+ * Hash based superfast kernel
  */
 
-#ifndef DENSITY_BUFFER_H
-#define DENSITY_BUFFER_H
+#ifndef DENSITY_CHAMELEON_H
+#define DENSITY_CHAMELEON_H
 
-#include "../globals.h"
-#include "../density_api.h"
-#include "../../libs/spookyhash/src/spookyhash_api.h"
-#include "../structure/header.h"
-#include "../structure/footer.h"
-#include "../core/chameleon/chameleon_encode.h"
-#include "../core/chameleon/chameleon_decode.h"
-#include "../core/cheetah/cheetah_encode.h"
-#include "../core/cheetah/cheetah_decode.h"
-#include "../core/lion/lion_encode.h"
-#include "../core/lion/lion_decode.h"
+#include "../../globals.h"
 
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*)(size_t), void (*)(void *));
+#define DENSITY_CHAMELEON_HASH_BITS                                         16
+#define DENSITY_CHAMELEON_HASH_MULTIPLIER                                   (uint32_t)0x9D6EF916lu
 
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_decompress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
+#define DENSITY_CHAMELEON_HASH_ALGORITHM(value32)                           (uint16_t)((value32 * DENSITY_CHAMELEON_HASH_MULTIPLIER) >> (32 - DENSITY_CHAMELEON_HASH_BITS))
 
+typedef enum {
+    DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK = 0x0,
+    DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP = 0x1,
+} DENSITY_CHAMELEON_SIGNATURE_FLAG;
+
+typedef uint64_t density_chameleon_signature;
+
+#define DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE        (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))   // Uncompressed chunks
+#define DENSITY_CHAMELEON_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE              (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
+
+#define DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE                      (sizeof(density_chameleon_signature) + DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
+#define DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE                            (DENSITY_CHAMELEON_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
 
 #endif

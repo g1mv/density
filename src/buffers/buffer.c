@@ -34,12 +34,23 @@
 
 #include "buffer.h"
 
+DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_make_result(DENSITY_BUFFER_STATE state, uint_fast64_t read, uint_fast64_t written) {
+    density_buffer_processing_result result;
+    result.state = state;
+    result.bytesRead = read;
+    result.bytesWritten = written;
+    return result;
+}
+
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_compress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
+    // Variables setup
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
-    uint64_t hash1, hash2;
 
+    // Header
     density_main_header_write_unrestricted(&out, compression_mode, block_type);
+
+    // Compression
     switch (compression_mode) {
         case DENSITY_COMPRESSION_MODE_COPY:
             DENSITY_MEMCPY(out, in, input_size);
@@ -47,86 +58,83 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
             out += input_size;
             break;
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            density_chameleon_encode_bulk_unrestricted(&in, input_size, &out);
+            density_chameleon_encode_unrestricted(&in, input_size, &out);
             break;
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            density_cheetah_encode_bulk_unrestricted(&in, input_size, &out);
+            density_cheetah_encode_unrestricted(&in, input_size, &out);
             break;
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
-            density_lion_encode_bulk_unrestricted(&in, input_size, &out);
+            density_lion_encode_unrestricted(&in, input_size, &out);
             break;
         default:
             break;
     }
 
-    switch (block_type) {
-        case DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK:
-            hash1 = DENSITY_SPOOKYHASH_SEED_1;
-            hash2 = DENSITY_SPOOKYHASH_SEED_2;
-            spookyhash_128(input_buffer, input_size, &hash1, &hash2);
-            density_main_footer_write_unrestricted(&out, true, hash1, hash2);
-            break;
-        default:
-            break;
+    // Footer
+    if (block_type == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK) {
+        uint64_t hash1, hash2;
+        hash1 = DENSITY_SPOOKYHASH_SEED_1;
+        hash2 = DENSITY_SPOOKYHASH_SEED_2;
+        spookyhash_128(input_buffer, input_size, &hash1, &hash2);
+        density_main_footer_write_unrestricted(&out, hash1, hash2);
     }
 
-    density_buffer_processing_result result;
-    result.state = DENSITY_BUFFER_STATE_OK;
-    result.bytesRead = in - input_buffer;
-    result.bytesWritten = out - output_buffer;
-    return result;
+    // Result
+    return density_buffer_make_result(DENSITY_BUFFER_STATE_OK, in - input_buffer, out - output_buffer);
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_decompress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
-    if (input_size < 16)
+    if (input_size < 8)
         exit(0);
 
+    // Variables setup
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
-    uint64_t hash1, hash2;
+    DENSITY_BUFFER_STATE state;
 
-    bool valid = false;
+    // Header
     density_main_header main_header;
     density_main_header_read_unrestricted(&in, &main_header);
+    const bool integrity_checks = (main_header.blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK);
     uint_fast64_t remaining = input_size - (in - input_buffer);
-    if (main_header.blockType == DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
+    if (integrity_checks)
         remaining -= sizeof(density_main_footer);
+
+    // Decompression
     switch (main_header.compressionMode) {
         case DENSITY_COMPRESSION_MODE_COPY:
-            valid = true;
             DENSITY_MEMCPY(out, in, remaining);
             in += remaining;
             out += remaining;
             break;
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            valid = density_chameleon_decode_bulk_unrestricted(&in, remaining, &out);
+            if (!density_chameleon_decode_unrestricted(&in, remaining, &out))
+                density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING, in - input_buffer, out - output_buffer);
             break;
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            valid = density_cheetah_decode_bulk_unrestricted(&in, remaining, &out);
+            if (!density_cheetah_decode_unrestricted(&in, remaining, &out))
+                density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING, in - input_buffer, out - output_buffer);
             break;
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
-            valid = density_lion_decode_bulk_unrestricted(&in, remaining, &out);
+            if (!density_lion_decode_unrestricted(&in, remaining, &out))
+                density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING, in - input_buffer, out - output_buffer);
             break;
         default:
             break;
     }
 
-    switch (main_header.blockType) {
-        case DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK:
-            hash1 = DENSITY_SPOOKYHASH_SEED_1;
-            hash2 = DENSITY_SPOOKYHASH_SEED_2;
-            spookyhash_128(output_buffer, out - output_buffer, &hash1, &hash2);
-            density_main_footer footer;
-            density_main_footer_read_unrestricted(&in, true, &footer);
-            valid = (footer.hashsum1 == hash1 && footer.hashsum2 == hash2);
-            break;
-        default:
-            break;
+    // Footer
+    if (integrity_checks) {
+        uint64_t hash1, hash2;
+        hash1 = DENSITY_SPOOKYHASH_SEED_1;
+        hash2 = DENSITY_SPOOKYHASH_SEED_2;
+        spookyhash_128(output_buffer, out - output_buffer, &hash1, &hash2);
+        density_main_footer footer;
+        density_main_footer_read_unrestricted(&in, &footer);
+        if (footer.hashsum1 != hash1 || footer.hashsum2 != hash2)
+            density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_INTEGRITY_CHECK_FAIL, in - input_buffer, out - output_buffer);
     }
 
-    density_buffer_processing_result result;
-    result.state = valid ? DENSITY_BUFFER_STATE_OK : DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING;
-    result.bytesRead = in - input_buffer;
-    result.bytesWritten = out - output_buffer;
-    return result;
+    // Result
+    return density_buffer_make_result(DENSITY_BUFFER_STATE_OK, in - input_buffer, out - output_buffer);
 }

@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2015, Guillaume Voirin
+ * Copyright (c) 2013, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,27 +29,24 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 3/02/15 19:51
+ * 23/06/15 21:49
+ *
+ * -------------------
+ * Chameleon algorithm
+ * -------------------
+ *
+ * Author(s)
+ * Guillaume Voirin (https://github.com/gpnuma)
+ *
+ * Description
+ * Hash based superfast kernel
  */
 
-#ifndef DENSITY_BUFFER_H
-#define DENSITY_BUFFER_H
+#ifndef DENSITY_CHAMELEON_DECODE_H
+#define DENSITY_CHAMELEON_DECODE_H
 
-#include "../globals.h"
-#include "../density_api.h"
-#include "../../libs/spookyhash/src/spookyhash_api.h"
-#include "../structure/header.h"
-#include "../structure/footer.h"
-#include "../core/chameleon/chameleon_encode.h"
-#include "../core/chameleon/chameleon_decode.h"
-#include "../core/cheetah/cheetah_encode.h"
-#include "../core/cheetah/cheetah_decode.h"
-#include "../core/lion/lion_encode.h"
-#include "../core/lion/lion_decode.h"
+#include "chameleon_dictionary.h"
 
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*)(size_t), void (*)(void *));
-
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_decompress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
-
+DENSITY_WINDOWS_EXPORT const bool density_chameleon_decode_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **);
 
 #endif

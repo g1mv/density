@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2015, Guillaume Voirin
+ * Copyright (c) 2013, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,27 +29,44 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 3/02/15 19:51
+ * 06/12/13 20:20
+ *
+ * -----------------
+ * Cheetah algorithm
+ * -----------------
+ *
+ * Author(s)
+ * Guillaume Voirin (https://github.com/gpnuma)
+ * Piotr Tarsa (https://github.com/tarsa)
+ *
+ * Description
+ * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#ifndef DENSITY_BUFFER_H
-#define DENSITY_BUFFER_H
+#ifndef DENSITY_CHEETAH_DICTIONARY_H
+#define DENSITY_CHEETAH_DICTIONARY_H
 
-#include "../globals.h"
-#include "../density_api.h"
-#include "../../libs/spookyhash/src/spookyhash_api.h"
-#include "../structure/header.h"
-#include "../structure/footer.h"
-#include "../core/chameleon/chameleon_encode.h"
-#include "../core/chameleon/chameleon_decode.h"
-#include "../core/cheetah/cheetah_encode.h"
-#include "../core/cheetah/cheetah_decode.h"
-#include "../core/lion/lion_encode.h"
-#include "../core/lion/lion_decode.h"
+#include "cheetah.h"
 
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*)(size_t), void (*)(void *));
+#include <string.h>
 
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_decompress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));
+#pragma pack(push)
+#pragma pack(4)
+typedef struct {
+    uint32_t chunk_a;
+    uint32_t chunk_b;
+} density_cheetah_dictionary_entry;
 
+typedef struct {
+    uint32_t next_chunk_prediction;
+} density_cheetah_dictionary_prediction_entry;
+
+typedef struct {
+    density_cheetah_dictionary_entry entries[1 << DENSITY_CHEETAH_HASH_BITS];
+    density_cheetah_dictionary_prediction_entry prediction_entries[1 << DENSITY_CHEETAH_HASH_BITS];
+} density_cheetah_dictionary;
+#pragma pack(pop)
+
+DENSITY_WINDOWS_EXPORT void density_cheetah_dictionary_reset(density_cheetah_dictionary *);
 
 #endif
