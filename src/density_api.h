@@ -72,6 +72,7 @@ typedef enum {
 
 typedef enum {
     DENSITY_BUFFER_STATE_OK = 0,                                        // Everything went alright
+    DENSITY_BUFFER_STATE_ERROR_INPUT_BUFFER_TOO_SMALL,                  // Input buffer size is too small
     DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // Output buffer size is too small
     DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING,                       // Error during processing
     DENSITY_BUFFER_STATE_ERROR_INTEGRITY_CHECK_FAIL                     // Integrity check has failed
@@ -152,6 +153,10 @@ DENSITY_WINDOWS_EXPORT uint8_t density_version_revision(void);
  * Density buffer API functions                                                                                        *
  *                                                                                                                     *
  ***********************************************************************************************************************/
+
+DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_minimum_compressed_output_size(const uint_fast64_t);
+
+DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_minimum_decompressed_output_size(const uint_fast64_t);
 
 /*
  * Compress an input_buffer of input_size bytes and store the result in output_buffer, using compression_mode and block_type.

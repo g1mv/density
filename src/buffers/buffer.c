@@ -34,6 +34,57 @@
 
 #include "buffer.h"
 
+DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_minimum_compressed_output_size(const uint_fast64_t input_size) {
+    uint_fast64_t longest_output_size = 0;
+
+    // Chameleon longest output
+    uint_fast64_t chameleon_longest_output_size = 0;
+    chameleon_longest_output_size += sizeof(density_header);
+    chameleon_longest_output_size += sizeof(density_chameleon_signature) * (1 + (input_size >> (5 + 3)));   // Signature space (1 bit <=> 4 bytes)
+    chameleon_longest_output_size += sizeof(density_chameleon_signature);                                   // Eventual supplementary signature for end marker
+    chameleon_longest_output_size += input_size;                                                            // Everything encoded as plain data
+    chameleon_longest_output_size += sizeof(density_footer);                                                // In case of integrity checks
+    longest_output_size = chameleon_longest_output_size;
+
+    // Cheetah longest output
+    uint_fast64_t cheetah_longest_output_size = 0;
+    cheetah_longest_output_size += sizeof(density_header);
+    cheetah_longest_output_size += sizeof(density_cheetah_signature) * (1 + (input_size >> (4 + 3)));       // Signature space (2 bits <=> 4 bytes)
+    cheetah_longest_output_size += sizeof(density_cheetah_signature);                                       // Eventual supplementary signature for end marker
+    cheetah_longest_output_size += input_size;                                                              // Everything encoded as plain data
+    cheetah_longest_output_size += sizeof(density_footer);                                                  // In case of integrity checks
+    if (cheetah_longest_output_size > longest_output_size)
+        longest_output_size = cheetah_longest_output_size;
+
+    // Lion longest output
+    uint_fast64_t lion_longest_output_size = 0;
+    lion_longest_output_size += sizeof(density_header);
+    lion_longest_output_size += sizeof(density_lion_signature) * (1 + ((input_size * 7) >> (5 + 3)));       // Signature space (7 bits <=> 4 bytes), although this size is technically impossible
+    lion_longest_output_size += sizeof(density_lion_signature);                                             // Eventual supplementary signature for end marker
+    lion_longest_output_size += input_size;                                                                 // Everything encoded as plain data
+    lion_longest_output_size += sizeof(density_footer);                                                     // In case of integrity checks
+    if (lion_longest_output_size > longest_output_size)
+        longest_output_size = lion_longest_output_size;
+
+    return longest_output_size;
+}
+
+DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_minimum_decompressed_output_size(const uint_fast64_t input_size) {
+    uint_fast64_t longest_output_size = 0;
+
+    // Chameleon longest output
+    uint_fast64_t chameleon_longest_output_size = 0;
+    uint_fast64_t chameleon_structure_size = 0;
+    chameleon_structure_size += sizeof(density_header);
+    chameleon_structure_size += sizeof(density_chameleon_signature) * (1 + (input_size >> (4 + 3)));        // Signature space (1 bit <=> 2 bytes)
+    chameleon_structure_size += sizeof(density_footer);
+    if (input_size >= chameleon_structure_size)
+        chameleon_longest_output_size += ((input_size - chameleon_structure_size) << 1);                    // Assuming everything was compressed
+    longest_output_size = chameleon_longest_output_size;
+
+    return longest_output_size;
+}
+
 DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_make_result(DENSITY_BUFFER_STATE state, uint_fast64_t read, uint_fast64_t written) {
     density_buffer_processing_result result;
     result.state = state;
@@ -43,6 +94,9 @@ DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_make_result
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_compress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
+    if (output_size < density_buffer_minimum_compressed_output_size(input_size))
+        return density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL, 0, 0);
+
     // Variables setup
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
@@ -84,8 +138,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_decompress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, void *(*mem_alloc)(size_t), void (*mem_free)(void *)) {
-    if (input_size < sizeof(density_header))
-        exit(0);
+    if (input_size < sizeof(density_header) + sizeof(uint64_t))
+        density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_INPUT_BUFFER_TOO_SMALL, 0, 0);
 
     // Variables setup
     const uint8_t *in = input_buffer;

@@ -47,6 +47,10 @@
 #include "../core/lion/lion_encode.h"
 #include "../core/lion/lion_decode.h"
 
+DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_minimum_compressed_output_size(const uint_fast64_t);
+
+DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_minimum_decompressed_output_size(const uint_fast64_t);
+
 DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE, void *(*)(size_t), void (*)(void *));
 
 DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_decompress(const uint8_t*, const uint_fast64_t, uint8_t*, const uint_fast64_t, void *(*)(size_t), void (*)(void *));

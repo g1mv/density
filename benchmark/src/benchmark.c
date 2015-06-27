@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
     if (fuzzer) {
         srand((unsigned int) (time(NULL) * 14521937821257379531llu));
         uncompressed_size = (uint_fast64_t) (((uint64_t) (rand() * 100000000llu)) / RAND_MAX);
-        memory_allocated = (3 * uncompressed_size) / 2;
+        memory_allocated = density_buffer_minimum_compressed_output_size(uncompressed_size);
         in = malloc(memory_allocated * sizeof(uint8_t));
         uint8_t value = (uint8_t) rand();
         for (int count = 0; count < uncompressed_size; count++) {
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
 
         // Allocate memory and copy file to memory
         uncompressed_size = (uint_fast64_t) file_attributes.st_size;
-        memory_allocated = (3 * uncompressed_size) / 2;
+        memory_allocated = density_buffer_minimum_compressed_output_size(uncompressed_size);
         in = malloc(memory_allocated * sizeof(uint8_t));
         fread(in, sizeof(uint8_t), uncompressed_size, file);
         fclose(file);
