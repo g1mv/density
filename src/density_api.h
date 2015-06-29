@@ -154,9 +154,19 @@ DENSITY_WINDOWS_EXPORT uint8_t density_version_revision(void);
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
-DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_minimum_compressed_output_size(const uint_fast64_t);
+/*
+ * Return an output buffer byte size which guarantees enough space for encoding input_size bytes
+ *
+ * @param input_size the size of the input data which is about to be compressed
+ */
+DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_compress_safe_size(const uint_fast64_t input_size);
 
-DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_minimum_decompressed_output_size(const uint_fast64_t);
+/*
+ * Return an output buffer byte size which guarantees enough space for decoding input_size bytes
+ *
+ * @param input_size the size of the input data which is about to be decompressed
+ */
+DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_decompress_safe_size(const uint_fast64_t input_size);
 
 /*
  * Compress an input_buffer of input_size bytes and store the result in output_buffer, using compression_mode and block_type.
