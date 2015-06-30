@@ -86,7 +86,7 @@ DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_decompress_safe_size(const u
     uint_fast64_t cheetah_structure_size = 0;
     cheetah_structure_size += sizeof(density_header);
     if (input_size >= cheetah_structure_size)
-        cheetah_longest_output_size += ((input_size - cheetah_structure_size) << 5);                        // All predictions, 1 bit <=> 4 bytes
+        cheetah_longest_output_size += ((input_size - cheetah_structure_size) << 4);                        // All predictions, 2 bit <=> 4 bytes
     if (cheetah_longest_output_size > longest_output_size)
         longest_output_size = cheetah_longest_output_size;
 
