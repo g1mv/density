@@ -14,7 +14,7 @@ One of the biggest assets of DENSITY is that its work unit is **not a byte** lik
 
 When other libraries consume one byte of data and then apply an algorithmic processing to it, DENSITY consumes 4 bytes and then applies its algorithmic processing.
 
-That's why DENSITY's algorithms were designed from scratch. They have to alleviate for 4-byte work units and still provide great speed.
+That's why DENSITY's algorithms were designed from scratch. They have to alleviate for 4-byte work units and still provide interesting compression ratios.
 
 **Speed pedigree traits**
 

@@ -191,14 +191,14 @@ int main(int argc, char *argv[]) {
             DENSITY_BENCHMARK_BOLD(printf("on"));
         }
         printf("\nPre-heating ...\n");
-        density_buffer_processing_result result = density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type, NULL, NULL);
+        density_buffer_processing_result result = density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type);
         if (result.state) {
             DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
         }
         const uint_fast64_t compressed_size = result.bytesWritten;
 
         if (!compression_only) {
-            result = density_buffer_decompress(out, compressed_size, in, memory_allocated, NULL, NULL);
+            result = density_buffer_decompress(out, compressed_size, in, memory_allocated);
             if (result.state) {
                 DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
             }
@@ -249,12 +249,12 @@ int main(int argc, char *argv[]) {
             ++iterations;
 
             cputime_chronometer_start(&chrono);
-            density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type, NULL, NULL);
+            density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type);
             compress_time_elapsed = cputime_chronometer_stop(&chrono);
 
             if (!compression_only) {
                 cputime_chronometer_start(&chrono);
-                density_buffer_decompress(out, compressed_size, in, memory_allocated, NULL, NULL);
+                density_buffer_decompress(out, compressed_size, in, memory_allocated);
                 decompress_time_elapsed = cputime_chronometer_stop(&chrono);
             }
 

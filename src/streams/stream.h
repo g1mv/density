@@ -29,29 +29,32 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 23/06/15 21:51
- *
- * -------------------
- * Chameleon algorithm
- * -------------------
- *
- * Author(s)
- * Guillaume Voirin (https://github.com/gpnuma)
- *
- * Description
- * Hash based superfast kernel
+ * 30/06/13 10:59
  */
 
-#ifndef DENSITY_CHAMELEON_ENCODE_H
-#define DENSITY_CHAMELEON_ENCODE_H
+#include "../density_api.h"
 
-#include "chameleon_dictionary.h"
-#include "../algorithms.h"
+#pragma pack(push)
+#pragma pack(4)
+typedef struct {
+    //DENSITY_ENCODE_PROCESS process;
+    DENSITY_COMPRESSION_MODE compressionMode;
+    DENSITY_BLOCK_TYPE blockType;
 
-//DENSITY_WINDOWS_EXPORT const density_algorithms_exit_status density_chameleon_encode_body(const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t, density_chameleon_dictionary *const);
+    uint_fast64_t totalRead;
+    uint_fast64_t totalWritten;
+} density_stream_encode_state;
 
-//DENSITY_WINDOWS_EXPORT const density_algorithms_exit_status density_chameleon_encode_tail(const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t, density_chameleon_dictionary *const);
+typedef struct {
+    //DENSITY_STREAM_PROCESS process;
+    density_byte temporary_buffer[1 << 16];
+    uint_fast16_t available_bytes;
 
-DENSITY_WINDOWS_EXPORT const density_algorithms_exit_status density_chameleon_encode(const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t);
+    density_stream_encode_state internal_encode_state;
+    //density_decode_state internal_decode_state;
+} density_stream_state;
+#pragma pack(pop)
 
-#endif
+DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE);
+
+DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *const, const uint8_t *const, const uint_fast64_t, uint8_t *const, const uint_fast64_t);

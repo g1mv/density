@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2013, Guillaume Voirin
+ * Copyright (c) 2015, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,29 +29,18 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 23/06/15 21:51
- *
- * -------------------
- * Chameleon algorithm
- * -------------------
- *
- * Author(s)
- * Guillaume Voirin (https://github.com/gpnuma)
- *
- * Description
- * Hash based superfast kernel
+ * 3/02/15 19:51
  */
 
-#ifndef DENSITY_CHAMELEON_ENCODE_H
-#define DENSITY_CHAMELEON_ENCODE_H
+#ifndef DENSITY_ALGORITHMS_H
+#define DENSITY_ALGORITHMS_H
 
-#include "chameleon_dictionary.h"
-#include "../algorithms.h"
-
-//DENSITY_WINDOWS_EXPORT const density_algorithms_exit_status density_chameleon_encode_body(const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t, density_chameleon_dictionary *const);
-
-//DENSITY_WINDOWS_EXPORT const density_algorithms_exit_status density_chameleon_encode_tail(const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t, density_chameleon_dictionary *const);
-
-DENSITY_WINDOWS_EXPORT const density_algorithms_exit_status density_chameleon_encode(const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t);
+typedef enum {
+    DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING,
+    DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_INTEGRITY_CHECK,
+    DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL,
+    DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL,
+    DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED,
+} density_algorithms_exit_status;
 
 #endif
