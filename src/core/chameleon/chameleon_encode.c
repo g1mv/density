@@ -87,7 +87,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_256(const uint8_t **restrict 
 #endif
 }
 
-DENSITY_FORCE_INLINE const density_algorithms_exit_status density_chameleon_encode_body(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, density_chameleon_dictionary *const restrict dictionary) {
+DENSITY_FORCE_INLINE const density_algorithms_exit_status density_chameleon_encode_main(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, density_chameleon_dictionary *const restrict dictionary) {
     if (out_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
@@ -155,7 +155,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
     density_chameleon_dictionary dictionary;
     density_chameleon_dictionary_reset(&dictionary);
 
-    switch (density_chameleon_encode_body(in, in_size, out, out_size, &dictionary)) {
+    switch (density_chameleon_encode_main(in, in_size, out, out_size, &dictionary)) {
         case DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL:
             return density_chameleon_encode_tail(in, in_size, out, out_size, &dictionary);
         default:
