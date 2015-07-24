@@ -96,62 +96,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_read_signature(const uint8_t 
     *in += sizeof(density_chameleon_signature);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const bool density_chameleon_decode_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out) {
-    density_chameleon_signature signature;
-    density_chameleon_dictionary dictionary;
-    density_chameleon_dictionary_reset(&dictionary);
-    uint_fast8_t shift;
-    uint_fast64_t remaining;
-
-    const uint8_t *start = *in;
-
-    if (in_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
-        goto read_signature;
-
-    while (*in - start <= in_size - DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE) {
-        density_chameleon_decode_read_signature(in, &signature);
-        density_chameleon_decode_256(in, out, signature, &dictionary);
-    }
-
-    read_signature:
-    if (in_size - (*in - start) < sizeof(density_chameleon_signature))
-        return false;
-    shift = 0;
-    density_chameleon_decode_read_signature(in, &signature);
-    read_and_decode_4:
-    switch (in_size - (*in - start)) {
-        case 0:
-        case 1:
-            if (density_chameleon_decode_test_compressed(signature, shift))
-                return false;
-            else    // End marker
-                goto process_remaining_bytes;
-        case 2:
-        case 3:
-            if (density_chameleon_decode_test_compressed(signature, shift++))
-                density_chameleon_decode_kernel(in, out, true, &dictionary);
-            else    // End marker
-                goto process_remaining_bytes;
-            break;
-        default:
-            density_chameleon_decode_4(in, out, signature, shift++, &dictionary);
-            break;
-    }
-
-    if (density_unlikely(shift == density_bitsizeof(density_chameleon_signature)))
-        goto read_signature;
-    else
-        goto read_and_decode_4;
-
-    process_remaining_bytes:
-    remaining = in_size - (*in - start);
-    DENSITY_MEMCPY(*out, *in, remaining);
-    *in += remaining;
-    *out += remaining;
-    return true;
-}
-
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_chameleon_decode_restricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_chameleon_decode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
     if (out_size < DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 

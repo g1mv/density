@@ -103,7 +103,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
             out += input_size;
             break;
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            density_chameleon_encode(&in, input_size, &out, output_size);
+            density_chameleon_encode(&in, input_size, &out, output_size, true);
             break;
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
             density_cheetah_encode_unrestricted(&in, input_size, &out);
@@ -152,7 +152,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
             out += remaining;
             break;
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            if (!density_chameleon_decode_restricted(&in, remaining, &out, output_size))
+            if (!density_chameleon_decode(&in, remaining, &out, output_size))
                 density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING, in - input_buffer, out - output_buffer);
             else
                 printf("error");
