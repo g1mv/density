@@ -111,10 +111,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     if (process_all) {
-        uint32_t unit;
         uint_fast64_t remaining;
-        density_chameleon_signature signature;
-        density_chameleon_signature *signature_pointer;
 
         switch (in_size & 0xff) {
             case 0:
