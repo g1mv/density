@@ -106,7 +106,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
             density_chameleon_encode(&in, input_size, &out, output_size, true);
             break;
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            density_cheetah_encode_unrestricted(&in, input_size, &out);
+            density_cheetah_encode(&in, input_size, &out, output_size, true);
             break;
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
             density_lion_encode_unrestricted(&in, input_size, &out);

@@ -88,15 +88,14 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_256(const uint8_t **restrict 
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_chameleon_encode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, const bool process_all) {
-    density_chameleon_dictionary dictionary;
-    density_chameleon_dictionary_reset(&dictionary);
-
     if (out_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
-    uint32_t unit;
+    density_chameleon_dictionary dictionary;
+    density_chameleon_dictionary_reset(&dictionary);
     density_chameleon_signature signature;
     density_chameleon_signature *signature_pointer;
+    uint32_t unit;
 
     uint8_t *out_limit = *out + out_size - DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint_fast64_t limit_256 = (in_size >> 8);
