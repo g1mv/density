@@ -78,8 +78,10 @@ typedef struct {
 
 typedef uint64_t                                                        density_lion_signature;
 
-#define DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE         (density_bitsizeof(density_lion_signature) * sizeof(uint32_t))   // Plain writes
+#define DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE         (density_bitsizeof(density_lion_signature) * sizeof(uint32_t))  // Plain writes
 #define DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE                       (sizeof(density_lion_signature) + DENSITY_LION_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
+
+#define DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE                     (density_bitsizeof(density_lion_signature) * sizeof(uint32_t))  // Smallest form size times work unit size
 
 #define DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_SMALL                      8
 #define DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG                        64

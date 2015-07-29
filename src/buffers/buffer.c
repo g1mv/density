@@ -70,11 +70,11 @@ DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_compress_safe_size(const uin
 }
 
 DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_decompress_safe_size(const uint_fast64_t expected_output_size) {
-    uint_fast64_t slack = DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE;
-    if (DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE > slack)
-        slack = DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE;
-    if (DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE > slack)
-        slack = DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE;
+    uint_fast64_t slack = DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE;
+    if (DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE > slack)
+        slack = DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE;
+    if (DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE > slack)
+        slack = DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE;
 
     return expected_output_size + slack;
 }
@@ -164,8 +164,10 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
                 printf("error");
             break;
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
-            if (!density_lion_decode_unrestricted(&in, remaining, &out))
+            if (!density_lion_decode(&in, remaining, &out, output_size))
                 density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING, in - input_buffer, out - output_buffer);
+            else
+                printf("error");
             break;
         default:
             break;

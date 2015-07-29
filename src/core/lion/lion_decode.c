@@ -218,7 +218,10 @@ DENSITY_FORCE_INLINE void density_lion_decode_256(const uint8_t **restrict in, u
 #endif
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const bool density_lion_decode_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_lion_decode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
+    if (out_size < DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE)
+        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+
     density_lion_signature signature;
     density_lion_dictionary dictionary;
     density_lion_dictionary_reset(&dictionary);
@@ -236,12 +239,21 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const bool density_lion_decode_unres
     if (in_size < DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE)
         goto read_and_decode_4;
 
-    while (*in - start <= in_size - DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE)
+    const uint8_t *in_limit = *in + in_size - DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE;
+    uint8_t *out_limit = *out + out_size - DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE;
+    while (density_likely(*in <= in_limit && *out <= out_limit))
         density_lion_decode_256(in, out, &last_hash, &dictionary, &data, &signature, &shift);
 
+    if (*out > out_limit)
+        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+
     read_and_decode_4:
-    if (density_unlikely(!shift))
+    if (density_unlikely(!shift)) {
+        if (in_size - (*in - start) < sizeof(density_lion_signature))
+            return DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL;
+
         density_lion_decode_read_signature(in, &signature);
+    }
     form = density_lion_decode_read_form(in, &signature, &shift, &data);
     switch (in_size - (*in - start)) {
         case 0:
@@ -255,7 +267,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const bool density_lion_decode_unres
                     density_lion_decode_4(in, out, &last_hash, &dictionary, &data, form);
                     break;
                 default:
-                    return false;   // Not enough bytes to read a hash
+                    return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;   // Not enough bytes to read a hash
             }
             break;
         case 2:
@@ -279,5 +291,5 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const bool density_lion_decode_unres
     DENSITY_MEMCPY(*out, *in, remaining);
     *in += remaining;
     *out += remaining;
-    return true;
+    return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
 }
