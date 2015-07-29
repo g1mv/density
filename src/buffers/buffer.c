@@ -158,8 +158,10 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
                 printf("error");
             break;
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            if (!density_cheetah_decode_unrestricted(&in, remaining, &out))
+            if (!density_cheetah_decode(&in, remaining, &out, output_size))
                 density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING, in - input_buffer, out - output_buffer);
+            else
+                printf("error");
             break;
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
             if (!density_lion_decode_unrestricted(&in, remaining, &out))

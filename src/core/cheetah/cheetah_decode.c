@@ -170,7 +170,10 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(const uint8_t **
     *in += sizeof(density_cheetah_signature);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const bool density_cheetah_decode_unrestricted(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_cheetah_decode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
+    if (out_size < DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE)
+        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+
     density_cheetah_signature signature;
     density_cheetah_dictionary dictionary;
     density_cheetah_dictionary_reset(&dictionary);
@@ -184,14 +187,19 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const bool density_cheetah_decode_un
     if (in_size < DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE)
         goto read_signature;
 
-    while (*in - start <= in_size - DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE) {
+    const uint8_t *in_limit = *in + in_size - DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE;
+    uint8_t *out_limit = *out + out_size - DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE;
+    while (density_likely(*in <= in_limit && *out <= out_limit)) {
         density_cheetah_decode_read_signature(in, &signature);
         density_cheetah_decode_128(in, out, &last_hash, signature, &dictionary);
     }
 
+    if (*out > out_limit)
+        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+
     read_signature:
     if (in_size - (*in - start) < sizeof(density_cheetah_signature))
-        return false;
+        return DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL;
     shift = 0;
     density_cheetah_decode_read_signature(in, &signature);
     read_and_decode_4:
@@ -206,7 +214,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const bool density_cheetah_decode_un
                     shift += 2;
                     break;
                 default:
-                    return false;
+                    return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;
             }
             break;
         case 2:
@@ -237,5 +245,5 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const bool density_cheetah_decode_un
     DENSITY_MEMCPY(*out, *in, remaining);
     *in += remaining;
     *out += remaining;
-    return true;
+    return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
 }

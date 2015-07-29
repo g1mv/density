@@ -47,8 +47,9 @@
 #define DENSITY_CHEETAH_DECODE_H
 
 #include "cheetah_dictionary.h"
+#include "../algorithms.h"
 
-DENSITY_WINDOWS_EXPORT const bool density_cheetah_decode_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **);
+DENSITY_WINDOWS_EXPORT const density_algorithms_exit_status density_cheetah_decode(const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t);
 
 #endif
 
