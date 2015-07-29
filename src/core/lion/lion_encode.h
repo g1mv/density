@@ -47,7 +47,8 @@
 
 #include "lion_dictionary.h"
 #include "lion_form_model.h"
+#include "../algorithms.h"
 
-DENSITY_WINDOWS_EXPORT void density_lion_encode_unrestricted(const uint8_t **, const uint_fast64_t, uint8_t **);
+DENSITY_WINDOWS_EXPORT const density_algorithms_exit_status density_lion_encode(const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t, const bool);
 
 #endif
