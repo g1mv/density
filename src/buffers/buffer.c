@@ -79,6 +79,21 @@ DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_decompress_safe_size(const u
     return expected_output_size + slack;
 }
 
+DENSITY_FORCE_INLINE DENSITY_BUFFER_STATE density_buffer_convert_algorithm_exit_status(density_algorithms_exit_status status) {
+    switch (status) {
+        case DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED:
+            return DENSITY_BUFFER_STATE_OK;
+        case DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING:
+            return DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING;
+        case DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_INTEGRITY_CHECK:
+            return DENSITY_BUFFER_STATE_ERROR_INTEGRITY_CHECK_FAIL;
+        case DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL:
+            return DENSITY_BUFFER_STATE_ERROR_INPUT_BUFFER_TOO_SMALL;
+        case DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL:
+            return DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL;
+    }
+}
+
 DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_make_result(DENSITY_BUFFER_STATE state, uint_fast64_t read, uint_fast64_t written) {
     density_buffer_processing_result result;
     result.state = state;
@@ -89,6 +104,7 @@ DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_make_result
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result density_buffer_compress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type) {
     // Variables setup
+    density_algorithms_exit_status status;
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
 
@@ -103,13 +119,16 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
             out += input_size;
             break;
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            density_chameleon_encode(&in, input_size, &out, output_size, true);
+            if ((status = density_chameleon_encode(&in, input_size, &out, output_size, true)))
+                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            density_cheetah_encode(&in, input_size, &out, output_size, true);
+            if ((status = density_cheetah_encode(&in, input_size, &out, output_size, true)))
+                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
-            density_lion_encode(&in, input_size, &out, output_size, true);
+            if ((status = density_lion_encode(&in, input_size, &out, output_size, true)))
+                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         default:
             break;
@@ -133,6 +152,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
         density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_INPUT_BUFFER_TOO_SMALL, 0, 0);
 
     // Variables setup
+    density_algorithms_exit_status status;
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
 
@@ -152,22 +172,16 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_buffer_processing_result den
             out += remaining;
             break;
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            if (!density_chameleon_decode(&in, remaining, &out, output_size))
-                density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING, in - input_buffer, out - output_buffer);
-            else
-                printf("error");
+            if ((status = density_chameleon_decode(&in, remaining, &out, output_size)))
+                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            if (!density_cheetah_decode(&in, remaining, &out, output_size))
-                density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING, in - input_buffer, out - output_buffer);
-            else
-                printf("error");
+            if ((status = density_cheetah_decode(&in, remaining, &out, output_size)))
+                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
-            if (!density_lion_decode(&in, remaining, &out, output_size))
-                density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING, in - input_buffer, out - output_buffer);
-            else
-                printf("error");
+            if ((status = density_lion_decode(&in, remaining, &out, output_size)))
+                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         default:
             break;
