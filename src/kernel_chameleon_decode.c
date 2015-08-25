@@ -70,7 +70,7 @@ DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_chameleon_decode_check_
                 density_byte resetDictionaryCycleShift = state->parameters.as_bytes[0];
                 if (resetDictionaryCycleShift) {
                     density_chameleon_dictionary_reset(&state->dictionary);
-                    state->resetCycle = (uint_fast64_t)(1 << resetDictionaryCycleShift) - 1;
+                    state->resetCycle = ((uint_fast64_t) 1 << resetDictionaryCycleShift) - 1;
                 }
             }
 
@@ -141,7 +141,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_KERNEL_DECODE_STATE density_
     state->parameters = parameters;
     density_byte resetDictionaryCycleShift = state->parameters.as_bytes[0];
     if (resetDictionaryCycleShift)
-        state->resetCycle = (uint_fast64_t)(1 << resetDictionaryCycleShift) - 1;
+        state->resetCycle = ((uint_fast64_t) 1 << resetDictionaryCycleShift) - 1;
 
     state->endDataOverhead = endDataOverhead;
 
