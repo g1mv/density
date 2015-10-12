@@ -34,14 +34,14 @@
 
 #include "globals.h"
 
-DENSITY_WINDOWS_EXPORT uint8_t density_version_major() {
+DENSITY_WINDOWS_EXPORT const uint8_t density_version_major() {
     return DENSITY_MAJOR_VERSION;
 }
 
-DENSITY_WINDOWS_EXPORT uint8_t density_version_minor() {
+DENSITY_WINDOWS_EXPORT const uint8_t density_version_minor() {
     return DENSITY_MINOR_VERSION;
 }
 
-DENSITY_WINDOWS_EXPORT uint8_t density_version_revision() {
+DENSITY_WINDOWS_EXPORT const uint8_t density_version_revision() {
     return DENSITY_REVISION;
 }

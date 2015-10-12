@@ -134,17 +134,17 @@ typedef struct {
 /*
  * Returns the major density version
  */
-DENSITY_WINDOWS_EXPORT uint8_t density_version_major(void);
+DENSITY_WINDOWS_EXPORT const uint8_t density_version_major(void);
 
 /*
  * Returns the minor density version
  */
-DENSITY_WINDOWS_EXPORT uint8_t density_version_minor(void);
+DENSITY_WINDOWS_EXPORT const uint8_t density_version_minor(void);
 
 /*
  * Returns the density revision
  */
-DENSITY_WINDOWS_EXPORT uint8_t density_version_revision(void);
+DENSITY_WINDOWS_EXPORT const uint8_t density_version_revision(void);
 
 
 
@@ -159,14 +159,14 @@ DENSITY_WINDOWS_EXPORT uint8_t density_version_revision(void);
  *
  * @param input_size the size of the input data which is about to be compressed
  */
-DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_compress_safe_size(const uint_fast64_t input_size);
+DENSITY_WINDOWS_EXPORT const uint_fast64_t density_buffer_compress_safe_size(const uint_fast64_t input_size);
 
 /*
  * Return an output buffer byte size which, if expected_output_size is correct, will enable density to decompress properly
  *
  * @param expected_output_size the expected (original) size of the decompressed data
  */
-DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_decompress_safe_size(const uint_fast64_t expected_output_size);
+DENSITY_WINDOWS_EXPORT const uint_fast64_t density_buffer_decompress_safe_size(const uint_fast64_t expected_output_size);
 
 /*
  * Compress an input_buffer of input_size bytes and store the result in output_buffer, using compression_mode and block_type.
@@ -184,7 +184,7 @@ DENSITY_WINDOWS_EXPORT uint_fast64_t density_buffer_decompress_safe_size(const u
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_compress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type);
+DENSITY_WINDOWS_EXPORT const density_buffer_processing_result density_buffer_compress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type);
 
 /*
  * Decompress an input_buffer of input_size bytes and store the result in output_buffer.
@@ -198,7 +198,7 @@ DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_compress(
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-DENSITY_WINDOWS_EXPORT density_buffer_processing_result density_buffer_decompress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size);
+DENSITY_WINDOWS_EXPORT const density_buffer_processing_result density_buffer_decompress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size);
 
 
 
