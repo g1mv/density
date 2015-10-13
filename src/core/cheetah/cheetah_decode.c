@@ -170,13 +170,11 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(const uint8_t **
     *in += sizeof(density_cheetah_signature);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_cheetah_decode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_cheetah_decode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, density_cheetah_dictionary *const restrict dictionary) {
     if (out_size < DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     density_cheetah_signature signature;
-    density_cheetah_dictionary dictionary;
-    density_cheetah_dictionary_reset(&dictionary);
     uint_fast8_t shift;
     uint_fast64_t remaining;
     uint_fast16_t last_hash = 0;
@@ -191,7 +189,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
     uint8_t *out_limit = *out + out_size - DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE;
     while (density_likely(*in <= in_limit && *out <= out_limit)) {
         density_cheetah_decode_read_signature(in, &signature);
-        density_cheetah_decode_128(in, out, &last_hash, signature, &dictionary);
+        density_cheetah_decode_128(in, out, &last_hash, signature, dictionary);
     }
 
     if (*out > out_limit)
@@ -210,7 +208,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
                 case DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK:
                     goto process_remaining_bytes;   // End marker
                 case DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED:
-                    density_cheetah_decode_kernel_4(in, out, &last_hash, DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED, &dictionary);
+                    density_cheetah_decode_kernel_4(in, out, &last_hash, DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED, dictionary);
                     shift += 2;
                     break;
                 default:
@@ -224,13 +222,13 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
                 case DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK:
                     goto process_remaining_bytes;   // End marker
                 default:
-                    density_cheetah_decode_kernel_4(in, out, &last_hash, flag, &dictionary);
+                    density_cheetah_decode_kernel_4(in, out, &last_hash, flag, dictionary);
                     shift += 2;
                     break;
             }
             break;
         default:
-            density_cheetah_decode_4(in, out, &last_hash, signature, shift, &dictionary);
+            density_cheetah_decode_4(in, out, &last_hash, signature, shift, dictionary);
             shift += 2;
             break;
     }

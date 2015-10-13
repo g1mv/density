@@ -123,10 +123,13 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         }
-        case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            if ((status = density_cheetah_encode(&in, input_size, &out, output_size, true)))
+        case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM: {
+            density_cheetah_dictionary dictionary;
+            density_cheetah_dictionary_reset(&dictionary);
+            if ((status = density_cheetah_encode(&in, input_size, &out, output_size, &dictionary, true)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
+        }
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
             if ((status = density_lion_encode(&in, input_size, &out, output_size, true)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
@@ -179,10 +182,13 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         }
-        case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            if ((status = density_cheetah_decode(&in, remaining, &out, output_size)))
+        case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM: {
+            density_cheetah_dictionary dictionary;
+            density_cheetah_dictionary_reset(&dictionary);
+            if ((status = density_cheetah_decode(&in, remaining, &out, output_size, &dictionary)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
+        }
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
             if ((status = density_lion_decode(&in, remaining, &out, output_size)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);

@@ -102,14 +102,12 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_128(const uint8_t **restrict in
 #endif
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_cheetah_encode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, const bool process_all) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_cheetah_encode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, density_cheetah_dictionary *const restrict dictionary, const bool process_all) {
     if (out_size < DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     density_cheetah_signature signature;
     density_cheetah_signature *signature_pointer;
-    density_cheetah_dictionary dictionary;
-    density_cheetah_dictionary_reset(&dictionary);
     uint_fast16_t last_hash = 0;
     uint32_t unit;
 
@@ -118,7 +116,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
     while (density_likely(limit_128-- && *out <= out_limit)) {
         density_cheetah_encode_prepare_signature(out, &signature_pointer, &signature);
         __builtin_prefetch(*in + 128);
-        density_cheetah_encode_128(in, out, &last_hash, &signature, &dictionary, &unit);
+        density_cheetah_encode_128(in, out, &last_hash, &signature, dictionary, &unit);
         DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
     }
 
@@ -144,7 +142,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
         const uint_fast64_t limit_4 = ((in_size & 0x7f) >> 2) << 1; // 4-byte units times number of signature flag bits
         density_cheetah_encode_prepare_signature(out, &signature_pointer, &signature);
         for (uint_fast8_t shift = 0; shift != limit_4; shift += 2)
-            density_cheetah_encode_4(in, out, &last_hash, shift, &signature, &dictionary, &unit);
+            density_cheetah_encode_4(in, out, &last_hash, shift, &signature, dictionary, &unit);
 
         signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK << limit_4);   // End marker
         DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
