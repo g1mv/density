@@ -85,8 +85,6 @@ DENSITY_FORCE_INLINE const DENSITY_BUFFER_STATE density_buffer_convert_algorithm
             return DENSITY_BUFFER_STATE_OK;
         case DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING:
             return DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING;
-        case DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_INTEGRITY_CHECK:
-            return DENSITY_BUFFER_STATE_ERROR_INTEGRITY_CHECK_FAIL;
         case DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL:
             return DENSITY_BUFFER_STATE_ERROR_INPUT_BUFFER_TOO_SMALL;
         case DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL:
@@ -118,10 +116,13 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
             in += input_size;
             out += input_size;
             break;
-        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            if ((status = density_chameleon_encode(&in, input_size, &out, output_size, true)))
+        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM: {
+            density_chameleon_dictionary dictionary;
+            density_chameleon_dictionary_reset(&dictionary);
+            if ((status = density_chameleon_encode(&in, input_size, &out, output_size, &dictionary, true)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
+        }
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
             if ((status = density_cheetah_encode(&in, input_size, &out, output_size, true)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
@@ -171,10 +172,13 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
             in += remaining;
             out += remaining;
             break;
-        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            if ((status = density_chameleon_decode(&in, remaining, &out, output_size)))
+        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM: {
+            density_chameleon_dictionary dictionary;
+            density_chameleon_dictionary_reset(&dictionary);
+            if ((status = density_chameleon_decode(&in, remaining, &out, output_size, &dictionary)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
+        }
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
             if ((status = density_cheetah_decode(&in, remaining, &out, output_size)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);

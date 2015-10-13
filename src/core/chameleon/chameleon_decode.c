@@ -96,13 +96,11 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_read_signature(const uint8_t 
     *in += sizeof(density_chameleon_signature);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_chameleon_decode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_chameleon_decode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, density_chameleon_dictionary *const restrict dictionary) {
     if (out_size < DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     density_chameleon_signature signature;
-    density_chameleon_dictionary dictionary;
-    density_chameleon_dictionary_reset(&dictionary);
     uint_fast8_t shift;
     uint_fast64_t remaining;
 
@@ -115,7 +113,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
     uint8_t *out_limit = *out + out_size - DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE;
     while (density_likely(*in <= in_limit && *out <= out_limit)) {
         density_chameleon_decode_read_signature(in, &signature);
-        density_chameleon_decode_256(in, out, signature, &dictionary);
+        density_chameleon_decode_256(in, out, signature, dictionary);
     }
 
     if (*out > out_limit)
@@ -137,12 +135,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
         case 2:
         case 3:
             if (density_chameleon_decode_test_compressed(signature, shift++))
-                density_chameleon_decode_kernel(in, out, true, &dictionary);
+                density_chameleon_decode_kernel(in, out, true, dictionary);
             else    // End marker
                 goto process_remaining_bytes;
             break;
         default:
-            density_chameleon_decode_4(in, out, signature, shift++, &dictionary);
+            density_chameleon_decode_4(in, out, signature, shift++, dictionary);
             break;
     }
 

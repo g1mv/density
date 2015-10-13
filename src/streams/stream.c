@@ -35,22 +35,59 @@
 #include "stream.h"
 #include "../density_api.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream) {
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream) {
     return DENSITY_STREAM_STATE_READY;
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type) {
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type) {
     ((density_stream_state *) stream->internal_state)->internal_encode_state.compressionMode = compression_mode;
     ((density_stream_state *) stream->internal_state)->internal_encode_state.blockType = block_type;
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *const restrict stream, const uint8_t *const restrict input_buffer, const uint_fast64_t input_size, uint8_t *const restrict output_buffer, const uint_fast64_t output_size) {
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *const restrict stream, const uint8_t *const restrict input_buffer, const uint_fast64_t input_size, uint8_t *const restrict output_buffer, const uint_fast64_t output_size) {
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
 
-    uint_fast16_t temp_available = ((density_stream_state *) stream->internal_state)->available_bytes;
+    uint_fast16_t *const temp_available = &((density_stream_state *) stream->internal_state)->available_bytes;
+    density_byte *const temporary_buffer = ((density_stream_state *) stream->internal_state)->temporary_buffer;
 
-    if (temp_available) {
+    switch (((density_stream_state *) stream->internal_state)->internal_encode_state.compressionMode) {
+        case DENSITY_COMPRESSION_MODE_COPY:
+            if (output_size < input_size)
+                return DENSITY_STREAM_STATE_STALL_ON_OUTPUT;
+            DENSITY_MEMCPY(out, in, input_size);
+            in += input_size;
+            out += input_size;
+            break;
+        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM: {
+            if (temp_available) {
+                if ((*temp_available + input_size) > DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE) {
+                    const uint_fast64_t fill_size = DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE - *temp_available;
+                    DENSITY_MEMCPY(temporary_buffer, in, fill_size);    // position in temporary to check
+                    in += fill_size;
+                    //density_chameleon_encode(&temporary_buffer, DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE, &out, output_size, false);   // manage return status
+                } else {
+                    DENSITY_MEMCPY(temporary_buffer, in, input_size);    // position in temporary to check
+                    in += input_size;
+                    return DENSITY_STREAM_STATE_STALL_ON_INPUT;
+                }
+            }
+            if (input_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE) {   // check input size properly updated in previous branch
+                DENSITY_MEMCPY(temporary_buffer, in, input_size);
+                *temp_available = input_size;
+                return DENSITY_STREAM_STATE_STALL_ON_INPUT;
+            } else {
+                //density_chameleon_encode(&in, input_size, &out, output_size, false);   // manage return status
+                DENSITY_MEMCPY(temporary_buffer, in, input_size - (in - input_buffer));
+                in += (input_size - (in - input_buffer));
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    /*if (temp_available) {
         // available is < to unit size by definition
         // fill to unit size if possible, if not fill input_size and exit
     } else {
@@ -61,14 +98,14 @@ DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_continue(den
         // encode input_buffer with restricted coarse encoding
         // put the remaining input size in temp buffer and exit
         //}
-    }
+    }*/
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *const restrict stream, const uint8_t *const restrict input_buffer, const uint_fast64_t input_size, uint8_t *const restrict output_buffer, const uint_fast64_t output_size) {
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *const restrict stream, const uint8_t *const restrict input_buffer, const uint_fast64_t input_size, uint8_t *const restrict output_buffer, const uint_fast64_t output_size) {
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
 
-    uint_fast16_t temp_available = ((density_stream_state *) stream->internal_state)->available_bytes;
+    const uint_fast16_t temp_available = ((density_stream_state *) stream->internal_state)->available_bytes;
 
     if (temp_available) {
         // available is < to unit size by definition

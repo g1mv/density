@@ -32,7 +32,10 @@
  * 30/06/13 10:59
  */
 
+#include "../globals.h"
 #include "../density_api.h"
+#include "../core/chameleon/chameleon_encode.h"
+#include "../core/chameleon/chameleon_decode.h"
 
 #pragma pack(push)
 #pragma pack(4)
@@ -49,12 +52,13 @@ typedef struct {
     //DENSITY_STREAM_PROCESS process;
     density_byte temporary_buffer[1 << 16];
     uint_fast16_t available_bytes;
+    //uint_fast8_t unit_size;
 
     density_stream_encode_state internal_encode_state;
     //density_decode_state internal_decode_state;
 } density_stream_state;
 #pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE);
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE);
 
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *const, const uint8_t *const, const uint_fast64_t, uint8_t *const, const uint_fast64_t);
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *const, const uint8_t *const, const uint_fast64_t, uint8_t *const, const uint_fast64_t);

@@ -217,7 +217,7 @@ DENSITY_WINDOWS_EXPORT const density_buffer_processing_result density_buffer_dec
  *      The option DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK adds data integrity checks in the encoded output.
  *      The output size becomes therefore slightly bigger (a few hundred bytes for huge input files).
  */
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type);
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type);
 
 /*
  * Stream decompression initialization
@@ -225,35 +225,35 @@ DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_init(density
  * @param stream the stream
  * @param header_information stream header information, use NULL if you don't need it
  */
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream, density_stream_header_information *header_information);
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream, density_stream_header_information *header_information);
 
 /*
  * Stream compression function, has to be called repetitively.
  *
  * @param stream the stream
  */
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *stream, const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size);
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *stream, const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size);
 
 /*
  * Stream decompression function, has to be called repetitively.
  *
  * @param stream the stream
  */
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *stream, const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size);
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *stream, const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size);
 
 /*
  * Call once processing is finished, to clear up the environment and release eventual allocated memory.
  *
  * @param stream the stream
  */
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *stream);
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *stream);
 
 /*
  * Call once processing is finished, to clear up the environment and release eventual allocated memory.
  *
  * @param stream the stream
  */
-DENSITY_WINDOWS_EXPORT DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream);
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream);
 
 #ifdef __cplusplus
 }
