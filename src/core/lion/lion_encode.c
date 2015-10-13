@@ -190,15 +190,13 @@ DENSITY_FORCE_INLINE void density_lion_encode_fine_unrestricted(const uint8_t **
 
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_lion_encode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, const bool process_all) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_lion_encode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, density_lion_dictionary *const restrict dictionary, const bool process_all) {
     if (out_size < DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     density_lion_signature signature;
     density_lion_signature *signature_pointer;
     uint_fast8_t shift = 0;
-    density_lion_dictionary dictionary;
-    density_lion_dictionary_reset(&dictionary);
     density_lion_form_data data;
     density_lion_form_model_init(&data);
     uint_fast16_t last_hash = 0;
@@ -208,7 +206,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
     uint_fast64_t limit_256 = (in_size >> 8);
     while (density_likely(limit_256-- && *out <= out_limit)) {
         __builtin_prefetch(*in + 256);
-        density_lion_encode_256(in, out, &last_hash, &signature_pointer, &signature, &shift, &dictionary, &data, &unit);
+        density_lion_encode_256(in, out, &last_hash, &signature_pointer, &signature, &shift, dictionary, &data, &unit);
     }
 
     if (*out > out_limit)
@@ -231,7 +229,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
 
         uint_fast64_t limit_4 = (in_size & 0xff) >> 2;
         while (limit_4--)
-            density_lion_encode_4(in, out, &last_hash, &signature_pointer, &signature, &shift, &dictionary, &data, &unit);
+            density_lion_encode_4(in, out, &last_hash, &signature_pointer, &signature, &shift, dictionary, &data, &unit);
 
         density_lion_encode_push_code_to_signature(out, &signature_pointer, &signature, &shift, density_lion_form_model_get_encoding(&data, DENSITY_LION_FORM_PLAIN)); // End marker
         DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_lion_signature));

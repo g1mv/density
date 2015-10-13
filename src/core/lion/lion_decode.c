@@ -218,13 +218,11 @@ DENSITY_FORCE_INLINE void density_lion_decode_256(const uint8_t **restrict in, u
 #endif
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_lion_decode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_lion_decode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, density_lion_dictionary *const restrict dictionary) {
     if (out_size < DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     density_lion_signature signature;
-    density_lion_dictionary dictionary;
-    density_lion_dictionary_reset(&dictionary);
     density_lion_form_data data;
     density_lion_form_model_init(&data);
     void (*attachments[DENSITY_LION_NUMBER_OF_FORMS])(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const) = {(void (*)(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const)) &density_lion_decode_prediction_a, (void (*)(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const)) &density_lion_decode_prediction_b, (void (*)(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const)) &density_lion_decode_prediction_c, (void (*)(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const)) &density_lion_decode_dictionary_a, (void (*)(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const)) &density_lion_decode_dictionary_b, (void (*)(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const)) &density_lion_decode_dictionary_c, (void (*)(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const)) &density_lion_decode_dictionary_d, (void (*)(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const)) &density_lion_decode_plain};
@@ -242,7 +240,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
     const uint8_t *in_limit = *in + in_size - DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint8_t *out_limit = *out + out_size - DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE;
     while (density_likely(*in <= in_limit && *out <= out_limit))
-        density_lion_decode_256(in, out, &last_hash, &dictionary, &data, &signature, &shift);
+        density_lion_decode_256(in, out, &last_hash, dictionary, &data, &signature, &shift);
 
     if (*out > out_limit)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
@@ -264,7 +262,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
                 case DENSITY_LION_FORM_PREDICTIONS_A:
                 case DENSITY_LION_FORM_PREDICTIONS_B:
                 case DENSITY_LION_FORM_PREDICTIONS_C:
-                    density_lion_decode_4(in, out, &last_hash, &dictionary, &data, form);
+                    density_lion_decode_4(in, out, &last_hash, dictionary, &data, form);
                     break;
                 default:
                     return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;   // Not enough bytes to read a hash
@@ -276,12 +274,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
                 case DENSITY_LION_FORM_PLAIN:
                     goto process_remaining_bytes;   // End marker
                 default:
-                    density_lion_decode_4(in, out, &last_hash, &dictionary, &data, form);
+                    density_lion_decode_4(in, out, &last_hash, dictionary, &data, form);
                     break;
             }
             break;
         default:
-            density_lion_decode_4(in, out, &last_hash, &dictionary, &data, form);
+            density_lion_decode_4(in, out, &last_hash, dictionary, &data, form);
             break;
     }
     goto read_and_decode_4;
