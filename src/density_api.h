@@ -66,16 +66,10 @@ typedef enum {
 } DENSITY_COMPRESSION_MODE;
 
 typedef enum {
-    DENSITY_BLOCK_TYPE_DEFAULT = 0,                                     // Standard, no integrity check
-    DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK = 1                 // Add data integrity check to the stream
-} DENSITY_BLOCK_TYPE;
-
-typedef enum {
     DENSITY_BUFFER_STATE_OK = 0,                                        // Everything went alright
     DENSITY_BUFFER_STATE_ERROR_INPUT_BUFFER_TOO_SMALL,                  // Input buffer size is too small
     DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // Output buffer size is too small
     DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING,                       // Error during processing
-    DENSITY_BUFFER_STATE_ERROR_INTEGRITY_CHECK_FAIL                     // Integrity check has failed
 } DENSITY_BUFFER_STATE;
 
 typedef struct {
@@ -90,7 +84,6 @@ typedef enum {
     DENSITY_STREAM_STATE_STALL_ON_OUTPUT,                               // There is not enough space left in the output buffer to continue
     DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // Output buffer size is too small
     DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE,                  // Error during processing
-    DENSITY_STREAM_STATE_ERROR_INTEGRITY_CHECK_FAIL                     // Integrity check has failed
 } DENSITY_STREAM_STATE;
 
 typedef struct {
@@ -98,7 +91,6 @@ typedef struct {
     density_byte minorVersion;
     density_byte revision;
     DENSITY_COMPRESSION_MODE compressionMode;
-    DENSITY_BLOCK_TYPE blockType;
 } density_stream_header_information;
 
 typedef struct {
@@ -184,7 +176,7 @@ DENSITY_WINDOWS_EXPORT const uint_fast64_t density_buffer_decompress_safe_size(c
  * @param mem_alloc the memory allocation function
  * @param mem_free the memory freeing function
  */
-DENSITY_WINDOWS_EXPORT const density_buffer_processing_result density_buffer_compress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type);
+DENSITY_WINDOWS_EXPORT const density_buffer_processing_result density_buffer_compress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode);
 
 /*
  * Decompress an input_buffer of input_size bytes and store the result in output_buffer.
@@ -217,7 +209,7 @@ DENSITY_WINDOWS_EXPORT const density_buffer_processing_result density_buffer_dec
  *      The option DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK adds data integrity checks in the encoded output.
  *      The output size becomes therefore slightly bigger (a few hundred bytes for huge input files).
  */
-DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type);
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const DENSITY_COMPRESSION_MODE compression_mode);
 
 /*
  * Stream decompression initialization

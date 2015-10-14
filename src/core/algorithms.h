@@ -35,11 +35,21 @@
 #ifndef DENSITY_ALGORITHMS_H
 #define DENSITY_ALGORITHMS_H
 
+#include "../globals.h"
+
 typedef enum {
     DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED = 0,
     DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING,
     DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL,
-    DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL,
+    DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL, DENSITY_ALGORITHMS_EXIT_STATUS_UNDEFINED,
 } density_algorithms_exit_status;
+
+typedef struct {
+    void *dictionary;
+    uint_fast8_t copy_penalty;
+    density_algorithms_exit_status status;
+} density_algorithm_state;
+
+DENSITY_WINDOWS_EXPORT void density_algorithms_make_state(density_algorithm_state *const, void *const, const uint_fast8_t, const density_algorithms_exit_status);
 
 #endif

@@ -61,8 +61,6 @@ solution "Density"
 		kind "SharedLib"
 		language "C"
 		files {
-			"../libs/spookyhash/src/*.h",
-			"../libs/spookyhash/src/*.c",
 			"../src/**.h",
 			"../src/**.c"
 		}

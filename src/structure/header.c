@@ -34,22 +34,21 @@
 
 #include "header.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_read_unrestricted(const uint8_t **restrict in, density_header *restrict header) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_read(const uint8_t **restrict in, density_header *restrict header) {
     header->version[0] = *(*in);
     header->version[1] = *(*in + 1);
     header->version[2] = *(*in + 2);
     header->compressionMode = *(*in + 3);
-    header->blockType = *(*in + 4);
 
     *in += sizeof(density_header);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_write_unrestricted(uint8_t **restrict out, const DENSITY_COMPRESSION_MODE compressionMode, const DENSITY_BLOCK_TYPE blockType) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_write(uint8_t **restrict out, const DENSITY_COMPRESSION_MODE compressionMode) {
     *(*out) = DENSITY_MAJOR_VERSION;
     *(*out + 1) = DENSITY_MINOR_VERSION;
     *(*out + 2) = DENSITY_REVISION;
     *(*out + 3) = compressionMode;
-    *(*out + 4) = blockType;
+    *(*out + 4) = 0;
     *(*out + 5) = 0;
     *(*out + 6) = 0;
     *(*out + 7) = 0;

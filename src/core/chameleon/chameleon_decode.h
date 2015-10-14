@@ -48,6 +48,6 @@
 #include "chameleon_dictionary.h"
 #include "../algorithms.h"
 
-DENSITY_WINDOWS_EXPORT const density_algorithms_exit_status density_chameleon_decode(const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t, density_chameleon_dictionary *const);
+DENSITY_WINDOWS_EXPORT void density_chameleon_decode(density_algorithm_state *const, const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t, const bool);
 
 #endif

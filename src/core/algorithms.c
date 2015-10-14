@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2013, Guillaume Voirin
+ * Copyright (c) 2015, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,26 +29,13 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 18/10/13 22:30
+ * 14/10/15 02:06
  */
 
-#ifndef DENSITY_FOOTER_H
-#define DENSITY_FOOTER_H
+#include "algorithms.h"
 
-#include "../globals.h"
-#include "../density_api.h"
-#include "header.h"
-
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    uint64_t hashsum1;
-    uint64_t hashsum2;
-} density_footer;
-#pragma pack(pop)
-
-DENSITY_WINDOWS_EXPORT void density_footer_read_unrestricted(const uint8_t **, density_footer *);
-
-DENSITY_WINDOWS_EXPORT void density_footer_write_unrestricted(uint8_t **, const uint_fast64_t, const uint_fast64_t);
-
-#endif
+DENSITY_WINDOWS_EXPORT void density_algorithms_make_state(density_algorithm_state *const restrict state, void *const restrict dictionary, const uint_fast8_t copy_penalty, const density_algorithms_exit_status status) {
+    state->dictionary = dictionary;
+    state->copy_penalty = copy_penalty;
+    state->status = status;
+}

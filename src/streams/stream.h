@@ -42,7 +42,6 @@
 typedef struct {
     //DENSITY_ENCODE_PROCESS process;
     DENSITY_COMPRESSION_MODE compressionMode;
-    DENSITY_BLOCK_TYPE blockType;
 
     uint_fast64_t totalRead;
     uint_fast64_t totalWritten;
@@ -59,6 +58,6 @@ typedef struct {
 } density_stream_state;
 #pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const, const DENSITY_COMPRESSION_MODE, const DENSITY_BLOCK_TYPE);
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const, const DENSITY_COMPRESSION_MODE);
 
 DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *const, const uint8_t *const, const uint_fast64_t, uint8_t *const, const uint_fast64_t);

@@ -39,9 +39,8 @@ DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_prepare(density
     return DENSITY_STREAM_STATE_READY;
 }
 
-DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_BLOCK_TYPE block_type) {
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const stream, const DENSITY_COMPRESSION_MODE compression_mode) {
     ((density_stream_state *) stream->internal_state)->internal_encode_state.compressionMode = compression_mode;
-    ((density_stream_state *) stream->internal_state)->internal_encode_state.blockType = block_type;
 }
 
 DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *const restrict stream, const uint8_t *const restrict input_buffer, const uint_fast64_t input_size, uint8_t *const restrict output_buffer, const uint_fast64_t output_size) {

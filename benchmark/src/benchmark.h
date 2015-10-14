@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <time.h>
+#include "../../src/density_api.h"
 
 #if defined(_WIN64) || defined(_WIN32)
 #else

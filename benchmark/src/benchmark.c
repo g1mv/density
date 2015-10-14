@@ -34,7 +34,7 @@ void density_benchmark_version() {
 void density_benchmark_client_usage() {
     printf("\n");
     DENSITY_BENCHMARK_BOLD(printf("Usage :\n"));
-    printf("  benchmark [OPTIONS ?]... [FILE]\n\n");
+    printf("  benchmark [OPTIONS ?]... [FILE ?]\n\n");
     DENSITY_BENCHMARK_BOLD(printf("Available options :\n"));
     printf("  -[LEVEL]                          Test file using only the specified compression LEVEL\n");
     printf("                                    If unspecified, all algorithms are tested (default).\n");
@@ -45,8 +45,7 @@ void density_benchmark_client_usage() {
     printf("                                    2 = Cheetah algorithm\n");
     printf("                                    3 = Lion algorithm\n");
     printf("  -c                                Compress only\n");
-    printf("  -x                                Activate integrity hashsum checking\n");
-    printf("  -f                                Activate fuzzer mode (generated data)\n\n");
+    printf("  -f                                Activate fuzzer mode (pseudorandom generated data)\n\n");
     exit(0);
 }
 
@@ -63,8 +62,6 @@ const char *density_benchmark_convert_buffer_state_to_text(DENSITY_BUFFER_STATE 
     switch (state) {
         case DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING:
             return "Error during processing";
-        case DENSITY_BUFFER_STATE_ERROR_INTEGRITY_CHECK_FAIL:
-            return "Integrity check failed";
         case DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL:
             return "Output buffer is too small";
         default:
@@ -76,7 +73,6 @@ int main(int argc, char *argv[]) {
     density_benchmark_version();
     DENSITY_COMPRESSION_MODE start_mode = DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM;
     DENSITY_COMPRESSION_MODE end_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
-    DENSITY_BLOCK_TYPE block_type = DENSITY_BLOCK_TYPE_DEFAULT;
     bool compression_only = false;
     bool fuzzer = false;
     char *file_path = NULL;
@@ -104,9 +100,6 @@ int main(int argc, char *argv[]) {
                     break;
                 case 'c':
                     compression_only = true;
-                    break;
-                case 'x':
-                    block_type = DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK;
                     break;
                 case 'f':
                     fuzzer = true;
@@ -184,14 +177,8 @@ int main(int argc, char *argv[]) {
             DENSITY_BENCHMARK_BOLD(printf("%s", file_path));
         }
         printf(" copied in memory\n");
-        printf("Hashsum integrity check is ");
-        if (block_type != DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
-            printf("off");
-        else {
-            DENSITY_BENCHMARK_BOLD(printf("on"));
-        }
-        printf("\nPre-heating ...\n");
-        density_buffer_processing_result result = density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type);
+        printf("Pre-heating ...\n");
+        density_buffer_processing_result result = density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode);
         if (result.state) {
             DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
         }
@@ -249,7 +236,7 @@ int main(int argc, char *argv[]) {
             ++iterations;
 
             cputime_chronometer_start(&chrono);
-            density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type);
+            density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode);
             compress_time_elapsed = cputime_chronometer_stop(&chrono);
 
             if (!compression_only) {

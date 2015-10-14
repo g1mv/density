@@ -87,9 +87,11 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_256(const uint8_t **restrict 
 #endif
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_chameleon_encode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, density_chameleon_dictionary *const restrict dictionary, const bool process_all) {
-    if (out_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
-        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_chameleon_encode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, const bool process_all) {
+    if (out_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE) {
+        state->status = DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+        return;
+    }
 
     density_chameleon_signature signature;
     density_chameleon_signature *signature_pointer;
@@ -98,14 +100,26 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
     uint8_t *out_limit = *out + out_size - DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint_fast64_t limit_256 = (in_size >> 8);
     while (density_likely(limit_256-- && *out <= out_limit)) {
-        density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
-        __builtin_prefetch(*in + 256);
-        density_chameleon_encode_256(in, out, &signature, dictionary, &unit);
-        DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
+        if (state->copy_penalty) {
+            DENSITY_MEMCPY(*out, *in, DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
+            *in += DENSITY_CHAMELEON_WORK_BLOCK_SIZE;
+            *out += DENSITY_CHAMELEON_WORK_BLOCK_SIZE;
+            state->copy_penalty--;
+        } else {
+            const uint8_t *out_before = *out;
+            density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
+            __builtin_prefetch(*in + DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
+            density_chameleon_encode_256(in, out, &signature, state->dictionary, &unit);
+            DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
+            if ((*out - out_before) & 0xff00)
+                state->copy_penalty = DENSITY_CHAMELEON_COPY_PENALTY;
+        }
     }
 
-    if (*out > out_limit)
-        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+    if (*out > out_limit) {
+        state->status = DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+        return;
+    }
 
     if (process_all) {
         uint_fast64_t remaining;
@@ -126,7 +140,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
         const uint_fast64_t limit_4 = (in_size & 0xff) >> 2;
         density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
         for (uint_fast8_t shift = 0; shift != limit_4; shift++)
-            density_chameleon_encode_4(in, out, shift, &signature, dictionary, &unit);
+            density_chameleon_encode_4(in, out, shift, &signature, state->dictionary, &unit);
 
         signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK << limit_4);   // End marker
         DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
@@ -140,5 +154,6 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
         }
     }
 
-    return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
+    state->status = DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
+    return;
 }
