@@ -34,8 +34,12 @@
 
 #include "algorithms.h"
 
-DENSITY_WINDOWS_EXPORT void density_algorithms_make_state(density_algorithm_state *const restrict state, void *const restrict dictionary, const uint_fast8_t copy_penalty, const density_algorithms_exit_status status) {
+DENSITY_WINDOWS_EXPORT void density_algorithms_make_state(density_algorithm_state *const restrict state, void *const restrict dictionary) {
     state->dictionary = dictionary;
-    state->copy_penalty = copy_penalty;
-    state->status = status;
+    state->copy_penalty = 0;
+    state->copy_penalty_start = 1;
+    state->counter = 0;
+    state->user_defined_interrupt = 0;
+    state->return_from_interrupt = false;
+    state->status = 0;
 }

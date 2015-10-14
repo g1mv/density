@@ -68,4 +68,7 @@ typedef uint64_t                                                            dens
 #define DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE                        (sizeof(density_cheetah_signature) + DENSITY_CHEETAH_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 #define DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE                              (DENSITY_CHEETAH_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
 
+#define DENSITY_CHEETAH_WORK_BLOCK_SIZE                                     128
+#define DENSITY_CHEETAH_COPY_PENALTY                                        5
+
 #endif

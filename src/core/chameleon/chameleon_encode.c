@@ -99,12 +99,30 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_chameleon_encode(densit
 
     uint8_t *out_limit = *out + out_size - DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint_fast64_t limit_256 = (in_size >> 8);
+
     while (density_likely(limit_256-- && *out <= out_limit)) {
+        if (density_unlikely(!(state->counter & 0xf))) {
+            if (state->user_defined_interrupt) {
+                if (!(state->counter & state->user_defined_interrupt)) {
+                    if (state->return_from_interrupt)
+                        state->return_from_interrupt = false;
+                    else {
+                        state->status = DENSITY_ALGORITHMS_EXIT_STATUS_USER_INTERRUPT;
+                        state->return_from_interrupt = true;
+                        return;
+                    }
+                }
+            }
+            if (state->copy_penalty_start & ~0x1)
+                state->copy_penalty_start >>= 1;
+        }
+        state->counter++;
         if (density_unlikely(state->copy_penalty)) {
             DENSITY_MEMCPY(*out, *in, DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
             *in += DENSITY_CHAMELEON_WORK_BLOCK_SIZE;
             *out += DENSITY_CHAMELEON_WORK_BLOCK_SIZE;
-            state->copy_penalty--;
+            if (!(--state->copy_penalty))
+                state->copy_penalty_start++;
         } else {
             const uint8_t *out_before = *out;
             density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
@@ -112,7 +130,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_chameleon_encode(densit
             density_chameleon_encode_256(in, out, &signature, state->dictionary, &unit);
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
             if (density_unlikely((*out - out_before) & 0xff00))
-                state->copy_penalty = DENSITY_CHAMELEON_COPY_PENALTY;
+                state->copy_penalty = state->copy_penalty_start;
         }
     }
 
