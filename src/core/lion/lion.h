@@ -88,4 +88,7 @@ typedef uint64_t                                                        density_
 #define DENSITY_LION_PROCESS_UNIT_SIZE_SMALL                            (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_SMALL * sizeof(uint32_t))
 #define DENSITY_LION_PROCESS_UNIT_SIZE_BIG                              (DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG * sizeof(uint32_t))
 
+#define DENSITY_LION_WORK_BLOCK_SIZE                                   256
+#define DENSITY_LION_COPY_PENALTY                                      3
+
 #endif

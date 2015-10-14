@@ -114,7 +114,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_chameleon_decode(densit
     const uint8_t *in_limit = *in + in_size - DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint8_t *out_limit = *out + out_size - DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE;
     while (density_likely(*in <= in_limit && *out <= out_limit)) {
-        if (state->copy_penalty) {
+        if (density_unlikely(state->copy_penalty)) {
             DENSITY_MEMCPY(*out, *in, DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
             *in += DENSITY_CHAMELEON_WORK_BLOCK_SIZE;
             *out += DENSITY_CHAMELEON_WORK_BLOCK_SIZE;
@@ -123,7 +123,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_chameleon_decode(densit
             const uint8_t *in_before = *in;
             density_chameleon_decode_read_signature(in, &signature);
             density_chameleon_decode_256(in, out, signature, state->dictionary);
-            if ((*in - in_before) & 0xff00)
+            if (density_unlikely((*in - in_before) & 0xff00))
                 state->copy_penalty = DENSITY_CHAMELEON_COPY_PENALTY;
         }
     }

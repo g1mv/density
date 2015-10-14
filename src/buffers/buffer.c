@@ -136,8 +136,11 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM: {
             density_lion_dictionary dictionary;
             density_lion_dictionary_reset(&dictionary);
-            if ((status = density_lion_encode(&in, input_size, &out, output_size, &dictionary, true)))
-                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
+            density_algorithm_state state;
+            density_algorithms_make_state(&state, &dictionary, 0, DENSITY_ALGORITHMS_EXIT_STATUS_UNDEFINED);
+            density_lion_encode(&state, &in, input_size, &out, output_size, true);
+            if (state.status)
+                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(state.status), in - input_buffer, out - output_buffer);
             break;
         }
     }
@@ -187,8 +190,11 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM: {
             density_lion_dictionary dictionary;
             density_lion_dictionary_reset(&dictionary);
-            if ((status = density_lion_decode(&in, remaining, &out, output_size, &dictionary)))
-                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
+            density_algorithm_state state;
+            density_algorithms_make_state(&state, &dictionary, 0, DENSITY_ALGORITHMS_EXIT_STATUS_UNDEFINED);
+            density_lion_decode(&state, &in, remaining, &out, output_size, true);
+            if (state.status)
+                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(state.status), in - input_buffer, out - output_buffer);
             break;
         }
     }

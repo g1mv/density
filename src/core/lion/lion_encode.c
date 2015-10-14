@@ -69,7 +69,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(uint8_t **restri
         if (density_unlikely(*shift >= density_bitsizeof(density_lion_signature))) {
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
 
-            const uint_fast8_t remainder = (uint_fast8_t) (*shift & 0x3f);
+            const uint_fast8_t remainder = (uint_fast8_t)(*shift & 0x3f);
             *shift = 0;
             if (remainder) {
                 density_lion_encode_prepare_signature(out, signature_pointer, signature);
@@ -89,7 +89,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(uint8_t **r
         if (density_unlikely(*shift >= density_bitsizeof(density_lion_signature))) {
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
 
-            const uint_fast8_t remainder = (uint_fast8_t) (*shift & 0x3f);
+            const uint_fast8_t remainder = (uint_fast8_t)(*shift & 0x3f);
             if (remainder) {
                 density_lion_encode_prepare_signature(out, signature_pointer, signature);
                 *shift = remainder;
@@ -190,9 +190,11 @@ DENSITY_FORCE_INLINE void density_lion_encode_fine_unrestricted(const uint8_t **
 
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_lion_encode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, density_lion_dictionary *const restrict dictionary, const bool process_all) {
-    if (out_size < DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE)
-        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_encode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, const bool process_all) {
+    if (out_size < DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE) {
+        state->status = DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+        return;
+    }
 
     density_lion_signature signature;
     density_lion_signature *signature_pointer;
@@ -205,12 +207,24 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
     uint8_t *out_limit = *out + out_size - DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint_fast64_t limit_256 = (in_size >> 8);
     while (density_likely(limit_256-- && *out <= out_limit)) {
-        __builtin_prefetch(*in + 256);
-        density_lion_encode_256(in, out, &last_hash, &signature_pointer, &signature, &shift, dictionary, &data, &unit);
+        if (density_unlikely(state->copy_penalty)) {
+            DENSITY_MEMCPY(*out, *in, DENSITY_LION_WORK_BLOCK_SIZE);
+            *in += DENSITY_LION_WORK_BLOCK_SIZE;
+            *out += DENSITY_LION_WORK_BLOCK_SIZE;
+            state->copy_penalty--;
+        } else {
+            const uint8_t *out_before = *out;
+            __builtin_prefetch(*in + DENSITY_LION_WORK_BLOCK_SIZE);
+            density_lion_encode_256(in, out, &last_hash, &signature_pointer, &signature, &shift, state->dictionary, &data, &unit);
+            if (density_unlikely((*out - out_before) & 0xff00))
+                state->copy_penalty = DENSITY_LION_COPY_PENALTY;
+        }
     }
 
-    if (*out > out_limit)
-        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+    if (*out > out_limit) {
+        state->status = DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+        return;
+    }
 
     if (process_all) {
         uint_fast64_t remaining;
@@ -229,7 +243,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
 
         uint_fast64_t limit_4 = (in_size & 0xff) >> 2;
         while (limit_4--)
-            density_lion_encode_4(in, out, &last_hash, &signature_pointer, &signature, &shift, dictionary, &data, &unit);
+            density_lion_encode_4(in, out, &last_hash, &signature_pointer, &signature, &shift, state->dictionary, &data, &unit);
 
         density_lion_encode_push_code_to_signature(out, &signature_pointer, &signature, &shift, density_lion_form_model_get_encoding(&data, DENSITY_LION_FORM_PLAIN)); // End marker
         DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_lion_signature));
@@ -243,5 +257,6 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status
         }
     }
 
-    return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
+    state->status = DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
+    return;
 }
