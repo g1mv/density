@@ -43,7 +43,7 @@ typedef enum {
     DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL,
     DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL,
     DENSITY_ALGORITHMS_EXIT_STATUS_USER_INTERRUPT
-} density_algorithms_exit_status;
+} density_algorithm_exit_status;
 
 typedef struct {
     void *dictionary;
@@ -52,9 +52,29 @@ typedef struct {
     uint_fast64_t counter;
     uint_fast32_t user_defined_interrupt;
     bool return_from_interrupt;
-    density_algorithms_exit_status status;
 } density_algorithm_state;
 
-DENSITY_WINDOWS_EXPORT void density_algorithms_make_state(density_algorithm_state *const, void *const);
+#define DENSITY_ALGORITHM_COPY(work_block_size)\
+            DENSITY_MEMCPY(*out, *in, work_block_size);\
+            *in += work_block_size;\
+            *out += work_block_size;\
+            if (!(--state->copy_penalty))\
+                state->copy_penalty_start++;
+
+#define DENSITY_ALGORITHM_CHECK_USER_INTERRUPT\
+            if (state->user_defined_interrupt) {\
+                if (!(state->counter & state->user_defined_interrupt)) {\
+                    if (state->return_from_interrupt)\
+                        state->return_from_interrupt = false;\
+                    else {\
+                        state->return_from_interrupt = true;\
+                        return DENSITY_ALGORITHMS_EXIT_STATUS_USER_INTERRUPT;\
+                    }\
+                }\
+            }
+
+DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const, void *const);
+
+DENSITY_WINDOWS_EXPORT void density_algorithm_copy(density_algorithm_state *const, const uint8_t **, uint8_t **, const uint_fast16_t);
 
 #endif

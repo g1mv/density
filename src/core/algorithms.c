@@ -34,12 +34,19 @@
 
 #include "algorithms.h"
 
-DENSITY_WINDOWS_EXPORT void density_algorithms_make_state(density_algorithm_state *const restrict state, void *const restrict dictionary) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_algorithms_prepare_state(density_algorithm_state *const restrict state, void *const restrict dictionary) {
     state->dictionary = dictionary;
     state->copy_penalty = 0;
     state->copy_penalty_start = 1;
     state->counter = 0;
     state->user_defined_interrupt = 0;
     state->return_from_interrupt = false;
-    state->status = 0;
+}
+
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_algorithm_copy(density_algorithm_state *const state, const uint8_t **restrict in, uint8_t **restrict out, const uint_fast16_t work_block_size) {
+    DENSITY_MEMCPY(*out, *in, work_block_size);
+    *in += work_block_size;
+    *out += work_block_size;
+    if (!(--state->copy_penalty))
+        state->copy_penalty_start++;
 }

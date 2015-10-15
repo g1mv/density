@@ -102,11 +102,9 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_128(const uint8_t **restrict in
 #endif
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_cheetah_encode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, const bool process_all) {
-    if (out_size < DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE) {
-        state->status = DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
-        return;
-    }
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status density_cheetah_encode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, const bool process_all) {
+    if (out_size < DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE)
+        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     density_cheetah_signature signature;
     density_cheetah_signature *signature_pointer;
@@ -115,6 +113,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_cheetah_encode(density_
 
     uint8_t *out_limit = *out + out_size - DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint_fast64_t limit_128 = (in_size >> 7);
+
     while (density_likely(limit_128-- && *out <= out_limit)) {
         if (density_unlikely(state->copy_penalty)) {
             DENSITY_MEMCPY(*out, *in, DENSITY_CHEETAH_WORK_BLOCK_SIZE);
@@ -132,10 +131,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_cheetah_encode(density_
         }
     }
 
-    if (*out > out_limit) {
-        state->status = DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
-        return;
-    }
+    if (*out > out_limit)
+        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     if (process_all) {
         uint_fast64_t remaining;
@@ -170,6 +167,5 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_cheetah_encode(density_
         }
     }
 
-    state->status = DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
-    return;
+    return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
 }

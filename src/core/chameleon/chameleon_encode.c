@@ -87,11 +87,9 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_256(const uint8_t **restrict 
 #endif
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_chameleon_encode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, const bool process_all) {
-    if (out_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE) {
-        state->status = DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
-        return;
-    }
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status density_chameleon_encode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, const bool process_all) {
+    if (out_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
+        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     density_chameleon_signature signature;
     density_chameleon_signature *signature_pointer;
@@ -102,42 +100,26 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_chameleon_encode(densit
 
     while (density_likely(limit_256-- && *out <= out_limit)) {
         if (density_unlikely(!(state->counter & 0xf))) {
-            if (state->user_defined_interrupt) {
-                if (!(state->counter & state->user_defined_interrupt)) {
-                    if (state->return_from_interrupt)
-                        state->return_from_interrupt = false;
-                    else {
-                        state->status = DENSITY_ALGORITHMS_EXIT_STATUS_USER_INTERRUPT;
-                        state->return_from_interrupt = true;
-                        return;
-                    }
-                }
-            }
+            DENSITY_ALGORITHM_CHECK_USER_INTERRUPT;
             if (state->copy_penalty_start & ~0x1)
                 state->copy_penalty_start >>= 1;
         }
         state->counter++;
         if (density_unlikely(state->copy_penalty)) {
-            DENSITY_MEMCPY(*out, *in, DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
-            *in += DENSITY_CHAMELEON_WORK_BLOCK_SIZE;
-            *out += DENSITY_CHAMELEON_WORK_BLOCK_SIZE;
-            if (!(--state->copy_penalty))
-                state->copy_penalty_start++;
+            DENSITY_ALGORITHM_COPY(DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
         } else {
-            const uint8_t *out_before = *out;
+            const uint8_t *out_start = *out;
             density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
             __builtin_prefetch(*in + DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
             density_chameleon_encode_256(in, out, &signature, state->dictionary, &unit);
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
-            if (density_unlikely((*out - out_before) & 0xff00))
+            if (density_unlikely((*out - out_start) & 0xff00))
                 state->copy_penalty = state->copy_penalty_start;
         }
     }
 
-    if (*out > out_limit) {
-        state->status = DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
-        return;
-    }
+    if (*out > out_limit)
+        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     if (process_all) {
         uint_fast64_t remaining;
@@ -172,6 +154,5 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_chameleon_encode(densit
         }
     }
 
-    state->status = DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
-    return;
+    return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
 }

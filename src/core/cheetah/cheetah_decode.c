@@ -170,7 +170,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(const uint8_t **
     *in += sizeof(density_cheetah_signature);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithms_exit_status density_cheetah_decode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, density_cheetah_dictionary *const restrict dictionary) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status density_cheetah_decode(const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, density_cheetah_dictionary *const restrict dictionary) {
     if (out_size < DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
