@@ -38,6 +38,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_algorithms_prepare_stat
     state->dictionary = dictionary;
     state->copy_penalty = 0;
     state->copy_penalty_start = 1;
+    state->incompressible_in_a_row = 0;
+    state->previous_incompressible = false;
     state->counter = 0;
     state->user_defined_interrupt = 0;
     state->return_from_interrupt = false;

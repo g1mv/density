@@ -129,8 +129,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
             __builtin_prefetch(*in + DENSITY_CHEETAH_WORK_BLOCK_SIZE);
             density_cheetah_encode_128(in, out, &last_hash, &signature, state->dictionary, &unit);
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
-            if (density_unlikely((*out - out_start) & 0xff80))
-                state->copy_penalty = state->copy_penalty_start;
+            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*out - out_start, DENSITY_CHEETAH_WORK_BLOCK_SIZE);
         }
     }
 

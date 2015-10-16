@@ -49,6 +49,8 @@ typedef struct {
     void *dictionary;
     uint_fast8_t copy_penalty;
     uint_fast8_t copy_penalty_start;
+    uint_fast8_t incompressible_in_a_row;
+    bool previous_incompressible;
     uint_fast64_t counter;
     uint_fast32_t user_defined_interrupt;
     bool return_from_interrupt;
@@ -78,6 +80,14 @@ typedef struct {
 #define DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START\
             if (state->copy_penalty_start & ~0x1)\
                 state->copy_penalty_start >>= 1;
+
+#define DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(span, work_block_size)\
+            if (density_unlikely(span & ~(work_block_size - 1))) {\
+                if (state->previous_incompressible)\
+                    state->copy_penalty = state->copy_penalty_start;\
+                state->previous_incompressible = true;\
+            } else\
+                state->previous_incompressible = false;
 
 DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const, void *const);
 

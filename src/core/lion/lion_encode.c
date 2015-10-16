@@ -218,8 +218,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
             const uint8_t *out_start = *out;
             __builtin_prefetch(*in + DENSITY_LION_WORK_BLOCK_SIZE);
             density_lion_encode_256(in, out, &last_hash, &signature_pointer, &signature, &shift, state->dictionary, &data, &unit);
-            if (density_unlikely((*out - out_start) & 0xff00))
-                state->copy_penalty = state->copy_penalty_start;
+            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*out - out_start, DENSITY_LION_WORK_BLOCK_SIZE);
         }
     }
 

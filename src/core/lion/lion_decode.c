@@ -254,10 +254,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
             DENSITY_ALGORITHM_COPY(DENSITY_LION_WORK_BLOCK_SIZE);
             DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
-            const uint8_t *in_before = *in;
+            const uint8_t *in_start = *in;
             density_lion_decode_256(in, out, &last_hash, state->dictionary, &data, &signature, &shift);
-            if (density_unlikely((*in - in_before) & 0xff00))
-                state->copy_penalty = state->copy_penalty_start;
+            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*in - in_start, DENSITY_LION_WORK_BLOCK_SIZE);
         }
     }
 

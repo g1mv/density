@@ -101,20 +101,19 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
     while (density_likely(limit_256-- && *out <= out_limit)) {
         if (density_unlikely(!(state->counter & 0xf))) {
             DENSITY_ALGORITHM_CHECK_USER_INTERRUPT;
-            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
+            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START
         }
         state->counter++;
         if (density_unlikely(state->copy_penalty)) {
             DENSITY_ALGORITHM_COPY(DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
-            DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
+            DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START
         } else {
             const uint8_t *out_start = *out;
             density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
             __builtin_prefetch(*in + DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
             density_chameleon_encode_256(in, out, &signature, state->dictionary, &unit);
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
-            if (density_unlikely((*out - out_start) & 0xff00))
-                state->copy_penalty = state->copy_penalty_start;
+            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*out - out_start, DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
         }
     }
 
