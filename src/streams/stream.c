@@ -51,13 +51,6 @@ DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_contin
     density_byte *const temporary_buffer = ((density_stream_state *) stream->internal_state)->temporary_buffer;
 
     switch (((density_stream_state *) stream->internal_state)->internal_encode_state.compressionMode) {
-        case DENSITY_COMPRESSION_MODE_COPY:
-            if (output_size < input_size)
-                return DENSITY_STREAM_STATE_STALL_ON_OUTPUT;
-            DENSITY_MEMCPY(out, in, input_size);
-            in += input_size;
-            out += input_size;
-            break;
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM: {
             if (temp_available) {
                 if ((*temp_available + input_size) > DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE) {

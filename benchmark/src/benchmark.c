@@ -82,10 +82,6 @@ int main(int argc, char *argv[]) {
     for (unsigned int count = 1; count < argc; count++) {
         if (argv[count][0] == '-') {
             switch (argv[count][1]) {
-                case '0':
-                    start_mode = DENSITY_COMPRESSION_MODE_COPY;
-                    end_mode = DENSITY_COMPRESSION_MODE_COPY;
-                    break;
                 case '1':
                     start_mode = DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM;
                     end_mode = DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM;
@@ -149,10 +145,6 @@ int main(int argc, char *argv[]) {
     for (DENSITY_COMPRESSION_MODE compression_mode = start_mode; compression_mode <= end_mode; compression_mode++) {
         // Print algorithm info
         switch (compression_mode) {
-            case DENSITY_COMPRESSION_MODE_COPY:
-            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Copy")));
-                DENSITY_BENCHMARK_UNDERLINE(4);
-                break;
             case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
             DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Chameleon algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(19);

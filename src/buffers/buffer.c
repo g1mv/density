@@ -112,11 +112,6 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
 
     // Compression
     switch (compression_mode) {
-        case DENSITY_COMPRESSION_MODE_COPY:
-            DENSITY_MEMCPY(out, in, input_size);
-            in += input_size;
-            out += input_size;
-            break;
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM: {
             density_chameleon_dictionary dictionary;
             density_chameleon_dictionary_reset(&dictionary);
@@ -164,11 +159,6 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
 
     // Decompression
     switch (main_header.compressionMode) {
-        case DENSITY_COMPRESSION_MODE_COPY:
-            DENSITY_MEMCPY(out, in, remaining);
-            in += remaining;
-            out += remaining;
-            break;
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM: {
             density_chameleon_dictionary dictionary;
             density_chameleon_dictionary_reset(&dictionary);
