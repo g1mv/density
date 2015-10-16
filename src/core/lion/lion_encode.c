@@ -206,17 +206,20 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
     uint_fast64_t limit_256 = (in_size >> 8);
 
     while (density_likely(limit_256-- && *out <= out_limit)) {
+        if (density_unlikely(!(state->counter & 0xf))) {
+            DENSITY_ALGORITHM_CHECK_USER_INTERRUPT;
+            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
+        }
+        state->counter++;
         if (density_unlikely(state->copy_penalty)) {
-            DENSITY_MEMCPY(*out, *in, DENSITY_LION_WORK_BLOCK_SIZE);
-            *in += DENSITY_LION_WORK_BLOCK_SIZE;
-            *out += DENSITY_LION_WORK_BLOCK_SIZE;
-            state->copy_penalty--;
+            DENSITY_ALGORITHM_COPY(DENSITY_LION_WORK_BLOCK_SIZE);
+            DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
-            const uint8_t *out_before = *out;
+            const uint8_t *out_start = *out;
             __builtin_prefetch(*in + DENSITY_LION_WORK_BLOCK_SIZE);
             density_lion_encode_256(in, out, &last_hash, &signature_pointer, &signature, &shift, state->dictionary, &data, &unit);
-            if (density_unlikely((*out - out_before) & 0xff00))
-                state->copy_penalty = DENSITY_LION_COPY_PENALTY;
+            if (density_unlikely((*out - out_start) & 0xff00))
+                state->copy_penalty = state->copy_penalty_start;
         }
     }
 

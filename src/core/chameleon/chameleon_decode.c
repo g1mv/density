@@ -106,24 +106,32 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
 
     const uint8_t *start = *in;
 
-    if (in_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
-        goto read_signature;
+    if (in_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE) {
+        if (process_all)
+            goto read_signature;
+        else
+            return DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL;
+    }
+
 
     const uint8_t *in_limit = *in + in_size - DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint8_t *out_limit = *out + out_size - DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE;
 
     while (density_likely(*in <= in_limit && *out <= out_limit)) {
+        if (density_unlikely(!(state->counter & 0xf))) {
+            DENSITY_ALGORITHM_CHECK_USER_INTERRUPT;
+            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
+        }
+        state->counter++;
         if (density_unlikely(state->copy_penalty)) {
-            DENSITY_MEMCPY(*out, *in, DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
-            *in += DENSITY_CHAMELEON_WORK_BLOCK_SIZE;
-            *out += DENSITY_CHAMELEON_WORK_BLOCK_SIZE;
-            state->copy_penalty--;
+            DENSITY_ALGORITHM_COPY(DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
+            DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
-            const uint8_t *in_before = *in;
+            const uint8_t *in_start = *in;
             density_chameleon_decode_read_signature(in, &signature);
             density_chameleon_decode_256(in, out, signature, state->dictionary);
-            if (density_unlikely((*in - in_before) & 0xff00))
-                state->copy_penalty = DENSITY_CHAMELEON_COPY_PENALTY;
+            if (density_unlikely((*in - in_start) & 0xff00))
+                state->copy_penalty = state->copy_penalty_start;
         }
     }
 
@@ -163,9 +171,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
 
         process_remaining_bytes:
         remaining = in_size - (*in - start);
-        DENSITY_MEMCPY(*out, *in, remaining);
-        *in += remaining;
-        *out += remaining;
+        DENSITY_ALGORITHM_COPY(remaining);
     }
 
     return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;

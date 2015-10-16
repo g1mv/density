@@ -101,12 +101,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
     while (density_likely(limit_256-- && *out <= out_limit)) {
         if (density_unlikely(!(state->counter & 0xf))) {
             DENSITY_ALGORITHM_CHECK_USER_INTERRUPT;
-            if (state->copy_penalty_start & ~0x1)
-                state->copy_penalty_start >>= 1;
+            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
         }
         state->counter++;
         if (density_unlikely(state->copy_penalty)) {
             DENSITY_ALGORITHM_COPY(DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
+            DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
             const uint8_t *out_start = *out;
             density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
@@ -147,11 +147,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
 
         process_remaining_bytes:
         remaining = in_size & 0x3;
-        if (remaining) {
-            DENSITY_MEMCPY(*out, *in, remaining);
-            *in += remaining;
-            *out += remaining;
-        }
+        if (remaining)
+        DENSITY_ALGORITHM_COPY(remaining);
     }
 
     return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;

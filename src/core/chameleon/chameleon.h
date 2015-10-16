@@ -66,6 +66,5 @@ typedef uint64_t density_chameleon_signature;
 #define DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE                            (DENSITY_CHAMELEON_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
 
 #define DENSITY_CHAMELEON_WORK_BLOCK_SIZE                                   256
-#define DENSITY_CHAMELEON_COPY_PENALTY                                      3
 
 #endif

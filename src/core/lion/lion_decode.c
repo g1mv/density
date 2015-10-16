@@ -234,23 +234,30 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
 
     const uint8_t *start = *in;
 
-    if (in_size < DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE)
-        goto read_and_decode_4;
+    if (in_size < DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE) {
+        if (process_all)
+            goto read_and_decode_4;
+        else
+            return DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL;
+    }
 
     const uint8_t *in_limit = *in + in_size - DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint8_t *out_limit = *out + out_size - DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE;
 
     while (density_likely(*in <= in_limit && *out <= out_limit)) {
+        if (density_unlikely(!(state->counter & 0xf))) {
+            DENSITY_ALGORITHM_CHECK_USER_INTERRUPT;
+            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
+        }
+        state->counter++;
         if (density_unlikely(state->copy_penalty)) {
-            DENSITY_MEMCPY(*out, *in, DENSITY_LION_WORK_BLOCK_SIZE);
-            *in += DENSITY_LION_WORK_BLOCK_SIZE;
-            *out += DENSITY_LION_WORK_BLOCK_SIZE;
-            state->copy_penalty--;
+            DENSITY_ALGORITHM_COPY(DENSITY_LION_WORK_BLOCK_SIZE);
+            DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
             const uint8_t *in_before = *in;
             density_lion_decode_256(in, out, &last_hash, state->dictionary, &data, &signature, &shift);
             if (density_unlikely((*in - in_before) & 0xff00))
-                state->copy_penalty = DENSITY_LION_COPY_PENALTY;
+                state->copy_penalty = state->copy_penalty_start;
         }
     }
 

@@ -57,9 +57,7 @@ typedef struct {
 #define DENSITY_ALGORITHM_COPY(work_block_size)\
             DENSITY_MEMCPY(*out, *in, work_block_size);\
             *in += work_block_size;\
-            *out += work_block_size;\
-            if (!(--state->copy_penalty))\
-                state->copy_penalty_start++;
+            *out += work_block_size;
 
 #define DENSITY_ALGORITHM_CHECK_USER_INTERRUPT\
             if (state->user_defined_interrupt) {\
@@ -73,8 +71,14 @@ typedef struct {
                 }\
             }
 
-DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const, void *const);
+#define DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START\
+            if(!(--state->copy_penalty))\
+                state->copy_penalty_start++;
 
-DENSITY_WINDOWS_EXPORT void density_algorithm_copy(density_algorithm_state *const, const uint8_t **, uint8_t **, const uint_fast16_t);
+#define DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START\
+            if (state->copy_penalty_start & ~0x1)\
+                state->copy_penalty_start >>= 1;
+
+DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const, void *const);
 
 #endif

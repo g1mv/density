@@ -115,19 +115,22 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
     uint_fast64_t limit_128 = (in_size >> 7);
 
     while (density_likely(limit_128-- && *out <= out_limit)) {
+        if (density_unlikely(!(state->counter & 0x1f))) {
+            DENSITY_ALGORITHM_CHECK_USER_INTERRUPT;
+            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
+        }
+        state->counter++;
         if (density_unlikely(state->copy_penalty)) {
-            DENSITY_MEMCPY(*out, *in, DENSITY_CHEETAH_WORK_BLOCK_SIZE);
-            *in += DENSITY_CHEETAH_WORK_BLOCK_SIZE;
-            *out += DENSITY_CHEETAH_WORK_BLOCK_SIZE;
-            state->copy_penalty--;
+            DENSITY_ALGORITHM_COPY(DENSITY_CHEETAH_WORK_BLOCK_SIZE);
+            DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
-            const uint8_t *out_before = *out;
+            const uint8_t *out_start = *out;
             density_cheetah_encode_prepare_signature(out, &signature_pointer, &signature);
             __builtin_prefetch(*in + DENSITY_CHEETAH_WORK_BLOCK_SIZE);
             density_cheetah_encode_128(in, out, &last_hash, &signature, state->dictionary, &unit);
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
-            if (density_unlikely((*out - out_before) & 0xff80))
-                state->copy_penalty = DENSITY_CHEETAH_COPY_PENALTY;
+            if (density_unlikely((*out - out_start) & 0xff80))
+                state->copy_penalty = state->copy_penalty_start;
         }
     }
 
@@ -160,11 +163,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
 
         process_remaining_bytes:
         remaining = in_size & 0x3;
-        if (remaining) {
-            DENSITY_MEMCPY(*out, *in, remaining);
-            *in += remaining;
-            *out += remaining;
-        }
+        if (remaining)
+        DENSITY_ALGORITHM_COPY(remaining);
     }
 
     return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
