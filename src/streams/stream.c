@@ -33,24 +33,58 @@
  */
 
 #include "stream.h"
-#include "../density_api.h"
 
 DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_prepare(density_stream *stream) {
     return DENSITY_STREAM_STATE_READY;
 }
 
-DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const stream, const DENSITY_COMPRESSION_MODE compression_mode) {
-    ((density_stream_state *) stream->internal_state)->internal_encode_state.compressionMode = compression_mode;
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_USER_INTERRUPT_PERIODICITY interrupt_periodicity) {
+    void *dictionary;
+    switch (compression_mode) {
+        case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
+            dictionary = malloc(sizeof(density_chameleon_dictionary));
+            density_chameleon_dictionary_reset(dictionary);
+            break;
+        case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
+            dictionary = malloc(sizeof(density_cheetah_dictionary));
+            density_cheetah_dictionary_reset(dictionary);
+            break;
+        case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
+            dictionary = malloc(sizeof(density_lion_dictionary));
+            density_lion_dictionary_reset(dictionary);
+            break;
+    }
+
+    uint_fast32_t user_defined_interrupt;
+    switch (interrupt_periodicity) {
+        case DENSITY_USER_INTERRUPT_PERIODICITY_NONE:
+            user_defined_interrupt = 0;
+            break;
+        default:
+            switch (compression_mode) {
+                case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
+                case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
+                    user_defined_interrupt = (interrupt_periodicity << 4) - 1;
+                    break;
+                case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
+                    user_defined_interrupt = (interrupt_periodicity << 5) - 1;
+                    break;
+            }
+            break;
+    }
+
+    density_algorithms_prepare_state(&((density_stream_state *) stream->internal_state)->algorithm_state, dictionary, user_defined_interrupt);
+    ((density_stream_state *) stream->internal_state)->compression_mode = compression_mode;
 }
 
 DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *const restrict stream, const uint8_t *const restrict input_buffer, const uint_fast64_t input_size, uint8_t *const restrict output_buffer, const uint_fast64_t output_size) {
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
 
-    uint_fast16_t *const temp_available = &((density_stream_state *) stream->internal_state)->available_bytes;
+    uint_fast16_t *const temp_available = &((density_stream_state *) stream->internal_state)->temporary_available_bytes;
     density_byte *const temporary_buffer = ((density_stream_state *) stream->internal_state)->temporary_buffer;
 
-    switch (((density_stream_state *) stream->internal_state)->internal_encode_state.compressionMode) {
+    switch (((density_stream_state *) stream->internal_state)->compression_mode) {
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM: {
             if (temp_available) {
                 if ((*temp_available + input_size) > DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE) {
@@ -97,7 +131,7 @@ DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_decompress_cont
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
 
-    const uint_fast16_t temp_available = ((density_stream_state *) stream->internal_state)->available_bytes;
+    const uint_fast16_t temp_available = ((density_stream_state *) stream->internal_state)->temporary_available_bytes;
 
     if (temp_available) {
         // available is < to unit size by definition

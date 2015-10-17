@@ -115,7 +115,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM: {
             density_chameleon_dictionary dictionary;
             density_chameleon_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary);
+            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
             if ((status = density_chameleon_encode(&state, &in, input_size, &out, output_size, true)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
@@ -123,7 +123,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM: {
             density_cheetah_dictionary dictionary;
             density_cheetah_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary);
+            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
             if ((status = density_cheetah_encode(&state, &in, input_size, &out, output_size, true)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
@@ -131,7 +131,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM: {
             density_lion_dictionary dictionary;
             density_lion_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary);
+            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
             if ((status = density_lion_encode(&state, &in, input_size, &out, output_size, true)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
@@ -162,7 +162,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM: {
             density_chameleon_dictionary dictionary;
             density_chameleon_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary);
+            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
             if ((status = density_chameleon_decode(&state, &in, remaining, &out, output_size, true)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
@@ -170,7 +170,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM: {
             density_cheetah_dictionary dictionary;
             density_cheetah_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary);
+            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
             if ((status = density_cheetah_decode(&state, &in, remaining, &out, output_size, true)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
@@ -178,7 +178,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM: {
             density_lion_dictionary dictionary;
             density_lion_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary);
+            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
             if ((status = density_lion_decode(&state, &in, remaining, &out, output_size, true)))
                 return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;

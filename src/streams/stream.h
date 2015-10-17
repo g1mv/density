@@ -36,28 +36,30 @@
 #include "../density_api.h"
 #include "../core/chameleon/chameleon_encode.h"
 #include "../core/chameleon/chameleon_decode.h"
+#include "../core/cheetah/cheetah_encode.h"
+#include "../core/cheetah/cheetah_decode.h"
+#include "../core/lion/lion_encode.h"
+#include "../core/lion/lion_decode.h"
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
     //DENSITY_ENCODE_PROCESS process;
-    DENSITY_COMPRESSION_MODE compressionMode;
 
     uint_fast64_t totalRead;
     uint_fast64_t totalWritten;
 } density_stream_encode_state;
 
 typedef struct {
-    //DENSITY_STREAM_PROCESS process;
-    density_byte temporary_buffer[1 << 16];
-    uint_fast16_t available_bytes;
-    //uint_fast8_t unit_size;
+    density_algorithm_state algorithm_state;
+    DENSITY_COMPRESSION_MODE compression_mode;
 
-    density_stream_encode_state internal_encode_state;
-    //density_decode_state internal_decode_state;
+    density_byte temporary_buffer[1 << 16];
+    uint_fast16_t temporary_available_bytes;
+
 } density_stream_state;
 #pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const, const DENSITY_COMPRESSION_MODE);
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *const, const DENSITY_COMPRESSION_MODE, const DENSITY_USER_INTERRUPT_PERIODICITY);
 
 DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *const, const uint8_t *const, const uint_fast64_t, uint8_t *const, const uint_fast64_t);

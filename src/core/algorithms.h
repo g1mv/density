@@ -49,10 +49,9 @@ typedef struct {
     void *dictionary;
     uint_fast8_t copy_penalty;
     uint_fast8_t copy_penalty_start;
-    uint_fast8_t incompressible_in_a_row;
     bool previous_incompressible;
     uint_fast64_t counter;
-    uint_fast32_t user_defined_interrupt;
+    uint_fast32_t user_defined_interrupt_periodicity;
     bool return_from_interrupt;
 } density_algorithm_state;
 
@@ -62,8 +61,8 @@ typedef struct {
             *out += work_block_size;
 
 #define DENSITY_ALGORITHM_CHECK_USER_INTERRUPT\
-            if (state->user_defined_interrupt) {\
-                if (!(state->counter & state->user_defined_interrupt)) {\
+            if (state->user_defined_interrupt_periodicity) {\
+                if (!(state->counter & state->user_defined_interrupt_periodicity)) {\
                     if (state->return_from_interrupt)\
                         state->return_from_interrupt = false;\
                     else {\
@@ -89,6 +88,6 @@ typedef struct {
             } else\
                 state->previous_incompressible = false;
 
-DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const, void *const);
+DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const, void *const, const uint_fast32_t);
 
 #endif
