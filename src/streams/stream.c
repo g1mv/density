@@ -64,10 +64,10 @@ DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(d
             switch (compression_mode) {
                 case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
                 case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
-                    user_defined_interrupt = (interrupt_periodicity << 4) - 1;
+                    user_defined_interrupt = ((1 << (interrupt_periodicity - 1)) << 4) - 1;
                     break;
                 case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-                    user_defined_interrupt = (interrupt_periodicity << 5) - 1;
+                    user_defined_interrupt = ((1 << (interrupt_periodicity - 1)) << 5) - 1;
                     break;
             }
             break;
@@ -125,6 +125,10 @@ DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_contin
         // put the remaining input size in temp buffer and exit
         //}
     }*/
+}
+
+DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *stream) {
+    free(((density_stream_state *) stream->internal_state)->algorithm_state.dictionary);
 }
 
 DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *const restrict stream, const uint8_t *const restrict input_buffer, const uint_fast64_t input_size, uint8_t *const restrict output_buffer, const uint_fast64_t output_size) {
