@@ -293,3 +293,10 @@ free(outDecompressed);
 And that's it ! We've done two compression/decompression round trips with a few lines !
 
 If you want a more elaborate example you can checkout [the SHARC project](https://github.com/centaurean/sharc).
+
+Related projects
+----------------
+
+* **densityxx** (c++ port of density) https://github.com/charlesw1234/densityxx
+* **fsbench-density** (in-memory transformations benchmark) https://github.com/gpnuma/fsbench-density
+* **SHARC** (archiver using density algorithms) https://github.com/centaurean/sharc
