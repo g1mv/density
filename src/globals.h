@@ -179,7 +179,7 @@ DENSITY_WINDOWS_EXPORT const uint8_t density_version_revision();
  **********************************************************************************************************************/
 
 #define DENSITY_MAJOR_VERSION   0
-#define DENSITY_MINOR_VERSION   13
+#define DENSITY_MINOR_VERSION   14
 #define DENSITY_REVISION        0
 
 
