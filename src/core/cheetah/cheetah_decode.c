@@ -91,7 +91,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_4(const uint8_t **restri
             break;
         case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A:
             DENSITY_MEMCPY(&hash, *in, sizeof(uint16_t));
-            density_cheetah_decode_process_compressed_a(out, last_hash, dictionary, hash);
+    density_cheetah_decode_process_compressed_a(out, last_hash, dictionary, hash);
             *in += sizeof(uint16_t);
             break;
         case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B:
@@ -131,7 +131,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_16(const uint8_t **restr
             DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK, \
             *out += sizeof(uint32_t);, \
             2\
-);
+        );
         default:
             break;
     }

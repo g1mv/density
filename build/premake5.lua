@@ -35,16 +35,16 @@
 --
 
 -- Check for tools
-if os.execute("clang -v") == 0 then
+if os.execute("clang -v") then
 	toolset "clang"
-elseif os.execute("gcc -v") == 0 then
+elseif os.execute("gcc -v") then
 	toolset "gcc"
 else
 	io.write("No supported compiler found on the command line. Please install Clang/LLVM or GCC.\n")
 	os.exit(0)
 end
 
-if os.execute("git --version") > 0 then
+if os.execute("git --version") == "true" then
 	io.write("Please install Git, it is required for submodules updating.")
 	os.exit(0)
 end
@@ -53,9 +53,10 @@ end
 os.execute("git submodule update --init --recursive")
 
 solution "Density"
-	configurations { "Release" }
-	buildoptions { "-std=c99" }
-	flags { "OptimizeSpeed", "NoFramePointer", "LinkTimeOptimization" }
+	configurations { "release" }
+		buildoptions { "-std=c99" }
+		flags { "NoFramePointer", "LinkTimeOptimization" }
+		optimize "Speed"
 
 	project "density"
 		kind "SharedLib"
