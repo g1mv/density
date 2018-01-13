@@ -70,6 +70,9 @@
 #error Unknow endianness
 #endif
 
+#define DENSITY_MAX_2(a, b) (((a)>(b))?(a):(b))
+#define DENSITY_MAX_3(a, b, c) (DENSITY_MAX_2(DENSITY_MAX_2(a, b), c))
+
 #define DENSITY_FORMAT(v)               0##v##llu
 
 #define DENSITY_ISOLATE(b, p)           ((DENSITY_FORMAT(b) / p) & 0x1)
