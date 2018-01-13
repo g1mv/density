@@ -246,7 +246,6 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
 
     while (density_likely(*in <= in_limit && *out <= out_limit)) {
         if (density_unlikely(!(state->counter & 0xf))) {
-            DENSITY_ALGORITHM_CHECK_USER_INTERRUPT;
             DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
         }
         state->counter++;
@@ -263,52 +262,50 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
     if (*out > out_limit)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
-    if (process_all) {
-        read_and_decode_4:
-        if (density_unlikely(!shift)) {
-            if (in_size - (*in - start) < sizeof(density_lion_signature))
-                return DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL;
+    read_and_decode_4:
+    if (density_unlikely(!shift)) {
+        if (in_size - (*in - start) < sizeof(density_lion_signature))
+            return DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL;
 
-            density_lion_decode_read_signature(in, &signature);
-        }
-        form = density_lion_decode_read_form(in, &signature, &shift, &data);
-        switch (in_size - (*in - start)) {
-            case 0:
-            case 1:
-                switch (form) {
-                    case DENSITY_LION_FORM_PLAIN:
-                        goto process_remaining_bytes;   // End marker
-                    case DENSITY_LION_FORM_PREDICTIONS_A:
-                    case DENSITY_LION_FORM_PREDICTIONS_B:
-                    case DENSITY_LION_FORM_PREDICTIONS_C:
-                        density_lion_decode_4(in, out, &last_hash, state->dictionary, &data, form);
-                        break;
-                    default:
-                        return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;   // Not enough bytes to read a hash
-                }
-                break;
-            case 2:
-            case 3:
-                switch (form) {
-                    case DENSITY_LION_FORM_PLAIN:
-                        goto process_remaining_bytes;   // End marker
-                    default:
-                        density_lion_decode_4(in, out, &last_hash, state->dictionary, &data, form);
-                        break;
-                }
-                break;
-            default:
-                density_lion_decode_4(in, out, &last_hash, state->dictionary, &data, form);
-                break;
-        }
-        goto read_and_decode_4;
-
-        process_remaining_bytes:
-        remaining = in_size - (*in - start);
-        DENSITY_MEMCPY(*out, *in, remaining);
-        *in += remaining;
-        *out += remaining;
+        density_lion_decode_read_signature(in, &signature);
     }
+    form = density_lion_decode_read_form(in, &signature, &shift, &data);
+    switch (in_size - (*in - start)) {
+        case 0:
+        case 1:
+            switch (form) {
+                case DENSITY_LION_FORM_PLAIN:
+                    goto process_remaining_bytes;   // End marker
+                case DENSITY_LION_FORM_PREDICTIONS_A:
+                case DENSITY_LION_FORM_PREDICTIONS_B:
+                case DENSITY_LION_FORM_PREDICTIONS_C:
+                    density_lion_decode_4(in, out, &last_hash, state->dictionary, &data, form);
+                    break;
+                default:
+                    return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;   // Not enough bytes to read a hash
+            }
+            break;
+        case 2:
+        case 3:
+            switch (form) {
+                case DENSITY_LION_FORM_PLAIN:
+                    goto process_remaining_bytes;   // End marker
+                default:
+                    density_lion_decode_4(in, out, &last_hash, state->dictionary, &data, form);
+                    break;
+            }
+            break;
+        default:
+            density_lion_decode_4(in, out, &last_hash, state->dictionary, &data, form);
+            break;
+    }
+    goto read_and_decode_4;
+
+    process_remaining_bytes:
+    remaining = in_size - (*in - start);
+    DENSITY_MEMCPY(*out, *in, remaining);
+    *in += remaining;
+    *out += remaining;
 
     return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
 }

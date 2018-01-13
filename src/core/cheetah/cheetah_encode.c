@@ -116,7 +116,6 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
 
     while (density_likely(limit_128-- && *out <= out_limit)) {
         if (density_unlikely(!(state->counter & 0x1f))) {
-            DENSITY_ALGORITHM_CHECK_USER_INTERRUPT;
             DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
         }
         state->counter++;
@@ -136,35 +135,33 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
     if (*out > out_limit)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
-    if (process_all) {
-        uint_fast64_t remaining;
+    uint_fast64_t remaining;
 
-        switch (in_size & 0x7f) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-                density_cheetah_encode_prepare_signature(out, &signature_pointer, &signature);
-                signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK);   // End marker
-                DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
-                goto process_remaining_bytes;
-            default:
-                break;
-        }
-
-        const uint_fast64_t limit_4 = ((in_size & 0x7f) >> 2) << 1; // 4-byte units times number of signature flag bits
-        density_cheetah_encode_prepare_signature(out, &signature_pointer, &signature);
-        for (uint_fast8_t shift = 0; shift != limit_4; shift += 2)
-            density_cheetah_encode_4(in, out, &last_hash, shift, &signature, state->dictionary, &unit);
-
-        signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK << limit_4);   // End marker
-        DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
-
-        process_remaining_bytes:
-        remaining = in_size & 0x3;
-        if (remaining)
-        DENSITY_ALGORITHM_COPY(remaining);
+    switch (in_size & 0x7f) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+            density_cheetah_encode_prepare_signature(out, &signature_pointer, &signature);
+            signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK);   // End marker
+            DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
+            goto process_remaining_bytes;
+        default:
+            break;
     }
+
+    const uint_fast64_t limit_4 = ((in_size & 0x7f) >> 2) << 1; // 4-byte units times number of signature flag bits
+    density_cheetah_encode_prepare_signature(out, &signature_pointer, &signature);
+    for (uint_fast8_t shift = 0; shift != limit_4; shift += 2)
+        density_cheetah_encode_4(in, out, &last_hash, shift, &signature, state->dictionary, &unit);
+
+    signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK << limit_4);   // End marker
+    DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
+
+    process_remaining_bytes:
+    remaining = in_size & 0x3;
+    if (remaining)
+    DENSITY_ALGORITHM_COPY(remaining);
 
     return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
 }

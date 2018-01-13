@@ -118,7 +118,6 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
 
     while (density_likely(*in <= in_limit && *out <= out_limit)) {
         if (density_unlikely(!(state->counter & 0xf))) {
-            DENSITY_ALGORITHM_CHECK_USER_INTERRUPT;
             DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
         }
         state->counter++;
@@ -136,41 +135,39 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
     if (*out > out_limit)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
-    if (process_all) {
-        read_signature:
-        if (in_size - (*in - start) < sizeof(density_chameleon_signature))
-            return DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL;
-        shift = 0;
-        density_chameleon_decode_read_signature(in, &signature);
-        read_and_decode_4:
-        switch (in_size - (*in - start)) {
-            case 0:
-            case 1:
-                if (density_chameleon_decode_test_compressed(signature, shift))
-                    return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;
-                else    // End marker
-                    goto process_remaining_bytes;
-            case 2:
-            case 3:
-                if (density_chameleon_decode_test_compressed(signature, shift++))
-                    density_chameleon_decode_kernel(in, out, true, state->dictionary);
-                else    // End marker
-                    goto process_remaining_bytes;
-                break;
-            default:
-                density_chameleon_decode_4(in, out, signature, shift++, state->dictionary);
-                break;
-        }
-
-        if (density_unlikely(shift == density_bitsizeof(density_chameleon_signature)))
-            goto read_signature;
-        else
-            goto read_and_decode_4;
-
-        process_remaining_bytes:
-        remaining = in_size - (*in - start);
-        DENSITY_ALGORITHM_COPY(remaining);
+    read_signature:
+    if (in_size - (*in - start) < sizeof(density_chameleon_signature))
+        return DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL;
+    shift = 0;
+    density_chameleon_decode_read_signature(in, &signature);
+    read_and_decode_4:
+    switch (in_size - (*in - start)) {
+        case 0:
+        case 1:
+            if (density_chameleon_decode_test_compressed(signature, shift))
+                return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;
+            else    // End marker
+                goto process_remaining_bytes;
+        case 2:
+        case 3:
+            if (density_chameleon_decode_test_compressed(signature, shift++))
+                density_chameleon_decode_kernel(in, out, true, state->dictionary);
+            else    // End marker
+                goto process_remaining_bytes;
+            break;
+        default:
+            density_chameleon_decode_4(in, out, signature, shift++, state->dictionary);
+            break;
     }
+
+    if (density_unlikely(shift == density_bitsizeof(density_chameleon_signature)))
+        goto read_signature;
+    else
+        goto read_and_decode_4;
+
+    process_remaining_bytes:
+    remaining = in_size - (*in - start);
+    DENSITY_ALGORITHM_COPY(remaining);
 
     return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
 }
