@@ -34,12 +34,10 @@
 
 #include "algorithms.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_algorithms_prepare_state(density_algorithm_state *const restrict state, void *const restrict dictionary, const uint_fast32_t user_defined_interrupt_periodicity) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_algorithms_prepare_state(density_algorithm_state *const restrict state, void *restrict dictionary) {
     state->dictionary = dictionary;
     state->copy_penalty = 0;
     state->copy_penalty_start = 1;
     state->previous_incompressible = false;
     state->counter = 0;
-    state->user_defined_interrupt_periodicity = user_defined_interrupt_periodicity;
-    state->return_from_interrupt = false;
 }

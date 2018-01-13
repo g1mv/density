@@ -41,8 +41,7 @@ typedef enum {
     DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED = 0,
     DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING,
     DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL,
-    DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL,
-    DENSITY_ALGORITHMS_EXIT_STATUS_USER_INTERRUPT
+    DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL
 } density_algorithm_exit_status;
 
 typedef struct {
@@ -51,26 +50,12 @@ typedef struct {
     uint_fast8_t copy_penalty_start;
     bool previous_incompressible;
     uint_fast64_t counter;
-    uint_fast32_t user_defined_interrupt_periodicity;
-    bool return_from_interrupt;
 } density_algorithm_state;
 
 #define DENSITY_ALGORITHM_COPY(work_block_size)\
             DENSITY_MEMCPY(*out, *in, work_block_size);\
             *in += work_block_size;\
             *out += work_block_size;
-
-#define DENSITY_ALGORITHM_CHECK_USER_INTERRUPT\
-            if (state->user_defined_interrupt_periodicity) {\
-                if (!(state->counter & state->user_defined_interrupt_periodicity)) {\
-                    if (state->return_from_interrupt)\
-                        state->return_from_interrupt = false;\
-                    else {\
-                        state->return_from_interrupt = true;\
-                        return DENSITY_ALGORITHMS_EXIT_STATUS_USER_INTERRUPT;\
-                    }\
-                }\
-            }
 
 #define DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START\
             if(!(--state->copy_penalty))\
@@ -88,6 +73,6 @@ typedef struct {
             } else\
                 state->previous_incompressible = false;
 
-DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const, void *const, const uint_fast32_t);
+DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const, void *);
 
 #endif
