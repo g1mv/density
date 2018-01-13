@@ -23,7 +23,7 @@
 #include "benchmark.h"
 
 void density_benchmark_version() {
-    printf("Single threaded ");
+    printf("\nSingle threaded ");
     DENSITY_BENCHMARK_BOLD(printf("in-memory benchmark"));
     printf(" powered by ");
     DENSITY_BENCHMARK_BOLD(printf("Centaurean Density %i.%i.%i\n", density_version_major(), density_version_minor(), density_version_revision()));
@@ -142,8 +142,8 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Allocated ");
-    density_benchmark_format_decimal(memory_allocated);
-    printf(" bytes as in-memory buffer space\n");
+    density_benchmark_format_decimal(2 * memory_allocated);
+    printf(" bytes of in-memory work space\n");
 
     printf("\n");
     for (DENSITY_COMPRESSION_MODE compression_mode = start_mode; compression_mode <= end_mode; compression_mode++) {
@@ -285,6 +285,8 @@ int main(int argc, char *argv[]) {
 
     free(in);
     free(out);
+
+    printf("Allocated memory released.\n\n");
 
     return 1;
 }
