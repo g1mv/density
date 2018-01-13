@@ -38,16 +38,16 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_read(const uint8
     header->version[0] = *(*in);
     header->version[1] = *(*in + 1);
     header->version[2] = *(*in + 2);
-    header->compressionMode = *(*in + 3);
+    header->algorithm = *(*in + 3);
 
     *in += sizeof(density_header);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_write(uint8_t **restrict out, const DENSITY_COMPRESSION_MODE compressionMode) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_write(uint8_t **restrict out, const DENSITY_ALGORITHM algorithm) {
     *(*out) = DENSITY_MAJOR_VERSION;
     *(*out + 1) = DENSITY_MINOR_VERSION;
     *(*out + 2) = DENSITY_REVISION;
-    *(*out + 3) = compressionMode;
+    *(*out + 3) = algorithm;
     *(*out + 4) = 0;
     *(*out + 5) = 0;
     *(*out + 6) = 0;

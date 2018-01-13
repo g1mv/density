@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 23/06/15 23:29
+ * 24/06/15 0:31
  *
  * -----------------
  * Cheetah algorithm
@@ -43,12 +43,12 @@
  * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#ifndef DENSITY_CHEETAH_ENCODE_H
-#define DENSITY_CHEETAH_ENCODE_H
+#ifndef DENSITY_CHEETAH_DECODE_H
+#define DENSITY_CHEETAH_DECODE_H
 
-#include "cheetah_dictionary.h"
-#include "../algorithms.h"
+#include "../dictionary/cheetah_dictionary.h"
+#include "../../algorithms.h"
 
-DENSITY_WINDOWS_EXPORT const density_algorithm_exit_status density_cheetah_encode(density_algorithm_state *const, const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t);
+DENSITY_WINDOWS_EXPORT const density_algorithm_exit_status density_cheetah_decode(density_algorithm_state *const, const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t);
 
 #endif

@@ -39,6 +39,7 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -59,36 +60,31 @@ typedef uint8_t density_byte;
 typedef bool density_bool;
 
 typedef enum {
-    DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM = 1,
-    DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM = 2,
-    DENSITY_COMPRESSION_MODE_LION_ALGORITHM = 3,
-} DENSITY_COMPRESSION_MODE;
+    DENSITY_ALGORITHM_CHAMELEON = 1,
+    DENSITY_ALGORITHM_CHEETAH = 2,
+    DENSITY_ALGORITHM_LION = 3,
+} DENSITY_ALGORITHM;
 
 typedef enum {
     DENSITY_STATE_OK = 0,                                        // Everything went alright
     DENSITY_STATE_ERROR_INPUT_BUFFER_TOO_SMALL,                  // Input buffer size is too small
     DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // Output buffer size is too small
     DENSITY_STATE_ERROR_DURING_PROCESSING,                       // Error during processing
+    DENSITY_STATE_ERROR_INVALID_DICTIONARY,                      // Invalid dictionary
 } DENSITY_STATE;
+
+typedef struct {
+    void* pointer;
+    uint_fast32_t size;
+    DENSITY_ALGORITHM algorithm;
+} density_dictionary;
 
 typedef struct {
     DENSITY_STATE state;
     uint_fast64_t bytesRead;
     uint_fast64_t bytesWritten;
+    density_dictionary* dictionary;
 } density_processing_result;
-
-
-
-/***********************************************************************************************************************
- *                                                                                                                     *
- * Density condition sets                                                                                              *
- *                                                                                                                     *
- ***********************************************************************************************************************/
-
-/*
- * This is the minimum output buffer size accepted (1024 bytes), please use bigger buffers when possible to preserve performance
- */
-#define DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE         (1 << 10)
 
 
 
@@ -129,30 +125,47 @@ DENSITY_WINDOWS_EXPORT const uint8_t density_version_revision(void);
 DENSITY_WINDOWS_EXPORT const uint_fast64_t density_compress_safe_size(const uint_fast64_t input_size);
 
 /*
- * Return an output buffer byte size which, if expected_output_size is correct, will enable density to decompress properly
+ * Return an output buffer byte size which, if expected_decompressed_output_size is correct, will enable density to decompress properly
  *
- * @param expected_output_size the expected (original) size of the decompressed data
+ * @param expected_decompressed_output_size the expected (original) size of the decompressed data
  */
-DENSITY_WINDOWS_EXPORT const uint_fast64_t density_decompress_safe_size(const uint_fast64_t expected_output_size);
+DENSITY_WINDOWS_EXPORT const uint_fast64_t density_decompress_safe_size(const uint_fast64_t expected_decompressed_output_size);
 
 /*
- * Compress an input_buffer of input_size bytes and store the result in output_buffer, using compression_mode and block_type.
- * mem_alloc and mem_free can be used to allocate/free memory using specific malloc and free functions.
- * If NULL is specified, the standard malloc/free will be used.
+ * Creates a dictionary tailored and reset for the chosen algorithm
+ *
+ * @param algorithm the DENSITY_ALGORITHM to be used
+ * @param mem_alloc a memory allocation function, if NULL is specified malloc() will be used
+ */
+DENSITY_WINDOWS_EXPORT density_dictionary* density_create_dictionary(DENSITY_ALGORITHM algorithm, void *(*mem_alloc)(size_t));
+
+/*
+ * Deletes the provided dictionary
+ *
+ * @param mem_free a memory freeing function, if NULL is specified free() will be used
+ */
+DENSITY_WINDOWS_EXPORT density_dictionary* density_delete_dictionary(void (*mem_free)(void *));
+
+/*
+ * Resets the provided dictionary
+ *
+ * @param dictionary the dictionary to reset. It will be filled with zero values.
+ */
+DENSITY_WINDOWS_EXPORT void density_reset_dictionary(density_dictionary* dictionary);
+
+/*
+ * Compress an input_buffer of input_size bytes and store the result in output_buffer, using the provided dictionary.
  *
  * @param input_buffer a buffer of bytes
  * @param input_size the size in bytes of input_buffer
  * @param output_buffer a buffer of bytes
  * @param output_size the size of output_buffer, must be at least DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE
- * @param compression_mode the compression mode
  * @param dictionary a pointer to a dictionary
  */
-DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, void *const dictionary);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, density_dictionary *const dictionary);
 
 /*
  * Decompress an input_buffer of input_size bytes and store the result in output_buffer.
- * mem_alloc and mem_free can be used to allocate/free memory using specific malloc and free functions.
- * If NULL is specified, the standard malloc/free will be used.
  *
  * @param input_buffer a buffer of bytes
  * @param input_size the size in bytes of input_buffer
@@ -160,7 +173,7 @@ DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const ui
  * @param output_size the size of output_buffer, must be at least DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE
  * @param dictionary a pointer to a dictionary
  */
-DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, void *const dictionary);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, density_dictionary *const dictionary);
 
 #ifdef __cplusplus
 }

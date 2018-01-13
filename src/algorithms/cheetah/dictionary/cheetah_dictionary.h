@@ -29,31 +29,44 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 11/10/13 02:06
+ * 06/12/13 20:20
+ *
+ * -----------------
+ * Cheetah algorithm
+ * -----------------
+ *
+ * Author(s)
+ * Guillaume Voirin (https://github.com/gpnuma)
+ * Piotr Tarsa (https://github.com/tarsa)
+ *
+ * Description
+ * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
  */
 
-#ifndef DENSITY_FILE_HEADER_H
-#define DENSITY_FILE_HEADER_H
+#ifndef DENSITY_CHEETAH_DICTIONARY_H
+#define DENSITY_CHEETAH_DICTIONARY_H
 
-#include <stdio.h>
-#include <time.h>
+#include "../cheetah.h"
 
-#include "../globals.h"
-#include "../density_api.h"
+#include <string.h>
 
 #pragma pack(push)
 #pragma pack(4)
+typedef struct {
+    uint32_t chunk_a;
+    uint32_t chunk_b;
+} density_cheetah_dictionary_entry;
 
 typedef struct {
-    density_byte version[3];
-    density_byte algorithm;
-    density_byte reserved[4];
-} density_header;
+    uint32_t next_chunk_prediction;
+} density_cheetah_dictionary_prediction_entry;
 
+typedef struct {
+    density_cheetah_dictionary_entry entries[1 << DENSITY_CHEETAH_HASH_BITS];
+    density_cheetah_dictionary_prediction_entry prediction_entries[1 << DENSITY_CHEETAH_HASH_BITS];
+} density_cheetah_dictionary;
 #pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT void density_header_read(const uint8_t **, density_header *);
-
-DENSITY_WINDOWS_EXPORT void density_header_write(uint8_t **, const DENSITY_ALGORITHM);
+DENSITY_WINDOWS_EXPORT void density_cheetah_dictionary_reset(density_cheetah_dictionary *);
 
 #endif

@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/10/13 11:57
+ * 23/06/15 21:51
  *
  * -------------------
  * Chameleon algorithm
@@ -42,29 +42,12 @@
  * Hash based superfast kernel
  */
 
-#ifndef DENSITY_CHAMELEON_H
-#define DENSITY_CHAMELEON_H
+#ifndef DENSITY_CHAMELEON_ENCODE_H
+#define DENSITY_CHAMELEON_ENCODE_H
 
-#include "../../globals.h"
+#include "../dictionary/chameleon_dictionary.h"
+#include "../../algorithms.h"
 
-#define DENSITY_CHAMELEON_HASH_BITS                                         16
-#define DENSITY_CHAMELEON_HASH_MULTIPLIER                                   (uint32_t)0x9D6EF916lu
-
-#define DENSITY_CHAMELEON_HASH_ALGORITHM(value32)                           (uint16_t)((value32 * DENSITY_CHAMELEON_HASH_MULTIPLIER) >> (32 - DENSITY_CHAMELEON_HASH_BITS))
-
-typedef enum {
-    DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK = 0x0,
-    DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP = 0x1,
-} DENSITY_CHAMELEON_SIGNATURE_FLAG;
-
-typedef uint64_t density_chameleon_signature;
-
-#define DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE        (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))   // Uncompressed chunks
-#define DENSITY_CHAMELEON_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE              (density_bitsizeof(density_chameleon_signature) * sizeof(uint32_t))
-
-#define DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE                      (sizeof(density_chameleon_signature) + DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
-#define DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE                            (DENSITY_CHAMELEON_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
-
-#define DENSITY_CHAMELEON_WORK_BLOCK_SIZE                                   256
+DENSITY_WINDOWS_EXPORT const density_algorithm_exit_status density_chameleon_encode(density_algorithm_state *const, const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t);
 
 #endif

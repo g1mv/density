@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2013, Guillaume Voirin
+ * Copyright (c) 2015, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,26 +29,47 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/06/15 0:31
+ * 12/02/15 23:09
  *
- * -----------------
- * Cheetah algorithm
- * -----------------
+ * --------------
+ * Lion algorithm
+ * --------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
- * Piotr Tarsa (https://github.com/tarsa)
  *
  * Description
- * Very fast two level dictionary hash algorithm derived from Chameleon, with predictions lookup
+ * Multiform compression algorithm
  */
 
-#ifndef DENSITY_CHEETAH_DECODE_H
-#define DENSITY_CHEETAH_DECODE_H
+#ifndef DENSITY_LION_DICTIONARY_H
+#define DENSITY_LION_DICTIONARY_H
 
-#include "cheetah_dictionary.h"
-#include "../algorithms.h"
+#include "../lion.h"
 
-DENSITY_WINDOWS_EXPORT const density_algorithm_exit_status density_cheetah_decode(density_algorithm_state *const, const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t);
+#pragma pack(push)
+#pragma pack(4)
+
+typedef struct {
+    uint32_t chunk_a;
+    uint32_t chunk_b;
+    uint32_t chunk_c;
+    uint32_t chunk_d;
+    uint32_t chunk_e;
+} density_lion_dictionary_chunk_entry;
+
+typedef struct {
+    uint32_t next_chunk_a;
+    uint32_t next_chunk_b;
+    uint32_t next_chunk_c;
+} density_lion_dictionary_chunk_prediction_entry;
+
+typedef struct {
+    density_lion_dictionary_chunk_entry chunks[1 << DENSITY_LION_CHUNK_HASH_BITS];
+    density_lion_dictionary_chunk_prediction_entry predictions[1 << DENSITY_LION_CHUNK_HASH_BITS];
+} density_lion_dictionary;
+#pragma pack(pop)
+
+DENSITY_WINDOWS_EXPORT void density_lion_dictionary_reset(density_lion_dictionary *);
 
 #endif

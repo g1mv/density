@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2015, Guillaume Voirin
+ * Copyright (c) 2018, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,26 +29,32 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/06/15 18:56
- *
- * --------------
- * Lion algorithm
- * --------------
- *
- * Author(s)
- * Guillaume Voirin (https://github.com/gpnuma)
- *
- * Description
- * Multiform compression algorithm
+ * 13/01/18 17:31
  */
 
-#ifndef DENSITY_LION_ENCODE_H
-#define DENSITY_LION_ENCODE_H
+#include "dictionaries.h"
 
-#include "lion_dictionary.h"
-#include "lion_form_model.h"
-#include "../algorithms.h"
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_dictionary* density_create_dictionary(DENSITY_ALGORITHM algorithm, void *(*mem_alloc)(size_t)) {
+    if(mem_alloc == NULL)
+        mem_alloc = malloc;
+    density_dictionary* out = mem_alloc(sizeof(density_dictionary));
+    out->algorithm = algorithm;
+    switch(algorithm) {
+        case DENSITY_ALGORITHM_CHAMELEON:
+            out->size = sizeof(density_chameleon_dictionary);
+            out->pointer = mem_alloc(out->size);
+            break;
+        default:
+            return NULL;
+    }
+}
 
-DENSITY_WINDOWS_EXPORT const density_algorithm_exit_status density_lion_encode(density_algorithm_state *const, const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t);
 
-#endif
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_dictionary* density_delete_dictionary(void (*mem_free)(void *)) {
+
+}
+
+
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_reset_dictionary(density_dictionary* dictionary) {
+
+}

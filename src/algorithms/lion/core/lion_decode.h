@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2013, Guillaume Voirin
+ * Copyright (c) 2015, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,37 +29,26 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 24/10/13 12:05
+ * 24/06/15 20:55
  *
- * -------------------
- * Chameleon algorithm
- * -------------------
+ * --------------
+ * Lion algorithm
+ * --------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
  *
  * Description
- * Hash based superfast kernel
+ * Multiform compression algorithm
  */
 
-#ifndef DENSITY_CHAMELEON_DICTIONARY_H
-#define DENSITY_CHAMELEON_DICTIONARY_H
+#ifndef DENSITY_LION_DECODE_H
+#define DENSITY_LION_DECODE_H
 
-#include "chameleon.h"
+#include "../dictionary/lion_dictionary.h"
+#include "../forms/lion_form_model.h"
+#include "../../algorithms.h"
 
-#include <string.h>
-
-#pragma pack(push)
-#pragma pack(4)
-typedef struct {
-    uint32_t as_uint32_t;
-} density_chameleon_dictionary_entry;
-
-typedef struct {
-    density_chameleon_dictionary_entry entries[1 << DENSITY_CHAMELEON_HASH_BITS];
-} density_chameleon_dictionary;
-#pragma pack(pop)
-
-DENSITY_WINDOWS_EXPORT void density_chameleon_dictionary_reset(const density_chameleon_dictionary*);
+DENSITY_WINDOWS_EXPORT const density_algorithm_exit_status density_lion_decode(density_algorithm_state *const, const uint8_t **, const uint_fast64_t, uint8_t **, const uint_fast64_t);
 
 #endif

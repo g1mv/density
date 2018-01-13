@@ -45,8 +45,8 @@
 #ifndef DENSITY_LION_FORM_MODEL_H
 #define DENSITY_LION_FORM_MODEL_H
 
-#include "../../globals.h"
-#include "lion.h"
+#include "../../../globals.h"
+#include "../lion.h"
 
 #define DENSITY_LION_NUMBER_OF_FORMS                                    8
 
