@@ -97,7 +97,7 @@ DENSITY_FORCE_INLINE const density_processing_result density_make_result(const D
     return result;
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_processing_result density_compress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, void const* dictionary) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_processing_result density_compress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const void* dictionary) {
     // Variables setup
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
@@ -139,7 +139,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_processing_result dens
     return density_make_result(DENSITY_STATE_OK, in - input_buffer, out - output_buffer);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_processing_result density_buffer_decompress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_processing_result density_decompress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, const void* dictionary) {
     if (input_size < sizeof(density_header) + sizeof(uint64_t))
         density_make_result(DENSITY_STATE_ERROR_INPUT_BUFFER_TOO_SMALL, 0, 0);
 

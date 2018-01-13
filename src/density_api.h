@@ -147,7 +147,7 @@ DENSITY_WINDOWS_EXPORT const uint_fast64_t density_decompress_safe_size(const ui
  * @param compression_mode the compression mode
  * @param dictionay a pointer to a dictionary
  */
-DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, void const* dictionary);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, const void* dictionary);
 
 /*
  * Decompress an input_buffer of input_size bytes and store the result in output_buffer.
@@ -160,7 +160,7 @@ DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const ui
  * @param output_size the size of output_buffer, must be at least DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE
  * @param dictionay a pointer to a dictionary
  */
-DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, void const* dictionary);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, const void* dictionary);
 
 #ifdef __cplusplus
 }
