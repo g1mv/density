@@ -58,11 +58,11 @@ void density_benchmark_format_decimal(uint64_t number) {
     printf(",%03"PRIu64, number % 1000);
 }
 
-const char *density_benchmark_convert_buffer_state_to_text(DENSITY_BUFFER_STATE state) {
+const char *density_benchmark_convert_state_to_text(DENSITY_STATE state) {
     switch (state) {
-        case DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING:
+        case DENSITY_STATE_ERROR_DURING_PROCESSING:
             return "Error during processing";
-        case DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL:
+        case DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL:
             return "Output buffer is too small";
         default:
             return "Unknown error";
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     if (fuzzer) {
         srand((unsigned int) (time(NULL) * 14521937821257379531llu));
         uncompressed_size = (uint_fast64_t) (((uint64_t) (rand() * 100000000llu)) / RAND_MAX);
-        memory_allocated = density_buffer_compress_safe_size(uncompressed_size);
+        memory_allocated = density_compress_safe_size(uncompressed_size);
         in = malloc(memory_allocated * sizeof(uint8_t));
         uint8_t value = (uint8_t) rand();
         for (int count = 0; count < uncompressed_size; count++) {
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
 
         // Allocate memory and copy file to memory
         uncompressed_size = (uint_fast64_t) file_attributes.st_size;
-        memory_allocated = density_buffer_compress_safe_size(uncompressed_size);
+        memory_allocated = density_compress_safe_size(uncompressed_size);
         in = malloc(memory_allocated * sizeof(uint8_t));
         fread(in, sizeof(uint8_t), uncompressed_size, file);
         fclose(file);
@@ -146,15 +146,15 @@ int main(int argc, char *argv[]) {
         // Print algorithm info
         switch (compression_mode) {
             case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Chameleon algorithm")));
+                DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Chameleon algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(19);
                 break;
             case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Cheetah algorithm")));
+                DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Cheetah algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(17);
                 break;
             case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
-            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Lion algorithm")));
+                DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Lion algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(14);
                 break;
         }
@@ -170,23 +170,23 @@ int main(int argc, char *argv[]) {
         }
         printf(" copied in memory\n");
         printf("Pre-heating ...\n");
-        density_buffer_processing_result result = density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode);
+        density_processing_result result = density_compress(in, uncompressed_size, out, memory_allocated, compression_mode, NULL);
         if (result.state) {
-            DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
+            DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
         }
         const uint_fast64_t compressed_size = result.bytesWritten;
 
         if (!compression_only) {
-            result = density_buffer_decompress(out, compressed_size, in, memory_allocated);
+            result = density_decompress(out, compressed_size, in, memory_allocated, NULL);
             if (result.state) {
-                DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
+                DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
             }
             if (result.bytesWritten != uncompressed_size) {
                 DENSITY_BENCHMARK_ERROR(printf("Round-trip size differs from original size (");
-                                                density_benchmark_format_decimal(result.bytesWritten);
-                                                printf(" bytes against ");
-                                                density_benchmark_format_decimal(uncompressed_size);
-                                                printf(" bytes).");, true);
+                density_benchmark_format_decimal(result.bytesWritten);
+                printf(" bytes against ");
+                density_benchmark_format_decimal(uncompressed_size);
+                printf(" bytes).");, true);
             }
         }
         printf("Starting main bench.\n");
@@ -216,7 +216,6 @@ int main(int argc, char *argv[]) {
         double total_compress_time = 0.0;
         double total_decompress_time = 0.0;
         double total_time = 0.0;
-        struct timeval stop;
         double decompress_speed;
         double decompress_speed_low;
         double decompress_speed_high;
@@ -224,16 +223,16 @@ int main(int argc, char *argv[]) {
         double decompress_time_elapsed;
         cputime_chronometer chrono;
 
-        while (total_time <= 15.0) {
+        while (total_time <= 10.0) {
             ++iterations;
 
             cputime_chronometer_start(&chrono);
-            density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode);
+            density_compress(in, uncompressed_size, out, memory_allocated, compression_mode, NULL);
             compress_time_elapsed = cputime_chronometer_stop(&chrono);
 
             if (!compression_only) {
                 cputime_chronometer_start(&chrono);
-                density_buffer_decompress(out, compressed_size, in, memory_allocated);
+                density_decompress(out, compressed_size, in, memory_allocated, NULL);
                 decompress_time_elapsed = cputime_chronometer_stop(&chrono);
             }
 
@@ -266,13 +265,13 @@ int main(int argc, char *argv[]) {
             }
 
             DENSITY_BENCHMARK_BLUE(printf("\rCompress speed ");
-                                           DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", compress_speed)));
+            DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", compress_speed)));
             printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs) ", compress_speed_low, compress_speed_high, compress_time_low);
 
             if (!compression_only) {
                 printf("<=> ");
                 DENSITY_BENCHMARK_BLUE(printf("Decompress speed ");
-                                               DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", decompress_speed)));
+                DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", decompress_speed)));
                 printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs) ", decompress_speed_low, decompress_speed_high, decompress_time_low);
             }
             fflush(stdout);
