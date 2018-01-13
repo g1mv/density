@@ -208,7 +208,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
         } else {
             const uint8_t *out_start = *out;
             __builtin_prefetch(*in + DENSITY_LION_WORK_BLOCK_SIZE);
-            density_lion_encode_256(in, out, &last_hash, &signature_pointer, &signature, &shift, state->dictionary, &data, &unit);
+            density_lion_encode_256(in, out, &last_hash, &signature_pointer, &signature, &shift, (density_lion_dictionary *const) state->dictionary, &data, &unit);
             DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*out - out_start, DENSITY_LION_WORK_BLOCK_SIZE);
         }
     }
@@ -232,7 +232,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
 
     uint_fast64_t limit_4 = (in_size & 0xff) >> 2;
     while (limit_4--)
-        density_lion_encode_4(in, out, &last_hash, &signature_pointer, &signature, &shift, state->dictionary, &data, &unit);
+        density_lion_encode_4(in, out, &last_hash, &signature_pointer, &signature, &shift, (density_lion_dictionary *const) state->dictionary, &data, &unit);
 
     density_lion_encode_push_code_to_signature(out, &signature_pointer, &signature, &shift, density_lion_form_model_get_encoding(&data, DENSITY_LION_FORM_PLAIN)); // End marker
     DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_lion_signature));

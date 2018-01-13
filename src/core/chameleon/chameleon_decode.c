@@ -124,7 +124,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
         } else {
             const uint8_t *in_start = *in;
             density_chameleon_decode_read_signature(in, &signature);
-            density_chameleon_decode_256(in, out, signature, state->dictionary);
+            density_chameleon_decode_256(in, out, signature, (density_chameleon_dictionary *const) state->dictionary);
             DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*in - in_start, DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
         }
     }
@@ -148,12 +148,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
         case 2:
         case 3:
             if (density_chameleon_decode_test_compressed(signature, shift++))
-                density_chameleon_decode_kernel(in, out, true, state->dictionary);
+                density_chameleon_decode_kernel(in, out, true, (density_chameleon_dictionary *const) state->dictionary);
             else    // End marker
                 goto process_remaining_bytes;
             break;
         default:
-            density_chameleon_decode_4(in, out, signature, shift++, state->dictionary);
+            density_chameleon_decode_4(in, out, signature, shift++, (density_chameleon_dictionary *const) state->dictionary);
             break;
     }
 

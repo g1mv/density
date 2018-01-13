@@ -251,7 +251,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
             DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
             const uint8_t *in_start = *in;
-            density_lion_decode_256(in, out, &last_hash, state->dictionary, &data, &signature, &shift);
+            density_lion_decode_256(in, out, &last_hash, (density_lion_dictionary *const) state->dictionary, &data, &signature, &shift);
             DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*in - in_start, DENSITY_LION_WORK_BLOCK_SIZE);
         }
     }
@@ -276,7 +276,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
                 case DENSITY_LION_FORM_PREDICTIONS_A:
                 case DENSITY_LION_FORM_PREDICTIONS_B:
                 case DENSITY_LION_FORM_PREDICTIONS_C:
-                    density_lion_decode_4(in, out, &last_hash, state->dictionary, &data, form);
+                    density_lion_decode_4(in, out, &last_hash, (density_lion_dictionary *const) state->dictionary, &data, form);
                     break;
                 default:
                     return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;   // Not enough bytes to read a hash
@@ -288,12 +288,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
                 case DENSITY_LION_FORM_PLAIN:
                     goto process_remaining_bytes;   // End marker
                 default:
-                    density_lion_decode_4(in, out, &last_hash, state->dictionary, &data, form);
+                    density_lion_decode_4(in, out, &last_hash, (density_lion_dictionary *const) state->dictionary, &data, form);
                     break;
             }
             break;
         default:
-            density_lion_decode_4(in, out, &last_hash, state->dictionary, &data, form);
+            density_lion_decode_4(in, out, &last_hash, (density_lion_dictionary *const) state->dictionary, &data, form);
             break;
     }
     goto read_and_decode_4;

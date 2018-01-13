@@ -200,7 +200,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
         } else {
             const uint8_t *in_start = *in;
             density_cheetah_decode_read_signature(in, &signature);
-            density_cheetah_decode_128(in, out, &last_hash, signature, state->dictionary);
+            density_cheetah_decode_128(in, out, &last_hash, signature, (density_cheetah_dictionary *const) state->dictionary);
             DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*in - in_start, DENSITY_CHEETAH_WORK_BLOCK_SIZE);
         }
     }
@@ -221,7 +221,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
                 case DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK:
                     goto process_remaining_bytes;   // End marker
                 case DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED:
-                    density_cheetah_decode_kernel_4(in, out, &last_hash, DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED, state->dictionary);
+                    density_cheetah_decode_kernel_4(in, out, &last_hash, DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED, (density_cheetah_dictionary *const) state->dictionary);
                     shift += 2;
                     break;
                 default:
@@ -235,13 +235,13 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
                 case DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK:
                     goto process_remaining_bytes;   // End marker
                 default:
-                    density_cheetah_decode_kernel_4(in, out, &last_hash, flag, state->dictionary);
+                    density_cheetah_decode_kernel_4(in, out, &last_hash, flag, (density_cheetah_dictionary *const) state->dictionary);
                     shift += 2;
                     break;
             }
             break;
         default:
-            density_cheetah_decode_4(in, out, &last_hash, signature, shift, state->dictionary);
+            density_cheetah_decode_4(in, out, &last_hash, signature, shift, (density_cheetah_dictionary *const) state->dictionary);
             shift += 2;
             break;
     }
