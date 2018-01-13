@@ -65,65 +65,18 @@ typedef enum {
 } DENSITY_COMPRESSION_MODE;
 
 typedef enum {
-    DENSITY_USER_INTERRUPT_PERIODICITY_NONE = 0,
-    DENSITY_USER_INTERRUPT_PERIODICITY_4KB = 1,
-    DENSITY_USER_INTERRUPT_PERIODICITY_8KB = 2,
-    DENSITY_USER_INTERRUPT_PERIODICITY_16KB = 3,
-    DENSITY_USER_INTERRUPT_PERIODICITY_32KB = 4,
-    DENSITY_USER_INTERRUPT_PERIODICITY_64KB = 5,
-    DENSITY_USER_INTERRUPT_PERIODICITY_128KB = 6,
-    DENSITY_USER_INTERRUPT_PERIODICITY_256KB = 7,
-    DENSITY_USER_INTERRUPT_PERIODICITY_512KB = 8,
-    DENSITY_USER_INTERRUPT_PERIODICITY_1M = 9,
-    DENSITY_USER_INTERRUPT_PERIODICITY_2M = 10,
-    DENSITY_USER_INTERRUPT_PERIODICITY_4M = 11,
-    DENSITY_USER_INTERRUPT_PERIODICITY_8M = 12,
-    DENSITY_USER_INTERRUPT_PERIODICITY_16M = 13,
-    DENSITY_USER_INTERRUPT_PERIODICITY_32M = 14,
-    DENSITY_USER_INTERRUPT_PERIODICITY_64M = 15,
-    DENSITY_USER_INTERRUPT_PERIODICITY_128M = 16,
-    DENSITY_USER_INTERRUPT_PERIODICITY_256M = 17,
-    DENSITY_USER_INTERRUPT_PERIODICITY_512M = 18,
-    DENSITY_USER_INTERRUPT_PERIODICITY_1G = 19
-} DENSITY_USER_INTERRUPT_PERIODICITY;
-
-typedef enum {
-    DENSITY_BUFFER_STATE_OK = 0,                                        // Everything went alright
-    DENSITY_BUFFER_STATE_ERROR_INPUT_BUFFER_TOO_SMALL,                  // Input buffer size is too small
-    DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // Output buffer size is too small
-    DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING,                       // Error during processing
-} DENSITY_BUFFER_STATE;
+    DENSITY_STATE_OK = 0,                                        // Everything went alright
+    DENSITY_STATE_ERROR_INPUT_BUFFER_TOO_SMALL,                  // Input buffer size is too small
+    DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // Output buffer size is too small
+    DENSITY_STATE_ERROR_DURING_PROCESSING,                       // Error during processing
+} DENSITY_STATE;
 
 typedef struct {
-    DENSITY_BUFFER_STATE state;
+    DENSITY_STATE state;
     uint_fast64_t bytesRead;
     uint_fast64_t bytesWritten;
-} density_buffer_processing_result;
+} density_processing_result;
 
-typedef enum {
-    DENSITY_STREAM_STATE_READY = 0,                                     // Awaiting further instructions (new action or adding data to the input buffer)
-    DENSITY_STREAM_STATE_STALL_ON_INPUT,                                // There is not enough space left in the input buffer to continue
-    DENSITY_STREAM_STATE_STALL_ON_OUTPUT,                               // There is not enough space left in the output buffer to continue
-    DENSITY_STREAM_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // Output buffer size is too small
-    DENSITY_STREAM_STATE_ERROR_INVALID_INTERNAL_STATE,                  // Error during processing
-} DENSITY_STREAM_STATE;
-
-typedef struct {
-    density_byte majorVersion;
-    density_byte minorVersion;
-    density_byte revision;
-    DENSITY_COMPRESSION_MODE compressionMode;
-} density_stream_header_information;
-
-typedef struct {
-    void *in;
-    uint_fast64_t *totalBytesRead;
-
-    void *out;
-    uint_fast64_t *totalBytesWritten;
-
-    void *internal_state;
-} density_stream;
 
 
 /***********************************************************************************************************************
@@ -164,7 +117,7 @@ DENSITY_WINDOWS_EXPORT const uint8_t density_version_revision(void);
 
 /***********************************************************************************************************************
  *                                                                                                                     *
- * Density buffer API functions                                                                                        *
+ * Density API functions                                                                                               *
  *                                                                                                                     *
  ***********************************************************************************************************************/
 
@@ -173,14 +126,14 @@ DENSITY_WINDOWS_EXPORT const uint8_t density_version_revision(void);
  *
  * @param input_size the size of the input data which is about to be compressed
  */
-DENSITY_WINDOWS_EXPORT const uint_fast64_t density_buffer_compress_safe_size(const uint_fast64_t input_size);
+DENSITY_WINDOWS_EXPORT const uint_fast64_t density_compress_safe_size(const uint_fast64_t input_size);
 
 /*
  * Return an output buffer byte size which, if expected_output_size is correct, will enable density to decompress properly
  *
  * @param expected_output_size the expected (original) size of the decompressed data
  */
-DENSITY_WINDOWS_EXPORT const uint_fast64_t density_buffer_decompress_safe_size(const uint_fast64_t expected_output_size);
+DENSITY_WINDOWS_EXPORT const uint_fast64_t density_decompress_safe_size(const uint_fast64_t expected_output_size);
 
 /*
  * Compress an input_buffer of input_size bytes and store the result in output_buffer, using compression_mode and block_type.
@@ -192,13 +145,9 @@ DENSITY_WINDOWS_EXPORT const uint_fast64_t density_buffer_decompress_safe_size(c
  * @param output_buffer a buffer of bytes
  * @param output_size the size of output_buffer, must be at least DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE
  * @param compression_mode the compression mode
- * @param block_type the type of data blocks Density will generate.
- *      The option DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK adds data integrity checks in the encoded output.
- *      The output size becomes therefore slightly bigger (a few hundred bytes for huge input files).
- * @param mem_alloc the memory allocation function
- * @param mem_free the memory freeing function
+ * @param dictionay a pointer to a dictionary
  */
-DENSITY_WINDOWS_EXPORT const density_buffer_processing_result density_buffer_compress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, void const* dictionary);
 
 /*
  * Decompress an input_buffer of input_size bytes and store the result in output_buffer.
@@ -209,65 +158,9 @@ DENSITY_WINDOWS_EXPORT const density_buffer_processing_result density_buffer_com
  * @param input_size the size in bytes of input_buffer
  * @param output_buffer a buffer of bytes
  * @param output_size the size of output_buffer, must be at least DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE
- * @param mem_alloc the memory allocation function
- * @param mem_free the memory freeing function
+ * @param dictionay a pointer to a dictionary
  */
-DENSITY_WINDOWS_EXPORT const density_buffer_processing_result density_buffer_decompress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size);
-
-
-
-/***********************************************************************************************************************
- *                                                                                                                     *
- * Density stream API functions                                                                                        *
- *                                                                                                                     *
- ***********************************************************************************************************************/
-
-/*
- * Initialize compression
- *
- * @param stream the stream
- * @param compression_mode the compression mode
- * @param block_type the type of data blocks Density will generate.
- *      The option DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK adds data integrity checks in the encoded output.
- *      The output size becomes therefore slightly bigger (a few hundred bytes for huge input files).
- */
-DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_init(density_stream *stream, const DENSITY_COMPRESSION_MODE compression_mode, const DENSITY_USER_INTERRUPT_PERIODICITY interrupt_periodicity);
-
-/*
- * Stream decompression initialization
- *
- * @param stream the stream
- * @param header_information stream header information, use NULL if you don't need it
- */
-DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_decompress_init(density_stream *stream, density_stream_header_information *header_information);
-
-/*
- * Stream compression function, has to be called repetitively.
- *
- * @param stream the stream
- */
-DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_continue(density_stream *stream, const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size);
-
-/*
- * Stream decompression function, has to be called repetitively.
- *
- * @param stream the stream
- */
-DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_decompress_continue(density_stream *stream, const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size);
-
-/*
- * Call once processing is finished, to clear up the environment and release eventual allocated memory.
- *
- * @param stream the stream
- */
-DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_compress_finish(density_stream *stream);
-
-/*
- * Call once processing is finished, to clear up the environment and release eventual allocated memory.
- *
- * @param stream the stream
- */
-DENSITY_WINDOWS_EXPORT const DENSITY_STREAM_STATE density_stream_decompress_finish(density_stream *stream);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, void const* dictionary);
 
 #ifdef __cplusplus
 }
