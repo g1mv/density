@@ -170,7 +170,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(const uint8_t **
     *in += sizeof(density_cheetah_signature);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status density_cheetah_decode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size, const bool process_all) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status density_cheetah_decode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
     if (out_size < DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
@@ -183,10 +183,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
     const uint8_t *start = *in;
 
     if (in_size < DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE) {
-        if (process_all)
-            goto read_signature;
-        else
-            return DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL;
+        goto read_signature;
     }
 
     const uint8_t *in_limit = *in + in_size - DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE;
