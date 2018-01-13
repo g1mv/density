@@ -49,9 +49,9 @@ DENSITY_WINDOWS_EXPORT const uint_fast64_t density_compress_safe_size(const uint
 
 DENSITY_WINDOWS_EXPORT const uint_fast64_t density_decompress_safe_size(const uint_fast64_t);
 
-DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, const void* dictionary);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, void *const dictionary);
 
-DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, const void* dictionary);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, void *const dictionary);
 
 
 #endif
