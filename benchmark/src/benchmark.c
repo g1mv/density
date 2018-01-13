@@ -26,7 +26,7 @@ void density_benchmark_version() {
     printf("Single threaded ");
     DENSITY_BENCHMARK_BOLD(printf("in-memory benchmark"));
     printf(" powered by ");
-    DENSITY_BENCHMARK_BOLD(printf("Centaurean Density %i.%i.%i beta\n", density_version_major(), density_version_minor(), density_version_revision()));
+    DENSITY_BENCHMARK_BOLD(printf("Centaurean Density %i.%i.%i\n", density_version_major(), density_version_minor(), density_version_revision()));
     printf("Copyright (C) 2015 Guillaume Voirin\n");
     printf("Built for %s (%s endian system, %u bits) using " DENSITY_BENCHMARK_COMPILER ", %s %s\n", DENSITY_BENCHMARK_PLATFORM_STRING, DENSITY_BENCHMARK_ENDIAN_STRING, (unsigned int) (8 * sizeof(void *)), DENSITY_BENCHMARK_COMPILER_VERSION, __DATE__, __TIME__);
 }
@@ -141,6 +141,10 @@ int main(int argc, char *argv[]) {
         out = malloc(memory_allocated * sizeof(uint8_t));
     }
 
+    printf("Allocated ");
+    density_benchmark_format_decimal(memory_allocated);
+    printf(" bytes as in-memory buffer space\n");
+
     printf("\n");
     for (DENSITY_COMPRESSION_MODE compression_mode = start_mode; compression_mode <= end_mode; compression_mode++) {
         // Print algorithm info
@@ -172,14 +176,14 @@ int main(int argc, char *argv[]) {
         printf("Pre-heating ...\n");
         density_processing_result result = density_compress(in, uncompressed_size, out, memory_allocated, compression_mode, NULL);
         if (result.state) {
-            DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
+            DENSITY_BENCHMARK_ERROR(printf("API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
         }
         const uint_fast64_t compressed_size = result.bytesWritten;
 
         if (!compression_only) {
             result = density_decompress(out, compressed_size, in, memory_allocated, NULL);
             if (result.state) {
-                DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
+                DENSITY_BENCHMARK_ERROR(printf("API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
             }
             if (result.bytesWritten != uncompressed_size) {
                 DENSITY_BENCHMARK_ERROR(printf("Round-trip size differs from original size (");
