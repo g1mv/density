@@ -34,7 +34,7 @@
 
 #include "buffer.h"
 
-DENSITY_WINDOWS_EXPORT const uint_fast64_t density_buffer_compress_safe_size(const uint_fast64_t input_size) {
+DENSITY_WINDOWS_EXPORT const uint_fast64_t density_compress_safe_size(const uint_fast64_t input_size) {
     uint_fast64_t longest_output_size = 0;
 
     // Chameleon longest output
@@ -66,7 +66,7 @@ DENSITY_WINDOWS_EXPORT const uint_fast64_t density_buffer_compress_safe_size(con
     return longest_output_size;
 }
 
-DENSITY_WINDOWS_EXPORT const uint_fast64_t density_buffer_decompress_safe_size(const uint_fast64_t expected_output_size) {
+DENSITY_WINDOWS_EXPORT const uint_fast64_t density_decompress_safe_size(const uint_fast64_t expected_output_size) {
     uint_fast64_t slack = DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE;
     if (DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE > slack)
         slack = DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE;
@@ -76,31 +76,28 @@ DENSITY_WINDOWS_EXPORT const uint_fast64_t density_buffer_decompress_safe_size(c
     return expected_output_size + slack;
 }
 
-DENSITY_FORCE_INLINE const DENSITY_BUFFER_STATE density_buffer_convert_algorithm_exit_status(const density_algorithm_exit_status status) {
+DENSITY_FORCE_INLINE const DENSITY_STATE density_convert_algorithm_exit_status(const density_algorithm_exit_status status) {
     switch (status) {
         case DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED:
-            return DENSITY_BUFFER_STATE_OK;
+            return DENSITY_STATE_OK;
         case DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING:
-            return DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING;
+            return DENSITY_STATE_ERROR_DURING_PROCESSING;
         case DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL:
-            return DENSITY_BUFFER_STATE_ERROR_INPUT_BUFFER_TOO_SMALL;
+            return DENSITY_STATE_ERROR_INPUT_BUFFER_TOO_SMALL;
         case DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL:
-            return DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL;
-        case DENSITY_ALGORITHMS_EXIT_STATUS_USER_INTERRUPT:
-            return DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING;
+            return DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL;
     }
 }
 
-// @todo stack initialization scope
-DENSITY_FORCE_INLINE const density_buffer_processing_result density_buffer_make_result(const DENSITY_BUFFER_STATE state, const uint_fast64_t read, const uint_fast64_t written) {
-    density_buffer_processing_result result;
+DENSITY_FORCE_INLINE const density_processing_result density_make_result(const DENSITY_STATE state, const uint_fast64_t read, const uint_fast64_t written) {
+    density_processing_result result;
     result.state = state;
     result.bytesRead = read;
     result.bytesWritten = written;
     return result;
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_result density_buffer_compress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_processing_result density_compress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size, const DENSITY_COMPRESSION_MODE compression_mode, void const* dictionary) {
     // Variables setup
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
@@ -115,36 +112,36 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM: {
             density_chameleon_dictionary dictionary;
             density_chameleon_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
+            density_algorithms_prepare_state(&state, &dictionary);
             if ((status = density_chameleon_encode(&state, &in, input_size, &out, output_size, true)))
-                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
+                return density_make_result(density_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         }
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM: {
             density_cheetah_dictionary dictionary;
             density_cheetah_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
+            density_algorithms_prepare_state(&state, &dictionary);
             if ((status = density_cheetah_encode(&state, &in, input_size, &out, output_size, true)))
-                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
+                return density_make_result(density_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         }
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM: {
             density_lion_dictionary dictionary;
             density_lion_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
+            density_algorithms_prepare_state(&state, &dictionary);
             if ((status = density_lion_encode(&state, &in, input_size, &out, output_size, true)))
-                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
+                return density_make_result(density_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         }
     }
 
     // Result
-    return density_buffer_make_result(DENSITY_BUFFER_STATE_OK, in - input_buffer, out - output_buffer);
+    return density_make_result(DENSITY_STATE_OK, in - input_buffer, out - output_buffer);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_result density_buffer_decompress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_processing_result density_buffer_decompress(const uint8_t *restrict input_buffer, const uint_fast64_t input_size, uint8_t *restrict output_buffer, const uint_fast64_t output_size) {
     if (input_size < sizeof(density_header) + sizeof(uint64_t))
-        density_buffer_make_result(DENSITY_BUFFER_STATE_ERROR_INPUT_BUFFER_TOO_SMALL, 0, 0);
+        density_make_result(DENSITY_STATE_ERROR_INPUT_BUFFER_TOO_SMALL, 0, 0);
 
     // Variables setup
     const uint8_t *in = input_buffer;
@@ -162,29 +159,29 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_buffer_processing_resu
         case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM: {
             density_chameleon_dictionary dictionary;
             density_chameleon_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
+            density_algorithms_prepare_state(&state, &dictionary);
             if ((status = density_chameleon_decode(&state, &in, remaining, &out, output_size, true)))
-                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
+                return density_make_result(density_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         }
         case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM: {
             density_cheetah_dictionary dictionary;
             density_cheetah_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
+            density_algorithms_prepare_state(&state, &dictionary);
             if ((status = density_cheetah_decode(&state, &in, remaining, &out, output_size, true)))
-                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
+                return density_make_result(density_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         }
         case DENSITY_COMPRESSION_MODE_LION_ALGORITHM: {
             density_lion_dictionary dictionary;
             density_lion_dictionary_reset(&dictionary);
-            density_algorithms_prepare_state(&state, &dictionary, DENSITY_USER_INTERRUPT_PERIODICITY_NONE);
+            density_algorithms_prepare_state(&state, &dictionary);
             if ((status = density_lion_decode(&state, &in, remaining, &out, output_size, true)))
-                return density_buffer_make_result(density_buffer_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
+                return density_make_result(density_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer);
             break;
         }
     }
 
     // Result
-    return density_buffer_make_result(DENSITY_BUFFER_STATE_OK, in - input_buffer, out - output_buffer);
+    return density_make_result(DENSITY_STATE_OK, in - input_buffer, out - output_buffer);
 }
