@@ -200,3 +200,10 @@ When this is done you can start using the **DENSITY API** :
 ```
 
 And that's it ! We've done a compression/decompression round trip with a few lines !
+
+Related projects
+----------------
+
+* **densityxx** (c++ port of density) https://github.com/charlesw1234/densityxx
+* **fsbench-density** (in-memory transformations benchmark) https://github.com/gpnuma/fsbench-density
+* **SHARC** (archiver using density algorithms) https://github.com/centaurean/sharc
