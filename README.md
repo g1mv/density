@@ -204,6 +204,6 @@ And that's it ! We've done a compression/decompression round trip with a few lin
 Related projects
 ----------------
 
-* **densityxx** (c++ port of density) https://github.com/charlesw1234/densityxx
-* **fsbench-density** (in-memory transformations benchmark) https://github.com/gpnuma/fsbench-density
-* **SHARC** (archiver using density algorithms) https://github.com/centaurean/sharc
+*   **densityxx** (c++ port of density) [https://github.com/charlesw1234/densityxx](https://github.com/charlesw1234/densityxx)
+*   **fsbench-density** (in-memory transformations benchmark) [https://github.com/gpnuma/fsbench-density](https://github.com/gpnuma/fsbench-density)
+*   **SHARC** (archiver using density algorithms) [https://github.com/centaurean/sharc](https://github.com/centaurean/sharc)

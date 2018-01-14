@@ -34,27 +34,13 @@
 
 #include "dictionaries.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_dictionary* density_create_dictionary(DENSITY_ALGORITHM algorithm, void *(*mem_alloc)(size_t)) {
-    if(mem_alloc == NULL)
-        mem_alloc = malloc;
-    density_dictionary* out = mem_alloc(sizeof(density_dictionary));
-    out->algorithm = algorithm;
+DENSITY_WINDOWS_EXPORT const size_t density_utils_get_dictionary_size(DENSITY_ALGORITHM algorithm) {
     switch(algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
-            out->size = sizeof(density_chameleon_dictionary);
-            out->pointer = mem_alloc(out->size);
-            break;
-        default:
-            return NULL;
+            return sizeof(density_chameleon_dictionary);
+        case DENSITY_ALGORITHM_CHEETAH:
+            return sizeof(density_cheetah_dictionary);
+        case DENSITY_ALGORITHM_LION:
+            return sizeof(density_lion_dictionary);
     }
-}
-
-
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_delete_dictionary(void (*mem_free)(void *)) {
-
-}
-
-
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_reset_dictionary(density_dictionary* dictionary) {
-
 }
