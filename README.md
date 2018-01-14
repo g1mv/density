@@ -136,7 +136,7 @@ A very short header holding vital informations (like DENSITY version and algorit
 APIs
 ----
 DENSITY features a straightforward *API*, simple yet powerful enough to keep users' creativity unleashed.
-Please see the [*quick start*](quickstart) at the bottom of this page.
+Please see the [*quick start*](#quick-start-a-simple-example-using-the-api) at the bottom of this page.
 
 About the algorithms
 --------------------
