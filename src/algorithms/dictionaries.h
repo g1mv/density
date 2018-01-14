@@ -41,7 +41,7 @@
 #include "../algorithms/lion/dictionary/lion_dictionary.h"
 
 DENSITY_WINDOWS_EXPORT density_dictionary* density_create_dictionary(DENSITY_ALGORITHM, void *(*)(size_t));
-DENSITY_WINDOWS_EXPORT density_dictionary* density_delete_dictionary(void (*)(void *));
+DENSITY_WINDOWS_EXPORT void density_delete_dictionary(void (*)(void *));
 DENSITY_WINDOWS_EXPORT void density_reset_dictionary(density_dictionary*);
 
 #endif

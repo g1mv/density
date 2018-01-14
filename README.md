@@ -141,24 +141,18 @@ Please see the [*quick start*](quickstart) at the bottom of this page.
 About the algorithms
 --------------------
 
-**Copy** ( *DENSITY_COMPRESSION_MODE_COPY* )
-
-This is not a so-to-speak algorithm as the name implies. It embeds data inside the density block structures.
-It can be used to quickly add integrity checks to input data, but it has another important purpose inside each block : if data is marked as incompressible using the target algorithm, a mode reversion occurs and copy mode is instead used for the remainder of the block.
-On the next block the target algorithm is tried again.
-
-**Chameleon** ( *DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM* )
+**Chameleon** ( *DENSITY_ALGORITHM_CHAMELEON* )
 
 Chameleon is a dictionary lookup based compression algorithm. It is designed for absolute speed and usually reaches a 60% compression ratio on compressible data.
 Decompression is just as fast. This algorithm is a great choice when main concern is speed.
 
-**Cheetah** ( *DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM* )
+**Cheetah** ( *DENSITY_ALGORITHM_CHEETAH* )
 
 Cheetah was developed with inputs from [Piotr Tarsa](https://github.com/tarsa).
 It is derived from chameleon and uses swapped double dictionary lookups and predictions. It can be extremely good with highly compressible data (ratio reaching 10% or less).
 On typical compressible data compression ratio is about 50% or less. It is still extremely fast for both compression and decompression and is a great, efficient all-rounder algorithm.
 
-**Lion** ( *DENSITY_COMPRESSION_MODE_LION_ALGORITHM* )
+**Lion** ( *DENSITY_ALGORITHM_LION* )
 
 Lion is a multiform compression algorithm derived from cheetah. It goes further in the areas of dynamic adaptation and fine-grained analysis.
 It uses multiple swapped dictionary lookups and predictions, and forms rank entropy coding.

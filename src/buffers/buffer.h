@@ -38,20 +38,20 @@
 #include "../globals.h"
 #include "../density_api.h"
 #include "../structure/header.h"
-#include "../core/chameleon/chameleon_encode.h"
-#include "../core/chameleon/chameleon_decode.h"
-#include "../core/cheetah/cheetah_encode.h"
-#include "../core/cheetah/cheetah_decode.h"
-#include "../core/lion/lion_encode.h"
-#include "../core/lion/lion_decode.h"
+#include "../algorithms/chameleon/core/chameleon_encode.h"
+#include "../algorithms/chameleon/core/chameleon_decode.h"
+#include "../algorithms/cheetah/core/cheetah_encode.h"
+#include "../algorithms/cheetah/core/cheetah_decode.h"
+#include "../algorithms/lion/core/lion_encode.h"
+#include "../algorithms/lion/core/lion_decode.h"
 
 DENSITY_WINDOWS_EXPORT const uint_fast64_t density_compress_safe_size(const uint_fast64_t);
 
 DENSITY_WINDOWS_EXPORT const uint_fast64_t density_decompress_safe_size(const uint_fast64_t);
 
-DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, const DENSITY_COMPRESSION_MODE, void *const dictionary);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, density_dictionary *const dictionary);
 
-DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, void *const dictionary);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, density_dictionary *const dictionary);
 
 
 #endif

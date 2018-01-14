@@ -50,7 +50,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_dictionary* density_create_d
 }
 
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_dictionary* density_delete_dictionary(void (*mem_free)(void *)) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_delete_dictionary(void (*mem_free)(void *)) {
 
 }
 

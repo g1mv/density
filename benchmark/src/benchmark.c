@@ -62,8 +62,12 @@ const char *density_benchmark_convert_state_to_text(DENSITY_STATE state) {
     switch (state) {
         case DENSITY_STATE_ERROR_DURING_PROCESSING:
             return "Error during processing";
+        case DENSITY_STATE_ERROR_INPUT_BUFFER_TOO_SMALL:
+            return "Input buffer is too small";
         case DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL:
             return "Output buffer is too small";
+        case DENSITY_STATE_ERROR_INVALID_DICTIONARY:
+            return "Invalid dictionary";
         default:
             return "Unknown error";
     }
@@ -71,8 +75,8 @@ const char *density_benchmark_convert_state_to_text(DENSITY_STATE state) {
 
 int main(int argc, char *argv[]) {
     density_benchmark_version();
-    DENSITY_COMPRESSION_MODE start_mode = DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM;
-    DENSITY_COMPRESSION_MODE end_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
+    DENSITY_ALGORITHM start_mode = DENSITY_ALGORITHM_CHAMELEON;
+    DENSITY_ALGORITHM end_mode = DENSITY_ALGORITHM_LION;
     bool compression_only = false;
     bool fuzzer = false;
     char *file_path = NULL;
@@ -83,16 +87,16 @@ int main(int argc, char *argv[]) {
         if (argv[count][0] == '-') {
             switch (argv[count][1]) {
                 case '1':
-                    start_mode = DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM;
-                    end_mode = DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM;
+                    start_mode = DENSITY_ALGORITHM_CHAMELEON;
+                    end_mode = DENSITY_ALGORITHM_CHAMELEON;
                     break;
                 case '2':
-                    start_mode = DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM;
-                    end_mode = DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM;
+                    start_mode = DENSITY_ALGORITHM_CHEETAH;
+                    end_mode = DENSITY_ALGORITHM_CHEETAH;
                     break;
                 case '3':
-                    start_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
-                    end_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
+                    start_mode = DENSITY_ALGORITHM_LION;
+                    end_mode = DENSITY_ALGORITHM_LION;
                     break;
                 case 'c':
                     compression_only = true;
@@ -146,18 +150,18 @@ int main(int argc, char *argv[]) {
     printf(" bytes of in-memory work space\n");
 
     printf("\n");
-    for (DENSITY_COMPRESSION_MODE compression_mode = start_mode; compression_mode <= end_mode; compression_mode++) {
+    for (DENSITY_ALGORITHM compression_mode = start_mode; compression_mode <= end_mode; compression_mode++) {
         // Print algorithm info
         switch (compression_mode) {
-            case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
+            case DENSITY_ALGORITHM_CHAMELEON:
                 DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Chameleon algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(19);
                 break;
-            case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
+            case DENSITY_ALGORITHM_CHEETAH:
                 DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Cheetah algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(17);
                 break;
-            case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
+            case DENSITY_ALGORITHM_LION:
                 DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Lion algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(14);
                 break;
