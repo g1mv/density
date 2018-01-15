@@ -47,12 +47,12 @@
 
 DENSITY_WINDOWS_EXPORT const uint_fast64_t density_compress_safe_size(const uint_fast64_t);
 DENSITY_WINDOWS_EXPORT const uint_fast64_t density_decompress_safe_size(const uint_fast64_t);
-DENSITY_WINDOWS_EXPORT density_context *const density_allocate_context(const DENSITY_ALGORITHM, const bool, void *(*)(size_t));
 DENSITY_WINDOWS_EXPORT void density_free_context(density_context *const, void (*)(void *));
-DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress_prepare_context(const uint8_t *, const uint_fast64_t, const bool, void *(*)(size_t));
+DENSITY_WINDOWS_EXPORT const density_processing_result density_compress_prepare_context(const DENSITY_ALGORITHM, const bool, void *(*)(size_t));
 DENSITY_WINDOWS_EXPORT const density_processing_result density_compress_with_context(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, density_context *const);
-DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress_with_context(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, density_context *const);
 DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, const DENSITY_ALGORITHM);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress_prepare_context(const uint8_t *, const uint_fast64_t, const bool, void *(*)(size_t));
+DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress_with_context(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t, density_context *const);
 DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *, const uint_fast64_t, uint8_t *, const uint_fast64_t);
 
 #endif
