@@ -70,14 +70,15 @@ typedef enum {
     DENSITY_STATE_ERROR_INPUT_BUFFER_TOO_SMALL,                  // Input buffer size is too small
     DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL,                 // Output buffer size is too small
     DENSITY_STATE_ERROR_DURING_PROCESSING,                       // Error during processing
-    DENSITY_STATE_ERROR_INVALID_DICTIONARY,                      // Invalid dictionary
+    DENSITY_STATE_ERROR_INVALID_CONTEXT,                         // Invalid context
     DENSITY_STATE_ERROR_INVALID_ALGORITHM,                       // Invalid algorithm
 } DENSITY_STATE;
 
 typedef struct {
     DENSITY_ALGORITHM algorithm;
-    void* dictionary;
+    bool dictionary_type;
     size_t dictionary_size;
+    void* dictionary;
 } density_context;
 
 typedef struct {
@@ -123,7 +124,7 @@ DENSITY_WINDOWS_EXPORT const uint8_t density_version_revision(void);
  *
  * @param algorithm the algorithm to use this dictionary for
  */
-DENSITY_WINDOWS_EXPORT const size_t density_utils_get_dictionary_size(DENSITY_ALGORITHM algorithm);
+DENSITY_WINDOWS_EXPORT const size_t density_get_dictionary_size(DENSITY_ALGORITHM algorithm);
 
 /*
  * Return an output buffer byte size which guarantees enough space for encoding input_size bytes
@@ -138,6 +139,23 @@ DENSITY_WINDOWS_EXPORT const uint_fast64_t density_compress_safe_size(const uint
  * @param expected_decompressed_output_size the expected (original) size of the decompressed data
  */
 DENSITY_WINDOWS_EXPORT const uint_fast64_t density_decompress_safe_size(const uint_fast64_t expected_decompressed_output_size);
+
+/*
+ * Allocate a context in memory using the provided function and optional dictionary
+ *
+ * @param algorithm the required algorithm
+ * @param custom_dictionary use an eventual custom dictionary ? If set to true the context's dictionary must be specified
+ * @param mem_alloc the memory allocation function. If set to NULL, malloc() is used
+ */
+DENSITY_WINDOWS_EXPORT density_context *const density_allocate_context(const DENSITY_ALGORITHM algorithm, const bool custom_dictionary, void *(*mem_alloc)(size_t));
+
+/*
+ * Releases a context from memory.
+ *
+ * @param context the context to free
+ * @param mem_free the memory freeing function. If set to NULL, free() is used
+ */
+DENSITY_WINDOWS_EXPORT void density_free_context(density_context *const context, void (*mem_free)(void *));
 
 /*
  * Compress an input_buffer of input_size bytes and store the result in output_buffer.
@@ -173,11 +191,14 @@ DENSITY_WINDOWS_EXPORT const density_processing_result density_compress_with_con
 DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size);
 
 /*
- * Reads the compressed data's header. Has to be called before density_decompress.
+ * Reads the compressed data's header and creates an adequate decompression context.
  *
- * @param dictionary the dictionary to reset. It will be filled with zero values.
+ * @param input_buffer a buffer of bytes
+ * @param input_size the size in bytes of input_buffer
+ * @param custom_dictionary use a custom dictionary ? If set to true the context's dictionary must be specified
+ * @param mem_alloc the memory allocation function. If set to NULL, malloc() is used
  */
-DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress_get_context(const uint8_t *input_buffer, const uint_fast64_t input_size);
+DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress_prepare_context(const uint8_t *input_buffer, const uint_fast64_t input_size, const bool custom_dictionary, void *(*mem_alloc)(size_t));
 
 /*
  * Decompress an input_buffer of input_size bytes and store the result in output_buffer, using the provided dictionary.

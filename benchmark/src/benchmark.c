@@ -66,8 +66,10 @@ const char *density_benchmark_convert_state_to_text(DENSITY_STATE state) {
             return "Input buffer is too small";
         case DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL:
             return "Output buffer is too small";
-        case DENSITY_STATE_ERROR_INVALID_DICTIONARY:
-            return "Invalid dictionary";
+        case DENSITY_STATE_ERROR_INVALID_CONTEXT:
+            return "Invalid context";
+        case DENSITY_STATE_ERROR_INVALID_ALGORITHM:
+            return "Invalid algorithm";
         default:
             return "Unknown error";
     }
@@ -178,14 +180,14 @@ int main(int argc, char *argv[]) {
         }
         printf(" copied in memory\n");
         printf("Pre-heating ...\n");
-        density_processing_result result = density_compress(in, uncompressed_size, out, memory_allocated, compression_mode, NULL);
+        density_processing_result result = density_compress(in, uncompressed_size, out, memory_allocated, compression_mode);
         if (result.state) {
             DENSITY_BENCHMARK_ERROR(printf("API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
         }
         const uint_fast64_t compressed_size = result.bytesWritten;
 
         if (!compression_only) {
-            result = density_decompress(out, compressed_size, in, memory_allocated, NULL);
+            result = density_decompress(out, compressed_size, in, memory_allocated);
             if (result.state) {
                 DENSITY_BENCHMARK_ERROR(printf("API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
             }
@@ -235,12 +237,12 @@ int main(int argc, char *argv[]) {
             ++iterations;
 
             cputime_chronometer_start(&chrono);
-            density_compress(in, uncompressed_size, out, memory_allocated, compression_mode, NULL);
+            density_compress(in, uncompressed_size, out, memory_allocated, compression_mode);
             compress_time_elapsed = cputime_chronometer_stop(&chrono);
 
             if (!compression_only) {
                 cputime_chronometer_start(&chrono);
-                density_decompress(out, compressed_size, in, memory_allocated, NULL);
+                density_decompress(out, compressed_size, in, memory_allocated);
                 decompress_time_elapsed = cputime_chronometer_stop(&chrono);
             }
 
