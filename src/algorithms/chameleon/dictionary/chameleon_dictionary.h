@@ -60,6 +60,4 @@ typedef struct {
 } density_chameleon_dictionary;
 #pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT void density_chameleon_dictionary_reset(const density_chameleon_dictionary*);
-
 #endif

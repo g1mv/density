@@ -67,6 +67,4 @@ typedef struct {
 } density_cheetah_dictionary;
 #pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT void density_cheetah_dictionary_reset(density_cheetah_dictionary *);
-
 #endif
