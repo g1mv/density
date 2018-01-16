@@ -1,3 +1,13 @@
+0.14.0
+------
+*January 16, 2018*
+- First stable version of DENSITY
+- Complete project reorganization and API rewrite
+- Many stability fixes and improvements
+- Fast revert to conditional copy for incompressible input
+- Custom dictionaries in API
+- Improvements in compression ratio and speed
+
 0.12.5 beta
 -----------
 *June 20, 2015*
