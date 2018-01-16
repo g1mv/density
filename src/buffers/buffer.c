@@ -36,7 +36,6 @@
 
 DENSITY_WINDOWS_EXPORT const uint_fast64_t density_compress_safe_size(const uint_fast64_t input_size) {
     const uint_fast64_t slack = DENSITY_MAX_3(DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE, DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE, DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE);
-    uint_fast64_t longest_output_size = 0;
 
     // Chameleon longest output
     uint_fast64_t chameleon_longest_output_size = 0;
@@ -44,7 +43,6 @@ DENSITY_WINDOWS_EXPORT const uint_fast64_t density_compress_safe_size(const uint
     chameleon_longest_output_size += sizeof(density_chameleon_signature) * (1 + (input_size >> (5 + 3)));   // Signature space (1 bit <=> 4 bytes)
     chameleon_longest_output_size += sizeof(density_chameleon_signature);                                   // Eventual supplementary signature for end marker
     chameleon_longest_output_size += input_size;                                                            // Everything encoded as plain data
-    longest_output_size = chameleon_longest_output_size;
 
     // Cheetah longest output
     uint_fast64_t cheetah_longest_output_size = 0;
@@ -52,8 +50,6 @@ DENSITY_WINDOWS_EXPORT const uint_fast64_t density_compress_safe_size(const uint
     cheetah_longest_output_size += sizeof(density_cheetah_signature) * (1 + (input_size >> (4 + 3)));       // Signature space (2 bits <=> 4 bytes)
     cheetah_longest_output_size += sizeof(density_cheetah_signature);                                       // Eventual supplementary signature for end marker
     cheetah_longest_output_size += input_size;                                                              // Everything encoded as plain data
-    if (cheetah_longest_output_size > longest_output_size)
-        longest_output_size = cheetah_longest_output_size;
 
     // Lion longest output
     uint_fast64_t lion_longest_output_size = 0;
@@ -61,16 +57,14 @@ DENSITY_WINDOWS_EXPORT const uint_fast64_t density_compress_safe_size(const uint
     lion_longest_output_size += sizeof(density_lion_signature) * (1 + ((input_size * 7) >> (5 + 3)));       // Signature space (7 bits <=> 4 bytes), although this size is technically impossible
     lion_longest_output_size += sizeof(density_lion_signature);                                             // Eventual supplementary signature for end marker
     lion_longest_output_size += input_size;                                                                 // Everything encoded as plain data
-    if (lion_longest_output_size > longest_output_size)
-        longest_output_size = lion_longest_output_size;
 
-    return DENSITY_MAX_2(longest_output_size, slack);
+    return DENSITY_MAX_3(chameleon_longest_output_size, cheetah_longest_output_size, lion_longest_output_size) + slack;
 }
 
-DENSITY_WINDOWS_EXPORT const uint_fast64_t density_decompress_safe_size(const uint_fast64_t expected_output_size) {
+DENSITY_WINDOWS_EXPORT const uint_fast64_t density_decompress_safe_size(const uint_fast64_t expected_decompressed_output_size) {
     const uint_fast64_t slack = DENSITY_MAX_3(DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE, DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE, DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE);
 
-    return expected_output_size + slack;
+    return expected_decompressed_output_size + slack;
 }
 
 DENSITY_FORCE_INLINE const DENSITY_STATE density_convert_algorithm_exit_status(const density_algorithm_exit_status status) {
