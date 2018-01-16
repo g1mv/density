@@ -132,6 +132,7 @@ DENSITY_WINDOWS_EXPORT const density_processing_result density_compress_with_con
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
     density_algorithm_state state;
+    density_algorithm_exit_status status;
 
     // Header
     density_header_write(&out, context->algorithm);
@@ -140,15 +141,18 @@ DENSITY_WINDOWS_EXPORT const density_processing_result density_compress_with_con
     density_algorithms_prepare_state(&state, context->dictionary);
     switch (context->algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
-            return density_make_result(density_convert_algorithm_exit_status(density_chameleon_encode(&state, &in, input_size, &out, output_size)), in - input_buffer, out - output_buffer, context);
+            status = density_chameleon_encode(&state, &in, input_size, &out, output_size);
+            break;
         case DENSITY_ALGORITHM_CHEETAH:
-            return density_make_result(density_convert_algorithm_exit_status(density_cheetah_encode(&state, &in, input_size, &out, output_size)), in - input_buffer, out - output_buffer, context);
+            status = density_cheetah_encode(&state, &in, input_size, &out, output_size);
+            break;
         case DENSITY_ALGORITHM_LION:
-            return density_make_result(density_convert_algorithm_exit_status(density_lion_encode(&state, &in, input_size, &out, output_size)), in - input_buffer, out - output_buffer, context);
+            status = density_lion_encode(&state, &in, input_size, &out, output_size);
+            break;
     }
 
     // Result
-    return density_make_result(DENSITY_STATE_OK, in - input_buffer, out - output_buffer, context);
+    return density_make_result(density_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer, context);
 }
 
 DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress_prepare_context(const uint8_t *input_buffer, const uint_fast64_t input_size, const bool custom_dictionary, void *(*mem_alloc)(size_t)) {
@@ -177,38 +181,46 @@ DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress_with_c
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
     density_algorithm_state state;
-
-    // Header skip
-    density_header_skip(&in);
-    uint_fast64_t remaining = input_size - (in - input_buffer);
+    density_algorithm_exit_status status;
 
     // Decompression
     density_algorithms_prepare_state(&state, context->dictionary);
     switch (context->algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
-            return density_make_result(density_convert_algorithm_exit_status(density_chameleon_decode(&state, &in, remaining, &out, output_size)), in - input_buffer, out - output_buffer, context);
+            status = density_chameleon_decode(&state, &in, input_size, &out, output_size);
+            break;
         case DENSITY_ALGORITHM_CHEETAH:
-            return density_make_result(density_convert_algorithm_exit_status(density_cheetah_decode(&state, &in, remaining, &out, output_size)), in - input_buffer, out - output_buffer, context);
+            status = density_cheetah_decode(&state, &in, input_size, &out, output_size);
+            break;
         case DENSITY_ALGORITHM_LION:
-            return density_make_result(density_convert_algorithm_exit_status(density_lion_decode(&state, &in, remaining, &out, output_size)), in - input_buffer, out - output_buffer, context);
+            status = density_lion_decode(&state, &in, input_size, &out, output_size);
+            break;
     }
 
     // Result
-    return density_make_result(DENSITY_STATE_OK, in - input_buffer, out - output_buffer, context);
+    return density_make_result(density_convert_algorithm_exit_status(status), in - input_buffer, out - output_buffer, context);
 }
 
 DENSITY_WINDOWS_EXPORT const density_processing_result density_compress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, const DENSITY_ALGORITHM algorithm) {
-    density_processing_result result = density_compress_with_context(input_buffer, input_size, output_buffer, output_size, density_allocate_context(algorithm, NULL, malloc));
+    density_processing_result result = density_compress_prepare_context(algorithm, false, malloc);
+    if(result.state) {
+        density_free_context(result.context, free);
+        return result;
+    }
+
+    result = density_compress_with_context(input_buffer, input_size, output_buffer, output_size, result.context);
     density_free_context(result.context, free);
     return result;
 }
 
 DENSITY_WINDOWS_EXPORT const density_processing_result density_decompress(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size) {
     density_processing_result result = density_decompress_prepare_context(input_buffer, input_size, false, malloc);
-    if(result.state)
+    if(result.state) {
+        density_free_context(result.context, free);
         return result;
+    }
 
-    result = density_decompress_with_context(input_buffer, input_size, output_buffer, output_size, result.context);
+    result = density_decompress_with_context(input_buffer + result.bytesRead, input_size - result.bytesRead, output_buffer, output_size, result.context);
     density_free_context(result.context, free);
     return result;
 }

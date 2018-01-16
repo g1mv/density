@@ -105,7 +105,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
         state->counter++;
         if (density_unlikely(state->copy_penalty)) {
             DENSITY_ALGORITHM_COPY(DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
-            DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START
+            DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
             const uint8_t *out_start = *out;
             density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);

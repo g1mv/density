@@ -34,10 +34,6 @@
 
 #include "header.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_skip(const uint8_t **restrict in) {
-    *in += sizeof(density_header);
-}
-
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_read(const uint8_t **restrict in, density_header *restrict header) {
     header->version[0] = *(*in);
     header->version[1] = *(*in + 1);

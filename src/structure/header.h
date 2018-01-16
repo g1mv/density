@@ -52,7 +52,6 @@ typedef struct {
 
 #pragma pack(pop)
 
-DENSITY_WINDOWS_EXPORT void density_header_skip(const uint8_t **);
 DENSITY_WINDOWS_EXPORT void density_header_read(const uint8_t **, density_header *);
 DENSITY_WINDOWS_EXPORT void density_header_write(uint8_t **, const DENSITY_ALGORITHM);
 
