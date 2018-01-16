@@ -35,16 +35,16 @@
 --
 
 -- Check for tools
-if os.execute("clang -v") == 0 then
+if os.execute("clang -v") then
 	toolset "clang"
-elseif os.execute("gcc -v") == 0 then
+elseif os.execute("gcc -v") then
 	toolset "gcc"
 else
 	io.write("No supported compiler found on the command line. Please install Clang/LLVM or GCC.\n")
 	os.exit(0)
 end
 
-if os.execute("git --version") > 0 then
+if os.execute("git --version") == "true" then
 	io.write("Please install Git, it is required for submodules updating.")
 	os.exit(0)
 end
@@ -53,32 +53,26 @@ end
 os.execute("git submodule update --init --recursive")
 
 solution "Density"
-	configurations { "Release" }
-	buildoptions { "-std=c99" }
-	flags { "OptimizeSpeed", "NoFramePointer", "LinkTimeOptimization" }
-
-	project "spookyhash"
-		kind "StaticLib"
-		language "C"
-		files {
-			"../src/spookyhash/src/*.h",
-			"../src/spookyhash/src/*.c"
-		}
+	configurations { "release" }
+		buildoptions { "-std=c99" }
+		flags { "NoFramePointer", "LinkTimeOptimization" }
+		optimize "Speed"
 
 	project "density"
-		kind "StaticLib"
+		kind "SharedLib"
 		language "C"
 		files {
-			"../src/*.h",
-			"../src/*.c"
+			"../src/**.h",
+			"../src/**.c"
 		}
-		links { "spookyhash" }
 
 	project "benchmark"
 		kind "ConsoleApp"
 		language "C"
 		files {
-			"../benchmark/src/**.h",
-			"../benchmark/src/**.c"
+			"../benchmark/libs/cputime/src/*.h",
+			"../benchmark/libs/cputime/src/*.c",
+			"../benchmark/src/*.h",
+			"../benchmark/src/*.c"
 		}
-		links { "density", "spookyhash" }
+		links { "density" }

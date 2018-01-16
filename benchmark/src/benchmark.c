@@ -23,9 +23,10 @@
 #include "benchmark.h"
 
 void density_benchmark_version() {
-    DENSITY_BENCHMARK_BOLD(printf("In-memory benchmark"));
+    printf("\nSingle threaded ");
+    DENSITY_BENCHMARK_BOLD(printf("in-memory benchmark"));
     printf(" powered by ");
-    DENSITY_BENCHMARK_BOLD(printf("Centaurean Density %i.%i.%i beta\n", density_version_major(), density_version_minor(), density_version_revision()));
+    DENSITY_BENCHMARK_BOLD(printf("Centaurean Density %i.%i.%i\n", density_version_major(), density_version_minor(), density_version_revision()));
     printf("Copyright (C) 2015 Guillaume Voirin\n");
     printf("Built for %s (%s endian system, %u bits) using " DENSITY_BENCHMARK_COMPILER ", %s %s\n", DENSITY_BENCHMARK_PLATFORM_STRING, DENSITY_BENCHMARK_ENDIAN_STRING, (unsigned int) (8 * sizeof(void *)), DENSITY_BENCHMARK_COMPILER_VERSION, __DATE__, __TIME__);
 }
@@ -33,7 +34,7 @@ void density_benchmark_version() {
 void density_benchmark_client_usage() {
     printf("\n");
     DENSITY_BENCHMARK_BOLD(printf("Usage :\n"));
-    printf("  benchmark [OPTIONS ?]... [FILE]\n\n");
+    printf("  benchmark [OPTIONS ?]... [FILE ?]\n\n");
     DENSITY_BENCHMARK_BOLD(printf("Available options :\n"));
     printf("  -[LEVEL]                          Test file using only the specified compression LEVEL\n");
     printf("                                    If unspecified, all algorithms are tested (default).\n");
@@ -44,7 +45,7 @@ void density_benchmark_client_usage() {
     printf("                                    2 = Cheetah algorithm\n");
     printf("                                    3 = Lion algorithm\n");
     printf("  -c                                Compress only\n");
-    printf("  -x                                Activate integrity hashsum checking\n\n");
+    printf("  -f                                Activate fuzzer mode (pseudorandom generated data)\n\n");
     exit(0);
 }
 
@@ -57,14 +58,18 @@ void density_benchmark_format_decimal(uint64_t number) {
     printf(",%03"PRIu64, number % 1000);
 }
 
-const char *density_benchmark_convert_buffer_state_to_text(DENSITY_BUFFER_STATE state) {
+const char *density_benchmark_convert_state_to_text(DENSITY_STATE state) {
     switch (state) {
-        case DENSITY_BUFFER_STATE_ERROR_DURING_PROCESSING:
+        case DENSITY_STATE_ERROR_DURING_PROCESSING:
             return "Error during processing";
-        case DENSITY_BUFFER_STATE_ERROR_INTEGRITY_CHECK_FAIL:
-            return "Integrity check failed";
-        case DENSITY_BUFFER_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL:
+        case DENSITY_STATE_ERROR_INPUT_BUFFER_TOO_SMALL:
+            return "Input buffer is too small";
+        case DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL:
             return "Output buffer is too small";
+        case DENSITY_STATE_ERROR_INVALID_CONTEXT:
+            return "Invalid context";
+        case DENSITY_STATE_ERROR_INVALID_ALGORITHM:
+            return "Invalid algorithm";
         default:
             return "Unknown error";
     }
@@ -72,113 +77,126 @@ const char *density_benchmark_convert_buffer_state_to_text(DENSITY_BUFFER_STATE 
 
 int main(int argc, char *argv[]) {
     density_benchmark_version();
-    DENSITY_COMPRESSION_MODE start_mode = DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM;
-    DENSITY_COMPRESSION_MODE end_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
-    DENSITY_BLOCK_TYPE block_type = DENSITY_BLOCK_TYPE_DEFAULT;
+    DENSITY_ALGORITHM start_mode = DENSITY_ALGORITHM_CHAMELEON;
+    DENSITY_ALGORITHM end_mode = DENSITY_ALGORITHM_LION;
     bool compression_only = false;
+    bool fuzzer = false;
+    char *file_path = NULL;
 
-    if(argc <= 1)
+    if (argc <= 1)
         density_benchmark_client_usage();
-    for (unsigned int count = 1; count < argc - 1; count++) {
+    for (unsigned int count = 1; count < argc; count++) {
         if (argv[count][0] == '-') {
             switch (argv[count][1]) {
-                case '0':
-                    start_mode = DENSITY_COMPRESSION_MODE_COPY;
-                    end_mode = DENSITY_COMPRESSION_MODE_COPY;
-                    break;
                 case '1':
-                    start_mode = DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM;
-                    end_mode = DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM;
+                    start_mode = DENSITY_ALGORITHM_CHAMELEON;
+                    end_mode = DENSITY_ALGORITHM_CHAMELEON;
                     break;
                 case '2':
-                    start_mode = DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM;
-                    end_mode = DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM;
+                    start_mode = DENSITY_ALGORITHM_CHEETAH;
+                    end_mode = DENSITY_ALGORITHM_CHEETAH;
                     break;
                 case '3':
-                    start_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
-                    end_mode = DENSITY_COMPRESSION_MODE_LION_ALGORITHM;
+                    start_mode = DENSITY_ALGORITHM_LION;
+                    end_mode = DENSITY_ALGORITHM_LION;
                     break;
                 case 'c':
                     compression_only = true;
                     break;
-                case 'x':
-                    block_type = DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK;
+                case 'f':
+                    fuzzer = true;
                     break;
                 default:
                     density_benchmark_client_usage();
             }
         } else
-            density_benchmark_client_usage();
+            file_path = argv[argc - 1];
     }
-    const char *file_path = argv[argc - 1];
 
-    // Open file and get infos
-    FILE *file = fopen(file_path, "rb");
-    if (file == NULL) {
-        DENSITY_BENCHMARK_ERROR(printf("Error opening file %s.", file_path), false);
+    uint8_t *in;
+    uint8_t *out;
+    uint_fast64_t uncompressed_size;
+    uint_fast64_t memory_allocated;
+    if (fuzzer) {
+        srand((unsigned int) (time(NULL) * 14521937821257379531llu));
+        uncompressed_size = (uint_fast64_t) (((uint64_t) (rand() * 100000000llu)) / RAND_MAX);
+        memory_allocated = density_compress_safe_size(uncompressed_size);
+        in = malloc(memory_allocated * sizeof(uint8_t));
+        uint8_t value = (uint8_t) rand();
+        for (int count = 0; count < uncompressed_size; count++) {
+            if (!(rand() & 0xf))
+                value += rand();
+            in[count] = value;
+        }
+        out = malloc(memory_allocated * sizeof(uint8_t));
+    } else {
+        // Open file and get infos
+        FILE *file = fopen(file_path, "rb");
+        if (file == NULL) {
+            DENSITY_BENCHMARK_ERROR(printf("Error opening file %s.", file_path), false);
+        }
+        struct stat file_attributes;
+        stat(file_path, &file_attributes);
+
+        // Allocate memory and copy file to memory
+        uncompressed_size = (uint_fast64_t) file_attributes.st_size;
+        memory_allocated = density_compress_safe_size(uncompressed_size);
+        in = malloc(memory_allocated * sizeof(uint8_t));
+        fread(in, sizeof(uint8_t), uncompressed_size, file);
+        fclose(file);
+        out = malloc(memory_allocated * sizeof(uint8_t));
     }
-    struct stat file_attributes;
-    stat(file_path, &file_attributes);
 
-    // Allocate memory and copy file to memory
-    const uint_fast64_t uncompressed_size = file_attributes.st_size;
-    const uint32_t memory_allocated = (3 * uncompressed_size) / 2;
-    uint8_t *in = malloc(memory_allocated * sizeof(uint8_t));
-    fread(in, sizeof(uint8_t), uncompressed_size, file);
-    fclose(file);
-    uint8_t *out = malloc(memory_allocated * sizeof(uint8_t));
+    printf("Allocated ");
+    density_benchmark_format_decimal(2 * memory_allocated);
+    printf(" bytes of in-memory work space\n");
 
     printf("\n");
-    for (DENSITY_COMPRESSION_MODE compression_mode = start_mode; compression_mode <= end_mode; compression_mode++) {
+    for (DENSITY_ALGORITHM compression_mode = start_mode; compression_mode <= end_mode; compression_mode++) {
         // Print algorithm info
         switch (compression_mode) {
-            case DENSITY_COMPRESSION_MODE_COPY:
-            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Copy")));
-                DENSITY_BENCHMARK_UNDERLINE(4);
-                break;
-            case DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM:
-            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Chameleon algorithm")));
+            case DENSITY_ALGORITHM_CHAMELEON:
+                DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Chameleon algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(19);
                 break;
-            case DENSITY_COMPRESSION_MODE_CHEETAH_ALGORITHM:
-            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Cheetah algorithm")));
+            case DENSITY_ALGORITHM_CHEETAH:
+                DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Cheetah algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(17);
                 break;
-            case DENSITY_COMPRESSION_MODE_LION_ALGORITHM:
-            DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Lion algorithm")));
+            case DENSITY_ALGORITHM_LION:
+                DENSITY_BENCHMARK_BLUE(DENSITY_BENCHMARK_BOLD(printf("Lion algorithm")));
                 DENSITY_BENCHMARK_UNDERLINE(14);
                 break;
         }
         fflush(stdout);
 
         // Pre-heat
-        printf("\nUsing file ");
-        DENSITY_BENCHMARK_BOLD(printf("%s", file_path));
-        printf(" copied in memory\n");
-        printf("Hashsum integrity check is ");
-        if (block_type != DENSITY_BLOCK_TYPE_WITH_HASHSUM_INTEGRITY_CHECK)
-            printf("off");
-        else {
-            DENSITY_BENCHMARK_BOLD(printf("on"));
+        printf("\nUsing ");
+        if (fuzzer) {
+            DENSITY_BENCHMARK_BOLD(printf("generated data"));
+        } else {
+            printf("file ");
+            DENSITY_BENCHMARK_BOLD(printf("%s", file_path));
         }
-        printf("\nPre-heating ...\n");
-        density_buffer_processing_result result = density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type, NULL, NULL);
+        printf(" copied in memory\n");
+        printf("Pre-heating ...\n");
+        density_processing_result result = density_compress(in, uncompressed_size, out, memory_allocated, compression_mode);
         if (result.state) {
-            DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
+            DENSITY_BENCHMARK_ERROR(printf("During compress API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
         }
         const uint_fast64_t compressed_size = result.bytesWritten;
 
         if (!compression_only) {
-            result = density_buffer_decompress(out, compressed_size, in, memory_allocated, NULL, NULL);
+            result = density_decompress(out, compressed_size, in, memory_allocated);
             if (result.state) {
-                DENSITY_BENCHMARK_ERROR(printf("Buffer API returned error %i (%s).", result.state, density_benchmark_convert_buffer_state_to_text(result.state)), true);
+                DENSITY_BENCHMARK_ERROR(printf("During decompress API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
             }
             if (result.bytesWritten != uncompressed_size) {
                 DENSITY_BENCHMARK_ERROR(printf("Round-trip size differs from original size (");
-                                                density_benchmark_format_decimal(result.bytesWritten);
-                                                printf(" bytes against ");
-                                                density_benchmark_format_decimal(uncompressed_size);
-                                                printf(" bytes).");, true);
+                density_benchmark_format_decimal(result.bytesWritten);
+                printf(" bytes against ");
+                density_benchmark_format_decimal(uncompressed_size);
+                printf(" bytes).");, true);
             }
         }
         printf("Starting main bench.\n");
@@ -208,7 +226,6 @@ int main(int argc, char *argv[]) {
         double total_compress_time = 0.0;
         double total_decompress_time = 0.0;
         double total_time = 0.0;
-        struct timeval stop;
         double decompress_speed;
         double decompress_speed_low;
         double decompress_speed_high;
@@ -216,16 +233,16 @@ int main(int argc, char *argv[]) {
         double decompress_time_elapsed;
         cputime_chronometer chrono;
 
-        while (total_time <= 15.0) {
+        while (total_time <= 10.0) {
             ++iterations;
 
             cputime_chronometer_start(&chrono);
-            result = density_buffer_compress(in, uncompressed_size, out, memory_allocated, compression_mode, block_type, NULL, NULL);
+            density_compress(in, uncompressed_size, out, memory_allocated, compression_mode);
             compress_time_elapsed = cputime_chronometer_stop(&chrono);
 
             if (!compression_only) {
                 cputime_chronometer_start(&chrono);
-                result = density_buffer_decompress(out, compressed_size, in, memory_allocated, NULL, NULL);
+                density_decompress(out, compressed_size, in, memory_allocated);
                 decompress_time_elapsed = cputime_chronometer_stop(&chrono);
             }
 
@@ -258,14 +275,14 @@ int main(int argc, char *argv[]) {
             }
 
             DENSITY_BENCHMARK_BLUE(printf("\rCompress speed ");
-                                           DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", compress_speed)));
-            printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.3lfs) ", compress_speed_low, compress_speed_high, compress_time_low);
+            DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", compress_speed)));
+            printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs) ", compress_speed_low, compress_speed_high, compress_time_low);
 
             if (!compression_only) {
                 printf("<=> ");
                 DENSITY_BENCHMARK_BLUE(printf("Decompress speed ");
-                                               DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", decompress_speed)));
-                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.3lfs) ", decompress_speed_low, decompress_speed_high, decompress_time_low);
+                DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", decompress_speed)));
+                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs) ", decompress_speed_low, decompress_speed_high, decompress_time_low);
             }
             fflush(stdout);
         }
@@ -274,6 +291,8 @@ int main(int argc, char *argv[]) {
 
     free(in);
     free(out);
+
+    printf("Allocated memory released.\n\n");
 
     return 1;
 }
