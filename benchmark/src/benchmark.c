@@ -182,14 +182,14 @@ int main(int argc, char *argv[]) {
         printf("Pre-heating ...\n");
         density_processing_result result = density_compress(in, uncompressed_size, out, memory_allocated, compression_mode);
         if (result.state) {
-            DENSITY_BENCHMARK_ERROR(printf("API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
+            DENSITY_BENCHMARK_ERROR(printf("During compress API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
         }
         const uint_fast64_t compressed_size = result.bytesWritten;
 
         if (!compression_only) {
             result = density_decompress(out, compressed_size, in, memory_allocated);
             if (result.state) {
-                DENSITY_BENCHMARK_ERROR(printf("API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
+                DENSITY_BENCHMARK_ERROR(printf("During decompress API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
             }
             if (result.bytesWritten != uncompressed_size) {
                 DENSITY_BENCHMARK_ERROR(printf("Round-trip size differs from original size (");
