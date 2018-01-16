@@ -4,7 +4,7 @@ Superfast compression library
 
 DENSITY is a free C99, open-source, BSD licensed compression library.
 
-It is focused on high-speed compression, at the best ratio possible. **All three** of DENSITY's algorithms are currently at the **pareto frontier** of compression ratio vs speed (cf. [here](https://github.com/inikep/lzbench/blob/master/lzbench171_sorted.md) for an independent benchmark).
+It is focused on high-speed compression, at the best ratio possible. **All three** of DENSITY's algorithms are currently at the **pareto frontier** of compression speed vs ratio (cf. [here](https://github.com/inikep/lzbench/blob/master/lzbench171_sorted.md) for an independent benchmark).
 
 DENSITY features a simple API to enable quick integration in any project.
 
@@ -136,6 +136,9 @@ A very short header holding vital informations (like DENSITY version and algorit
 APIs
 ----
 DENSITY features a straightforward *API*, simple yet powerful enough to keep users' creativity unleashed.
+
+For advanced developers, it allows use of custom dictionaries and exportation of generated dictionaries after a compression session. Although using the default, blank dictionary is perfectly fine in most cases, setting up your own, tailored dictionaries could somewhat improve compression ratio especially for low sized input datum.
+
 Please see the [*quick start*](#quick-start-a-simple-example-using-the-api) at the bottom of this page.
 
 About the algorithms
