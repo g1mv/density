@@ -44,13 +44,13 @@
 
 #include "chameleon_encode.h"
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_signature(uint8_t **restrict out, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature) {
+DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_signature(uint8_t **DENSITY_RESTRICT out, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature) {
     *signature = 0;
     *signature_pointer = (density_chameleon_signature *) *out;
     *out += sizeof(density_chameleon_signature);
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(uint8_t **restrict out, const uint16_t hash, const uint_fast8_t shift, uint_fast64_t *const restrict signature, density_chameleon_dictionary *const restrict dictionary, uint32_t *restrict unit) {
+DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(uint8_t **DENSITY_RESTRICT out, const uint16_t hash, const uint_fast8_t shift, uint_fast64_t *const DENSITY_RESTRICT signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
     density_chameleon_dictionary_entry *const found = &dictionary->entries[hash];
 
     switch (*unit ^ found->as_uint32_t) {
@@ -67,13 +67,13 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(uint8_t **restrict out
     }
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_4(const uint8_t **restrict in, uint8_t **restrict out, const uint_fast8_t shift, uint_fast64_t *const restrict signature, density_chameleon_dictionary *const restrict dictionary, uint32_t *restrict unit) {
+DENSITY_FORCE_INLINE void density_chameleon_encode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast8_t shift, uint_fast64_t *const DENSITY_RESTRICT signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
     DENSITY_MEMCPY(unit, *in, sizeof(uint32_t));
     density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(*unit), shift, signature, dictionary, unit);
     *in += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_256(const uint8_t **restrict in, uint8_t **restrict out, uint_fast64_t *const restrict signature, density_chameleon_dictionary *const restrict dictionary, uint32_t *restrict unit) {
+DENSITY_FORCE_INLINE void density_chameleon_encode_256(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast64_t *const DENSITY_RESTRICT signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
     uint_fast8_t count = 0;
 
 #ifdef __clang__
@@ -87,7 +87,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_256(const uint8_t **restrict 
 #endif
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_chameleon_encode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_chameleon_encode(density_algorithm_state *const DENSITY_RESTRICT state, const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t out_size) {
     if (out_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
@@ -109,7 +109,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
         } else {
             const uint8_t *out_start = *out;
             density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
-            __builtin_prefetch(*in + DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
+            DENSITY_PREFETCH(*in + DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
             density_chameleon_encode_256(in, out, &signature, (density_chameleon_dictionary *const) state->dictionary, &unit);
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
             DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*out - out_start), DENSITY_CHAMELEON_WORK_BLOCK_SIZE);

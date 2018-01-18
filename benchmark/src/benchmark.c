@@ -28,7 +28,7 @@ void density_benchmark_version() {
     printf(" powered by ");
     DENSITY_BENCHMARK_BOLD(printf("Centaurean Density %i.%i.%i\n", density_version_major(), density_version_minor(), density_version_revision()));
     printf("Copyright (C) 2015 Guillaume Voirin\n");
-    printf("Built for %s (%s endian system, %u bits) using " DENSITY_BENCHMARK_COMPILER ", %s %s\n", DENSITY_BENCHMARK_PLATFORM_STRING, DENSITY_BENCHMARK_ENDIAN_STRING, (unsigned int) (8 * sizeof(void *)), DENSITY_BENCHMARK_COMPILER_VERSION, __DATE__, __TIME__);
+    //printf("Built for %s (%s endian system, %u bits) using " DENSITY_BENCHMARK_COMPILER ", %s %s\n", DENSITY_BENCHMARK_PLATFORM_STRING, DENSITY_BENCHMARK_ENDIAN_STRING, (unsigned int) (8 * sizeof(void *)), DENSITY_BENCHMARK_COMPILER_VERSION, __DATE__, __TIME__);
 }
 
 void density_benchmark_client_usage() {
@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
                 printf("<=> ");
                 DENSITY_BENCHMARK_BLUE(printf("Decompress speed ");
                 DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", decompress_speed)));
-                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs) ", decompress_speed_low, decompress_speed_high, decompress_time_low);
+                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs)    ", decompress_speed_low, decompress_speed_high, decompress_time_low);
             }
             fflush(stdout);
         }

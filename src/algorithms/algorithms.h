@@ -73,6 +73,6 @@ typedef struct {
             } else\
                 state->previous_incompressible = false;
 
-DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const, void *const);
+DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const DENSITY_RESTRICT, void *const DENSITY_RESTRICT);
 
 #endif

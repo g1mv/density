@@ -89,7 +89,7 @@ DENSITY_WINDOWS_EXPORT void density_lion_form_model_attach(density_lion_form_dat
 
 DENSITY_WINDOWS_EXPORT void density_lion_form_model_update(density_lion_form_data *const, density_lion_form_node *const, const uint8_t, density_lion_form_node *const, const uint8_t);
 
-DENSITY_WINDOWS_EXPORT DENSITY_LION_FORM density_lion_form_model_increment_usage(density_lion_form_data *const, density_lion_form_node *const restrict);
+DENSITY_WINDOWS_EXPORT DENSITY_LION_FORM density_lion_form_model_increment_usage(density_lion_form_data *const, density_lion_form_node *const DENSITY_RESTRICT);
 
 DENSITY_WINDOWS_EXPORT density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *const, const DENSITY_LION_FORM);
 
