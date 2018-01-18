@@ -114,12 +114,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint8_t *out_limit = *out + out_size - DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint_fast64_t limit_128 = (in_size >> 7);
 
-    while (density_likely(limit_128-- && *out <= out_limit)) {
-        if (density_unlikely(!(state->counter & 0x1f))) {
+    while (DENSITY_LIKELY(limit_128-- && *out <= out_limit)) {
+        if (DENSITY_UNLIKELY(!(state->counter & 0x1f))) {
             DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
         }
         state->counter++;
-        if (density_unlikely(state->copy_penalty)) {
+        if (DENSITY_UNLIKELY(state->copy_penalty)) {
             DENSITY_ALGORITHM_COPY(DENSITY_CHEETAH_WORK_BLOCK_SIZE);
             DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {

@@ -104,7 +104,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_attach(
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(density_lion_form_data *const DENSITY_RESTRICT data, density_lion_form_node *const DENSITY_RESTRICT form, const uint8_t usage, density_lion_form_node *const DENSITY_RESTRICT previous_form, const uint8_t previous_usage) {
-    if (density_unlikely(previous_usage < usage)) {    // Relative stability is assumed
+    if (DENSITY_UNLIKELY(previous_usage < usage)) {    // Relative stability is assumed
         const DENSITY_LION_FORM form_value = form->form;
         const DENSITY_LION_FORM previous_form_value = previous_form->form;
 
@@ -117,7 +117,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(
 }
 
 DENSITY_FORCE_INLINE void density_lion_form_model_flatten(density_lion_form_data *const data, const uint8_t usage) {
-    if (density_unlikely(usage & 0x80))
+    if (DENSITY_UNLIKELY(usage & 0x80))
         data->usages_as_uint64_t = (data->usages_as_uint64_t >> 1) & 0x7f7f7f7f7f7f7f7fllu; // Flatten usage values
 }
 

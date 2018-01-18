@@ -201,7 +201,7 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_prepare_cont
  * @param output_size the size of output_buffer, must be at least DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE
  * @param dictionaries a pointer to a dictionary
  */
-DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_with_context(const uint8_t *input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, density_context *const context);
+DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_with_context(const uint8_t * input_buffer, const uint_fast64_t input_size, uint8_t *output_buffer, const uint_fast64_t output_size, density_context *const context);
 
 /*
  * Decompress an input_buffer of input_size bytes and store the result in output_buffer.

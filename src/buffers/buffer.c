@@ -116,7 +116,7 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_compress_prepare_contex
     return density_make_result(DENSITY_STATE_OK, 0, 0, density_allocate_context(algorithm, custom_dictionary, mem_alloc));
 }
 
-DENSITY_WINDOWS_EXPORT density_processing_result density_compress_with_context(const uint8_t *DENSITY_RESTRICT input_buffer, const uint_fast64_t input_size, uint8_t *DENSITY_RESTRICT output_buffer, const uint_fast64_t output_size, density_context *const context) {
+DENSITY_WINDOWS_EXPORT density_processing_result density_compress_with_context(const uint8_t * input_buffer, const uint_fast64_t input_size, uint8_t * output_buffer, const uint_fast64_t output_size, density_context *const context) {
     if (output_size < sizeof(density_header))
         return density_make_result(DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL, 0, 0, context);
     if(context == NULL)
@@ -167,7 +167,7 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_prepare_cont
     return density_make_result(DENSITY_STATE_OK, in - input_buffer, 0, context);
 }
 
-DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_with_context(const uint8_t *DENSITY_RESTRICT input_buffer, const uint_fast64_t input_size, uint8_t *DENSITY_RESTRICT output_buffer, const uint_fast64_t output_size, density_context *const context) {
+DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_with_context(const uint8_t * input_buffer, const uint_fast64_t input_size, uint8_t * output_buffer, const uint_fast64_t output_size, density_context *const context) {
     if(context == NULL)
         return density_make_result(DENSITY_STATE_ERROR_INVALID_CONTEXT, 0, 0, context);
 

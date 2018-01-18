@@ -170,14 +170,14 @@ DENSITY_FORCE_INLINE void density_lion_decode_4(const uint8_t **DENSITY_RESTRICT
 
 DENSITY_FORCE_INLINE DENSITY_LION_FORM density_lion_decode_read_form(const uint8_t **DENSITY_RESTRICT in, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, density_lion_form_data *const form_data) {
     const uint_fast8_t trailing_zeroes = DENSITY_CTZ(0x80 | (*signature >> *shift));
-    if (density_likely(!trailing_zeroes)) {
+    if (DENSITY_LIKELY(!trailing_zeroes)) {
         *shift = (uint_fast8_t)((*shift + 1) & 0x3f);
         return density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool);
-    } else if (density_likely(trailing_zeroes <= 6)) {
+    } else if (DENSITY_LIKELY(trailing_zeroes <= 6)) {
         *shift = (uint_fast8_t)((*shift + (trailing_zeroes + 1)) & 0x3f);
         return density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool + trailing_zeroes);
     } else {
-        if (density_likely(*shift <= (density_bitsizeof(density_lion_signature) - 7))) {
+        if (DENSITY_LIKELY(*shift <= (density_bitsizeof(density_lion_signature) - 7))) {
             *shift = (uint_fast8_t)((*shift + 7) & 0x3f);
             return density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool + 7);
         } else {
@@ -185,7 +185,7 @@ DENSITY_FORCE_INLINE DENSITY_LION_FORM density_lion_decode_read_form(const uint8
             const uint_fast8_t primary_trailing_zeroes = (uint_fast8_t)(density_bitsizeof(density_lion_signature) - *shift);
             const uint_fast8_t ctz_barrier_shift = (uint_fast8_t)(7 - primary_trailing_zeroes);
             const uint_fast8_t secondary_trailing_zeroes = DENSITY_CTZ((1 << ctz_barrier_shift) | *signature);
-            if (density_likely(secondary_trailing_zeroes != ctz_barrier_shift))
+            if (DENSITY_LIKELY(secondary_trailing_zeroes != ctz_barrier_shift))
                 *shift = (uint_fast8_t)(secondary_trailing_zeroes + 1);
             else
                 *shift = secondary_trailing_zeroes;
@@ -195,7 +195,7 @@ DENSITY_FORCE_INLINE DENSITY_LION_FORM density_lion_decode_read_form(const uint8
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_process_form(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_lion_dictionary *const DENSITY_RESTRICT dictionary, density_lion_form_data *const form_data, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift) {
-    if (density_unlikely(!*shift))
+    if (DENSITY_UNLIKELY(!*shift))
         density_lion_decode_read_signature(in, signature);
 
     switch ((*signature >> *shift) & 0x1) {
@@ -244,12 +244,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     const uint8_t *in_limit = *in + in_size - DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint8_t *out_limit = *out + out_size - DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE;
 
-    while (density_likely(*in <= in_limit && *out <= out_limit)) {
-        if (density_unlikely(!(state->counter & 0xf))) {
+    while (DENSITY_LIKELY(*in <= in_limit && *out <= out_limit)) {
+        if (DENSITY_UNLIKELY(!(state->counter & 0xf))) {
             DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
         }
         state->counter++;
-        if (density_unlikely(state->copy_penalty)) {
+        if (DENSITY_UNLIKELY(state->copy_penalty)) {
             DENSITY_ALGORITHM_COPY(DENSITY_LION_WORK_BLOCK_SIZE);
             DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
@@ -263,7 +263,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     read_and_decode_4:
-    if (density_unlikely(!shift)) {
+    if (DENSITY_UNLIKELY(!shift)) {
         if (in_size - (*in - start) < sizeof(density_lion_signature))
             return DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL;
 

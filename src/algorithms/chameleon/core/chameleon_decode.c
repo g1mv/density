@@ -113,12 +113,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     const uint8_t *in_limit = *in + in_size - DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint8_t *out_limit = *out + out_size - DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE;
 
-    while (density_likely(*in <= in_limit && *out <= out_limit)) {
-        if (density_unlikely(!(state->counter & 0xf))) {
+    while (DENSITY_LIKELY(*in <= in_limit && *out <= out_limit)) {
+        if (DENSITY_UNLIKELY(!(state->counter & 0xf))) {
             DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
         }
         state->counter++;
-        if (density_unlikely(state->copy_penalty)) {
+        if (DENSITY_UNLIKELY(state->copy_penalty)) {
             DENSITY_ALGORITHM_COPY(DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
             DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
@@ -157,7 +157,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
             break;
     }
 
-    if (density_unlikely(shift == density_bitsizeof(density_chameleon_signature)))
+    if (DENSITY_UNLIKELY(shift == density_bitsizeof(density_chameleon_signature)))
         goto read_signature;
     else
         goto read_and_decode_4;

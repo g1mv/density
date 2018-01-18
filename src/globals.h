@@ -42,49 +42,45 @@
 
 #include "density_api.h"
 
-#if !defined(__clang__) && !defined(__GNUC__)
+#if defined(_MSC_VER)
 #include <string.h>
 #include <intrin.h>
 
-#pragma message("MSVC is supported but not recommended. Please use Clang or GCC for maximum performance.")
-#define DENSITY_FORCE_INLINE    __forceinline
-#define DENSITY_RESTRICT		__restrict
-#define DENSITY_MEMCPY          memcpy
-#define DENSITY_MEMMOVE         memmove
-#define density_likely(x)       (x)
-#define density_unlikely(x)     (x)
-#define DENSITY_PREFETCH(x)		((void)(x))
+#pragma message("MSVC is supported but not recommended on a performance viewpoint. Please try to compile with Clang/LLVM for that matter.")
+#define DENSITY_FORCE_INLINE		__forceinline
+#define DENSITY_RESTRICT			__restrict
+#define DENSITY_RESTRICT_DECLARE	__restrict
+#define DENSITY_MEMCPY				memcpy
+#define DENSITY_MEMMOVE				memmove
+#define DENSITY_LIKELY(x)			(x)
+#define DENSITY_UNLIKELY(x)			(x)
+#define DENSITY_PREFETCH(x)			((void)(x))
 
-unsigned long __forceinline ctz(uint64_t value) {
+uint_fast8_t __forceinline density_msvc_ctz(uint64_t value) {
 	unsigned long trailing_zero = 0;
-	if (_BitScanForward64(&trailing_zero, value)) {
-		return trailing_zero;
-	} else {
+	if (_BitScanForward64(&trailing_zero, value))
+		return (uint_fast8_t)trailing_zero;
+	else
 		return 32;
-	}
 }
+#define DENSITY_CTZ(x)			density_msvc_ctz(x)
 
-unsigned long __forceinline clz(uint64_t value) {
-	unsigned long leading_zero = 0;
+#elif defined(__clang__) || defined(__GNUC__)
+#if defined(__GNUC__)
+#warning For optimum performance, please also try to compile with Clang/LLVM.
+#endif
+#define DENSITY_FORCE_INLINE		inline __attribute__((always_inline))
+#define DENSITY_DENSITY				restrict
+#define DENSITY_RESTRICT_DECLARE	
+#define DENSITY_MEMCPY				__builtin_memcpy
+#define DENSITY_MEMMOVE				__builtin_memmove
+#define DENSITY_LIKELY(x)			__builtin_expect(!!(x), 1)
+#define DENSITY_UNLIKELY(x)			__builtin_expect(!!(x), 0)
+#define DENSITY_PREFETCH(x)			__builtin_prefetch(x)
+#define DENSITY_CTZ(x)				__builtin_ctz(x)
 
-	if (_BitScanReverse64(&leading_zero, value)) {
-		return 31 - leading_zero;
-	} else {
-		return 32;
-	}
-}
-
-#define DENSITY_CTZ(x)			ctz(x)
 #else
- #error Unsupported compiler.
-#define DENSITY_FORCE_INLINE    inline __attribute__((always_inline))
-#define DENSITY_DENSITY			restrict
-#define DENSITY_MEMCPY          __builtin_memcpy
-#define DENSITY_MEMMOVE         __builtin_memmove
-#define density_likely(x)       __builtin_expect(!!(x), 1)
-#define density_unlikely(x)     __builtin_expect(!!(x), 0)
-#define DENSITY_PREFETCH(x)		__builtin_prefetch(x)
-#define DENSITY_CTZ(x)			__builtin_ctz(x)
+#error Unsupported compiler.
 #endif
 
 //#define DENSITY_FORCE_INLINE    inline __attribute__((always_inline))

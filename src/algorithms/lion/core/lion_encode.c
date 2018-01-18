@@ -63,10 +63,10 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_proximity_signature(uint_f
 }
 
 DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(uint8_t **DENSITY_RESTRICT out, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, const uint64_t content, const uint_fast8_t bits) {
-    if (density_likely(*shift)) {
+    if (DENSITY_LIKELY(*shift)) {
         density_lion_encode_push_to_proximity_signature(signature, shift, content, bits);
 
-        if (density_unlikely(*shift >= density_bitsizeof(density_lion_signature))) {
+        if (DENSITY_UNLIKELY(*shift >= density_bitsizeof(density_lion_signature))) {
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
 
             const uint_fast8_t remainder = (uint_fast8_t)(*shift & 0x3f);
@@ -83,10 +83,10 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(uint8_t **DENSIT
 }
 
 DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(uint8_t **DENSITY_RESTRICT out, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, const uint_fast8_t bits) {
-    if (density_likely(*shift)) {
+    if (DENSITY_LIKELY(*shift)) {
         *shift += bits;
 
-        if (density_unlikely(*shift >= density_bitsizeof(density_lion_signature))) {
+        if (DENSITY_UNLIKELY(*shift >= density_bitsizeof(density_lion_signature))) {
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
 
             const uint_fast8_t remainder = (uint_fast8_t)(*shift & 0x3f);
@@ -197,12 +197,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint8_t *out_limit = *out + out_size - DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint_fast64_t limit_256 = (in_size >> 8);
 
-    while (density_likely(limit_256-- && *out <= out_limit)) {
-        if (density_unlikely(!(state->counter & 0xf))) {
+    while (DENSITY_LIKELY(limit_256-- && *out <= out_limit)) {
+        if (DENSITY_UNLIKELY(!(state->counter & 0xf))) {
             DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
         }
         state->counter++;
-        if (density_unlikely(state->copy_penalty)) {
+        if (DENSITY_UNLIKELY(state->copy_penalty)) {
             DENSITY_ALGORITHM_COPY(DENSITY_LION_WORK_BLOCK_SIZE);
             DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {

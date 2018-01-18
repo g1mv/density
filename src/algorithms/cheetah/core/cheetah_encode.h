@@ -49,6 +49,6 @@
 #include "../dictionary/cheetah_dictionary.h"
 #include "../../algorithms.h"
 
-DENSITY_WINDOWS_EXPORT density_algorithm_exit_status density_cheetah_encode(density_algorithm_state *const DENSITY_RESTRICT, const uint8_t **DENSITY_RESTRICT, const uint_fast64_t, uint8_t **DENSITY_RESTRICT, const uint_fast64_t);
+DENSITY_WINDOWS_EXPORT density_algorithm_exit_status density_cheetah_encode(density_algorithm_state *const DENSITY_RESTRICT_DECLARE, const uint8_t **DENSITY_RESTRICT_DECLARE, const uint_fast64_t, uint8_t **DENSITY_RESTRICT_DECLARE, const uint_fast64_t);
 
 #endif
