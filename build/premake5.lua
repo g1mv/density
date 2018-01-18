@@ -35,16 +35,16 @@
 --
 
 -- Check for tools
-if os.execute("clang -v") then
+if os.execute("clang -v") == true then
 	toolset "clang"
-elseif os.execute("gcc -v") then
+elseif os.execute("gcc -v") == true then
 	toolset "gcc"
 else
 	io.write("No supported compiler found on the command line. Please install Clang/LLVM or GCC.\n")
 	os.exit(0)
 end
 
-if os.execute("git --version") == "true" then
+if os.execute("git --version") == false then
 	io.write("Please install Git, it is required for submodules updating.")
 	os.exit(0)
 end
