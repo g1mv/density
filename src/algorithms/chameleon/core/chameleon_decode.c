@@ -125,7 +125,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
             const uint8_t *in_start = *in;
             density_chameleon_decode_read_signature(in, &signature);
             density_chameleon_decode_256(in, out, signature, (density_chameleon_dictionary *const) state->dictionary);
-            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*in - in_start, DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
+            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*in - in_start), DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
         }
     }
 

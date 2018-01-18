@@ -186,8 +186,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     if (out_size < DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
-    density_lion_signature signature;
-    density_lion_signature *signature_pointer;
+    density_lion_signature signature = 0;
+    density_lion_signature *signature_pointer = NULL;
     uint_fast8_t shift = 0;
     density_lion_form_data data;
     density_lion_form_model_init(&data);
@@ -209,7 +209,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
             const uint8_t *out_start = *out;
             __builtin_prefetch(*in + DENSITY_LION_WORK_BLOCK_SIZE);
             density_lion_encode_256(in, out, &last_hash, &signature_pointer, &signature, &shift, (density_lion_dictionary *const) state->dictionary, &data, &unit);
-            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*out - out_start, DENSITY_LION_WORK_BLOCK_SIZE);
+            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*out - out_start), DENSITY_LION_WORK_BLOCK_SIZE);
         }
     }
 

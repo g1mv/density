@@ -42,5 +42,7 @@ DENSITY_WINDOWS_EXPORT size_t density_get_dictionary_size(DENSITY_ALGORITHM algo
             return sizeof(density_cheetah_dictionary);
         case DENSITY_ALGORITHM_LION:
             return sizeof(density_lion_dictionary);
+        default:
+            return 0;
     }
 }

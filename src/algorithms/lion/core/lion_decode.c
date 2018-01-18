@@ -255,7 +255,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
         } else {
             const uint8_t *in_start = *in;
             density_lion_decode_256(in, out, &last_hash, (density_lion_dictionary *const) state->dictionary, &data, &signature, &shift);
-            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*in - in_start, DENSITY_LION_WORK_BLOCK_SIZE);
+            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*in - in_start), DENSITY_LION_WORK_BLOCK_SIZE);
         }
     }
 

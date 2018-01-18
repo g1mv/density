@@ -71,12 +71,12 @@ DENSITY_FORCE_INLINE DENSITY_STATE density_convert_algorithm_exit_status(const d
     switch (status) {
         case DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED:
             return DENSITY_STATE_OK;
-        case DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING:
-            return DENSITY_STATE_ERROR_DURING_PROCESSING;
         case DENSITY_ALGORITHMS_EXIT_STATUS_INPUT_STALL:
             return DENSITY_STATE_ERROR_INPUT_BUFFER_TOO_SMALL;
         case DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL:
             return DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL;
+        default:
+            return DENSITY_STATE_ERROR_DURING_PROCESSING;
     }
 }
 
@@ -126,7 +126,7 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_compress_with_context(c
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
     density_algorithm_state state;
-    density_algorithm_exit_status status;
+    density_algorithm_exit_status status = DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;
 
     // Header
     density_header_write(&out, context->algorithm);
@@ -175,7 +175,7 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_with_context
     const uint8_t *in = input_buffer;
     uint8_t *out = output_buffer;
     density_algorithm_state state;
-    density_algorithm_exit_status status;
+    density_algorithm_exit_status status = DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;
 
     // Decompression
     density_algorithms_prepare_state(&state, context->dictionary);

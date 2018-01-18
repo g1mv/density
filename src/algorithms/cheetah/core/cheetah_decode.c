@@ -152,9 +152,8 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_16(const uint8_t **restrict in,
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, const uint_fast64_t signature, density_cheetah_dictionary *const restrict dictionary) {
-    uint_fast8_t count = 0;
-
 #ifdef __clang__
+    uint_fast8_t count = 0;
     for (uint_fast8_t count_b = 0; count_b < 8; count_b ++) {
         density_cheetah_decode_16(in, out, last_hash, signature, count, dictionary);
         count += 8;
@@ -201,7 +200,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
             const uint8_t *in_start = *in;
             density_cheetah_decode_read_signature(in, &signature);
             density_cheetah_decode_128(in, out, &last_hash, signature, (density_cheetah_dictionary *const) state->dictionary);
-            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*in - in_start, DENSITY_CHEETAH_WORK_BLOCK_SIZE);
+            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*in - in_start), DENSITY_CHEETAH_WORK_BLOCK_SIZE);
         }
     }
 
