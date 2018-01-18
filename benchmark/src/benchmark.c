@@ -294,5 +294,5 @@ int main(int argc, char *argv[]) {
 
     printf("Allocated memory released.\n\n");
 
-    return 1;
+    return EXIT_SUCCESS;
 }
