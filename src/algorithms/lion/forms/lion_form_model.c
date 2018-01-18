@@ -95,7 +95,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_init(de
     rank_7->previousForm = rank_6;
     data->formsIndex[DENSITY_LION_FORM_DICTIONARY_D] = rank_7;
 
-    *(uint64_t *) data->usages = 0;
+    data->usages_as_uint64_t = 0;
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_attach(density_lion_form_data *const data, void (*attachments[DENSITY_LION_NUMBER_OF_FORMS])(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const)) {
