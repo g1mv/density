@@ -142,7 +142,10 @@ int main(int argc, char *argv[]) {
         uncompressed_size = (uint_fast64_t) file_attributes.st_size;
         memory_allocated = density_compress_safe_size(uncompressed_size);
         in = malloc(memory_allocated * sizeof(uint8_t));
-        fread(in, sizeof(uint8_t), uncompressed_size, file);
+        size_t read = fread(in, sizeof(uint8_t), uncompressed_size, file);
+        if(uncompressed_size != read) {
+            DENSITY_BENCHMARK_ERROR(printf("Error reading file %s.", file_path), false);
+        }
         fclose(file);
         out = malloc(memory_allocated * sizeof(uint8_t));
     }

@@ -118,7 +118,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(
 
 DENSITY_FORCE_INLINE void density_lion_form_model_flatten(density_lion_form_data *const data, const uint8_t usage) {
     if (density_unlikely(usage & 0x80))
-        *(uint64_t *) data->usages = (*(uint64_t *) data->usages >> 1) & 0x7f7f7f7f7f7f7f7fllu; // Flatten usage values
+        data->usages_as_uint64_t = (data->usages_as_uint64_t >> 1) & 0x7f7f7f7f7f7f7f7fllu; // Flatten usage values
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_LION_FORM density_lion_form_model_increment_usage(density_lion_form_data *const data, density_lion_form_node *const restrict form) {

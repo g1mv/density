@@ -56,7 +56,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_proximity_signature(uint_f
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     *signature |= (content << ((56 - (*shift & ~0x7)) + (*shift & 0x7)));
 #else
-#error Unknow endianness
+#error Unsupported endianness
 #endif
 
     *shift += bits;
