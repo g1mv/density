@@ -54,9 +54,10 @@ os.execute("git submodule update --init --recursive")
 
 solution "Density"
 	configurations { "release" }
-		buildoptions { "-std=c99" }
 		flags { "NoFramePointer", "LinkTimeOptimization" }
 		optimize "Speed"
+		cdialect "C99"
+		warnings "Extra"
 
 	project "density"
 		kind "SharedLib"

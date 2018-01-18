@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 
     if (argc <= 1)
         density_benchmark_client_usage();
-    for (unsigned int count = 1; count < argc; count++) {
+    for (int count = 1; count < argc; count++) {
         if (argv[count][0] == '-') {
             switch (argv[count][1]) {
                 case '1':
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
         memory_allocated = density_compress_safe_size(uncompressed_size);
         in = malloc(memory_allocated * sizeof(uint8_t));
         uint8_t value = (uint8_t) rand();
-        for (int count = 0; count < uncompressed_size; count++) {
+        for (unsigned int count = 0; count < uncompressed_size; count++) {
             if (!(rand() & 0xf))
                 value += rand();
             in[count] = value;

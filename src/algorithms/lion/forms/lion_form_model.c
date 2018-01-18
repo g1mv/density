@@ -121,7 +121,7 @@ DENSITY_FORCE_INLINE void density_lion_form_model_flatten(density_lion_form_data
         *(uint64_t *) data->usages = (*(uint64_t *) data->usages >> 1) & 0x7f7f7f7f7f7f7f7fllu; // Flatten usage values
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_form_model_increment_usage(density_lion_form_data *const data, density_lion_form_node *const restrict form) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_LION_FORM density_lion_form_model_increment_usage(density_lion_form_data *const data, density_lion_form_node *const restrict form) {
     const DENSITY_LION_FORM form_value = form->form;
     const uint8_t usage = ++data->usages[form_value];
 
@@ -135,7 +135,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion
     return form_value;
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *const data, const DENSITY_LION_FORM form) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *const data, const DENSITY_LION_FORM form) {
     const uint8_t usage = ++data->usages[form];
 
     density_lion_form_node *const form_found = data->formsIndex[form];

@@ -69,7 +69,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel(const uint8_t **restri
     *out += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE const bool density_chameleon_decode_test_compressed(const uint_fast64_t signature, const uint_fast8_t shift) {
+DENSITY_FORCE_INLINE bool density_chameleon_decode_test_compressed(const uint_fast64_t signature, const uint_fast8_t shift) {
     return (density_bool const) ((signature >> shift) & DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP);
 }
 
@@ -96,7 +96,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_read_signature(const uint8_t 
     *in += sizeof(density_chameleon_signature);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status density_chameleon_decode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_chameleon_decode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
     if (out_size < DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 

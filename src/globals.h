@@ -168,11 +168,11 @@
 #define DENSITY_SPOOKYHASH_SEED_1                                 (0xabc)
 #define DENSITY_SPOOKYHASH_SEED_2                                 (0xdef)
 
-DENSITY_WINDOWS_EXPORT const uint8_t density_version_major();
+DENSITY_WINDOWS_EXPORT uint8_t density_version_major();
 
-DENSITY_WINDOWS_EXPORT const uint8_t density_version_minor();
+DENSITY_WINDOWS_EXPORT uint8_t density_version_minor();
 
-DENSITY_WINDOWS_EXPORT const uint8_t density_version_revision();
+DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
 
 
 /**********************************************************************************************************************

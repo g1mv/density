@@ -78,6 +78,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_dictionary_generic(uint8_t **restr
 }
 
 void density_lion_decode_prediction_a(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, density_lion_dictionary *const restrict dictionary, uint16_t *restrict const hash, uint32_t *restrict const unit) {
+    (void)in;
     *unit = dictionary->predictions[*last_hash].next_chunk_a;
     density_lion_decode_prediction_generic(out, hash, unit);
 
@@ -85,6 +86,7 @@ void density_lion_decode_prediction_a(const uint8_t **restrict in, uint8_t **res
 }
 
 void density_lion_decode_prediction_b(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, density_lion_dictionary *const restrict dictionary, uint16_t *restrict const hash, uint32_t *restrict const unit) {
+    (void)in;
     density_lion_dictionary_chunk_prediction_entry *const prediction = &dictionary->predictions[*last_hash];
     *unit = prediction->next_chunk_b;
     density_lion_decode_update_predictions_model(prediction, *unit);
@@ -94,6 +96,7 @@ void density_lion_decode_prediction_b(const uint8_t **restrict in, uint8_t **res
 }
 
 void density_lion_decode_prediction_c(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, density_lion_dictionary *const restrict dictionary, uint16_t *restrict const hash, uint32_t *restrict const unit) {
+    (void)in;
     density_lion_dictionary_chunk_prediction_entry *const prediction = &dictionary->predictions[*last_hash];
     *unit = prediction->next_chunk_c;
     density_lion_decode_update_predictions_model(prediction, *unit);
@@ -165,7 +168,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_4(const uint8_t **restrict in, uin
     data->attachments[form](in, out, last_hash, dictionary, &hash, &unit);
 }
 
-DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_decode_read_form(const uint8_t **restrict in, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, density_lion_form_data *const form_data) {
+DENSITY_FORCE_INLINE DENSITY_LION_FORM density_lion_decode_read_form(const uint8_t **restrict in, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, density_lion_form_data *const form_data) {
     const uint_fast8_t trailing_zeroes = __builtin_ctz(0x80 | (*signature >> *shift));
     if (density_likely(!trailing_zeroes)) {
         *shift = (uint_fast8_t)((*shift + 1) & 0x3f);
@@ -218,7 +221,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_256(const uint8_t **restrict in, u
 #endif
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status density_lion_decode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_lion_decode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
     if (out_size < DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 

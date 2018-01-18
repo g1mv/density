@@ -34,7 +34,7 @@
 
 #include "dictionaries.h"
 
-DENSITY_WINDOWS_EXPORT const size_t density_get_dictionary_size(DENSITY_ALGORITHM algorithm) {
+DENSITY_WINDOWS_EXPORT size_t density_get_dictionary_size(DENSITY_ALGORITHM algorithm) {
     switch(algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
             return sizeof(density_chameleon_dictionary);
