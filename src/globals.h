@@ -70,7 +70,7 @@ uint_fast8_t __forceinline density_msvc_ctz(uint64_t value) {
 #warning For optimum performance, please also try to compile with Clang/LLVM.
 #endif
 #define DENSITY_FORCE_INLINE		inline __attribute__((always_inline))
-#define DENSITY_DENSITY				restrict
+#define DENSITY_RESTRICT			restrict
 #define DENSITY_RESTRICT_DECLARE	
 #define DENSITY_MEMCPY				__builtin_memcpy
 #define DENSITY_MEMMOVE				__builtin_memmove

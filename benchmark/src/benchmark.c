@@ -229,11 +229,11 @@ int main(int argc, char *argv[]) {
         double total_compress_time = 0.0;
         double total_decompress_time = 0.0;
         double total_time = 0.0;
-        double decompress_speed;
-        double decompress_speed_low;
-        double decompress_speed_high;
-        double compress_time_elapsed;
-        double decompress_time_elapsed;
+        double decompress_speed = 0.0;
+        double decompress_speed_low = 0.0;
+        double decompress_speed_high = 0.0;
+        double compress_time_elapsed = 0.0;
+        double decompress_time_elapsed = 0.0;
         cputime_chronometer chrono;
 
         while (total_time <= 10.0) {
