@@ -68,10 +68,7 @@ Build
 -----
 DENSITY can be built on a number of platforms. It uses the [premake](http://premake.github.io/) build system.
 
-It was developed and optimized against Clang/LLVM, but GCC is also supported (please use a recent version for maximum performance).
-At this time MSVC is *not* supported, but it's straightforward to install clang for windows.
-
-The following assumes you already have *git* installed.
+It was developed and optimized against Clang/LLVM which makes it the preferred compiler, but GCC and MSVC are also supported. Please use the latest compiler versions for best performance.
 
 **Mac OS X**
 
