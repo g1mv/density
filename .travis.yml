@@ -13,4 +13,4 @@ script:
   - tar zxvf premake.tar.gz
   - ./premake5 gmake
   - make
-  - ./bin/release/benchmark -f
+  - ./bin/Release/benchmark -f
