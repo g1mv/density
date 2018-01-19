@@ -75,9 +75,9 @@ The following assumes you already have *git* installed.
 
 **Mac OS X**
 
-On OS X, Clang/LLVM is the default compiler, which makes things simpler. 
+On OS X, Clang/LLVM is the default compiler, which makes things simpler.
 
-1) First things first, please install the [homebrew package manager](https://brew.sh/).
+1) First things first, install the [homebrew package manager](https://brew.sh/).
 
 2) Then the prerequisites from the command line :
 
@@ -85,7 +85,7 @@ On OS X, Clang/LLVM is the default compiler, which makes things simpler.
     brew install git wget
 ```
 
-3) Now get the source code from this repository, and install premake :
+3) Now the source code, and premake :
 
 ```
     git clone https://github.com/centaurean/density.git
@@ -94,7 +94,7 @@ On OS X, Clang/LLVM is the default compiler, which makes things simpler.
     tar zxvf premake.tar.gz
 ```
 
-5) Finally, let's build and test :
+5) Finally, build and test :
 
 ```
     ./premake5 gmake
@@ -105,15 +105,15 @@ On OS X, Clang/LLVM is the default compiler, which makes things simpler.
 **Linux**
 
 On Linux, Clang/LLVM is not always available by default, but can be easily added thanks to the provided package managers.
-The following example assumes a Debian or Ubuntu distributions with *apt*.
+The following example assumes a Debian or Ubuntu distribution with *apt-get*.
 
-1) From the command line, install Clang/LLVM and other prerequisites (GCC is also supported if Clang/LLVM is not a possibility).
+1) From the command line, install Clang/LLVM (*optional*, GCC is also supported if Clang/LLVM can't be used) and other prerequisites.
 
 ```
     sudo apt-get install clang git wget
 ```
 
-2) Get the source code from this repository, and install premake :
+2) Get the source code and premake :
 
 ```
     git clone https://github.com/centaurean/density.git
@@ -122,7 +122,7 @@ The following example assumes a Debian or Ubuntu distributions with *apt*.
     tar zxvf premake.tar.gz
 ```
 
-3) And finally, let's build and test :
+3) And finally, build and test :
 
 ```
     ./premake5 gmake
@@ -142,11 +142,11 @@ On Windows, things are (slightly) more complicated. We'll use the [chocolatey pa
     choco install git wget unzip
 ```
 
-3) Install the [Visual Studio IDE](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community) community edition if you don't already have it.
+3) Install the [Visual Studio IDE community edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community) if you don't already have it.
 
-4) Download and install [Clang/LLVM for Windows](http://releases.llvm.org/5.0.1/LLVM-5.0.1-win64.exe) (*optional*, skip this step if you have to use Microsoft's MSVC compiler).
+4) Download and install [Clang/LLVM for Windows](http://releases.llvm.org/5.0.1/LLVM-5.0.1-win64.exe) (*optional*, MSVC compiler is also supported but resulting binaries might be slower).
 
-5) Launch Visual Studio Installer, and click on start under the panel "Visual Studio Build Tools 2017". This should open a terminal window :
+5) Open a [developer command prompt](https://docs.microsoft.com/en-us/dotnet/framework/tools/developer-command-prompt-for-vs) and type :
 
 ```
     git clone https://github.com/centaurean/density.git
@@ -155,15 +155,15 @@ On Windows, things are (slightly) more complicated. We'll use the [chocolatey pa
     unzip premake.zip
 ```
 
-6) Let's build and test :
-  
+6) Build and test :
+
 ```
     premake5.exe vs2017
     msbuild Density.sln
     bin\Release\benchmark.exe -f
 ```
 
-And that's it ! If you open the Visual Studio IDE, in the solutions explorer by right-clicking on project names you can set the platform toolset back to VS2017 or VS2015, if you also need to compile without Clang/LLVM.
+And that's it ! If you open the Visual Studio IDE, in the solutions explorer by right-clicking on project names you can change platform toolsets, if you also want to try other compilers.
 
 Output format
 -------------
