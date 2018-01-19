@@ -34,7 +34,7 @@
 
 #include "header.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_read(const uint8_t **restrict in, density_header *restrict header) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_read(const uint8_t **DENSITY_RESTRICT in, density_header *DENSITY_RESTRICT header) {
     header->version[0] = *(*in);
     header->version[1] = *(*in + 1);
     header->version[2] = *(*in + 2);
@@ -43,7 +43,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_read(const uint8
     *in += sizeof(density_header);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_write(uint8_t **restrict out, const DENSITY_ALGORITHM algorithm) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_write(uint8_t **DENSITY_RESTRICT out, const DENSITY_ALGORITHM algorithm) {
     *(*out) = DENSITY_MAJOR_VERSION;
     *(*out + 1) = DENSITY_MINOR_VERSION;
     *(*out + 2) = DENSITY_REVISION;

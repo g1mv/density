@@ -66,13 +66,13 @@ typedef struct {
                 state->copy_penalty_start >>= 1;
 
 #define DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(span, work_block_size)\
-            if (density_unlikely(span & ~(work_block_size - 1))) {\
+            if (DENSITY_UNLIKELY(span & ~(work_block_size - 1))) {\
                 if (state->previous_incompressible)\
                     state->copy_penalty = state->copy_penalty_start;\
                 state->previous_incompressible = true;\
             } else\
                 state->previous_incompressible = false;
 
-DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const, void *const);
+DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const DENSITY_RESTRICT_DECLARE, void *const DENSITY_RESTRICT_DECLARE);
 
 #endif

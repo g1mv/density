@@ -1,4 +1,4 @@
-DENSITY
+﻿DENSITY
 ========
 Superfast compression library
 
@@ -77,55 +77,93 @@ The following assumes you already have *git* installed.
 
 On OS X, Clang/LLVM is the default compiler, which makes things simpler.
 
-1) Download and install [premake5](http://premake.github.io/) for OS X and make it available in your path.
+1) First things first, install the [homebrew package manager](https://brew.sh/).
 
-2) Run the following from the command line :
+2) Then the prerequisites from the command line :
 
 ```
-    cd build
-    premake5 gmake
+    brew install git wget
+```
+
+3) Now the source code, and premake :
+
+```
+    git clone https://github.com/centaurean/density.git
+    cd density/build
+    wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-macosx.tar.gz -O premake.tar.gz
+    tar zxvf premake.tar.gz
+```
+
+5) Finally, build and test :
+
+```
+    ./premake5 gmake
     make
+    bin/Release/benchmark -f
 ```
 
 **Linux**
 
-On Linux, Clang/LLVM is not always available by default.
+On Linux, Clang/LLVM is not always available by default, but can be easily added thanks to the provided package managers.
+The following example assumes a Debian or Ubuntu distribution with *apt-get*.
 
-1) Install Clang/LLVM *(optional if GCC is installed)* if you don't have it already (on Debian distributions for example, *sudo apt-get install clang* should do the trick)
-
-2) Download and install [premake5](http://premake.github.io/) for Linux and make it available in your path.
-
-3) Run the following from the command line :
+1) From the command line, install Clang/LLVM (*optional*, GCC is also supported if Clang/LLVM can't be used) and other prerequisites.
 
 ```
-    cd build
-    premake5 gmake
+    sudo apt-get install clang git wget
+```
+
+2) Get the source code and premake :
+
+```
+    git clone https://github.com/centaurean/density.git
+    cd density/build
+    wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz -O premake.tar.gz
+    tar zxvf premake.tar.gz
+```
+
+3) And finally, build and test :
+
+```
+    ./premake5 gmake
     make
+    bin/Release/benchmark -f
 ```
 
 **Windows**
 
-On Windows, things are a (little) bit more complicated.
+On Windows, things are (slightly) more complicated. We'll use the [chocolatey package manager](https://chocolatey.org/) for simplicity.
 
-1) First, check if you have git installed, if not you can [get it here](https://www.git-scm.com/download/win). Make it available in your path.
+1) Please install [chocolatey](https://chocolatey.org/install).
 
-2) We'll use *GNU make* to build the project, on Windows it's not part of the default toolset but you can [download a port here](http://gnuwin32.sourceforge.net/packages/make.htm). Make it available in your path.
-
-3) Microsoft Visual Studio is required as we will use its linker, [get it here](https://www.visualstudio.com/en-us/products/free-developer-offers-vs.aspx).
-
-4) Now we can install Clang/LLVM for Windows, and thanks to the **ClangOnWin** project it's easy ! You can [download it here](http://sourceforge.net/projects/clangonwin/). Make it available in your path.
-
-5) Download and install [premake5](http://premake.github.io/) for Windows and make it available in your path (edit the Path environment variable).
-
-6) Run the following from the command line :
+2) From the command line, get the prerequisites :
 
 ```
-    cd build
-    premake5.exe gmake
-    make
+    choco install git wget unzip
 ```
 
-And that's it ! You can now use the integrated in-memory benchmark to test your files (the *benchmark* or *benchmark.exe* binary in the build/bin/Release/ folder).
+3) Install the [Visual Studio IDE community edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community) if you don't already have it.
+
+4) Download and install [Clang/LLVM for Windows](http://releases.llvm.org/5.0.1/LLVM-5.0.1-win64.exe) (*optional*, MSVC compiler is also supported but resulting binaries might be slower).
+
+5) Open a [developer command prompt](https://docs.microsoft.com/en-us/dotnet/framework/tools/developer-command-prompt-for-vs) and type :
+
+```
+    git clone https://github.com/centaurean/density.git
+    cd density/build
+    wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-windows.zip -O premake.zip
+    unzip premake.zip
+```
+
+6) Build and test :
+
+```
+    premake5.exe vs2017
+    msbuild Density.sln
+    bin\Release\benchmark.exe -f
+```
+
+And that's it ! If you open the Visual Studio IDE, in the solutions explorer by right-clicking on project names you can change platform toolsets, if you also want to try other compilers.
 
 Output format
 -------------
