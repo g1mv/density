@@ -39,13 +39,13 @@ if package.config:sub(1,1) == "\\" then
 	if os.execute("clang -v") == true then
 		toolset "msc-llvm-vs2014"
 	else
-		io.write("INFO : Selected compiler is MSVC. You might get better performance with Clang/LLVM.")
+		io.write("INFO : Selected compiler is MSVC. You might get better performance with Clang/LLVM.\n")
 	end
 elseif os.execute("clang -v") == true then
 	toolset "clang"
 elseif os.execute("gcc -v") == true then
 	toolset "gcc"
-	io.write("INFO : Selected compiler is GCC. You might get better performance with Clang/LLVM.")
+	io.write("INFO : Selected compiler is GCC. You might get better performance with Clang/LLVM.\n")
 else
 	io.write("ERROR : No supported compiler found on the command line. Please install Clang/LLVM, GCC, or MSC.\n")
 	os.exit(0)
