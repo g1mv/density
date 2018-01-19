@@ -45,22 +45,22 @@
 
 #include "cheetah_decode.h"
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_process_predicted(uint8_t **restrict out, uint_fast16_t *restrict last_hash, density_cheetah_dictionary *const restrict dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_process_predicted(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
     const uint32_t unit = dictionary->prediction_entries[*last_hash].next_chunk_prediction;
     DENSITY_MEMCPY(*out, &unit, sizeof(uint32_t));
     *last_hash = DENSITY_CHEETAH_HASH_ALGORITHM(unit);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_a(uint8_t **restrict out, uint_fast16_t *restrict last_hash, density_cheetah_dictionary *const restrict dictionary, const uint16_t hash) {
-    __builtin_prefetch(&dictionary->prediction_entries[hash]);
+DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_a(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary, const uint16_t hash) {
+    DENSITY_PREFETCH(&dictionary->prediction_entries[hash]);
     const uint32_t unit = dictionary->entries[hash].chunk_a;
     DENSITY_MEMCPY(*out, &unit, sizeof(uint32_t));
     dictionary->prediction_entries[*last_hash].next_chunk_prediction = unit;
     *last_hash = hash;
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_b(uint8_t **restrict out, uint_fast16_t *restrict last_hash, density_cheetah_dictionary *const restrict dictionary, const uint16_t hash) {
-    __builtin_prefetch(&dictionary->prediction_entries[hash]);
+DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_b(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary, const uint16_t hash) {
+	DENSITY_PREFETCH(&dictionary->prediction_entries[hash]);
     density_cheetah_dictionary_entry *const entry = &dictionary->entries[hash];
     const uint32_t unit = entry->chunk_b;
     entry->chunk_b = entry->chunk_a;
@@ -70,9 +70,9 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_b(uint8_t **
     *last_hash = hash;
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_process_uncompressed(uint8_t **restrict out, uint_fast16_t *restrict last_hash, density_cheetah_dictionary *const restrict dictionary, const uint32_t unit) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_process_uncompressed(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary, const uint32_t unit) {
     const uint16_t hash = DENSITY_CHEETAH_HASH_ALGORITHM(unit);
-    __builtin_prefetch(&dictionary->prediction_entries[hash]);
+	DENSITY_PREFETCH(&dictionary->prediction_entries[hash]);
     density_cheetah_dictionary_entry *const entry = &dictionary->entries[hash];
     entry->chunk_b = entry->chunk_a;
     entry->chunk_a = unit;
@@ -81,7 +81,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_process_uncompressed(uint8_t **
     *last_hash = hash;
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_4(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, const uint8_t flag, density_cheetah_dictionary *const restrict dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint8_t flag, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
     uint16_t hash;
     uint32_t unit;
 
@@ -109,7 +109,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_4(const uint8_t **restri
     *out += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_16(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, const uint8_t flags, density_cheetah_dictionary *const restrict dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_16(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint8_t flags, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
     uint16_t hash;
     uint32_t unit;
 
@@ -139,22 +139,21 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_16(const uint8_t **restr
     *out += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE const uint8_t density_cheetah_decode_read_flag(const uint_fast64_t signature, const uint_fast8_t shift) {
+DENSITY_FORCE_INLINE uint8_t density_cheetah_decode_read_flag(const uint_fast64_t signature, const uint_fast8_t shift) {
     return (uint8_t const) ((signature >> shift) & 0x3);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_4(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, const uint_fast64_t signature, const uint_fast8_t shift, density_cheetah_dictionary *const restrict dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint_fast64_t signature, const uint_fast8_t shift, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
     density_cheetah_decode_kernel_4(in, out, last_hash, density_cheetah_decode_read_flag(signature, shift), dictionary);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_16(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, const uint_fast64_t signature, const uint_fast8_t shift, density_cheetah_dictionary *const restrict dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_16(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint_fast64_t signature, const uint_fast8_t shift, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
     density_cheetah_decode_kernel_16(in, out, last_hash, (uint8_t const) ((signature >> shift) & 0xff), dictionary);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, const uint_fast64_t signature, density_cheetah_dictionary *const restrict dictionary) {
-    uint_fast8_t count = 0;
-
+DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint_fast64_t signature, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
 #ifdef __clang__
+    uint_fast8_t count = 0;
     for (uint_fast8_t count_b = 0; count_b < 8; count_b ++) {
         density_cheetah_decode_16(in, out, last_hash, signature, count, dictionary);
         count += 8;
@@ -165,12 +164,12 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **restrict in
 #endif
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(const uint8_t **restrict in, density_cheetah_signature *restrict signature) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(const uint8_t **DENSITY_RESTRICT in, density_cheetah_signature *DENSITY_RESTRICT signature) {
     DENSITY_MEMCPY(signature, *in, sizeof(density_cheetah_signature));
     *in += sizeof(density_cheetah_signature);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status density_cheetah_decode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_cheetah_decode(density_algorithm_state *const DENSITY_RESTRICT state, const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t out_size) {
     if (out_size < DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
@@ -189,19 +188,19 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
     const uint8_t *in_limit = *in + in_size - DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint8_t *out_limit = *out + out_size - DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE;
 
-    while (density_likely(*in <= in_limit && *out <= out_limit)) {
-        if (density_unlikely(!(state->counter & 0x1f))) {
+    while (DENSITY_LIKELY(*in <= in_limit && *out <= out_limit)) {
+        if (DENSITY_UNLIKELY(!(state->counter & 0x1f))) {
             DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
         }
         state->counter++;
-        if (density_unlikely(state->copy_penalty)) {
+        if (DENSITY_UNLIKELY(state->copy_penalty)) {
             DENSITY_ALGORITHM_COPY(DENSITY_CHEETAH_WORK_BLOCK_SIZE);
             DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
             const uint8_t *in_start = *in;
             density_cheetah_decode_read_signature(in, &signature);
             density_cheetah_decode_128(in, out, &last_hash, signature, (density_cheetah_dictionary *const) state->dictionary);
-            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(*in - in_start, DENSITY_CHEETAH_WORK_BLOCK_SIZE);
+            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*in - in_start), DENSITY_CHEETAH_WORK_BLOCK_SIZE);
         }
     }
 
@@ -246,7 +245,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_algorithm_exit_status 
             break;
     }
 
-    if (density_unlikely(shift == density_bitsizeof(density_cheetah_signature)))
+    if (DENSITY_UNLIKELY(shift == density_bitsizeof(density_cheetah_signature)))
         goto read_signature;
     else
         goto read_and_decode_4;

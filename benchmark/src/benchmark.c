@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 
     if (argc <= 1)
         density_benchmark_client_usage();
-    for (unsigned int count = 1; count < argc; count++) {
+    for (int count = 1; count < argc; count++) {
         if (argv[count][0] == '-') {
             switch (argv[count][1]) {
                 case '1':
@@ -123,9 +123,9 @@ int main(int argc, char *argv[]) {
         memory_allocated = density_compress_safe_size(uncompressed_size);
         in = malloc(memory_allocated * sizeof(uint8_t));
         uint8_t value = (uint8_t) rand();
-        for (int count = 0; count < uncompressed_size; count++) {
+        for (unsigned int count = 0; count < uncompressed_size; count++) {
             if (!(rand() & 0xf))
-                value += rand();
+                value += (uint8_t)rand();
             in[count] = value;
         }
         out = malloc(memory_allocated * sizeof(uint8_t));
@@ -142,7 +142,10 @@ int main(int argc, char *argv[]) {
         uncompressed_size = (uint_fast64_t) file_attributes.st_size;
         memory_allocated = density_compress_safe_size(uncompressed_size);
         in = malloc(memory_allocated * sizeof(uint8_t));
-        fread(in, sizeof(uint8_t), uncompressed_size, file);
+        size_t read = fread(in, sizeof(uint8_t), uncompressed_size, file);
+        if(uncompressed_size != read) {
+            DENSITY_BENCHMARK_ERROR(printf("Error reading file %s.", file_path), false);
+        }
         fclose(file);
         out = malloc(memory_allocated * sizeof(uint8_t));
     }
@@ -226,11 +229,11 @@ int main(int argc, char *argv[]) {
         double total_compress_time = 0.0;
         double total_decompress_time = 0.0;
         double total_time = 0.0;
-        double decompress_speed;
-        double decompress_speed_low;
-        double decompress_speed_high;
-        double compress_time_elapsed;
-        double decompress_time_elapsed;
+        double decompress_speed = 0.0;
+        double decompress_speed_low = 0.0;
+        double decompress_speed_high = 0.0;
+        double compress_time_elapsed = 0.0;
+        double decompress_time_elapsed = 0.0;
         cputime_chronometer chrono;
 
         while (total_time <= 10.0) {
@@ -282,7 +285,7 @@ int main(int argc, char *argv[]) {
                 printf("<=> ");
                 DENSITY_BENCHMARK_BLUE(printf("Decompress speed ");
                 DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", decompress_speed)));
-                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs) ", decompress_speed_low, decompress_speed_high, decompress_time_low);
+                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs)    ", decompress_speed_low, decompress_speed_high, decompress_time_low);
             }
             fflush(stdout);
         }
@@ -294,5 +297,5 @@ int main(int argc, char *argv[]) {
 
     printf("Allocated memory released.\n\n");
 
-    return 1;
+    return EXIT_SUCCESS;
 }

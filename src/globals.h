@@ -42,14 +42,48 @@
 
 #include "density_api.h"
 
-#if !defined(__clang__) && !defined(__GNUC__)
+#if defined(__clang__) || defined(__GNUC__)
+#if defined(__GNUC__)
+#warning INFO : You are compiling with GCC. You might get better performance with Clang/LLVM.
+#endif
+#define DENSITY_FORCE_INLINE		inline __attribute__((always_inline))
+#define DENSITY_RESTRICT			restrict
+#define DENSITY_RESTRICT_DECLARE	
+#define DENSITY_MEMCPY				__builtin_memcpy
+#define DENSITY_MEMMOVE				__builtin_memmove
+#define DENSITY_LIKELY(x)			__builtin_expect(!!(x), 1)
+#define DENSITY_UNLIKELY(x)			__builtin_expect(!!(x), 0)
+#define DENSITY_PREFETCH(x)			__builtin_prefetch(x)
+#define DENSITY_CTZ(x)				__builtin_ctz(x)
+
+#elif defined(_MSC_VER)
+#include <string.h>
+#include <intrin.h>
+
+#pragma message("INFO : You are compiling with MSVC. You might get better performance with Clang/LLVM.")
+#define DENSITY_FORCE_INLINE		__forceinline
+#define DENSITY_RESTRICT			__restrict
+#define DENSITY_RESTRICT_DECLARE	__restrict
+#define DENSITY_MEMCPY				memcpy
+#define DENSITY_MEMMOVE				memmove
+#define DENSITY_LIKELY(x)			(x)
+#define DENSITY_UNLIKELY(x)			(x)
+#define DENSITY_PREFETCH(x)			((void)(x))
+
+uint_fast8_t __forceinline density_msvc_ctz(uint64_t value) {
+	unsigned long trailing_zero = 0;
+	if (_BitScanForward(&trailing_zero, (unsigned long)value))
+		return (uint_fast8_t)trailing_zero;
+	else
+		return 0;
+}
+#define DENSITY_CTZ(x)				density_msvc_ctz(x)
+
+#else
 #error Unsupported compiler.
 #endif
 
-#define DENSITY_FORCE_INLINE    inline __attribute__((always_inline))
-
-#define DENSITY_MEMCPY          __builtin_memcpy
-#define DENSITY_MEMMOVE         __builtin_memmove
+//#define DENSITY_FORCE_INLINE    inline __attribute__((always_inline))
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define DENSITY_LITTLE_ENDIAN_64(b)   ((uint64_t)b)
@@ -160,19 +194,17 @@
 #define DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT    6
 #define DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE          (1 << DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT)
 
-#define density_likely(x)                         __builtin_expect(!!(x), 1)
-#define density_unlikely(x)                       __builtin_expect(!!(x), 0)
 
 #define density_bitsizeof(x) (8 * sizeof(x))
 
 #define DENSITY_SPOOKYHASH_SEED_1                                 (0xabc)
 #define DENSITY_SPOOKYHASH_SEED_2                                 (0xdef)
 
-DENSITY_WINDOWS_EXPORT const uint8_t density_version_major();
+DENSITY_WINDOWS_EXPORT uint8_t density_version_major();
 
-DENSITY_WINDOWS_EXPORT const uint8_t density_version_minor();
+DENSITY_WINDOWS_EXPORT uint8_t density_version_minor();
 
-DENSITY_WINDOWS_EXPORT const uint8_t density_version_revision();
+DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
 
 
 /**********************************************************************************************************************

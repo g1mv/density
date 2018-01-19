@@ -71,7 +71,10 @@ typedef struct {
 } density_lion_form_node;
 
 typedef struct {
-    uint8_t usages[DENSITY_LION_NUMBER_OF_FORMS];
+    union {
+        uint8_t usages_as_uint8_t[DENSITY_LION_NUMBER_OF_FORMS];
+        uint64_t usages_as_uint64_t;
+    } usages;
 
     void (*attachments[DENSITY_LION_NUMBER_OF_FORMS])(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const);
     density_lion_form_node formsPool[DENSITY_LION_NUMBER_OF_FORMS];
@@ -84,10 +87,10 @@ DENSITY_WINDOWS_EXPORT void density_lion_form_model_init(density_lion_form_data 
 
 DENSITY_WINDOWS_EXPORT void density_lion_form_model_attach(density_lion_form_data *const, void (*[DENSITY_LION_NUMBER_OF_FORMS])(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const));
 
-DENSITY_WINDOWS_EXPORT void density_lion_form_model_update(density_lion_form_data *const, density_lion_form_node *const, const uint8_t, density_lion_form_node *const, const uint8_t);
+DENSITY_WINDOWS_EXPORT void density_lion_form_model_update(density_lion_form_data *const DENSITY_RESTRICT_DECLARE, density_lion_form_node *const DENSITY_RESTRICT_DECLARE, const uint8_t, density_lion_form_node *const DENSITY_RESTRICT_DECLARE, const uint8_t);
 
-DENSITY_WINDOWS_EXPORT const DENSITY_LION_FORM density_lion_form_model_increment_usage(density_lion_form_data *const, density_lion_form_node *const restrict);
+DENSITY_WINDOWS_EXPORT DENSITY_LION_FORM density_lion_form_model_increment_usage(density_lion_form_data *const, density_lion_form_node *const DENSITY_RESTRICT_DECLARE);
 
-DENSITY_WINDOWS_EXPORT const density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *const, const DENSITY_LION_FORM);
+DENSITY_WINDOWS_EXPORT density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *const, const DENSITY_LION_FORM);
 
 #endif

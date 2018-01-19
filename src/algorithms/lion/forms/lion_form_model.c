@@ -95,7 +95,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_init(de
     rank_7->previousForm = rank_6;
     data->formsIndex[DENSITY_LION_FORM_DICTIONARY_D] = rank_7;
 
-    *(uint64_t *) data->usages = 0;
+    data->usages.usages_as_uint64_t = 0;
 }
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_attach(density_lion_form_data *const data, void (*attachments[DENSITY_LION_NUMBER_OF_FORMS])(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const)) {
@@ -103,8 +103,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_attach(
         data->attachments[count] = attachments[count];
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(density_lion_form_data *const restrict data, density_lion_form_node *const restrict form, const uint8_t usage, density_lion_form_node *const restrict previous_form, const uint8_t previous_usage) {
-    if (density_unlikely(previous_usage < usage)) {    // Relative stability is assumed
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(density_lion_form_data *const DENSITY_RESTRICT data, density_lion_form_node *const DENSITY_RESTRICT form, const uint8_t usage, density_lion_form_node *const DENSITY_RESTRICT previous_form, const uint8_t previous_usage) {
+    if (DENSITY_UNLIKELY(previous_usage < usage)) {    // Relative stability is assumed
         const DENSITY_LION_FORM form_value = form->form;
         const DENSITY_LION_FORM previous_form_value = previous_form->form;
 
@@ -117,32 +117,32 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_lion_form_model_update(
 }
 
 DENSITY_FORCE_INLINE void density_lion_form_model_flatten(density_lion_form_data *const data, const uint8_t usage) {
-    if (density_unlikely(usage & 0x80))
-        *(uint64_t *) data->usages = (*(uint64_t *) data->usages >> 1) & 0x7f7f7f7f7f7f7f7fllu; // Flatten usage values
+    if (DENSITY_UNLIKELY(usage & 0x80))
+        data->usages.usages_as_uint64_t = (data->usages.usages_as_uint64_t >> 1) & 0x7f7f7f7f7f7f7f7fllu; // Flatten usage values
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const DENSITY_LION_FORM density_lion_form_model_increment_usage(density_lion_form_data *const data, density_lion_form_node *const restrict form) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE DENSITY_LION_FORM density_lion_form_model_increment_usage(density_lion_form_data *const data, density_lion_form_node *const DENSITY_RESTRICT form) {
     const DENSITY_LION_FORM form_value = form->form;
-    const uint8_t usage = ++data->usages[form_value];
+    const uint8_t usage = ++data->usages.usages_as_uint8_t[form_value];
 
     density_lion_form_node *const previous_form = form->previousForm;
 
     if (previous_form)
-        density_lion_form_model_update(data, form, usage, previous_form, data->usages[previous_form->form]);
+        density_lion_form_model_update(data, form, usage, previous_form, data->usages.usages_as_uint8_t[previous_form->form]);
     else
         density_lion_form_model_flatten(data, usage);
 
     return form_value;
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE const density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *const data, const DENSITY_LION_FORM form) {
-    const uint8_t usage = ++data->usages[form];
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_lion_entropy_code density_lion_form_model_get_encoding(density_lion_form_data *const data, const DENSITY_LION_FORM form) {
+    const uint8_t usage = ++data->usages.usages_as_uint8_t[form];
 
     density_lion_form_node *const form_found = data->formsIndex[form];
     density_lion_form_node *const previous_form = form_found->previousForm;
 
     if (previous_form) {
-        density_lion_form_model_update(data, form_found, usage, previous_form, data->usages[previous_form->form]);
+        density_lion_form_model_update(data, form_found, usage, previous_form, data->usages.usages_as_uint8_t[previous_form->form]);
 
         return density_lion_form_entropy_codes[form_found->rank];
     } else {
