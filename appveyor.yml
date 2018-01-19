@@ -1,5 +1,5 @@
 version: 0.14.0.{build}
-image: Visual Studio 2017
+image: Visual Studio 2015
 init:
 - cmd:
 install:
@@ -15,7 +15,7 @@ install:
     del premake5.zip
 build_script:
 - cmd: >-
-    premake5.exe vs2017
+    premake5.exe vs2015
 
     msbuild.exe Density.sln
 test_script:
