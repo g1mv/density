@@ -43,12 +43,9 @@
 #include "density_api.h"
 
 #if defined(__clang__) || defined(__GNUC__)
-#if defined(__GNUC__)
-#warning INFO : You are compiling with GCC. You might get better performance with Clang/LLVM.
-#endif
 #define DENSITY_FORCE_INLINE		inline __attribute__((always_inline))
 #define DENSITY_RESTRICT			restrict
-#define DENSITY_RESTRICT_DECLARE	
+#define DENSITY_RESTRICT_DECLARE
 #define DENSITY_MEMCPY				__builtin_memcpy
 #define DENSITY_MEMMOVE				__builtin_memmove
 #define DENSITY_LIKELY(x)			__builtin_expect(!!(x), 1)
@@ -60,7 +57,6 @@
 #include <string.h>
 #include <intrin.h>
 
-#pragma message("INFO : You are compiling with MSVC. You might get better performance with Clang/LLVM.")
 #define DENSITY_FORCE_INLINE		__forceinline
 #define DENSITY_RESTRICT			__restrict
 #define DENSITY_RESTRICT_DECLARE	__restrict
