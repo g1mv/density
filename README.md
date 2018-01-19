@@ -2,16 +2,16 @@
 ========
 Superfast compression library
 
-Branch|Linux & OSX|Windows
---- | --- | ---
-master|[![Build Status](https://travis-ci.org/centaurean/density.svg?branch=master)](https://travis-ci.org/centaurean/density)|[![Build status](https://ci.appveyor.com/api/projects/status/rf7x3x829il72cii/branch/master?svg=true)](https://ci.appveyor.com/project/gpnuma/density/branch/master)
-dev|[![Build Status](https://travis-ci.org/centaurean/density.svg?branch=dev)](https://travis-ci.org/centaurean/density)|[![Build status](https://ci.appveyor.com/api/projects/status/rf7x3x829il72cii/branch/dev?svg=true)](https://ci.appveyor.com/project/gpnuma/density/branch/dev)
-
 DENSITY is a free C99, open-source, BSD licensed compression library.
 
 It is focused on high-speed compression, at the best ratio possible. **All three** of DENSITY's algorithms are currently at the **pareto frontier** of compression speed vs ratio (cf. [here](https://github.com/inikep/lzbench/blob/master/lzbench171_sorted.md) for an independent benchmark).
 
 DENSITY features a simple API to enable quick integration in any project.
+
+Branch|Linux & OSX|Windows
+--- | --- | ---
+master|[![Build Status](https://travis-ci.org/centaurean/density.svg?branch=master)](https://travis-ci.org/centaurean/density)|[![Build status](https://ci.appveyor.com/api/projects/status/rf7x3x829il72cii/branch/master?svg=true)](https://ci.appveyor.com/project/gpnuma/density/branch/master)
+dev|[![Build Status](https://travis-ci.org/centaurean/density.svg?branch=dev)](https://travis-ci.org/centaurean/density)|[![Build status](https://ci.appveyor.com/api/projects/status/rf7x3x829il72cii/branch/dev?svg=true)](https://ci.appveyor.com/project/gpnuma/density/branch/dev)
 
 Why is it so fast ?
 -------------------
