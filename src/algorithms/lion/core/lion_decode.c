@@ -184,7 +184,7 @@ DENSITY_FORCE_INLINE DENSITY_LION_FORM density_lion_decode_read_form(const uint8
             density_lion_decode_read_signature(in, signature);
             const uint_fast8_t primary_trailing_zeroes = (uint_fast8_t)(density_bitsizeof(density_lion_signature) - *shift);
             const uint_fast8_t ctz_barrier_shift = (uint_fast8_t)(7 - primary_trailing_zeroes);
-            const uint_fast8_t secondary_trailing_zeroes = DENSITY_CTZ((1 << ctz_barrier_shift) | *signature);
+            const uint_fast8_t secondary_trailing_zeroes = DENSITY_CTZ(((uint64_t)1 << ctz_barrier_shift) | *signature);
             if (DENSITY_LIKELY(secondary_trailing_zeroes != ctz_barrier_shift))
                 *shift = (uint_fast8_t)(secondary_trailing_zeroes + 1);
             else

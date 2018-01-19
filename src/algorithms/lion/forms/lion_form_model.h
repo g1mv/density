@@ -72,9 +72,9 @@ typedef struct {
 
 typedef struct {
     union {
-        uint8_t usages[DENSITY_LION_NUMBER_OF_FORMS];
+        uint8_t usages_as_uint8_t[DENSITY_LION_NUMBER_OF_FORMS];
         uint64_t usages_as_uint64_t;
-    };
+    } usages;
 
     void (*attachments[DENSITY_LION_NUMBER_OF_FORMS])(const uint8_t **, uint8_t **, uint_fast16_t *, void *const, uint16_t *const, uint32_t *const);
     density_lion_form_node formsPool[DENSITY_LION_NUMBER_OF_FORMS];

@@ -42,11 +42,25 @@
 
 #include "density_api.h"
 
-#if defined(_MSC_VER)
+#if defined(__clang__) || defined(__GNUC__)
+#if defined(__GNUC__)
+#warning INFO : You are compiling with GCC. You might get better performance with Clang/LLVM.
+#endif
+#define DENSITY_FORCE_INLINE		inline __attribute__((always_inline))
+#define DENSITY_RESTRICT			restrict
+#define DENSITY_RESTRICT_DECLARE	
+#define DENSITY_MEMCPY				__builtin_memcpy
+#define DENSITY_MEMMOVE				__builtin_memmove
+#define DENSITY_LIKELY(x)			__builtin_expect(!!(x), 1)
+#define DENSITY_UNLIKELY(x)			__builtin_expect(!!(x), 0)
+#define DENSITY_PREFETCH(x)			__builtin_prefetch(x)
+#define DENSITY_CTZ(x)				__builtin_ctz(x)
+
+#elif defined(_MSC_VER)
 #include <string.h>
 #include <intrin.h>
 
-#pragma message("MSVC is supported but not recommended on a performance viewpoint. Please try to compile with Clang/LLVM for that matter.")
+#pragma message("INFO : You are compiling with MSVC. You might get better performance with Clang/LLVM.")
 #define DENSITY_FORCE_INLINE		__forceinline
 #define DENSITY_RESTRICT			__restrict
 #define DENSITY_RESTRICT_DECLARE	__restrict
@@ -58,26 +72,12 @@
 
 uint_fast8_t __forceinline density_msvc_ctz(uint64_t value) {
 	unsigned long trailing_zero = 0;
-	if (_BitScanForward64(&trailing_zero, value))
+	if (_BitScanForward(&trailing_zero, (unsigned long)value))
 		return (uint_fast8_t)trailing_zero;
 	else
-		return 32;
+		return 0;
 }
-#define DENSITY_CTZ(x)			density_msvc_ctz(x)
-
-#elif defined(__clang__) || defined(__GNUC__)
-#if defined(__GNUC__)
-#warning For optimum performance, please also try to compile with Clang/LLVM.
-#endif
-#define DENSITY_FORCE_INLINE		inline __attribute__((always_inline))
-#define DENSITY_RESTRICT			restrict
-#define DENSITY_RESTRICT_DECLARE	
-#define DENSITY_MEMCPY				__builtin_memcpy
-#define DENSITY_MEMMOVE				__builtin_memmove
-#define DENSITY_LIKELY(x)			__builtin_expect(!!(x), 1)
-#define DENSITY_UNLIKELY(x)			__builtin_expect(!!(x), 0)
-#define DENSITY_PREFETCH(x)			__builtin_prefetch(x)
-#define DENSITY_CTZ(x)				__builtin_ctz(x)
+#define DENSITY_CTZ(x)				density_msvc_ctz(x)
 
 #else
 #error Unsupported compiler.

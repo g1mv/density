@@ -53,11 +53,14 @@ end
 os.execute("git submodule update --init --recursive")
 
 solution "Density"
-	configurations { "release" }
+	configurations { "Release" }
 		flags { "NoFramePointer", "LinkTimeOptimization" }
 		optimize "Speed"
 		cdialect "C99"
 		warnings "Extra"
+		if os.is64bit() == true then
+			architecture "x64"
+		end
 
 	project "density"
 		kind "SharedLib"

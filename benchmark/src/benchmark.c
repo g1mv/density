@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
         uint8_t value = (uint8_t) rand();
         for (unsigned int count = 0; count < uncompressed_size; count++) {
             if (!(rand() & 0xf))
-                value += rand();
+                value += (uint8_t)rand();
             in[count] = value;
         }
         out = malloc(memory_allocated * sizeof(uint8_t));
