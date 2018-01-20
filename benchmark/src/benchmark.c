@@ -150,9 +150,13 @@ int main(int argc, char *argv[]) {
         out = malloc(memory_allocated * sizeof(uint8_t));
     }
 
-    printf("Allocated ");
+    printf("\nAllocated ");
     density_benchmark_format_decimal(2 * memory_allocated);
     printf(" bytes of in-memory work space\n");
+
+    uint64_t original_hash_1 = DENSITY_BENCHMARK_HASH_SEED_1;
+    uint64_t original_hash_2 = DENSITY_BENCHMARK_HASH_SEED_2;
+    spookyhash_128(in, uncompressed_size, &original_hash_1, &original_hash_2);
 
     printf("\n");
     for (DENSITY_ALGORITHM compression_mode = start_mode; compression_mode <= end_mode; compression_mode++) {
@@ -190,6 +194,7 @@ int main(int argc, char *argv[]) {
         const uint_fast64_t compressed_size = result.bytesWritten;
 
         if (!compression_only) {
+            //const uint8_t* original_in = in;
             result = density_decompress(out, compressed_size, in, memory_allocated);
             if (result.state) {
                 DENSITY_BENCHMARK_ERROR(printf("During decompress API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
@@ -200,6 +205,17 @@ int main(int argc, char *argv[]) {
                 printf(" bytes against ");
                 density_benchmark_format_decimal(uncompressed_size);
                 printf(" bytes).");, true);
+            }
+
+            uint64_t hash_1 = DENSITY_BENCHMARK_HASH_SEED_1;
+            uint64_t hash_2 = DENSITY_BENCHMARK_HASH_SEED_2;
+            spookyhash_128(in, uncompressed_size, &hash_1, &hash_2);
+            if(hash_1 != original_hash_1 || hash_2 != original_hash_2) {
+                DENSITY_BENCHMARK_ERROR(printf("Decompressed and original hash differ (");
+                printf("0x%" PRIx64 "%" PRIx64, hash_1, hash_2);
+                printf(" vs. ");
+                printf("0x%" PRIx64 "%" PRIx64, original_hash_1, original_hash_2);
+                printf(").");, true);
             }
         }
         printf("Starting main bench.\n");
