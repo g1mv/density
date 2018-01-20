@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
         uint8_t value = (uint8_t) rand();
         for (unsigned int count = 0; count < uncompressed_size; count++) {
             if (!(rand() & 0xf))
-                value += rand();
+                value += (uint8_t)rand();
             in[count] = value;
         }
         out = malloc(memory_allocated * sizeof(uint8_t));
@@ -229,11 +229,11 @@ int main(int argc, char *argv[]) {
         double total_compress_time = 0.0;
         double total_decompress_time = 0.0;
         double total_time = 0.0;
-        double decompress_speed;
-        double decompress_speed_low;
-        double decompress_speed_high;
-        double compress_time_elapsed;
-        double decompress_time_elapsed;
+        double decompress_speed = 0.0;
+        double decompress_speed_low = 0.0;
+        double decompress_speed_high = 0.0;
+        double compress_time_elapsed = 0.0;
+        double decompress_time_elapsed = 0.0;
         cputime_chronometer chrono;
 
         while (total_time <= 10.0) {
@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
                 printf("<=> ");
                 DENSITY_BENCHMARK_BLUE(printf("Decompress speed ");
                 DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", decompress_speed)));
-                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs) ", decompress_speed_low, decompress_speed_high, decompress_time_low);
+                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs)    ", decompress_speed_low, decompress_speed_high, decompress_time_low);
             }
             fflush(stdout);
         }

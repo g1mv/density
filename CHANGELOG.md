@@ -1,3 +1,11 @@
+0.14.1
+------
+*January 20, 2018*
+- Added MSVC support
+- Added continuous integration on travis and appveyor
+- Premake script improvement
+- Various codebase improvements
+
 0.14.0
 ------
 *January 16, 2018*

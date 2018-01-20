@@ -44,13 +44,13 @@
 
 #include "lion_encode.h"
 
-DENSITY_FORCE_INLINE void density_lion_encode_prepare_signature(uint8_t **restrict out, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature) {
+DENSITY_FORCE_INLINE void density_lion_encode_prepare_signature(uint8_t **DENSITY_RESTRICT out, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature) {
     *signature = 0;
     *signature_pointer = (density_lion_signature *) *out;
     *out += sizeof(density_lion_signature);
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_push_to_proximity_signature(uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, const uint64_t content, const uint_fast8_t bits) {
+DENSITY_FORCE_INLINE void density_lion_encode_push_to_proximity_signature(uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, const uint64_t content, const uint_fast8_t bits) {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     *signature |= (content << *shift);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -62,11 +62,11 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_proximity_signature(uint_f
     *shift += bits;
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(uint8_t **restrict out, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, const uint64_t content, const uint_fast8_t bits) {
-    if (density_likely(*shift)) {
+DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(uint8_t **DENSITY_RESTRICT out, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, const uint64_t content, const uint_fast8_t bits) {
+    if (DENSITY_LIKELY(*shift)) {
         density_lion_encode_push_to_proximity_signature(signature, shift, content, bits);
 
-        if (density_unlikely(*shift >= density_bitsizeof(density_lion_signature))) {
+        if (DENSITY_UNLIKELY(*shift >= density_bitsizeof(density_lion_signature))) {
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
 
             const uint_fast8_t remainder = (uint_fast8_t)(*shift & 0x3f);
@@ -82,11 +82,11 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(uint8_t **restri
     }
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(uint8_t **restrict out, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, const uint_fast8_t bits) {
-    if (density_likely(*shift)) {
+DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(uint8_t **DENSITY_RESTRICT out, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, const uint_fast8_t bits) {
+    if (DENSITY_LIKELY(*shift)) {
         *shift += bits;
 
-        if (density_unlikely(*shift >= density_bitsizeof(density_lion_signature))) {
+        if (DENSITY_UNLIKELY(*shift >= density_bitsizeof(density_lion_signature))) {
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
 
             const uint_fast8_t remainder = (uint_fast8_t)(*shift & 0x3f);
@@ -102,13 +102,13 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(uint8_t **r
     }
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_push_code_to_signature(uint8_t **restrict out, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, const density_lion_entropy_code code) {
+DENSITY_FORCE_INLINE void density_lion_encode_push_code_to_signature(uint8_t **DENSITY_RESTRICT out, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, const density_lion_entropy_code code) {
     density_lion_encode_push_to_signature(out, signature_pointer, signature, shift, code.value, code.bitLength);
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_kernel_4(uint8_t **restrict out, uint_fast16_t *restrict last_hash, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, density_lion_dictionary *const restrict dictionary, const uint16_t hash, density_lion_form_data *const data, const uint32_t unit) {
+DENSITY_FORCE_INLINE void density_lion_encode_kernel_4(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, density_lion_dictionary *const DENSITY_RESTRICT dictionary, const uint16_t hash, density_lion_form_data *const data, const uint32_t unit) {
     density_lion_dictionary_chunk_prediction_entry *const predictions = &dictionary->predictions[*last_hash];
-    __builtin_prefetch(&dictionary->predictions[hash]);
+	DENSITY_PREFETCH(&dictionary->predictions[hash]);
 
     if (*(uint32_t *) predictions ^ unit) {
         if (*((uint32_t *) predictions + 1) ^ unit) {
@@ -156,13 +156,13 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel_4(uint8_t **restrict out, u
     *last_hash = hash;
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_4(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, density_lion_dictionary *const restrict dictionary, density_lion_form_data *const data, uint32_t *restrict unit) {
+DENSITY_FORCE_INLINE void density_lion_encode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, density_lion_dictionary *const DENSITY_RESTRICT dictionary, density_lion_form_data *const data, uint32_t *DENSITY_RESTRICT unit) {
     DENSITY_MEMCPY(unit, *in, sizeof(uint32_t));
     density_lion_encode_kernel_4(out, last_hash, signature_pointer, signature, shift, dictionary, DENSITY_LION_HASH_ALGORITHM(*unit), data, *unit);
     *in += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_generic(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, density_lion_dictionary *const restrict dictionary, const uint_fast8_t chunks_per_process_unit, density_lion_form_data *const data, uint32_t *restrict unit) {
+DENSITY_FORCE_INLINE void density_lion_encode_generic(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, density_lion_dictionary *const DENSITY_RESTRICT dictionary, const uint_fast8_t chunks_per_process_unit, density_lion_form_data *const data, uint32_t *DENSITY_RESTRICT unit) {
 #ifdef __clang__
     for (uint_fast8_t count = 0; count < (chunks_per_process_unit >> 2); count++) {
         DENSITY_UNROLL_4(density_lion_encode_4(in, out, last_hash, signature_pointer, signature, shift, dictionary, data, unit));
@@ -174,15 +174,15 @@ DENSITY_FORCE_INLINE void density_lion_encode_generic(const uint8_t **restrict i
 #endif
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_32(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, density_lion_dictionary *const restrict dictionary, density_lion_form_data *const data, uint32_t *restrict unit) {
+DENSITY_FORCE_INLINE void density_lion_encode_32(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, density_lion_dictionary *const DENSITY_RESTRICT dictionary, density_lion_form_data *const data, uint32_t *DENSITY_RESTRICT unit) {
     density_lion_encode_generic(in, out, last_hash, signature_pointer, signature, shift, dictionary, DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_SMALL, data, unit);
 }
 
-DENSITY_FORCE_INLINE void density_lion_encode_256(const uint8_t **restrict in, uint8_t **restrict out, uint_fast16_t *restrict last_hash, uint_fast64_t **restrict signature_pointer, uint_fast64_t *const restrict signature, uint_fast8_t *const restrict shift, density_lion_dictionary *const restrict dictionary, density_lion_form_data *const data, uint32_t *restrict unit) {
+DENSITY_FORCE_INLINE void density_lion_encode_256(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature, uint_fast8_t *const DENSITY_RESTRICT shift, density_lion_dictionary *const DENSITY_RESTRICT dictionary, density_lion_form_data *const data, uint32_t *DENSITY_RESTRICT unit) {
     density_lion_encode_generic(in, out, last_hash, signature_pointer, signature, shift, dictionary, DENSITY_LION_CHUNKS_PER_PROCESS_UNIT_BIG, data, unit);
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_lion_encode(density_algorithm_state *const restrict state, const uint8_t **restrict in, const uint_fast64_t in_size, uint8_t **restrict out, const uint_fast64_t out_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_lion_encode(density_algorithm_state *const DENSITY_RESTRICT state, const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t out_size) {
     if (out_size < DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
@@ -197,17 +197,17 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint8_t *out_limit = *out + out_size - DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE;
     uint_fast64_t limit_256 = (in_size >> 8);
 
-    while (density_likely(limit_256-- && *out <= out_limit)) {
-        if (density_unlikely(!(state->counter & 0xf))) {
+    while (DENSITY_LIKELY(limit_256-- && *out <= out_limit)) {
+        if (DENSITY_UNLIKELY(!(state->counter & 0xf))) {
             DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
         }
         state->counter++;
-        if (density_unlikely(state->copy_penalty)) {
+        if (DENSITY_UNLIKELY(state->copy_penalty)) {
             DENSITY_ALGORITHM_COPY(DENSITY_LION_WORK_BLOCK_SIZE);
             DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
             const uint8_t *out_start = *out;
-            __builtin_prefetch(*in + DENSITY_LION_WORK_BLOCK_SIZE);
+			DENSITY_PREFETCH(*in + DENSITY_LION_WORK_BLOCK_SIZE);
             density_lion_encode_256(in, out, &last_hash, &signature_pointer, &signature, &shift, (density_lion_dictionary *const) state->dictionary, &data, &unit);
             DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*out - out_start), DENSITY_LION_WORK_BLOCK_SIZE);
         }
