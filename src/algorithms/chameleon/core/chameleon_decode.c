@@ -125,7 +125,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_4(const uint8_t **DENSITY_RES
 DENSITY_FORCE_INLINE void density_chameleon_decode_256(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
     uint_fast8_t count = 0;
 
-#ifdef __clang__
+#if defined(__clang__) || defined(_MSC_VER)
     for(uint_fast8_t count_b = 0; count_b < 16; count_b ++) {
         DENSITY_UNROLL_2(density_chameleon_decode_kernel_dual(in, out, signature, count, dictionary); count+= 2);
     }
