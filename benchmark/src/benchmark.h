@@ -121,7 +121,7 @@
                                                 DENSITY_BENCHMARK_BOLD(printf("Thank you !\n"));\
                                             }\
                                             fflush(stdout);\
-                                            exit(0);
+                                            exit(EXIT_FAILURE);
 
 #endif
 

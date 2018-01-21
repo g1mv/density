@@ -46,7 +46,7 @@ void density_benchmark_client_usage() {
     printf("                                    3 = Lion algorithm\n");
     printf("  -c                                Compress only\n");
     printf("  -f                                Activate fuzzer mode (pseudorandom generated data)\n\n");
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 void density_benchmark_format_decimal(uint64_t number) {
