@@ -50,11 +50,11 @@ Timing : using the *time* function, and taking the best *user* output after mult
 
 <sub>Library</sub>|<sub>Algorithm</sub>|<sub>Compress</sub>|<sub>Decompress</sub>|<sub>Size</sub>|<sub>Ratio</sub>|<sub>Round trip</sub>
 ---|---|---|---|---|---|---
-<sub>**density** 0.14.0</sub>|<sub>Chameleon</sub>|<sub>0.094s (1059 MB/s)</sub>|<sub>0.066s (1514 MB/s)</sub>|<sub>61 524 084</sub>|<sub>61,52%</sub>|<sub>0.160s</sub>
+<sub>**density** 0.14.1</sub>|<sub>Chameleon</sub>|<sub>0.094s (1059 MB/s)</sub>|<sub>0.059s (1694 MB/s)</sub>|<sub>61 524 084</sub>|<sub>61,52%</sub>|<sub>0.153s</sub>
 <sub>lz4 r129</sub>|<sub>-1</sub>|<sub>0.468s (214 MB/s)</sub>|<sub>0.115s (870 MB/s)</sub>|<sub>57 285 990</sub>|<sub>57,29%</sub>|<sub>0.583s</sub>
 <sub>lzo 2.08</sub>|<sub>-1</sub>|<sub>0.367s (272 MB/s)</sub>|<sub>0.309s (324 MB/s)</sub>|<sub>56 709 096</sub>|<sub>56,71%</sub>|<sub>0.676s</sub>
-<sub>**density** 0.14.0</sub>|<sub>Cheetah</sub>|<sub>0.177s (564 MB/s)</sub>|<sub>0.130s (768 MB/s)</sub>|<sub>53 156 668</sub>|<sub>53,16%</sub>|<sub>0.307s</sub>
-<sub>**density** 0.14.0</sub>|<sub>Lion</sub>|<sub>0.329s (304 MB/s)</sub>|<sub>0.301s (332 MB/s)</sub>|<sub>47 817 692</sub>|<sub>47,82%</sub>|<sub>0.630s</sub>
+<sub>**density** 0.14.1</sub>|<sub>Cheetah</sub>|<sub>0.177s (564 MB/s)</sub>|<sub>0.129s (777 MB/s)</sub>|<sub>53 156 668</sub>|<sub>53,16%</sub>|<sub>0.306s</sub>
+<sub>**density** 0.14.1</sub>|<sub>Lion</sub>|<sub>0.319s (314 MB/s)</sub>|<sub>0.289s (346 MB/s)</sub>|<sub>47 817 692</sub>|<sub>47,82%</sub>|<sub>0.608s</sub>
 <sub>lz4 r129</sub>|<sub>-3</sub>|<sub>1.685s (59 MB/s)</sub>|<sub>0.118s (847 MB/s)</sub>|<sub>44 539 940</sub>|<sub>44,54%</sub>|<sub>1.803s</sub>
 <sub>lzo 2.08</sub>|<sub>-7</sub>|<sub>9.562s (10 MB/s)</sub>|<sub>0.319s (313 MB/s)</sub>|<sub>41 720 721</sub>|<sub>41,72%</sub>|<sub>9.881s</sub>
 
