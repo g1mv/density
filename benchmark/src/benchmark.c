@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
         out = malloc(memory_allocated * sizeof(uint8_t));
     }
 
-    printf("\nAllocated ");
+    printf("Allocated ");
     density_benchmark_format_decimal(2 * memory_allocated);
     printf(" bytes of in-memory work space\n");
 
@@ -186,7 +186,6 @@ int main(int argc, char *argv[]) {
             DENSITY_BENCHMARK_BOLD(printf("%s", file_path));
         }
         printf(" copied in memory\n");
-        printf("Pre-heating ...\n");
         density_processing_result result = density_compress(in, uncompressed_size, out, memory_allocated, compression_mode);
         if (result.state) {
             DENSITY_BENCHMARK_ERROR(printf("During compress API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
@@ -194,7 +193,7 @@ int main(int argc, char *argv[]) {
         const uint_fast64_t compressed_size = result.bytesWritten;
 
         if (!compression_only) {
-            //const uint8_t* original_in = in;
+            memset(in, 0, memory_allocated);
             result = density_decompress(out, compressed_size, in, memory_allocated);
             if (result.state) {
                 DENSITY_BENCHMARK_ERROR(printf("During decompress API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
@@ -211,12 +210,14 @@ int main(int argc, char *argv[]) {
             uint64_t hash_2 = DENSITY_BENCHMARK_HASH_SEED_2;
             spookyhash_128(in, uncompressed_size, &hash_1, &hash_2);
             if(hash_1 != original_hash_1 || hash_2 != original_hash_2) {
-                DENSITY_BENCHMARK_ERROR(printf("Decompressed and original hash differ (");
+                DENSITY_BENCHMARK_ERROR(printf("Original and round-trip data hashes do not match (");
                 printf("0x%" PRIx64 "%" PRIx64, hash_1, hash_2);
                 printf(" vs. ");
                 printf("0x%" PRIx64 "%" PRIx64, original_hash_1, original_hash_2);
                 printf(").");, true);
             }
+
+            printf("Original and round-trip data hashes match. ");
         }
         printf("Starting main bench.\n");
         if (compression_only)
