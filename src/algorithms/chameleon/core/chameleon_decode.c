@@ -123,16 +123,17 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_4(const uint8_t **DENSITY_RES
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_256(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
-    uint_fast8_t count = 0;
+    uint_fast8_t count_a = 0;
+    uint_fast8_t count_b = 0;
 
 #if defined(__clang__) || defined(_MSC_VER)
-    for(uint_fast8_t count_b = 0; count_b < 16; count_b ++) {
-        DENSITY_UNROLL_2(density_chameleon_decode_kernel_dual(in, out, signature, count, dictionary); count+= 2);
-    }
+    do {
+        DENSITY_UNROLL_2(density_chameleon_decode_kernel_dual(in, out, signature, count_a, dictionary); count_a+= 2);
+    } while (++count_b & 0xf);
 #else
-    for(uint_fast8_t count_b = 0; count_b < 32; count_b ++) {
-        DENSITY_UNROLL_2(density_chameleon_decode_4(in, out, signature, count ++, dictionary));
-    }
+    do {
+        DENSITY_UNROLL_2(density_chameleon_decode_4(in, out, signature, count_a ++, dictionary));
+    } while (++count_b & 0x1f);
 #endif
 }
 
