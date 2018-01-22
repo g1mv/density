@@ -43,7 +43,6 @@
  */
 
 #include "chameleon_decode.h"
-#include <inttypes.h>
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_compressed(const uint16_t hash, uint8_t **DENSITY_RESTRICT out, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
     DENSITY_MEMCPY(*out, &dictionary->entries[hash].as_uint32_t, sizeof(uint32_t));
@@ -63,7 +62,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel(const uint8_t **DENSIT
     } else {
         uint32_t unit;
         DENSITY_MEMCPY(&unit, *in, sizeof(uint32_t));
-        density_chameleon_decode_process_uncompressed(unit/*, out*/, dictionary);
+        density_chameleon_decode_process_uncompressed(unit, dictionary);
         DENSITY_MEMCPY(*out, &unit, sizeof(uint32_t));
         *in += sizeof(uint32_t);
     }
@@ -71,43 +70,42 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel(const uint8_t **DENSIT
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_kernel_dual(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t signature, const uint_fast8_t shift, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
-    uint32_t chunk;
-    uint32_t unit_32;
-    uint64_t unit_64;
+    uint32_t var_32;
+    uint64_t var_64;
 
     switch((signature >> shift) & 0x3) {
         case 0x0:
-            DENSITY_MEMCPY(&unit_64, *in, sizeof(uint32_t) + sizeof(uint32_t));
-            density_chameleon_decode_process_uncompressed((uint32_t)(unit_64 & 0xffffffff), dictionary);
-            density_chameleon_decode_process_uncompressed((uint32_t)(unit_64 >> 32), dictionary);
-            DENSITY_MEMCPY(*out, &unit_64, sizeof(uint32_t) + sizeof(uint32_t));
+            DENSITY_MEMCPY(&var_64, *in, sizeof(uint32_t) + sizeof(uint32_t));
+            density_chameleon_decode_process_uncompressed((uint32_t)(var_64 & 0xffffffff), dictionary);
+            density_chameleon_decode_process_uncompressed((uint32_t)(var_64 >> density_bitsizeof(uint32_t)), dictionary);
+            DENSITY_MEMCPY(*out, &var_64, sizeof(uint32_t) + sizeof(uint32_t));
             *in += (sizeof(uint32_t) + sizeof(uint32_t));
             *out += sizeof(uint64_t);
             break;
         case 0x1:
-            DENSITY_MEMCPY(&unit_64, *in, sizeof(uint16_t) + sizeof(uint32_t));
-            density_chameleon_decode_process_compressed((uint16_t)(unit_64 & 0xffff), out, dictionary);
-            chunk = (uint32_t)((unit_64 >> 16) & 0xffffffff);
-            density_chameleon_decode_process_uncompressed(chunk, dictionary);
-            DENSITY_MEMCPY(*out + sizeof(uint32_t), &chunk, sizeof(uint32_t));
+            DENSITY_MEMCPY(&var_64, *in, sizeof(uint16_t) + sizeof(uint32_t));
+            density_chameleon_decode_process_compressed((uint16_t)(var_64 & 0xffff), out, dictionary);
+            var_32 = (uint32_t)((var_64 >> density_bitsizeof(uint16_t)) & 0xffffffff);
+            density_chameleon_decode_process_uncompressed(var_32, dictionary);
+            DENSITY_MEMCPY(*out + sizeof(uint32_t), &var_32, sizeof(uint32_t));
             *in += (sizeof(uint16_t) + sizeof(uint32_t));
             *out += sizeof(uint64_t);
             break;
         case 0x2:
-            DENSITY_MEMCPY(&unit_64, *in, sizeof(uint32_t) + sizeof(uint16_t));
-            chunk = (uint32_t)(unit_64 & 0xffffffff);
-            density_chameleon_decode_process_uncompressed(chunk, dictionary);
-            DENSITY_MEMCPY(*out, &chunk, sizeof(uint32_t));
+            DENSITY_MEMCPY(&var_64, *in, sizeof(uint32_t) + sizeof(uint16_t));
+            var_32 = (uint32_t)(var_64 & 0xffffffff);
+            density_chameleon_decode_process_uncompressed(var_32, dictionary);
+            DENSITY_MEMCPY(*out, &var_32, sizeof(uint32_t));
             *out += sizeof(uint32_t);
-            density_chameleon_decode_process_compressed((uint16_t)((unit_64 >> 32) & 0xffff), out, dictionary);
+            density_chameleon_decode_process_compressed((uint16_t)((var_64 >> density_bitsizeof(uint32_t)) & 0xffff), out, dictionary);
             *in += (sizeof(uint32_t) + sizeof(uint16_t));
             *out += sizeof(uint32_t);
             break;
         case 0x3:
-            DENSITY_MEMCPY(&unit_32, *in, sizeof(uint16_t) + sizeof(uint16_t));
-            density_chameleon_decode_process_compressed((uint16_t)(unit_32 & 0xffff), out, dictionary);
+            DENSITY_MEMCPY(&var_32, *in, sizeof(uint16_t) + sizeof(uint16_t));
+            density_chameleon_decode_process_compressed((uint16_t)(var_32 & 0xffff), out, dictionary);
             *out += sizeof(uint32_t);
-            density_chameleon_decode_process_compressed((uint16_t)(unit_32 >> 16), out, dictionary);
+            density_chameleon_decode_process_compressed((uint16_t)(var_32 >> density_bitsizeof(uint16_t)), out, dictionary);
             *in += (sizeof(uint16_t) + sizeof(uint16_t));
             *out += sizeof(uint32_t);
             break;
