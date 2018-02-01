@@ -48,6 +48,7 @@
 #define DENSITY_RESTRICT_DECLARE
 #define DENSITY_MEMCPY				__builtin_memcpy
 #define DENSITY_MEMMOVE				__builtin_memmove
+#define DENSITY_MEMSET				__builtin_memset
 #define DENSITY_LIKELY(x)			__builtin_expect(!!(x), 1)
 #define DENSITY_UNLIKELY(x)			__builtin_expect(!!(x), 0)
 #define DENSITY_PREFETCH(x)			__builtin_prefetch(x)
@@ -62,6 +63,7 @@
 #define DENSITY_RESTRICT_DECLARE	__restrict
 #define DENSITY_MEMCPY				memcpy
 #define DENSITY_MEMMOVE				memmove
+#define DENSITY_MEMSET				memset
 #define DENSITY_LIKELY(x)			(x)
 #define DENSITY_UNLIKELY(x)			(x)
 #define DENSITY_PREFETCH(x)			((void)(x))
