@@ -35,7 +35,7 @@
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = libdensity
-CFLAGS = -Ofast -fomit-frame-pointer -flto -std=c99 -march=native -mtune=native -Wall
+CFLAGS = -Ofast -fomit-frame-pointer -flto -std=c99 -march=native -mtune=native -Wall -fPIC
 LFLAGS = -flto
 
 BUILD_DIRECTORY = ./build
