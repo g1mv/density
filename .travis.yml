@@ -4,16 +4,17 @@ matrix:
   include:
     # OS X Mavericks
     - os: osx
-      env: CC=clang
+    - compiler: clang
 
     # Container-based Ubuntu 12.04 LTS Server Edition 64 bit (doesn't support 32-bit includes)
     - os: linux
       sudo: false
-      env: CC=gcc AR=gcc-ar
+      compiler: gcc
+      env: AR=gcc-ar
 
     - os: linux
       sudo: false
-      env: CC=clang
+      compiler: clang
 
     # Ubuntu 14.04 LTS Server Edition 64 bit
     - dist: trusty
@@ -24,7 +25,8 @@ matrix:
             - qemu-system-arm
             - qemu-user-static
             - gcc-aarch64-linux-gnu
-      env: QEMU_INTERPRETER=qemu-aarch64-static CC=aarch64-linux-gnu-gcc AR=gcc-ar
+      compiler: aarch64-linux-gnu-gcc
+      env: QEMU_INTERPRETER=qemu-aarch64-static AR=gcc-ar
 
     - dist: trusty
       sudo: required
