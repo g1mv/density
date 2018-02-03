@@ -34,27 +34,28 @@
 
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
-TARGET = libbenchmark
+TARGET = density-benchmark
 CFLAGS = -Ofast -fomit-frame-pointer -flto -std=c99 -march=native -mtune=native -Wall
+LFLAGS = -flto
 
-BUILD_DIRECTORY = ./build
+BUILD_DIRECTORY = ../build
 CLIENT_SRC_DIRECTORY = ./src
 CPUTIME_SRC_DIRECTORY = ./libs/cputime/src
 SPOOKYHASH_SRC_DIRECTORY = ./libs/spookyhash/src
-CLIENT_BUILD_DIRECTORY = $(BUILD_DIRECTORY)
+CLIENT_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/benchmark
 CPUTIME_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/cputime
 SPOOKYHASH_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/spookyhash
 
-
-EXTENSION = .a
 ifeq ($(OS),Windows_NT)
     bold =
     normal =
     ARROW = ^-^>
+		EXTENSION = .exe
 else
     bold = `tput bold`
     normal = `tput sgr0`
     ARROW = \-\>
+		EXTENSION =
 endif
 
 CLIENT_SRC = $(shell find $(CLIENT_SRC_DIRECTORY) -type f -name '*.c')
@@ -93,10 +94,10 @@ post-compile: compile
 	@echo
 
 pre-link : post-compile
-	@echo ${bold}Linking Density benchmark as a static library${normal} ...
+	@echo ${bold}Linking Density benchmark${normal} ...
 
 link: pre-link $(BENCHMARK_OBJ)
-	$(AR) cr $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) $(BENCHMARK_OBJ)
+	$(CC) $(LFLAGS) -o $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) -L$(BUILD_DIRECTORY) -ldensity $(BENCHMARK_OBJ)
 
 post-link: link
 	@echo Done.

@@ -35,11 +35,11 @@
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = libdensity
-BENCHMARK_TARGET = benchmark
 CFLAGS = -Ofast -fomit-frame-pointer -flto -std=c99 -march=native -mtune=native -Wall
 LFLAGS = -flto
 
 BUILD_DIRECTORY = ./build
+DENSITY_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/density
 SRC_DIRECTORY = ./src
 
 ifeq ($(OS),Windows_NT)
@@ -60,15 +60,16 @@ else
 		endif
 		BENCHMARK_EXTENSION =
 endif
+STATIC_EXTENSION = .a
 
 DENSITY_SRC = $(shell find $(SRC_DIRECTORY) -type f -name '*.c')
-DENSITY_OBJ = $(patsubst $(SRC_DIRECTORY)%.c, $(BUILD_DIRECTORY)%.o, $(DENSITY_SRC))
+DENSITY_OBJ = $(patsubst $(SRC_DIRECTORY)%.c, $(DENSITY_BUILD_DIRECTORY)%.o, $(DENSITY_SRC))
 
-.PHONY: pre-compile post-compile pre-link post-link library pre-link-benchmark post-link-benchmark benchmark
+.PHONY: pre-compile post-compile pre-link post-link library benchmark
 
-all: $(BUILD_DIRECTORY)/$(BENCHMARK_TARGET)$(BENCHMARK_EXTENSION)
+all: benchmark
 
-$(BUILD_DIRECTORY)/%.o: $(SRC_DIRECTORY)/%.c
+$(DENSITY_BUILD_DIRECTORY)%.o: $(SRC_DIRECTORY)/%.c
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -82,43 +83,33 @@ post-compile: compile
 	@echo
 
 pre-link : post-compile
-	@echo ${bold}Linking Density as a dynamic library${normal} ...
+	@echo ${bold}Linking Density as a library${normal} ...
 
 link: pre-link $(DENSITY_OBJ)
+	$(AR) cr $(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION) $(DENSITY_OBJ)
 	$(CC) $(LFLAGS) -shared -o $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) $(DENSITY_OBJ)
 
 post-link: link
 	@echo Done.
 	@echo
-	@echo The dynamic library file is located here : ${bold}$(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION)${normal}
+	@echo Static library file is here : ${bold}$(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION)${normal}
+	@echo Dynamic library file is here : ${bold}$(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION)${normal}
 	@echo
 
 $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION): post-link
 
 library: post-link
 
-pre-link-benchmark: post-link
+benchmark: library
 	@$(MAKE) -C benchmark/
-	@echo ${bold}Linking Density benchmark${normal} ...
-
-link-benchmark: pre-link-benchmark
-	$(CC) $(LFLAGS) -o $(BUILD_DIRECTORY)/$(BENCHMARK_TARGET)$(BENCHMARK_EXTENSION) -Lbenchmark/build/ -lbenchmark $(DENSITY_OBJ)
-
-post-link-benchmark: link-benchmark
-	@echo Done.
+	@echo Please type ${bold}$(BUILD_DIRECTORY)/density-benchmark${normal} to launch the benchmark binary.
 	@echo
-	@echo Please type ${bold}$(BUILD_DIRECTORY)/$(BENCHMARK_TARGET)$(BENCHMARK_EXTENSION)${normal} to launch the benchmark binary.
-	@echo
-
-$(BUILD_DIRECTORY)/$(BENCHMARK_TARGET)$(BENCHMARK_EXTENSION): post-link-benchmark
-
-benchmark: post-link-benchmark
 
 clean:
 	@$(MAKE) -C benchmark/ clean
 	@echo ${bold}Cleaning Density build files${normal} ...
 	@rm -f $(DENSITY_OBJ)
 	@rm -f $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION)
-	@rm -f $(BUILD_DIRECTORY)/$(BENCHMARK_TARGET)$(BENCHMARK_EXTENSION)
+	@rm -f $(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION)
 	@echo Done.
 	@echo
