@@ -29,96 +29,84 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# 01/02/18 01:32
+# 02/02/18 01:55
 #
 
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
-TARGET = libdensity
-BENCHMARK_TARGET = benchmark
+TARGET = libbenchmark
 CFLAGS = -Ofast -fomit-frame-pointer -flto -std=c99 -march=native -mtune=native -Wall
-LFLAGS = -flto
 
 BUILD_DIRECTORY = ./build
-SRC_DIRECTORY = ./src
+CLIENT_SRC_DIRECTORY = ./src
+CPUTIME_SRC_DIRECTORY = ./libs/cputime/src
+SPOOKYHASH_SRC_DIRECTORY = ./libs/spookyhash/src
+CLIENT_BUILD_DIRECTORY = $(BUILD_DIRECTORY)
+CPUTIME_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/cputime
+SPOOKYHASH_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/spookyhash
 
+
+EXTENSION = .a
 ifeq ($(OS),Windows_NT)
     bold =
     normal =
     ARROW = ^-^>
-    EXTENSION = .dll
-		BENCHMARK_EXTENSION = .exe
 else
     bold = `tput bold`
     normal = `tput sgr0`
     ARROW = \-\>
-		UNAME_S := $(shell uname -s)
-		ifeq ($(UNAME_S),Darwin)
-			EXTENSION = .dylib
-    else
-			EXTENSION = .so
-		endif
-		BENCHMARK_EXTENSION =
 endif
 
-DENSITY_SRC = $(shell find $(SRC_DIRECTORY) -type f -name '*.c')
-DENSITY_OBJ = $(patsubst $(SRC_DIRECTORY)%.c, $(BUILD_DIRECTORY)%.o, $(DENSITY_SRC))
+CLIENT_SRC = $(shell find $(CLIENT_SRC_DIRECTORY) -type f -name '*.c')
+CPUTIME_SRC = $(shell find $(CPUTIME_SRC_DIRECTORY) -type f -name '*.c')
+SPOOKYHASH_SRC = $(shell find $(SPOOKYHASH_SRC_DIRECTORY) -type f -name '*.c')
+CLIENT_OBJ = $(patsubst $(CLIENT_SRC_DIRECTORY)%.c, $(CLIENT_BUILD_DIRECTORY)%.o, $(CLIENT_SRC))
+CPUTIME_OBJ = $(patsubst $(CPUTIME_SRC_DIRECTORY)%.c, $(CPUTIME_BUILD_DIRECTORY)%.o, $(CPUTIME_SRC))
+SPOOKYHASH_OBJ = $(patsubst $(SPOOKYHASH_SRC_DIRECTORY)%.c, $(SPOOKYHASH_BUILD_DIRECTORY)%.o, $(SPOOKYHASH_SRC))
 
-.PHONY: pre-compile post-compile pre-link post-link library pre-link-benchmark post-link-benchmark benchmark
+BENCHMARK_SRC = $(CLIENT_SRC) $(CPUTIME_SRC) $(SPOOKYHASH_SRC)
+BENCHMARK_OBJ = $(CLIENT_OBJ) $(CPUTIME_OBJ) $(SPOOKYHASH_OBJ)
 
-all: $(BUILD_DIRECTORY)/$(BENCHMARK_TARGET)$(BENCHMARK_EXTENSION)
+.PHONY: pre-compile post-compile pre-link post-link
 
-$(BUILD_DIRECTORY)/%.o: $(SRC_DIRECTORY)/%.c
+all: $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION)
+
+$(CLIENT_BUILD_DIRECTORY)/%.o: $(CLIENT_SRC_DIRECTORY)/%.c
+	@mkdir -p "$(@D)"
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(CPUTIME_BUILD_DIRECTORY)/%.o: $(CPUTIME_SRC_DIRECTORY)/%.c
+	@mkdir -p "$(@D)"
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SPOOKYHASH_BUILD_DIRECTORY)/%.o: $(SPOOKYHASH_SRC_DIRECTORY)/%.c
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -c $< -o $@
 
 pre-compile:
-	@echo ${bold}Compiling Density${normal} ...
+	@echo ${bold}Compiling Density benchmark${normal} ...
 
-compile: pre-compile $(DENSITY_OBJ)
+compile: pre-compile $(BENCHMARK_OBJ)
 
 post-compile: compile
 	@echo Done.
 	@echo
 
 pre-link : post-compile
-	@echo ${bold}Linking Density as a dynamic library${normal} ...
+	@echo ${bold}Linking Density benchmark as a static library${normal} ...
 
-link: pre-link $(DENSITY_OBJ)
-	$(CC) $(LFLAGS) -shared -o $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) $(DENSITY_OBJ)
+link: pre-link $(BENCHMARK_OBJ)
+	$(AR) cr $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) $(BENCHMARK_OBJ)
 
 post-link: link
 	@echo Done.
 	@echo
-	@echo The dynamic library file is located here : ${bold}$(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION)${normal}
-	@echo
 
 $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION): post-link
 
-library: post-link
-
-pre-link-benchmark: post-link
-	@$(MAKE) -C benchmark/
-	@echo ${bold}Linking Density benchmark${normal} ...
-
-link-benchmark: pre-link-benchmark
-	$(CC) $(LFLAGS) -o $(BUILD_DIRECTORY)/$(BENCHMARK_TARGET)$(BENCHMARK_EXTENSION) -Lbenchmark/build/ -lbenchmark $(DENSITY_OBJ)
-
-post-link-benchmark: link-benchmark
-	@echo Done.
-	@echo
-	@echo Please type ${bold}$(BUILD_DIRECTORY)/$(BENCHMARK_TARGET)$(BENCHMARK_EXTENSION)${normal} to launch the benchmark binary.
-	@echo
-
-$(BUILD_DIRECTORY)/$(BENCHMARK_TARGET)$(BENCHMARK_EXTENSION): post-link-benchmark
-
-benchmark: post-link-benchmark
-
 clean:
-	@$(MAKE) -C benchmark/ clean
-	@echo ${bold}Cleaning Density build files${normal} ...
-	@rm -f $(DENSITY_OBJ)
+	@echo ${bold}Cleaning Density benchmark build files${normal} ...
+	@rm -f $(BENCHMARK_OBJ)
 	@rm -f $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION)
-	@rm -f $(BUILD_DIRECTORY)/$(BENCHMARK_TARGET)$(BENCHMARK_EXTENSION)
 	@echo Done.
 	@echo
