@@ -4,16 +4,16 @@ matrix:
   include:
     # OS X Mavericks
     - os: osx
-      env: C_COMPILER=clang
+      env: CC=clang
 
     # Container-based Ubuntu 12.04 LTS Server Edition 64 bit (doesn't support 32-bit includes)
     - os: linux
       sudo: false
-      env: C_COMPILER=gcc
+      env: CC=gcc AR=gcc-ar
 
     - os: linux
       sudo: false
-      env: C_COMPILER=clang
+      env: CC=clang
 
     # Ubuntu 14.04 LTS Server Edition 64 bit
     - dist: trusty
@@ -24,8 +24,7 @@ matrix:
             - qemu-system-arm
             - qemu-user-static
             - gcc-aarch64-linux-gnu
-            - g++-aarch64-linux-gnu
-      env: QEMU_INTERPRETER=qemu-aarch64-static C_COMPILER=aarch64-linux-gnu-gcc
+      env: QEMU_INTERPRETER=qemu-aarch64-static CC=aarch64-linux-gnu-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -35,8 +34,7 @@ matrix:
             - qemu-system-arm
             - qemu-user-static
             - gcc-arm-linux-gnueabi
-            - g++-arm-linux-gnueabi
-      env: QEMU_INTERPRETER=qemu-arm-static C_COMPILER=arm-linux-gnueabi-gcc
+      env: QEMU_INTERPRETER=qemu-arm-static CC=arm-linux-gnueabi-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -46,8 +44,7 @@ matrix:
             - qemu-system-ppc
             - qemu-user-static
             - gcc-powerpc-linux-gnu
-            - g++-powerpc-linux-gnu
-      env: QEMU_INTERPRETER=qemu-ppc64-static C_COMPILER=powerpc-linux-gnu-gcc
+      env: QEMU_INTERPRETER=qemu-ppc64-static CC=powerpc-linux-gnu-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -57,22 +54,11 @@ matrix:
             - qemu-system-ppc
             - qemu-user-static
             - gcc-powerpc-linux-gnu
-            - g++-powerpc-linux-gnu
-      env: QEMU_INTERPRETER=qemu-ppc-static C_COMPILER=powerpc-linux-gnu-gcc
+      env: QEMU_INTERPRETER=qemu-ppc-static CC=powerpc-linux-gnu-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
-      env: C_COMPILER=gcc
-
-    - dist: trusty
-      sudo: required
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-4.9
-      env: C_COMPILER=gcc-4.9
+      env: CC=gcc
 
     - dist: trusty
       sudo: required
@@ -81,8 +67,8 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-5
-      env: C_COMPILER=gcc-5
+            - gcc-4.8
+      env: CC=gcc-4.8 AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -91,8 +77,38 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-6
-      env: C_COMPILER=gcc-6
+            - gcc-4.9
+      env: CC=gcc-4.9 AR=gcc-ar
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-5
+      env: CC=gcc-5 AR=gcc-ar-5
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+      env: CC=gcc-6 AR=gcc-ar-6
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-7
+      env: CC=gcc-7 AR=gcc-ar-7
 
     - dist: trusty
       sudo: required
@@ -103,7 +119,7 @@ matrix:
             - llvm-toolchain-trusty-3.5
           packages:
             - clang-3.5
-      env: C_COMPILER=clang-3.5
+      env: CC=clang-3.5
 
     - dist: trusty
       sudo: required
@@ -114,7 +130,7 @@ matrix:
             - llvm-toolchain-trusty-3.6
           packages:
             - clang-3.6
-      env: C_COMPILER=clang-3.6
+      env: CC=clang-3.6
 
     - dist: trusty
       sudo: required
@@ -125,7 +141,7 @@ matrix:
             - llvm-toolchain-trusty-3.8
           packages:
             - clang-3.8
-      env: C_COMPILER=clang-3.8
+      env: CC=clang-3.8
 
     - dist: trusty
       sudo: required
@@ -136,7 +152,7 @@ matrix:
             - llvm-toolchain-trusty-3.9
           packages:
             - clang-3.9
-      env: C_COMPILER=clang-3.9
+      env: CC=clang-3.9
 
     - dist: trusty
       sudo: required
@@ -147,7 +163,7 @@ matrix:
             - llvm-toolchain-trusty-4.0
           packages:
             - clang-4.0
-      env: C_COMPILER=clang-4.0
+      env: CC=clang-4.0
 
     - dist: trusty
       sudo: required
@@ -157,9 +173,9 @@ matrix:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-5.0
           packages:
-            - clang-4.0
-      env: C_COMPILER=clang-5.0
+            - clang-5.0
+      env: CC=clang-5.0
 
 script:
-  - make CC=C_COMPILER
+  - make
   - $QEMU_INTERPRETER ./build/density-benchmark -f
