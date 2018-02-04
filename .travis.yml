@@ -70,7 +70,9 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - gcc-4.8
-      env: CC=gcc-4.8 AR=gcc-ar
+      env:
+        - MATRIX_EVAL="CC=gcc-4.8"
+        - AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -80,7 +82,9 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - gcc-4.9
-      env: CC=gcc-4.9 AR=gcc-ar
+      env:
+        - MATRIX_EVAL="CC=gcc-4.9"
+        - AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -90,7 +94,9 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - gcc-5
-      env: CC=gcc-5 AR=gcc-ar-5
+      env:
+        - MATRIX_EVAL="CC=gcc-5"
+        - AR=gcc-ar-5
 
     - dist: trusty
       sudo: required
@@ -100,7 +106,9 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - gcc-6
-      env: CC=gcc-6 AR=gcc-ar-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6"
+        - AR=gcc-ar-6
 
     - dist: trusty
       sudo: required
@@ -110,7 +118,9 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - gcc-7
-      env: CC=gcc-7 AR=gcc-ar-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7"
+        - AR=gcc-ar-7
 
     - dist: trusty
       sudo: required
