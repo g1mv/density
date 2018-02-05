@@ -4,18 +4,19 @@ matrix:
   include:
     # OS X Mavericks
     - os: osx
-    - compiler: clang
+    - env:
+        - CC=clang AR=ar
 
     # Container-based Ubuntu 12.04 LTS Server Edition 64 bit (doesn't support 32-bit includes)
     - os: linux
       sudo: false
-      compiler: gcc
       env:
-        - AR_SETUP="AR=gcc-ar"
+        - CC=gcc AR=gcc-ar
 
     - os: linux
       sudo: false
-      compiler: clang
+      env:
+        - CC=clang AR=ar
 
     # Ubuntu 14.04 LTS Server Edition 64 bit
     - dist: trusty
@@ -26,9 +27,8 @@ matrix:
             - qemu-system-arm
             - qemu-user-static
             - gcc-aarch64-linux-gnu
-      compiler: aarch64-linux-gnu-gcc
       env:
-        - MATRIX_EVAL="QEMU_INTERPRETER=qemu-aarch64-static && AR=gcc-ar"
+        - QEMU_INTERPRETER=qemu-aarch64-static CC=aarch64-linux-gnu-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -39,7 +39,7 @@ matrix:
             - qemu-user-static
             - gcc-arm-linux-gnueabi
       env:
-        - MATRIX_EVAL="QEMU_INTERPRETER=qemu-arm-static && CC=arm-linux-gnueabi-gcc && AR=gcc-ar"
+        - QEMU_INTERPRETER=qemu-arm-static CC=arm-linux-gnueabi-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -50,7 +50,7 @@ matrix:
             - qemu-user-static
             - gcc-powerpc-linux-gnu
       env:
-        - MATRIX_EVAL="QEMU_INTERPRETER=qemu-ppc64-static && CC=powerpc-linux-gnu-gcc && AR=gcc-ar"
+        - QEMU_INTERPRETER=qemu-ppc64-static CC=powerpc-linux-gnu-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -61,7 +61,7 @@ matrix:
             - qemu-user-static
             - gcc-powerpc-linux-gnu
       env:
-        - MATRIX_EVAL="QEMU_INTERPRETER=qemu-ppc-static && CC=powerpc-linux-gnu-gcc && AR=gcc-ar"
+        - QEMU_INTERPRETER=qemu-ppc-static CC=powerpc-linux-gnu-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -76,8 +76,7 @@ matrix:
           packages:
             - gcc-4.8
       env:
-        - CC_SETUP="CC=gcc-4.8"
-        - AR_SETUP="AR=gcc-ar"
+        - CC=gcc-4.8 AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -88,8 +87,7 @@ matrix:
           packages:
             - gcc-4.9
       env:
-        - CC_SETUP="CC=gcc-4.9"
-        - AR_SETUP="AR=gcc-ar"
+        - CC=gcc-4.9 AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -100,8 +98,7 @@ matrix:
           packages:
             - gcc-5
       env:
-        - CC_SETUP="CC=gcc-5"
-        - AR_SETUP="AR=gcc-ar-5"
+        - CC=gcc-5 AR=gcc-ar-5
 
     - dist: trusty
       sudo: required
@@ -112,8 +109,7 @@ matrix:
           packages:
             - gcc-6
       env:
-        - CC_SETUP="CC=gcc-6"
-        - AR_SETUP="AR=gcc-ar-6"
+        - CC=gcc-6 AR=gcc-ar-6
 
     - dist: trusty
       sudo: required
@@ -124,8 +120,7 @@ matrix:
           packages:
             - gcc-7
       env:
-        - CC_SETUP="CC=gcc-7"
-        - AR_SETUP="AR=gcc-ar-7"
+        - CC=gcc-7 AR=gcc-ar-7
 
     - dist: trusty
       sudo: required
@@ -137,7 +132,7 @@ matrix:
           packages:
             - clang-3.5
       env:
-        - MATRIX_EVAL="CC=clang-3.5"
+        - CC=clang-3.5 AR=ar
 
     - dist: trusty
       sudo: required
@@ -149,7 +144,7 @@ matrix:
           packages:
             - clang-3.6
       env:
-        - MATRIX_EVAL="CC=clang-3.6"
+        - CC=clang-3.6 AR=ar
 
     - dist: trusty
       sudo: required
@@ -161,7 +156,7 @@ matrix:
           packages:
             - clang-3.8
       env:
-        - MATRIX_EVAL="CC=clang-3.8"
+        - CC=clang-3.8 AR=ar
 
     - dist: trusty
       sudo: required
@@ -173,7 +168,7 @@ matrix:
           packages:
             - clang-3.9
       env:
-        - MATRIX_EVAL="CC=clang-3.9"
+        - CC=clang-3.9 AR=ar
 
     - dist: trusty
       sudo: required
@@ -185,7 +180,7 @@ matrix:
           packages:
             - clang-4.0
       env:
-        - MATRIX_EVAL="CC=clang-4.0"
+        - CC=clang-4.0 AR=ar
 
     - dist: trusty
       sudo: required
@@ -197,8 +192,8 @@ matrix:
           packages:
             - clang-5.0
       env:
-        - MATRIX_EVAL="CC=clang-5.0"
+        - CC=clang-5.0 AR=ar
 
 script:
-  - make CC=${CC_SETUP} AR=${AR_SETUP}
+  - make CC=${CC} AR=${AR}
   - $QEMU_INTERPRETER ./build/density-benchmark -f
