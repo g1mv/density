@@ -109,7 +109,7 @@ matrix:
           packages:
             - gcc-6
       env:
-        - MATRIX_EVAL="CC=gcc-6 && AR=gcc-ar-6
+        - MATRIX_EVAL="CC=gcc-6 && AR=gcc-ar-6"
 
     - dist: trusty
       sudo: required
@@ -120,7 +120,7 @@ matrix:
           packages:
             - gcc-7
       env:
-        - MATRIX_EVAL="CC=gcc-7 && AR=gcc-ar-7
+        - MATRIX_EVAL="CC=gcc-7 && AR=gcc-ar-7"
 
     - dist: trusty
       sudo: required
