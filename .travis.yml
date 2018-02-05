@@ -200,7 +200,5 @@ matrix:
         - MATRIX_EVAL="CC=clang-5.0"
 
 script:
-  - eval "${CC_SETUP}"
-  - eval "${AR_SETUP}"
-  - make
+  - make CC=${CC_SETUP} AR=${AR_SETUP}
   - $QEMU_INTERPRETER ./build/density-benchmark -f
