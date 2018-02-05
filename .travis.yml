@@ -71,8 +71,7 @@ matrix:
           packages:
             - gcc-4.8
       env:
-        - MATRIX_EVAL="CC=gcc-4.8"
-        - AR=gcc-ar
+        - MATRIX_EVAL="CC=gcc-4.8 && AR=gcc-ar"
 
     - dist: trusty
       sudo: required
@@ -83,8 +82,7 @@ matrix:
           packages:
             - gcc-4.9
       env:
-        - MATRIX_EVAL="CC=gcc-4.9"
-        - AR=gcc-ar
+        - MATRIX_EVAL="CC=gcc-4.9 && AR=gcc-ar"
 
     - dist: trusty
       sudo: required
@@ -95,8 +93,7 @@ matrix:
           packages:
             - gcc-5
       env:
-        - MATRIX_EVAL="CC=gcc-5"
-        - AR=gcc-ar-5
+        - MATRIX_EVAL="CC=gcc-5 && AR=gcc-ar-5"
 
     - dist: trusty
       sudo: required
@@ -107,8 +104,7 @@ matrix:
           packages:
             - gcc-6
       env:
-        - MATRIX_EVAL="CC=gcc-6"
-        - AR=gcc-ar-6
+        - MATRIX_EVAL="CC=gcc-6 && AR=gcc-ar-6
 
     - dist: trusty
       sudo: required
@@ -119,8 +115,7 @@ matrix:
           packages:
             - gcc-7
       env:
-        - MATRIX_EVAL="CC=gcc-7"
-        - AR=gcc-ar-7
+        - MATRIX_EVAL="CC=gcc-7 && AR=gcc-ar-7
 
     - dist: trusty
       sudo: required
@@ -187,6 +182,9 @@ matrix:
           packages:
             - clang-5.0
       env: CC=clang-5.0
+
+before_install:
+    - eval "${MATRIX_EVAL}"
 
 script:
   - make
