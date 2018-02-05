@@ -98,7 +98,7 @@ pre-link : post-compile
 	@echo ${bold}Linking Density benchmark${normal} ...
 
 link: pre-link $(BENCHMARK_OBJ)
-	$(CC) $(LFLAGS) -o $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) $(BUILD_DIRECTORY)/$(DENSITY_STATIC_LIBRARY) $(BENCHMARK_OBJ)
+	$(CC) $(LFLAGS) -o $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) $(BENCHMARK_OBJ) $(BUILD_DIRECTORY)/$(DENSITY_STATIC_LIBRARY)
 
 post-link: link
 	@echo Done.
