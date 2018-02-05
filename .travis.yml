@@ -10,7 +10,8 @@ matrix:
     - os: linux
       sudo: false
       compiler: gcc
-      env: AR=gcc-ar
+      env:
+        - MATRIX_EVAL="AR=gcc-ar"
 
     - os: linux
       sudo: false
@@ -26,7 +27,8 @@ matrix:
             - qemu-user-static
             - gcc-aarch64-linux-gnu
       compiler: aarch64-linux-gnu-gcc
-      env: QEMU_INTERPRETER=qemu-aarch64-static AR=gcc-ar
+      env:
+        - MATRIX_EVAL="QEMU_INTERPRETER=qemu-aarch64-static && AR=gcc-ar"
 
     - dist: trusty
       sudo: required
@@ -36,7 +38,8 @@ matrix:
             - qemu-system-arm
             - qemu-user-static
             - gcc-arm-linux-gnueabi
-      env: QEMU_INTERPRETER=qemu-arm-static CC=arm-linux-gnueabi-gcc AR=gcc-ar
+      env:
+        - MATRIX_EVAL="QEMU_INTERPRETER=qemu-arm-static && CC=arm-linux-gnueabi-gcc && AR=gcc-ar"
 
     - dist: trusty
       sudo: required
@@ -46,7 +49,8 @@ matrix:
             - qemu-system-ppc
             - qemu-user-static
             - gcc-powerpc-linux-gnu
-      env: QEMU_INTERPRETER=qemu-ppc64-static CC=powerpc-linux-gnu-gcc AR=gcc-ar
+      env:
+        - MATRIX_EVAL="QEMU_INTERPRETER=qemu-ppc64-static && CC=powerpc-linux-gnu-gcc && AR=gcc-ar"
 
     - dist: trusty
       sudo: required
@@ -56,7 +60,8 @@ matrix:
             - qemu-system-ppc
             - qemu-user-static
             - gcc-powerpc-linux-gnu
-      env: QEMU_INTERPRETER=qemu-ppc-static CC=powerpc-linux-gnu-gcc AR=gcc-ar
+      env:
+        - MATRIX_EVAL="QEMU_INTERPRETER=qemu-ppc-static && CC=powerpc-linux-gnu-gcc && AR=gcc-ar"
 
     - dist: trusty
       sudo: required
@@ -126,7 +131,8 @@ matrix:
             - llvm-toolchain-trusty-3.5
           packages:
             - clang-3.5
-      env: CC=clang-3.5
+      env:
+        - MATRIX_EVAL="CC=clang-3.5"
 
     - dist: trusty
       sudo: required
@@ -137,7 +143,8 @@ matrix:
             - llvm-toolchain-trusty-3.6
           packages:
             - clang-3.6
-      env: CC=clang-3.6
+      env:
+        - MATRIX_EVAL="CC=clang-3.6"
 
     - dist: trusty
       sudo: required
@@ -148,7 +155,8 @@ matrix:
             - llvm-toolchain-trusty-3.8
           packages:
             - clang-3.8
-      env: CC=clang-3.8
+      env:
+        - MATRIX_EVAL="CC=clang-3.8"
 
     - dist: trusty
       sudo: required
@@ -159,7 +167,8 @@ matrix:
             - llvm-toolchain-trusty-3.9
           packages:
             - clang-3.9
-      env: CC=clang-3.9
+      env:
+        - MATRIX_EVAL="CC=clang-3.9"
 
     - dist: trusty
       sudo: required
@@ -170,7 +179,8 @@ matrix:
             - llvm-toolchain-trusty-4.0
           packages:
             - clang-4.0
-      env: CC=clang-4.0
+      env:
+        - MATRIX_EVAL="CC=clang-4.0"
 
     - dist: trusty
       sudo: required
@@ -181,10 +191,11 @@ matrix:
             - llvm-toolchain-trusty-5.0
           packages:
             - clang-5.0
-      env: CC=clang-5.0
+      env:
+        - MATRIX_EVAL="CC=clang-5.0"
 
 before_install:
-    - eval "${MATRIX_EVAL}"
+  - eval "${MATRIX_EVAL}"
 
 script:
   - make
