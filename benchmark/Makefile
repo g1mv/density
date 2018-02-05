@@ -39,6 +39,7 @@ CFLAGS = -Ofast -fomit-frame-pointer -flto -std=c99 -march=native -mtune=native 
 LFLAGS = -flto
 
 BUILD_DIRECTORY = ../build
+DENSITY_STATIC_LIBRARY = libdensity.a
 CLIENT_SRC_DIRECTORY = ./src
 CPUTIME_SRC_DIRECTORY = ./libs/cputime/src
 SPOOKYHASH_SRC_DIRECTORY = ./libs/spookyhash/src
@@ -97,7 +98,7 @@ pre-link : post-compile
 	@echo ${bold}Linking Density benchmark${normal} ...
 
 link: pre-link $(BENCHMARK_OBJ)
-	$(CC) $(LFLAGS) -o $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) -L$(BUILD_DIRECTORY) -ldensity $(BENCHMARK_OBJ)
+	$(CC) $(LFLAGS) -o $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) $(BUILD_DIRECTORY)/$(DENSITY_STATIC_LIBRARY) $(BENCHMARK_OBJ)
 
 post-link: link
 	@echo Done.
