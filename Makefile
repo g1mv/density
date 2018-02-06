@@ -53,10 +53,12 @@ endif
 
 ifeq ($(ARCH),32)
 	CFLAGS += -m32
+	LFLAGS += -m32
 endif
 
 ifeq ($(ARCH),64)
 	CFLAGS += -m64
+	LFLAGS += -m64
 endif
 
 ifeq ($(OS),Windows_NT)
