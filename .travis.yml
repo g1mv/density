@@ -4,11 +4,11 @@ matrix:
   include:
     - os: osx
       env:
-        - MAKE_OPTIONS="CC=clang"
+        - C_COMPILER=clang
 
     - os: osx
       env:
-        - MAKE_OPTIONS="CC=gcc"
+        - C_COMPILER=gcc
 
     - dist: trusty
       sudo: required
@@ -20,7 +20,7 @@ matrix:
             - gcc-aarch64-linux-gnu
             - g++-aarch64-linux-gnu
       env:
-        - MAKE_OPTIONS="CC=aarch64-linux-gnu-gcc AR=gcc-ar NATIVE=off" QEMU_INTERPRETER="qemu-aarch64-static"
+        - C_COMPILER=aarch64-linux-gnu-gcc MAKE_OPTIONS="AR=gcc-ar NATIVE=off" QEMU_INTERPRETER=qemu-aarch64-static
 
     - dist: trusty
       sudo: required
@@ -33,7 +33,7 @@ matrix:
             - libc6-dev-i386
             - libc6-dev
       env:
-        - MAKE_OPTIONS="CC=arm-linux-gnueabi-gcc AR=gcc-ar NATIVE=off" QEMU_INTERPRETER="qemu-arm-static"
+        - MAKE_OPTIONS="CC=arm-linux-gnueabi-gcc AR=gcc-ar NATIVE=off" QEMU_INTERPRETER=qemu-arm-static
 
     - dist: trusty
       sudo: required
@@ -193,8 +193,9 @@ matrix:
         - MAKE_OPTIONS="CC=clang-5.0 LTO=off"
 
 script:
-  - make ${MAKE_OPTIONS}
+  - $C_COMPILER -v
+  - make CC=$C_COMPILER $MAKE_OPTIONS
   - file ./build/libdensity.*
   - file ./build/benchmark
-  - ${QEMU_INTERPRETER} ./build/benchmark
-  - ${QEMU_INTERPRETER} ./build/benchmark -f
+  - $QEMU_INTERPRETER ./build/benchmark
+  - $QEMU_INTERPRETER ./build/benchmark -f
