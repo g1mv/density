@@ -15,6 +15,10 @@ matrix:
 
     - os: linux
       sudo: false
+      addons:
+        apt:
+          packages:
+            - llvm-dev
       env:
         - C_COMPILER=clang AR=ar
 
@@ -129,9 +133,9 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.5
-            - llvm-3.5-dev
           packages:
             - clang-3.5
+            - llvm-3.5-dev
       env:
         - C_COMPILER=clang-3.5 AR=ar
 
@@ -142,9 +146,9 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.6
-            - llvm-3.6-dev
           packages:
             - clang-3.6
+            - llvm-3.6-dev
       env:
         - C_COMPILER=clang-3.6 AR=ar
 
@@ -155,9 +159,9 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.8
-            - llvm-3.8-dev
           packages:
             - clang-3.8
+            - llvm-3.8-dev
       env:
         - C_COMPILER=clang-3.8 AR=ar
 
@@ -168,9 +172,9 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.9
-            - llvm-3.9-dev
           packages:
             - clang-3.9
+            - llvm-3.9-dev
       env:
         - C_COMPILER=clang-3.9 AR=ar
 
@@ -181,9 +185,9 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-4.0
-            - llvm-4.0-dev
           packages:
             - clang-4.0
+            - llvm-4.0-dev
       env:
         - C_COMPILER=clang-4.0 AR=ar
 
@@ -194,9 +198,9 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-5.0
-            - llvm-5.0-dev
           packages:
             - clang-5.0
+            - llvm-5.0-dev
       env:
         - C_COMPILER=clang-5.0 AR=ar
 
