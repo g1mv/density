@@ -94,8 +94,7 @@ pre-link : post-compile
 	@echo ${bold}Linking Density as a library${normal} ...
 
 link: pre-link $(DENSITY_OBJ)
-	$(AR) cr $(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION) $(DENSITY_OBJ)
-	$(RANLIB) $(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION)
+	$(AR) crs $(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION) $(DENSITY_OBJ)
 	$(CC) $(LFLAGS) -shared -o $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) $(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION)
 
 post-link: link
