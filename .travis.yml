@@ -65,7 +65,7 @@ matrix:
 
     - dist: trusty
       sudo: required
-      env: C_COMPILER=gcc
+      env: C_COMPILER=gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
