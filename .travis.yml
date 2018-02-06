@@ -67,7 +67,19 @@ matrix:
           packages:
             - gcc-4.8
       env:
-        - MAKE_OPTIONS="CC=gcc-4.8 AR=gcc-ar"
+        - C_COMPILER=gcc-4.8 MAKE_OPTIONS="AR=gcc-ar"
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-4.8
+            - gcc-4.8-multilib
+      env:
+        - C_COMPILER=gcc-4.8 MAKE_OPTIONS="AR=gcc-ar ARCH=32"
 
     - dist: trusty
       sudo: required
