@@ -211,4 +211,5 @@ matrix:
 
 script:
   - make ${MAKE_OPTIONS}
-  - ${QEMU_INTERPRETER} ./build/density-benchmark -f
+  - file ./build/benchmark
+  - ${QEMU_INTERPRETER} ./build/benchmark -f

@@ -34,7 +34,7 @@
 
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
-TARGET = density-benchmark
+TARGET = benchmark
 CFLAGS = -Ofast -fomit-frame-pointer -std=c99 -Wall -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
 LFLAGS =
 
@@ -43,7 +43,7 @@ DENSITY_STATIC_LIBRARY = libdensity.a
 CLIENT_SRC_DIRECTORY = ./src
 CPUTIME_SRC_DIRECTORY = ./libs/cputime/src
 SPOOKYHASH_SRC_DIRECTORY = ./libs/spookyhash/src
-CLIENT_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/benchmark
+CLIENT_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/bench
 CPUTIME_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/cputime
 SPOOKYHASH_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/spookyhash
 

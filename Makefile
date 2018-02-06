@@ -111,7 +111,7 @@ library: post-link
 
 benchmark: library
 	@$(MAKE) -C benchmark/
-	@echo Please type ${bold}$(BUILD_DIRECTORY)/density-benchmark${normal} to launch the benchmark binary.
+	@echo Please type ${bold}$(BUILD_DIRECTORY)/benchmark${normal} to launch the benchmark binary.
 	@echo
 
 clean:
