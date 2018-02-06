@@ -46,6 +46,10 @@ ifeq ($(NATIVE),)
 	CFLAGS += -march=native -mtune=native
 endif
 
+ifneq (,$(findstring clang,$(CC)))
+	LFLAGS += -fuse-ld=gold
+endif
+
 ifeq ($(OS),Windows_NT)
     bold =
     normal =
