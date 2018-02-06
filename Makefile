@@ -95,7 +95,8 @@ pre-link : post-compile
 
 link: pre-link $(DENSITY_OBJ)
 	$(AR) cr $(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION) $(DENSITY_OBJ)
-	$(CC) $(LFLAGS) -shared -o $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) $(DENSITY_OBJ)
+	$(RANLIB) $(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION) $(DENSITY_OBJ)
+	$(CC) $(LFLAGS) -shared -o $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION) $(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION)
 
 post-link: link
 	@echo Done.
@@ -109,9 +110,7 @@ $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION): post-link
 library: post-link
 
 benchmark: library
-	@export CC
-	@export AR
-	@export NATIVE
+	@echo $(OS)
 	@$(MAKE) -C benchmark/
 	@echo Please type ${bold}$(BUILD_DIRECTORY)/density-benchmark${normal} to launch the benchmark binary.
 	@echo
