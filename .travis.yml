@@ -28,7 +28,7 @@ matrix:
             - qemu-user-static
             - gcc-aarch64-linux-gnu
       env:
-        - QEMU_INTERPRETER=qemu-aarch64-static C_COMPILER=aarch64-linux-gnu-gcc AR=gcc-ar
+        - QEMU_INTERPRETER=qemu-aarch64-static C_COMPILER=aarch64-linux-gnu-gcc AR=gcc-ar NATIVE=off
 
     - dist: trusty
       sudo: required
@@ -39,7 +39,7 @@ matrix:
             - qemu-user-static
             - gcc-arm-linux-gnueabi
       env:
-        - QEMU_INTERPRETER=qemu-arm-static C_COMPILER=arm-linux-gnueabi-gcc AR=gcc-ar
+        - QEMU_INTERPRETER=qemu-arm-static C_COMPILER=arm-linux-gnueabi-gcc AR=gcc-ar NATIVE=off
 
     - dist: trusty
       sudo: required
@@ -50,7 +50,7 @@ matrix:
             - qemu-user-static
             - gcc-powerpc-linux-gnu
       env:
-        - QEMU_INTERPRETER=qemu-ppc64-static C_COMPILER=powerpc-linux-gnu-gcc AR=gcc-ar
+        - QEMU_INTERPRETER=qemu-ppc64-static C_COMPILER=powerpc-linux-gnu-gcc AR=gcc-ar NATIVE=off
 
     - dist: trusty
       sudo: required
@@ -61,7 +61,7 @@ matrix:
             - qemu-user-static
             - gcc-powerpc-linux-gnu
       env:
-        - QEMU_INTERPRETER=qemu-ppc-static C_COMPILER=powerpc-linux-gnu-gcc AR=gcc-ar
+        - QEMU_INTERPRETER=qemu-ppc-static C_COMPILER=powerpc-linux-gnu-gcc AR=gcc-ar NATIVE=off
 
     - dist: trusty
       sudo: required
@@ -129,6 +129,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.5
+            - llvm-3.5-dev
           packages:
             - clang-3.5
       env:
@@ -141,6 +142,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.6
+            - llvm-3.6-dev
           packages:
             - clang-3.6
       env:
@@ -153,6 +155,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.8
+            - llvm-3.8-dev
           packages:
             - clang-3.8
       env:
@@ -165,6 +168,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.9
+            - llvm-3.9-dev
           packages:
             - clang-3.9
       env:
@@ -177,6 +181,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-4.0
+            - llvm-4.0-dev
           packages:
             - clang-4.0
       env:
@@ -189,11 +194,12 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-5.0
+            - llvm-5.0-dev
           packages:
             - clang-5.0
       env:
         - C_COMPILER=clang-5.0 AR=ar
 
 script:
-  - make CC=${C_COMPILER} AR=${AR}
-  - $QEMU_INTERPRETER ./build/density-benchmark -f
+  - make CC=${C_COMPILER} AR=${AR} NATIVE=${NATIVE}
+  - ${QEMU_INTERPRETER} ./build/density-benchmark -f
