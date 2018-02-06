@@ -177,7 +177,7 @@ matrix:
             - gcc-powerpc-linux-gnu
             - libc6-dev-i386
       env:
-        - MAKE_OPTIONS="CC=powerpc-linux-gnu-gcc AR=gcc-ar NATIVE=off" QEMU_INTERPRETER="qemu-ppc64-static"
+        - MAKE_OPTIONS="CC=powerpc-linux-gnu-gcc AR=gcc-ar NATIVE=off ARCH=64" QEMU_INTERPRETER="qemu-ppc64-static"
 
     - dist: trusty
       sudo: required
