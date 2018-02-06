@@ -57,11 +57,11 @@ ifeq ($(LTO),)
 endif
 
 ifeq ($(ARCH),32)
-	CLFAGS += -m32
+	CFLAGS += -m32
 endif
 
 ifeq ($(ARCH),64)
-	CLFAGS += -m64
+	CFLAGS += -m64
 endif
 
 ifeq ($(OS),Windows_NT)
