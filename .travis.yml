@@ -90,7 +90,19 @@ matrix:
           packages:
             - gcc-4.9
       env:
-        - MAKE_OPTIONS="CC=gcc-4.9 AR=gcc-ar"
+        - C_COMPILER=gcc-4.9 MAKE_OPTIONS="AR=gcc-ar"
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-4.9
+            - gcc-4.9-multilib
+      env:
+        - C_COMPILER=gcc-4.9 MAKE_OPTIONS="AR=gcc-ar ARCH=32"
 
     - dist: trusty
       sudo: required
@@ -101,7 +113,19 @@ matrix:
           packages:
             - gcc-5
       env:
-        - MAKE_OPTIONS="CC=gcc-5 AR=gcc-ar-5"
+        - C_COMPILER=gcc-5 MAKE_OPTIONS="AR=gcc-ar-5"
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-5
+            - gcc-5-multilib
+      env:
+        - C_COMPILER=gcc-5 MAKE_OPTIONS="AR=gcc-ar-5 ARCH=32"
 
     - dist: trusty
       sudo: required
@@ -112,7 +136,19 @@ matrix:
           packages:
             - gcc-6
       env:
-        - MAKE_OPTIONS="CC=gcc-6 AR=gcc-ar-6"
+        - C_COMPILER=gcc-6 MAKE_OPTIONS="AR=gcc-ar-6"
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+            - gcc-6-multilib
+      env:
+        - C_COMPILER=gcc-6 MAKE_OPTIONS="AR=gcc-ar-6 ARCH=32"
 
     - dist: trusty
       sudo: required
@@ -123,7 +159,19 @@ matrix:
           packages:
             - gcc-7
       env:
-        - MAKE_OPTIONS="CC=gcc-7 AR=gcc-ar-7"
+        - C_COMPILER=gcc-7 MAKE_OPTIONS="AR=gcc-ar-7"
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-7
+            - gcc-7-multilib
+      env:
+        - C_COMPILER=gcc-7 MAKE_OPTIONS="AR=gcc-ar-7 ARCH=32"
 
     - dist: trusty
       sudo: required
@@ -136,7 +184,7 @@ matrix:
             - clang-3.5
             - llvm-3.5-dev
       env:
-        - MAKE_OPTIONS="CC=clang-3.5 LTO=off"
+        - C_COMPILER=clang-3.5 MAKE_OPTIONS="LTO=off"
 
     - dist: trusty
       sudo: required
@@ -149,7 +197,7 @@ matrix:
             - clang-3.6
             - llvm-3.6-dev
       env:
-        - MAKE_OPTIONS="CC=clang-3.6 LTO=off"
+        - C_COMPILER=clang-3.6 MAKE_OPTIONS="LTO=off"
 
     - dist: trusty
       sudo: required
@@ -162,7 +210,7 @@ matrix:
             - clang-3.8
             - llvm-3.8-dev
       env:
-        - MAKE_OPTIONS="CC=clang-3.8 LTO=off"
+        - C_COMPILER=clang-3.8 MAKE_OPTIONS="LTO=off"
 
     - dist: trusty
       sudo: required
@@ -175,7 +223,7 @@ matrix:
             - clang-3.9
             - llvm-3.9-dev
       env:
-        - MAKE_OPTIONS="CC=clang-3.9 LTO=off"
+        - C_COMPILER=clang-3.9 MAKE_OPTIONS="LTO=off"
 
     - dist: trusty
       sudo: required
@@ -188,7 +236,7 @@ matrix:
             - clang-4.0
             - llvm-4.0-dev
       env:
-        - MAKE_OPTIONS="CC=clang-4.0 LTO=off"
+        - C_COMPILER=clang-4.0 MAKE_OPTIONS="LTO=off"
 
     - dist: trusty
       sudo: required
@@ -201,7 +249,7 @@ matrix:
             - clang-5.0
             - llvm-5.0-dev
       env:
-        - MAKE_OPTIONS="CC=clang-5.0 LTO=off"
+        - C_COMPILER=clang-5.0 MAKE_OPTIONS="LTO=off"
 
 script:
   - ${PRE_SCRIPT}
