@@ -19,10 +19,8 @@ matrix:
             - qemu-user-static
             - gcc-aarch64-linux-gnu
             - g++-aarch64-linux-gnu
-            #- libc6-dev-i386
-            #- libc6-dev
       env:
-        - MAKE_OPTIONS="CC=aarch64-linux-gnu-gcc NATIVE=off" QEMU_INTERPRETER="qemu-aarch64-static"
+        - MAKE_OPTIONS="CC=aarch64-linux-gnu-gcc AR=gcc-ar NATIVE=off" QEMU_INTERPRETER="qemu-aarch64-static"
 
     - dist: trusty
       sudo: required
