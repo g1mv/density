@@ -35,8 +35,8 @@
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = libdensity
-CFLAGS = -Ofast -fomit-frame-pointer -flto -std=c99 -Wall -fpic -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
-LFLAGS = -flto
+CFLAGS = -Ofast -fomit-frame-pointer -std=c99 -Wall -fpic -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
+LFLAGS =
 
 BUILD_DIRECTORY = ./build
 DENSITY_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/density
@@ -44,6 +44,11 @@ SRC_DIRECTORY = ./src
 
 ifeq ($(NATIVE),)
 	CFLAGS += -march=native -mtune=native
+endif
+
+ifeq ($(LTO),)
+	CFLAGS += -flto
+	LFLAGS += -flto
 endif
 
 ifeq ($(OS),Windows_NT)
@@ -105,7 +110,6 @@ $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION): post-link
 library: post-link
 
 benchmark: library
-	@echo $(OS)
 	@$(MAKE) -C benchmark/
 	@echo Please type ${bold}$(BUILD_DIRECTORY)/density-benchmark${normal} to launch the benchmark binary.
 	@echo

@@ -24,56 +24,13 @@ matrix:
           packages:
             - llvm-dev
       env:
-        - MAKE_OPTIONS="CC=clang"
+        - MAKE_OPTIONS="CC=clang LTO=off"
 
     # Ubuntu 14.04 LTS Server Edition 64 bit
     - dist: trusty
       sudo: required
-      addons:
-        apt:
-          packages:
-            - qemu-system-arm
-            - qemu-user-static
-            - gcc-aarch64-linux-gnu
       env:
-        - QEMU_INTERPRETER=qemu-aarch64-static MAKE_OPTIONS="CC=aarch64-linux-gnu-gcc AR=gcc-ar NATIVE=off"
-
-    - dist: trusty
-      sudo: required
-      addons:
-        apt:
-          packages:
-            - qemu-system-arm
-            - qemu-user-static
-            - gcc-arm-linux-gnueabi
-      env:
-        - QEMU_INTERPRETER=qemu-arm-static MAKE_OPTIONS="CC=arm-linux-gnueabi-gcc AR=gcc-ar NATIVE=off"
-
-    - dist: trusty
-      sudo: required
-      addons:
-        apt:
-          packages:
-            - qemu-system-ppc
-            - qemu-user-static
-            - gcc-powerpc-linux-gnu
-      env:
-        - QEMU_INTERPRETER=qemu-ppc64-static MAKE_OPTIONS="CC=powerpc-linux-gnu-gcc AR=gcc-ar NATIVE=off"
-
-    - dist: trusty
-      sudo: required
-      addons:
-        apt:
-          packages:
-            - qemu-system-ppc
-            - qemu-user-static
-            - gcc-powerpc-linux-gnu
-      env:
-        - QEMU_INTERPRETER=qemu-ppc-static MAKE_OPTIONS="CC=powerpc-linux-gnu-gcc AR=gcc-ar NATIVE=off"
-
-    - dist: trusty
-      sudo: required
-      env: MAKE_OPTIONS="CC=gcc AR=gcc-ar"
+        - MAKE_OPTIONS="CC=gcc AR=gcc-ar"
 
     - dist: trusty
       sudo: required
@@ -141,7 +98,7 @@ matrix:
             - clang-3.5
             - llvm-3.5-dev
       env:
-        - MAKE_OPTIONS="CC=clang-3.5"
+        - MAKE_OPTIONS="CC=clang-3.5 LTO=off"
 
     - dist: trusty
       sudo: required
@@ -154,7 +111,7 @@ matrix:
             - clang-3.6
             - llvm-3.6-dev
       env:
-        - MAKE_OPTIONS="CC=clang-3.6"
+        - MAKE_OPTIONS="CC=clang-3.6 LTO=off"
 
     - dist: trusty
       sudo: required
@@ -167,7 +124,7 @@ matrix:
             - clang-3.8
             - llvm-3.8-dev
       env:
-        - MAKE_OPTIONS="CC=clang-3.8"
+        - MAKE_OPTIONS="CC=clang-3.8 LTO=off"
 
     - dist: trusty
       sudo: required
@@ -180,7 +137,7 @@ matrix:
             - clang-3.9
             - llvm-3.9-dev
       env:
-        - MAKE_OPTIONS="CC=clang-3.9"
+        - MAKE_OPTIONS="CC=clang-3.9 LTO=off"
 
     - dist: trusty
       sudo: required
@@ -193,7 +150,7 @@ matrix:
             - clang-4.0
             - llvm-4.0-dev
       env:
-        - MAKE_OPTIONS="CC=clang-4.0"
+        - MAKE_OPTIONS="CC=clang-4.0 LTO=off"
 
     - dist: trusty
       sudo: required
@@ -206,7 +163,51 @@ matrix:
             - clang-5.0
             - llvm-5.0-dev
       env:
-        - MAKE_OPTIONS="CC=clang-5.0"
+        - MAKE_OPTIONS="CC=clang-5.0 LTO=off"
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          packages:
+            - qemu-system-arm
+            - qemu-user-static
+            - gcc-aarch64-linux-gnu
+      env:
+        - MAKE_OPTIONS="CC=aarch64-linux-gnu-gcc AR=gcc-ar NATIVE=off" QEMU_INTERPRETER="qemu-aarch64-static"
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          packages:
+            - qemu-system-arm
+            - qemu-user-static
+            - gcc-arm-linux-gnueabi
+      env:
+        - MAKE_OPTIONS="CC=arm-linux-gnueabi-gcc AR=gcc-ar NATIVE=off" QEMU_INTERPRETER="qemu-arm-static"
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          packages:
+            - qemu-system-ppc
+            - qemu-user-static
+            - gcc-powerpc-linux-gnu
+      env:
+        - MAKE_OPTIONS="CC=powerpc-linux-gnu-gcc AR=gcc-ar NATIVE=off" QEMU_INTERPRETER="qemu-ppc64-static"
+
+    - dist: trusty
+      sudo: required
+      addons:
+        apt:
+          packages:
+            - qemu-system-ppc
+            - qemu-user-static
+            - gcc-powerpc-linux-gnu
+      env:
+        - MAKE_OPTIONS="CC=powerpc-linux-gnu-gcc AR=gcc-ar NATIVE=off" QEMU_INTERPRETER="qemu-ppc-static"
 
 script:
   - make ${MAKE_OPTIONS}
