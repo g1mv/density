@@ -105,6 +105,9 @@ $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION): post-link
 library: post-link
 
 benchmark: library
+	@export CC
+	@export AR
+	@export NATIVE
 	@$(MAKE) -C benchmark/
 	@echo Please type ${bold}$(BUILD_DIRECTORY)/density-benchmark${normal} to launch the benchmark binary.
 	@echo
