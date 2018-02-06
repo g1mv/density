@@ -7,6 +7,10 @@ matrix:
       env:
         - C_COMPILER=clang AR=ar
 
+    - os: osx
+      env:
+        - C_COMPILER=gcc AR=gcc-ar
+
     # Container-based Ubuntu 12.04 LTS Server Edition 64 bit (doesn't support 32-bit includes)
     - os: linux
       sudo: false
