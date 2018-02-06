@@ -73,7 +73,7 @@ DENSITY_OBJ = $(patsubst $(SRC_DIRECTORY)%.c, $(DENSITY_BUILD_DIRECTORY)%.o, $(D
 
 all: benchmark
 
-$(DENSITY_BUILD_DIRECTORY)%.o: $(SRC_DIRECTORY)/%.c
+$(DENSITY_BUILD_DIRECTORY)/%.o: $(SRC_DIRECTORY)/%.c
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -c $< -o $@
 
