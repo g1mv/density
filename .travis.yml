@@ -32,7 +32,7 @@ matrix:
             - gcc-arm-linux-gnueabi
             - g++-arm-linux-gnueabi
       env:
-        - C_COMPILER=CC=arm-linux-gnueabi-gcc MAKE_OPTIONS="AR=gcc-ar NATIVE=off" QEMU_INTERPRETER=qemu-arm-static PRE_SCRIPT="export QEMU_LD_PREFIX=/usr/arm-linux-gnueabi/"
+        - C_COMPILER=arm-linux-gnueabi-gcc MAKE_OPTIONS="AR=gcc-ar NATIVE=off" QEMU_INTERPRETER=qemu-arm-static PRE_SCRIPT="export QEMU_LD_PREFIX=/usr/arm-linux-gnueabi/"
 
     - dist: trusty
       sudo: required
