@@ -35,7 +35,7 @@
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = density-benchmark
-CFLAGS = -Ofast -fomit-frame-pointer -flto -std=c99 -march=native -mtune=native -Wall -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
+CFLAGS = -Ofast -fomit-frame-pointer -flto -std=c99 -Wall -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
 LFLAGS = -flto
 
 BUILD_DIRECTORY = ../build
@@ -46,6 +46,10 @@ SPOOKYHASH_SRC_DIRECTORY = ./libs/spookyhash/src
 CLIENT_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/benchmark
 CPUTIME_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/cputime
 SPOOKYHASH_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/spookyhash
+
+ifeq ($(NATIVE),)
+	CFLAGS += -march=native -mtune=native
+endif
 
 ifeq ($(OS),Windows_NT)
     bold =
