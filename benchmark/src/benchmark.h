@@ -74,7 +74,7 @@
 #elif TARGET_OS_IPHONE
 #define DENSITY_BENCHMARK_PLATFORM_STRING         "iOS"
 #elif TARGET_OS_MAC
-#define DENSITY_BENCHMARK_PLATFORM_STRING         "Mac OS/X"
+#define DENSITY_BENCHMARK_PLATFORM_STRING         "MacOS"
 #else
 #define DENSITY_BENCHMARK_PLATFORM_STRING         "an unknown Apple platform"
 #endif
