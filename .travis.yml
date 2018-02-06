@@ -4,19 +4,19 @@ matrix:
   include:
     # OS X Mavericks
     - os: osx
-    - env:
-        - CC=clang AR=ar
+      env:
+        - C_COMPILER=clang AR=ar
 
     # Container-based Ubuntu 12.04 LTS Server Edition 64 bit (doesn't support 32-bit includes)
     - os: linux
       sudo: false
       env:
-        - CC=gcc AR=gcc-ar
+        - C_COMPILER=gcc AR=gcc-ar
 
     - os: linux
       sudo: false
       env:
-        - CC=clang AR=ar
+        - C_COMPILER=clang AR=ar
 
     # Ubuntu 14.04 LTS Server Edition 64 bit
     - dist: trusty
@@ -28,7 +28,7 @@ matrix:
             - qemu-user-static
             - gcc-aarch64-linux-gnu
       env:
-        - QEMU_INTERPRETER=qemu-aarch64-static CC=aarch64-linux-gnu-gcc AR=gcc-ar
+        - QEMU_INTERPRETER=qemu-aarch64-static C_COMPILER=aarch64-linux-gnu-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -39,7 +39,7 @@ matrix:
             - qemu-user-static
             - gcc-arm-linux-gnueabi
       env:
-        - QEMU_INTERPRETER=qemu-arm-static CC=arm-linux-gnueabi-gcc AR=gcc-ar
+        - QEMU_INTERPRETER=qemu-arm-static C_COMPILER=arm-linux-gnueabi-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -50,7 +50,7 @@ matrix:
             - qemu-user-static
             - gcc-powerpc-linux-gnu
       env:
-        - QEMU_INTERPRETER=qemu-ppc64-static CC=powerpc-linux-gnu-gcc AR=gcc-ar
+        - QEMU_INTERPRETER=qemu-ppc64-static C_COMPILER=powerpc-linux-gnu-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -61,11 +61,11 @@ matrix:
             - qemu-user-static
             - gcc-powerpc-linux-gnu
       env:
-        - QEMU_INTERPRETER=qemu-ppc-static CC=powerpc-linux-gnu-gcc AR=gcc-ar
+        - QEMU_INTERPRETER=qemu-ppc-static C_COMPILER=powerpc-linux-gnu-gcc AR=gcc-ar
 
     - dist: trusty
       sudo: required
-      env: CC=gcc
+      env: C_COMPILER=gcc
 
     - dist: trusty
       sudo: required
@@ -76,7 +76,7 @@ matrix:
           packages:
             - gcc-4.8
       env:
-        - CC=gcc-4.8 AR=gcc-ar
+        - C_COMPILER=gcc-4.8 AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -87,7 +87,7 @@ matrix:
           packages:
             - gcc-4.9
       env:
-        - CC=gcc-4.9 AR=gcc-ar
+        - C_COMPILER=gcc-4.9 AR=gcc-ar
 
     - dist: trusty
       sudo: required
@@ -98,7 +98,7 @@ matrix:
           packages:
             - gcc-5
       env:
-        - CC=gcc-5 AR=gcc-ar-5
+        - C_COMPILER=gcc-5 AR=gcc-ar-5
 
     - dist: trusty
       sudo: required
@@ -109,7 +109,7 @@ matrix:
           packages:
             - gcc-6
       env:
-        - CC=gcc-6 AR=gcc-ar-6
+        - C_COMPILER=gcc-6 AR=gcc-ar-6
 
     - dist: trusty
       sudo: required
@@ -120,7 +120,7 @@ matrix:
           packages:
             - gcc-7
       env:
-        - CC=gcc-7 AR=gcc-ar-7
+        - C_COMPILER=gcc-7 AR=gcc-ar-7
 
     - dist: trusty
       sudo: required
@@ -132,7 +132,7 @@ matrix:
           packages:
             - clang-3.5
       env:
-        - CC=clang-3.5 AR=ar
+        - C_COMPILER=clang-3.5 AR=ar
 
     - dist: trusty
       sudo: required
@@ -144,7 +144,7 @@ matrix:
           packages:
             - clang-3.6
       env:
-        - CC=clang-3.6 AR=ar
+        - C_COMPILER=clang-3.6 AR=ar
 
     - dist: trusty
       sudo: required
@@ -156,7 +156,7 @@ matrix:
           packages:
             - clang-3.8
       env:
-        - CC=clang-3.8 AR=ar
+        - C_COMPILER=clang-3.8 AR=ar
 
     - dist: trusty
       sudo: required
@@ -168,7 +168,7 @@ matrix:
           packages:
             - clang-3.9
       env:
-        - CC=clang-3.9 AR=ar
+        - C_COMPILER=clang-3.9 AR=ar
 
     - dist: trusty
       sudo: required
@@ -180,7 +180,7 @@ matrix:
           packages:
             - clang-4.0
       env:
-        - CC=clang-4.0 AR=ar
+        - C_COMPILER=clang-4.0 AR=ar
 
     - dist: trusty
       sudo: required
@@ -192,8 +192,8 @@ matrix:
           packages:
             - clang-5.0
       env:
-        - CC=clang-5.0 AR=ar
+        - C_COMPILER=clang-5.0 AR=ar
 
 script:
-  - make CC=${CC} AR=${AR}
+  - make CC=${C_COMPILER} AR=${AR}
   - $QEMU_INTERPRETER ./build/density-benchmark -f
