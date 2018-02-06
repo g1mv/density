@@ -2,7 +2,6 @@ language: c
 matrix:
   fast_finish: true
   include:
-    # OS X Mavericks
     - os: osx
       env:
         - MAKE_OPTIONS="CC=clang"
@@ -10,27 +9,6 @@ matrix:
     - os: osx
       env:
         - MAKE_OPTIONS="CC=gcc"
-
-    # Container-based Ubuntu 12.04 LTS Server Edition 64 bit (doesn't support 32-bit includes)
-    - os: linux
-      sudo: false
-      env:
-        - MAKE_OPTIONS="CC=gcc AR=gcc-ar"
-
-    - os: linux
-      sudo: false
-      addons:
-        apt:
-          packages:
-            - llvm-dev
-      env:
-        - MAKE_OPTIONS="CC=clang LTO=off"
-
-    # Ubuntu 14.04 LTS Server Edition 64 bit
-    - dist: trusty
-      sudo: required
-      env:
-        - MAKE_OPTIONS="CC=gcc AR=gcc-ar"
 
     - dist: trusty
       sudo: required
