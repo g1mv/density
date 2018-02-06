@@ -51,6 +51,14 @@ ifeq ($(LTO),)
 	LFLAGS += -flto
 endif
 
+ifeq ($(ARCH),32)
+	CLFAGS += -m32
+endif
+
+ifeq ($(ARCH),64)
+	CLFAGS += -m64
+endif
+
 ifeq ($(OS),Windows_NT)
     bold =
     normal =
