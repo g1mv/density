@@ -30,7 +30,7 @@ build_script:
 
     %LAUNCH_BUILD%
 
-    file "%LAUNCH_PATH%"*
+    file %LAUNCH_PATH%*
 
     %LAUNCH_PATH%benchmark.exe -f
 test_script:
