@@ -32,7 +32,7 @@
 # 01/02/18 01:32
 #
 
-recursive_wildcard=$(wildcard $1$2)$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+recursive_wildcard=$(wildcard $1$2)$(foreach d,$(wildcard $1*),$(call recursive_wildcard,$d/,$2))
 
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
