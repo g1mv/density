@@ -133,7 +133,7 @@ library: post-link
 
 benchmark: library
 	@$(MAKE) -C benchmark/
-	@echo Please type ${bold}$(BUILD_DIRECTORY)$(SEPARATOR)$(TARGET)$(EXTENSION)${normal} to launch the benchmark binary.
+	@echo Please type ${bold}$(BUILD_DIRECTORY)$(SEPARATOR)benchmark$(BENCHMARK_EXTENSION)${normal} to launch the benchmark binary.
 	@echo
 
 clean:
