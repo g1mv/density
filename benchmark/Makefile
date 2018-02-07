@@ -32,6 +32,8 @@
 # 02/02/18 01:55
 #
 
+recursive_wildcard=$(wildcard $1$2)$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = benchmark
@@ -73,9 +75,9 @@ else
 		EXTENSION =
 endif
 
-CLIENT_SRC = $(shell find $(CLIENT_SRC_DIRECTORY) -type f -name '*.c')
-CPUTIME_SRC = $(shell find $(CPUTIME_SRC_DIRECTORY) -type f -name '*.c')
-SPOOKYHASH_SRC = $(shell find $(SPOOKYHASH_SRC_DIRECTORY) -type f -name '*.c')
+CLIENT_SRC = $(call recursive_wildcard,$(CLIENT_SRC_DIRECTORY)/,*.c)
+CPUTIME_SRC = $(call recursive_wildcard,$(CPUTIME_SRC_DIRECTORY)/,*.c)
+SPOOKYHASH_SRC = $(call recursive_wildcard,$(SPOOKYHASH_SRC_DIRECTORY)/,*.c)
 CLIENT_OBJ = $(patsubst $(CLIENT_SRC_DIRECTORY)%.c, $(CLIENT_BUILD_DIRECTORY)%.o, $(CLIENT_SRC))
 CPUTIME_OBJ = $(patsubst $(CPUTIME_SRC_DIRECTORY)%.c, $(CPUTIME_BUILD_DIRECTORY)%.o, $(CPUTIME_SRC))
 SPOOKYHASH_OBJ = $(patsubst $(SPOOKYHASH_SRC_DIRECTORY)%.c, $(SPOOKYHASH_BUILD_DIRECTORY)%.o, $(SPOOKYHASH_SRC))

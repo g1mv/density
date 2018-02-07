@@ -32,6 +32,8 @@
 # 01/02/18 01:32
 #
 
+recursive_wildcard=$(wildcard $1$2)$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = libdensity
@@ -76,7 +78,7 @@ else
 endif
 STATIC_EXTENSION = .a
 
-DENSITY_SRC = $(shell find $(SRC_DIRECTORY) -type f -name '*.c')
+DENSITY_SRC = $(call recursive_wildcard,$(SRC_DIRECTORY)/,*.c)
 DENSITY_OBJ = $(patsubst $(SRC_DIRECTORY)%.c, $(DENSITY_BUILD_DIRECTORY)%.o, $(DENSITY_SRC))
 
 .PHONY: pre-compile post-compile pre-link post-link library benchmark
