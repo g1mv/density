@@ -21,7 +21,7 @@ matrix:
             - clang-4.0
             - llvm-4.0-dev
       env:
-        - C_COMPILER=clang-4.0
+        - C_COMPILER=clang-4.0 MAKE_OPTIONS="AR=llvm-ar"
 
     - dist: trusty
       sudo: required
