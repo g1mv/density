@@ -21,7 +21,7 @@ matrix:
             - clang-4.0
             - llvm-4.0-dev
       env:
-        - C_COMPILER=clang-4.0 MAKE_OPTIONS="AR=llvm-ar-4.0" PRE_SCRIPT="sudo rm /usr/bin/ld && sudo ln -s ld.gold /usr/bin/ld"
+        - C_COMPILER=clang-4.0 MAKE_OPTIONS="AR=llvm-ar-4.0" PRE_SCRIPT="sudo ln -sf ld.gold /usr/bin/ld"
 
     - dist: trusty
       sudo: required
@@ -257,5 +257,4 @@ script:
   - make CC=$C_COMPILER $MAKE_OPTIONS
   - file ./build/libdensity.*
   - file ./build/benchmark
-  - $QEMU_INTERPRETER ./build/benchmark
   - $QEMU_INTERPRETER ./build/benchmark -f
