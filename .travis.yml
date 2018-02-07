@@ -266,7 +266,8 @@ matrix:
 
 script:
   - ${PRE_SCRIPT}
-  - sudo ls -la /usr/bin
+  - sudo ls -la /usr/lib/llvm-3.8/lib/
+  - sudo ls -la /usr/local/clang-5.0.0/lib/
   - $C_COMPILER -v
   - make CC=$C_COMPILER $MAKE_OPTIONS
   - file ./build/libdensity.*
