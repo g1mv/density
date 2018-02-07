@@ -35,8 +35,8 @@
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = benchmark
-CFLAGS = -Ofast -fomit-frame-pointer -std=c99 -Wall -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
-LFLAGS =
+CFLAGS = -Ofast -flto -fomit-frame-pointer -std=c99 -Wall -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
+LFLAGS = -flto
 
 BUILD_DIRECTORY = ../build
 DENSITY_STATIC_LIBRARY = libdensity.a
@@ -49,11 +49,6 @@ SPOOKYHASH_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/spookyhash
 
 ifeq ($(NATIVE),)
 	CFLAGS += -march=native -mtune=native
-endif
-
-ifeq ($(LTO),)
-	CFLAGS += -flto
-	LFLAGS += -flto
 endif
 
 ifeq ($(ARCH),32)
