@@ -72,24 +72,24 @@ else
 endif
 
 ifeq ($(OS),Windows_NT)
-    bold =
-    normal =
-    ARROW = ^-^>
-    EXTENSION = .dll
-		BENCHMARK_EXTENSION = .exe
-		SEPARATOR = \\
+	bold =
+	normal =
+	ARROW = ^-^>
+	EXTENSION = .dll
+	BENCHMARK_EXTENSION = .exe
+	SEPARATOR = \\
 else
-    bold = `tput bold`
-    normal = `tput sgr0`
-    ARROW = \-\>
-		UNAME_S := $(shell uname -s)
-		ifeq ($(UNAME_S),Darwin)
-			EXTENSION = .dylib
-    else
-			EXTENSION = .so
-		endif
-		BENCHMARK_EXTENSION =
-		SEPARATOR = /
+	bold = `tput bold`
+	normal = `tput sgr0`
+	ARROW = \-\>
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Darwin)
+		EXTENSION = .dylib
+	else
+		EXTENSION = .so
+	endif
+	BENCHMARK_EXTENSION =
+	SEPARATOR = /
 endif
 STATIC_EXTENSION = .a
 
