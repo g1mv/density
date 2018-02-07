@@ -37,12 +37,16 @@ recursive_wildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call recursive
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = libdensity
-CFLAGS = -Ofast -flto -fomit-frame-pointer -std=c99 -Wall -fpic -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
+CFLAGS = -Ofast -flto -fomit-frame-pointer -std=c99 -Wall -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
 LFLAGS = -flto
 
 BUILD_DIRECTORY = ./build
 DENSITY_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/density
 SRC_DIRECTORY = ./src
+
+ifneq ($(TARGET_OS),mingw32)
+	CFLAGS += -fpic
+endif
 
 ifeq ($(NATIVE),)
 	CFLAGS += -march=native -mtune=native
