@@ -44,7 +44,14 @@ BUILD_DIRECTORY = ./build
 DENSITY_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/density
 SRC_DIRECTORY = ./src
 
-ifneq ($(TARGET_OS),mingw32)
+# Avoid fpic warnings
+TARGET_TRIPLE := $(subst -, ,$(shell $(CC) -dumpmachine))
+TARGET_ARCH   := $(word 1,$(TARGET_TRIPLE))
+TARGET_OS     := $(word 3,$(TARGET_TRIPLE))
+
+ifeq ($(TARGET_OS),mingw32)
+else ifeq ($(TARGET_OS),cygwin)
+else
 	CFLAGS += -fpic
 endif
 
