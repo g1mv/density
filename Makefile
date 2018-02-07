@@ -77,7 +77,7 @@ ifeq ($(OS),Windows_NT)
     ARROW = ^-^>
     EXTENSION = .dll
 		BENCHMARK_EXTENSION = .exe
-		SEPARATOR = \
+		SEPARATOR = \\
 else
     bold = `tput bold`
     normal = `tput sgr0`
