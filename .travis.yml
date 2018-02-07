@@ -266,6 +266,7 @@ matrix:
 
 script:
   - ${PRE_SCRIPT}
+  - sudo ls -la /usr/bin
   - $C_COMPILER -v
   - make CC=$C_COMPILER $MAKE_OPTIONS
   - file ./build/libdensity.*
