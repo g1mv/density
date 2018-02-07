@@ -40,9 +40,9 @@ TARGET = libdensity
 CFLAGS = -Ofast -flto -fomit-frame-pointer -std=c99 -Wall -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
 LFLAGS = -flto
 
-BUILD_DIRECTORY = ./build
+BUILD_DIRECTORY = build
 DENSITY_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/density
-SRC_DIRECTORY = ./src
+SRC_DIRECTORY = src
 
 # Avoid fpic warnings
 TARGET_TRIPLE := $(subst -, ,$(shell $(CC) -dumpmachine))
@@ -77,6 +77,7 @@ ifeq ($(OS),Windows_NT)
     ARROW = ^-^>
     EXTENSION = .dll
 		BENCHMARK_EXTENSION = .exe
+		SEPARATOR = \
 else
     bold = `tput bold`
     normal = `tput sgr0`
@@ -88,6 +89,7 @@ else
 			EXTENSION = .so
 		endif
 		BENCHMARK_EXTENSION =
+		SEPARATOR = /
 endif
 STATIC_EXTENSION = .a
 
@@ -121,8 +123,8 @@ link: pre-link $(DENSITY_OBJ)
 post-link: link
 	@echo Done.
 	@echo
-	@echo Static library file is here : ${bold}$(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION)${normal}
-	@echo Dynamic library file is here : ${bold}$(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION)${normal}
+	@echo Static library file : ${bold}$(BUILD_DIRECTORY)$(SEPARATOR)$(TARGET)$(STATIC_EXTENSION)${normal}
+	@echo Dynamic library file : ${bold}$(BUILD_DIRECTORY)$(SEPARATOR)$(TARGET)$(EXTENSION)${normal}
 	@echo
 
 $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION): post-link
@@ -131,7 +133,7 @@ library: post-link
 
 benchmark: library
 	@$(MAKE) -C benchmark/
-	@echo Please type ${bold}$(BUILD_DIRECTORY)/benchmark${normal} to launch the benchmark binary.
+	@echo Please type ${bold}$(BUILD_DIRECTORY)$(SEPARATOR)$(TARGET)$(EXTENSION)${normal} to launch the benchmark binary.
 	@echo
 
 clean:
