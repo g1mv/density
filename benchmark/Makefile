@@ -49,18 +49,20 @@ CLIENT_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/bench
 CPUTIME_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/cputime
 SPOOKYHASH_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/spookyhash
 
-ifeq ($(NATIVE),)
-	CFLAGS += -march=native -mtune=native
-endif
+ifeq ($(ARCH),)
+	ifeq ($(NATIVE),)
+		CFLAGS += -march=native -mtune=native
+	endif
+else
+	ifeq ($(ARCH),32)
+		CFLAGS += -m32
+		LFLAGS += -m32
+	endif
 
-ifeq ($(ARCH),32)
-	CFLAGS += -m32
-	LFLAGS += -m32
-endif
-
-ifeq ($(ARCH),64)
-	CFLAGS += -m64
-	LFLAGS += -m64
+	ifeq ($(ARCH),64)
+		CFLAGS += -m64
+		LFLAGS += -m64
+	endif
 endif
 
 ifeq ($(OS),Windows_NT)
