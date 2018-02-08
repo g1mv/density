@@ -51,16 +51,6 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_prepare_signature(uint8_t **DEN
     *out += sizeof(density_cheetah_signature);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_encode_write_to_signature(uint_fast64_t *const DENSITY_RESTRICT signature, const uint_fast8_t shift, const uint64_t flag) {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    *signature |= (flag << shift);
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    *signature |= (flag << ((56 - (shift & ~0x7)) + (shift & 0x7)));
-#else
-#error
-#endif
-}
-
 DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint_fast16_t hash, const uint_fast8_t shift, uint_fast64_t *const DENSITY_RESTRICT signature, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
     uint32_t *predictedChunk = (uint32_t * ) & dictionary->prediction_entries[*last_hash];
 
@@ -70,11 +60,11 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(uint8_t **DENSITY_RESTRI
         if (*found_a ^ *unit) {
             uint32_t *found_b = &found->chunk_b;
             if (*found_b ^ *unit) {
-                density_cheetah_encode_write_to_signature(signature, shift, (uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK);
+                *signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK << shift);
                 DENSITY_MEMCPY(*out, unit, sizeof(uint32_t));
                 *out += sizeof(uint32_t);
             } else {
-                density_cheetah_encode_write_to_signature(signature, shift, (uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B);
+                *signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B << shift);
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
                 DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -88,7 +78,7 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(uint8_t **DENSITY_RESTRI
             *found_b = *found_a;
             *found_a = *unit;
         } else {
-            density_cheetah_encode_write_to_signature(signature, shift, (uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A);
+            *signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A << shift);
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
             DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -151,10 +141,14 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
             density_cheetah_encode_prepare_signature(out, &signature_pointer, &signature);
             DENSITY_PREFETCH(*in + DENSITY_CHEETAH_WORK_BLOCK_SIZE);
             density_cheetah_encode_128(in, out, &last_hash, &signature, (density_cheetah_dictionary *const) state->dictionary, &unit);
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-            signature = DENSITY_LITTLE_ENDIAN_64(signature);
-#endif
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+            const uint_fast64_t endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
+            DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_cheetah_signature));
+#else
+#error
+#endif
             DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*out - out_start), DENSITY_CHEETAH_WORK_BLOCK_SIZE);
         }
     }
@@ -170,11 +164,15 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
         case 2:
         case 3:
             density_cheetah_encode_prepare_signature(out, &signature_pointer, &signature);
-            density_cheetah_encode_write_to_signature(&signature, 0, (uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK);  // End marker
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-            signature = DENSITY_LITTLE_ENDIAN_64(signature);
-#endif
+            signature = (uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK;    // End marker
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+            const uint_fast64_t endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
+            DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_cheetah_signature));
+#else
+#error
+#endif
             goto process_remaining_bytes;
         default:
             break;
@@ -185,11 +183,15 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     for (uint_fast8_t shift = 0; shift != limit_4; shift += 2)
         density_cheetah_encode_4(in, out, &last_hash, shift, &signature, (density_cheetah_dictionary *const) state->dictionary, &unit);
 
-    density_cheetah_encode_write_to_signature(&signature, limit_4, (uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK);    // End marker
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    signature = DENSITY_LITTLE_ENDIAN_64(signature);
-#endif
+    signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK << limit_4);  // End marker
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    const uint_fast64_t endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
+    DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_cheetah_signature));
+#else
+#error
+#endif
 
     process_remaining_bytes:
     remaining = in_size & 0x3;
