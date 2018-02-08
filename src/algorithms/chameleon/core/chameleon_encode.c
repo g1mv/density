@@ -57,11 +57,14 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(uint8_t **DENSITY_REST
         case 0:
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
             *signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP << shift);
-#else
+            DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
             *signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP << ((56 - (shift & ~0x7)) + (shift & 0x7)));
-#endif
             const uint16_t endian_hash = DENSITY_LITTLE_ENDIAN_16(hash);
             DENSITY_MEMCPY(*out, &endian_hash, sizeof(uint16_t));
+#else
+#error
+#endif
             *out += sizeof(uint16_t);
             break;
         default:
