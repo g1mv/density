@@ -37,7 +37,7 @@ recursive_wildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call recursive
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = benchmark
-CFLAGS = -Ofast -flto -fomit-frame-pointer -std=c99 -Wall -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
+CFLAGS = -Ofast -flto -fomit-frame-pointer -std=c99 -Wall
 LFLAGS = -flto
 
 BUILD_DIRECTORY = ../build
@@ -56,34 +56,34 @@ TARGET_OS     := $(word 3,$(TARGET_TRIPLE))
 ifeq ($(ARCH),)
 	ifeq ($(NATIVE),)
 		ifeq ($(TARGET_ARCH),powerpc)
-			CFLAGS += -mcpu=native
+			CFLAGS += -mtune=native
 		else
 			CFLAGS += -march=native
 		endif
-		CFLAGS += -mtune=native
 	endif
 else
 	ifeq ($(ARCH),32)
 		CFLAGS += -m32
-		LFLAGS += -m32
 	endif
 
 	ifeq ($(ARCH),64)
 		CFLAGS += -m64
-		LFLAGS += -m64
 	endif
 endif
 
 ifeq ($(OS),Windows_NT)
-    bold =
-    normal =
-    ARROW = ^-^>
-		EXTENSION = .exe
+	bold =
+	normal =
+	ARROW = ^-^>
+	EXTENSION = .exe
 else
-    bold = `tput bold`
-    normal = `tput sgr0`
-    ARROW = \-\>
-		EXTENSION =
+	bold = `tput bold`
+	normal = `tput sgr0`
+	ARROW = \-\>
+	EXTENSION =
+	ifeq ($(shell lsb_release -a 2>/dev/null | grep Distributor | awk '{ print $$3 }'),Ubuntu)
+		CFLAGS += -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
+	endif
 endif
 
 CLIENT_SRC = $(call recursive_wildcard,$(CLIENT_SRC_DIRECTORY)/,*.c)
