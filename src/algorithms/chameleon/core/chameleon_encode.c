@@ -51,7 +51,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_signature(uint8_t **D
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_write_to_signature(uint_fast64_t *const DENSITY_RESTRICT signature, const uint_fast8_t shift, const uint64_t flag) {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     *signature |= (flag << shift);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     *signature |= (flag << ((56 - (shift & ~0x7)) + (shift & 0x7)));
