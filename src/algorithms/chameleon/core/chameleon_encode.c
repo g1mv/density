@@ -55,8 +55,13 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(uint8_t **DENSITY_REST
 
     switch (*unit ^ found->as_uint32_t) {
         case 0:
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
             *signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP << shift);
-            DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
+#else
+            *signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP << ((56 - (shift & ~0x7)) + (shift & 0x7)));
+#endif
+            const uint16_t endian_hash = DENSITY_LITTLE_ENDIAN_16(hash);
+            DENSITY_MEMCPY(*out, &endian_hash, sizeof(uint16_t));
             *out += sizeof(uint16_t);
             break;
         default:
@@ -69,7 +74,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(uint8_t **DENSITY_REST
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast8_t shift, uint_fast64_t *const DENSITY_RESTRICT signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
     DENSITY_MEMCPY(unit, *in, sizeof(uint32_t));
-    density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(*unit), shift, signature, dictionary, unit);
+    density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(*unit)), shift, signature, dictionary, unit);
     *in += sizeof(uint32_t);
 }
 

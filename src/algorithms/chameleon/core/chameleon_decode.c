@@ -49,7 +49,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_process_compressed(const uint
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_uncompressed(const uint32_t chunk, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
-    const uint16_t hash = DENSITY_CHAMELEON_HASH_ALGORITHM(chunk);
+    const uint16_t hash = DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(chunk));
     (&dictionary->entries[hash])->as_uint32_t = chunk;
 }
 
@@ -57,7 +57,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel(const uint8_t **DENSIT
     if (compressed) {
         uint16_t hash;
         DENSITY_MEMCPY(&hash, *in, sizeof(uint16_t));
-        DENSITY_MEMCPY(*out, &dictionary->entries[hash].as_uint32_t, sizeof(uint32_t));
+        density_chameleon_decode_process_compressed(DENSITY_LITTLE_ENDIAN_16(hash), out, dictionary);
         *in += sizeof(uint16_t);
     } else {
         uint32_t unit;
@@ -137,6 +137,9 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_256(const uint8_t **DENSITY_R
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_read_signature(const uint8_t **DENSITY_RESTRICT in, density_chameleon_signature *DENSITY_RESTRICT signature) {
     DENSITY_MEMCPY(signature, *in, sizeof(density_chameleon_signature));
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    *signature = DENSITY_LITTLE_ENDIAN_64(*signature);
+#endif
     *in += sizeof(density_chameleon_signature);
 }
 
