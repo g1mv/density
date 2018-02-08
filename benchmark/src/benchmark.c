@@ -237,14 +237,14 @@ int main(int argc, char *argv[]) {
             }
 
             if(hash_1 != original_hash_1 || hash_2 != original_hash_2) {
-                DENSITY_BENCHMARK_ERROR(printf("Original and round-trip data hashes do not match (");
+                DENSITY_BENCHMARK_ERROR(printf("Uncompressed and round-trip data hashes do not match (");
                 printf("0x%" PRIx64 "%" PRIx64, hash_1, hash_2);
                 printf(" vs. ");
                 printf("0x%" PRIx64 "%" PRIx64, original_hash_1, original_hash_2);
                 printf(").");, true);
             }
 
-            printf("Original and round-trip data hashes match. ");
+            printf("Uncompressed and round-trip data hashes match. ");
         }
         printf("Starting main bench.\n");
         if (compression_only)
