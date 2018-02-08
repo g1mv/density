@@ -145,9 +145,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
         case 3:
             density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
             density_chameleon_encode_write_to_signature(&signature, 0, (uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK);  // End marker
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-            signature = DENSITY_LITTLE_ENDIAN_64(signature);
-#endif
+//#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+//            signature = DENSITY_LITTLE_ENDIAN_64(signature);
+//#endif
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
             goto process_remaining_bytes;
         default:
@@ -160,9 +160,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
         density_chameleon_encode_4(in, out, shift, &signature, (density_chameleon_dictionary *const) state->dictionary, &unit);
 
     density_chameleon_encode_write_to_signature(&signature, limit_4, (uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK);    // End marker
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    signature = DENSITY_LITTLE_ENDIAN_64(signature);
-#endif
+//#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+//    signature = DENSITY_LITTLE_ENDIAN_64(signature);
+//#endif
     DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
 
     process_remaining_bytes:
