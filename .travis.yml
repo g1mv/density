@@ -44,7 +44,7 @@ matrix:
             - gcc-powerpc-linux-gnu
             - g++-powerpc-linux-gnu
       env:
-        - C_COMPILER=powerpc-linux-gnu-gcc MAKE_OPTIONS="AR=gcc-ar NATIVE=off ARCH=64" QEMU_INTERPRETER="qemu-ppc64-static" PRE_SCRIPT="export QEMU_LD_PREFIX=/usr/powerpc-linux-gnu/"
+        - C_COMPILER=powerpc-linux-gnu-gcc MAKE_OPTIONS="AR=gcc-ar ARCH=64" QEMU_INTERPRETER="qemu-ppc64-static" PRE_SCRIPT="export QEMU_LD_PREFIX=/usr/powerpc-linux-gnu/"
 
     - dist: trusty
       sudo: required
