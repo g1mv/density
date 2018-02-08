@@ -121,7 +121,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-            const uint_fast64_t endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
+            const uint64_t endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
             DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_chameleon_signature));
 #else
 #error
@@ -145,7 +145,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-            const uint_fast64_t endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
+            const uint64_t endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
             DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_chameleon_signature));
 #else
 #error
@@ -164,7 +164,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    const uint_fast64_t endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
+    const uint64_t endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
     DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_chameleon_signature));
 #else
 #error
