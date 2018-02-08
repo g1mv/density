@@ -44,7 +44,6 @@ BUILD_DIRECTORY = build
 DENSITY_BUILD_DIRECTORY = $(BUILD_DIRECTORY)/density
 SRC_DIRECTORY = src
 
-# Avoid fpic warnings
 TARGET_TRIPLE := $(subst -, ,$(shell $(CC) -dumpmachine))
 TARGET_ARCH   := $(word 1,$(TARGET_TRIPLE))
 TARGET_OS     := $(word 3,$(TARGET_TRIPLE))
@@ -57,7 +56,12 @@ endif
 
 ifeq ($(ARCH),)
 	ifeq ($(NATIVE),)
-		CFLAGS += -march=native -mtune=native
+		ifeq ($(TARGET_ARCH),powerpc)
+			CFLAGS += -mcpu=native
+		else
+			CFLAGS += -march=native
+		endif
+		CFLAGS += -mtune=native
 	endif
 else
 	ifeq ($(ARCH),32)
