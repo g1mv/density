@@ -99,7 +99,7 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 #define DENSITY_LITTLE_ENDIAN_16(b)   ((((b) & 0xFF00) >> 8) | (((b) & 0x00FF) << 8))
 #endif
 #else
-#error Unknow endianness
+#error Unsupported endianness
 #endif
 
 #define DENSITY_MAX_2(a, b) (((a)>(b))?(a):(b))
