@@ -128,6 +128,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
             density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
             DENSITY_PREFETCH(*in + DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
             density_chameleon_encode_256(in, out, &signature, (density_chameleon_dictionary *const) state->dictionary, &unit);
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+            signature = DENSITY_LITTLE_ENDIAN_64(signature);
+#endif
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
             DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*out - out_start), DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
         }
