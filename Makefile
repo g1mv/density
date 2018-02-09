@@ -37,7 +37,7 @@ recursive_wildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call recursive
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = libdensity
-CFLAGS = -Ofast -flto -fomit-frame-pointer -std=c99 -Wall
+CFLAGS = -Ofast -flto -std=c99 -Wall
 LFLAGS = -flto
 
 BUILD_DIRECTORY = build
