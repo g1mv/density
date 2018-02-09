@@ -115,7 +115,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel_dual(const uint8_t **D
             *out += sizeof(uint32_t);
             density_chameleon_decode_process_compressed((uint16_t)((var_64 >> density_bitsizeof(uint32_t)) & 0xffff), out, dictionary);
             *out += sizeof(uint32_t);
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__);
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
             density_chameleon_decode_process_compressed(DENSITY_LITTLE_ENDIAN_16((uint16_t)((var_64 >> density_bitsizeof(uint32_t)) & 0xffff)), out, dictionary);
             var_32 = (uint32_t)(var_64 & 0xffffffff);
             density_chameleon_decode_process_uncompressed(var_32, dictionary);
