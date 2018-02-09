@@ -69,7 +69,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel(const uint8_t **DENSIT
     *out += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_decode_kernel_dual(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t signature, const uint_fast8_t shift, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
+DENSITY_FORCE_INLINE void density_chameleon_decode_kernel_dual(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const density_chameleon_signature signature, const uint_fast8_t shift, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
     uint32_t var_32;
     uint64_t var_64;
 
@@ -143,15 +143,15 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel_dual(const uint8_t **D
     }
 }
 
-DENSITY_FORCE_INLINE bool density_chameleon_decode_test_compressed(const uint_fast64_t signature, const uint_fast8_t shift) {
+DENSITY_FORCE_INLINE bool density_chameleon_decode_test_compressed(const density_chameleon_signature signature, const uint_fast8_t shift) {
     return (density_bool const) ((signature >> shift) & DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP);
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_decode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t signature, const uint_fast8_t shift, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
+DENSITY_FORCE_INLINE void density_chameleon_decode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const density_chameleon_signature signature, const uint_fast8_t shift, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
     density_chameleon_decode_kernel(in, out, density_chameleon_decode_test_compressed(signature, shift), dictionary);
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_decode_256(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
+DENSITY_FORCE_INLINE void density_chameleon_decode_256(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const density_chameleon_signature signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
     uint_fast8_t count_a = 0;
     uint_fast8_t count_b = 0;
 
@@ -167,9 +167,14 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_256(const uint8_t **DENSITY_R
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_read_signature(const uint8_t **DENSITY_RESTRICT in, density_chameleon_signature *DENSITY_RESTRICT signature) {
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     DENSITY_MEMCPY(signature, *in, sizeof(density_chameleon_signature));
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    *signature = DENSITY_LITTLE_ENDIAN_64(*signature);
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    density_chameleon_signature endian_signature;
+    DENSITY_MEMCPY(&endian_signature, *in, sizeof(density_chameleon_signature));
+    *signature = DENSITY_LITTLE_ENDIAN_64(endian_signature);
+#else
+#error
 #endif
     *in += sizeof(density_chameleon_signature);
 }

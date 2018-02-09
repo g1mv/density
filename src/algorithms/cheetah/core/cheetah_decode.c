@@ -139,19 +139,19 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_16(const uint8_t **DENSI
     *out += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE uint8_t density_cheetah_decode_read_flag(const uint_fast64_t signature, const uint_fast8_t shift) {
+DENSITY_FORCE_INLINE uint8_t density_cheetah_decode_read_flag(const density_cheetah_signature signature, const uint_fast8_t shift) {
     return (uint8_t const) ((signature >> shift) & 0x3);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint_fast64_t signature, const uint_fast8_t shift, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const density_cheetah_signature signature, const uint_fast8_t shift, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
     density_cheetah_decode_kernel_4(in, out, last_hash, density_cheetah_decode_read_flag(signature, shift), dictionary);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_16(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint_fast64_t signature, const uint_fast8_t shift, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_16(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const density_cheetah_signature signature, const uint_fast8_t shift, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
     density_cheetah_decode_kernel_16(in, out, last_hash, (uint8_t const) ((signature >> shift) & 0xff), dictionary);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint_fast64_t signature, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const density_cheetah_signature signature, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
 #ifdef __clang__
     uint_fast8_t count = 0;
     for (uint_fast8_t count_b = 0; count_b < 8; count_b ++) {
@@ -165,9 +165,14 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **DENSITY_RES
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(const uint8_t **DENSITY_RESTRICT in, density_cheetah_signature *DENSITY_RESTRICT signature) {
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     DENSITY_MEMCPY(signature, *in, sizeof(density_cheetah_signature));
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    *signature = DENSITY_LITTLE_ENDIAN_64(*signature);
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    density_cheetah_signature endian_signature;
+    DENSITY_MEMCPY(&endian_signature, *in, sizeof(density_cheetah_signature));
+    *signature = DENSITY_LITTLE_ENDIAN_64(endian_signature);
+#else
+#error
 #endif
     *in += sizeof(density_cheetah_signature);
 }
