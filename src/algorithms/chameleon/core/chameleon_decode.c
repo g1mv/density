@@ -156,15 +156,15 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_256(const uint8_t **DENSITY_R
     uint_fast8_t count_a = 0;
     uint_fast8_t count_b = 0;
 
-//#if defined(__clang__) || defined(_MSC_VER)
+#if defined(__clang__) || defined(_MSC_VER)
     do {
         DENSITY_UNROLL_2(density_chameleon_decode_kernel_dual(in, out, signature, count_a, dictionary); count_a+= 2);
     } while (++count_b & 0xf);
-//#else
-//    do {
-//        DENSITY_UNROLL_2(density_chameleon_decode_4(in, out, signature, count_a ++, dictionary));
-//    } while (++count_b & 0x1f);
-//#endif
+#else
+    do {
+        DENSITY_UNROLL_2(density_chameleon_decode_4(in, out, signature, count_a ++, dictionary));
+    } while (++count_b & 0x1f);
+#endif
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_read_signature(const uint8_t **DENSITY_RESTRICT in, density_chameleon_signature *DENSITY_RESTRICT signature) {
