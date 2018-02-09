@@ -50,7 +50,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_process_compressed(const uint
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_uncompressed(const uint32_t chunk, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
     const uint16_t hash = DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(chunk));
-    (&dictionary->entries[hash])->as_uint32_t = chunk;  // Does not ensure dictionary consistency in case of big endianness
+    (&dictionary->entries[hash])->as_uint32_t = chunk;  // Does not ensure dictionary content consistency between endiannesses
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_kernel(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const density_bool compressed, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {

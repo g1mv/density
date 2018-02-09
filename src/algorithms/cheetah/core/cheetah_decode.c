@@ -64,7 +64,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_b(uint8_t **
     density_cheetah_dictionary_entry *const entry = &dictionary->entries[hash];
     const uint32_t unit = entry->chunk_b;
     entry->chunk_b = entry->chunk_a;
-    entry->chunk_a = unit;  // Does not ensure dictionary consistency in case of big endianness
+    entry->chunk_a = unit;  // Does not ensure dictionary content consistency between endiannesses
     DENSITY_MEMCPY(*out, &unit, sizeof(uint32_t));
     dictionary->prediction_entries[*last_hash].next_chunk_prediction = unit;
     *last_hash = hash;
@@ -75,9 +75,9 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_process_uncompressed(uint8_t **
     DENSITY_PREFETCH(&dictionary->prediction_entries[hash]);
     density_cheetah_dictionary_entry *const entry = &dictionary->entries[hash];
     entry->chunk_b = entry->chunk_a;
-    entry->chunk_a = unit;  // Does not ensure dictionary consistency in case of big endianness
+    entry->chunk_a = unit;  // Does not ensure dictionary content consistency between endiannesses
     DENSITY_MEMCPY(*out, &unit, sizeof(uint32_t));
-    dictionary->prediction_entries[*last_hash].next_chunk_prediction = unit;    // Does not ensure dictionary consistency in case of big endianness
+    dictionary->prediction_entries[*last_hash].next_chunk_prediction = unit;    // Does not ensure dictionary content consistency between endiannesses
     *last_hash = hash;
 }
 

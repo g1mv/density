@@ -76,7 +76,7 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(uint8_t **DENSITY_RESTRI
                 *out += sizeof(uint16_t);
             }
             *found_b = *found_a;
-            *found_a = *unit;   // Does not ensure dictionary consistency in case of big endianness
+            *found_a = *unit;   // Does not ensure dictionary content consistency between endiannesses
         } else {
             *signature |= ((uint64_t) DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A << shift);
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -89,7 +89,7 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(uint8_t **DENSITY_RESTRI
 #endif
             *out += sizeof(uint16_t);
         }
-        *predictedChunk = *unit;    // Does not ensure dictionary consistency in case of big endianness
+        *predictedChunk = *unit;    // Does not ensure dictionary content consistency between endiannesses
     }
     *last_hash = hash;
 }
