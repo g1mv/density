@@ -192,6 +192,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel_4(uint8_t **DENSITY_RESTRIC
             density_lion_encode_push_code_to_signature(out, signature_pointer, signature, shift, density_lion_form_model_get_encoding(data, DENSITY_LION_FORM_PREDICTIONS_B));
         }
         DENSITY_MEMMOVE((uint32_t *) predictions + 1, predictions, 2 * sizeof(uint32_t));
+        *(uint32_t *) predictions = unit;   // Does not ensure dictionary consistency in case of big endianness
     } else
         density_lion_encode_push_code_to_signature(out, signature_pointer, signature, shift, density_lion_form_model_get_encoding(data, DENSITY_LION_FORM_PREDICTIONS_A));
     *last_hash = hash;
