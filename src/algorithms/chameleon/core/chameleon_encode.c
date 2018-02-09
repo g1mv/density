@@ -67,7 +67,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(uint8_t **DENSITY_REST
             *out += sizeof(uint16_t);
             break;
         default:
-            found->as_uint32_t = *unit;
+            found->as_uint32_t = *unit; // Does not ensure dictionary consistency in case of big endianness
             DENSITY_MEMCPY(*out, unit, sizeof(uint32_t));
             *out += sizeof(uint32_t);
             break;

@@ -50,7 +50,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_process_compressed(const uint
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_process_uncompressed(const uint32_t chunk, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
     const uint16_t hash = DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(chunk));
-    (&dictionary->entries[hash])->as_uint32_t = chunk;
+    (&dictionary->entries[hash])->as_uint32_t = chunk;  // Does not ensure dictionary consistency in case of big endianness
 }
 
 DENSITY_FORCE_INLINE void density_chameleon_decode_kernel(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const density_bool compressed, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary) {
@@ -76,38 +76,69 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel_dual(const uint8_t **D
     switch((signature >> shift) & 0x3) {
         case 0x0:
             DENSITY_MEMCPY(&var_64, *in, sizeof(uint32_t) + sizeof(uint32_t));
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
             density_chameleon_decode_process_uncompressed((uint32_t)(var_64 & 0xffffffff), dictionary);
+#endif
             density_chameleon_decode_process_uncompressed((uint32_t)(var_64 >> density_bitsizeof(uint32_t)), dictionary);
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+            density_chameleon_decode_process_uncompressed((uint32_t)(var_64 & 0xffffffff), dictionary);
+#endif
             DENSITY_MEMCPY(*out, &var_64, sizeof(uint32_t) + sizeof(uint32_t));
             *in += (sizeof(uint32_t) + sizeof(uint32_t));
             *out += sizeof(uint64_t);
             break;
         case 0x1:
             DENSITY_MEMCPY(&var_64, *in, sizeof(uint16_t) + sizeof(uint32_t));
-            density_chameleon_decode_process_compressed((uint16_t)(var_64 & 0xffff), out, dictionary);
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+            density_chameleon_decode_process_compressed(DENSITY_LITTLE_ENDIAN_16((uint16_t)(var_64 & 0xffff)), out, dictionary);
+#endif
             var_32 = (uint32_t)((var_64 >> density_bitsizeof(uint16_t)) & 0xffffffff);
             density_chameleon_decode_process_uncompressed(var_32, dictionary);
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
             DENSITY_MEMCPY(*out + sizeof(uint32_t), &var_32, sizeof(uint32_t));
-            *in += (sizeof(uint16_t) + sizeof(uint32_t));
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+            DENSITY_MEMCPY(*out += sizeof(uint32_t), &var_32, sizeof(uint32_t));
+            density_chameleon_decode_process_compressed(DENSITY_LITTLE_ENDIAN_16((uint16_t)(var_64 & 0xffff)), out, dictionary);
+            *out += sizeof(uint32_t)
+#else
+#error
+#endif
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
             *out += sizeof(uint64_t);
+#endif
+            *in += (sizeof(uint16_t) + sizeof(uint32_t));
             break;
         case 0x2:
             DENSITY_MEMCPY(&var_64, *in, sizeof(uint32_t) + sizeof(uint16_t));
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
             var_32 = (uint32_t)(var_64 & 0xffffffff);
             density_chameleon_decode_process_uncompressed(var_32, dictionary);
             DENSITY_MEMCPY(*out, &var_32, sizeof(uint32_t));
             *out += sizeof(uint32_t);
-            density_chameleon_decode_process_compressed((uint16_t)((var_64 >> density_bitsizeof(uint32_t)) & 0xffff), out, dictionary);
-            *in += (sizeof(uint32_t) + sizeof(uint16_t));
+#endif
+            density_chameleon_decode_process_compressed(DENSITY_LITTLE_ENDIAN_16((uint16_t)((var_64 >> density_bitsizeof(uint32_t)) & 0xffff)), out, dictionary);
             *out += sizeof(uint32_t);
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+            var_32 = (uint32_t)(var_64 & 0xffffffff);
+            density_chameleon_decode_process_uncompressed(var_32, dictionary);
+            DENSITY_MEMCPY(*out, &var_32, sizeof(uint32_t));
+            *out += sizeof(uint32_t);
+#endif
+            *in += (sizeof(uint32_t) + sizeof(uint16_t));
             break;
         case 0x3:
             DENSITY_MEMCPY(&var_32, *in, sizeof(uint16_t) + sizeof(uint16_t));
-            density_chameleon_decode_process_compressed((uint16_t)(var_32 & 0xffff), out, dictionary);
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+            density_chameleon_decode_process_compressed(DENSITY_LITTLE_ENDIAN_16((uint16_t)(var_32 & 0xffff)), out, dictionary);
             *out += sizeof(uint32_t);
-            density_chameleon_decode_process_compressed((uint16_t)(var_32 >> density_bitsizeof(uint16_t)), out, dictionary);
+#endif
+            density_chameleon_decode_process_compressed(DENSITY_LITTLE_ENDIAN_16((uint16_t)(var_32 >> density_bitsizeof(uint16_t))), out, dictionary);
+            *out += sizeof(uint32_t);
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+            density_chameleon_decode_process_compressed(DENSITY_LITTLE_ENDIAN_16((uint16_t)(var_32 & 0xffff)), out, dictionary);
+            *out += sizeof(uint32_t);
+#endif
             *in += (sizeof(uint16_t) + sizeof(uint16_t));
-            *out += sizeof(uint32_t);
             break;
     }
 }
