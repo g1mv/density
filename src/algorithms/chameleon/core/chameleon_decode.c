@@ -99,7 +99,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel_dual(const uint8_t **D
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
             DENSITY_MEMCPY(*out += sizeof(uint32_t), &var_32, sizeof(uint32_t));
             density_chameleon_decode_process_compressed(DENSITY_LITTLE_ENDIAN_16((uint16_t)(var_64 & 0xffff)), out, dictionary);
-            *out += sizeof(uint32_t)
+            *out += sizeof(uint32_t);
 #else
 #error
 #endif
