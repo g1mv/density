@@ -48,7 +48,7 @@
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_predicted(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
     const uint32_t unit = dictionary->prediction_entries[*last_hash].next_chunk_prediction;
     DENSITY_MEMCPY(*out, &unit, sizeof(uint32_t));
-    *last_hash = DENSITY_CHEETAH_HASH_ALGORITHM(unit);
+    *last_hash = DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(unit));
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_a(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary, const uint16_t hash) {
