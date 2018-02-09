@@ -96,7 +96,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel_dual(const uint8_t **D
             DENSITY_MEMCPY(*out + sizeof(uint32_t), &var_32, sizeof(uint32_t));
             *out += sizeof(uint64_t);
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-            density_chameleon_decode_process_compressed((uint16_t)((var_64 >> (density_bitsizeof(uint16_t) + density_bitsizeof(uint32_t))) & 0xffff), out, dictionary);
+            density_chameleon_decode_process_compressed(DENSITY_LITTLE_ENDIAN_16((uint16_t)((var_64 >> (density_bitsizeof(uint16_t) + density_bitsizeof(uint32_t))) & 0xffff)), out, dictionary);
             var_32 = (uint32_t)((var_64 >> density_bitsizeof(uint16_t)) & 0xffffffff);
             density_chameleon_decode_process_uncompressed(var_32, dictionary);
             DENSITY_MEMCPY(*out + sizeof(uint32_t), &var_32, sizeof(uint32_t));
@@ -120,7 +120,7 @@ DENSITY_FORCE_INLINE void density_chameleon_decode_kernel_dual(const uint8_t **D
             density_chameleon_decode_process_uncompressed(var_32, dictionary);
             DENSITY_MEMCPY(*out, &var_32, sizeof(uint32_t));
             *out += sizeof(uint32_t);
-            density_chameleon_decode_process_compressed((uint16_t)((var_64 >> density_bitsizeof(uint16_t)) & 0xffff), out, dictionary);
+            density_chameleon_decode_process_compressed(DENSITY_LITTLE_ENDIAN_16((uint16_t)((var_64 >> density_bitsizeof(uint16_t)) & 0xffff)), out, dictionary);
             *out += sizeof(uint32_t);
 #else
 #error
