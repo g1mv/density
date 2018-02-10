@@ -60,9 +60,9 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(uint8_t **DENSIT
         density_lion_encode_push_to_proximity_signature(signature, shift, content, bits);
 
         if (DENSITY_UNLIKELY(*shift >= density_bitsizeof(density_lion_signature))) {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined(DENSITY_BIG_ENDIAN)
             const density_lion_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(*signature);
             DENSITY_MEMCPY(*signature_pointer, &endian_signature, sizeof(density_lion_signature));
 #else
@@ -87,9 +87,9 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(uint8_t **D
         *shift += bits;
 
         if (DENSITY_UNLIKELY(*shift >= density_bitsizeof(density_lion_signature))) {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined(DENSITY_BIG_ENDIAN)
             const density_lion_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(*signature);
             DENSITY_MEMCPY(*signature_pointer, &endian_signature, sizeof(density_lion_signature));
 #else
@@ -130,9 +130,9 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel_4(uint8_t **DENSITY_RESTRIC
                                 *out += sizeof(uint32_t);
                             } else {
                                 density_lion_encode_push_code_to_signature(out, signature_pointer, signature, shift, density_lion_form_model_get_encoding(data, DENSITY_LION_FORM_DICTIONARY_D));
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifdef DENSITY_LITTLE_ENDIAN
                                 DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined(DENSITY_BIG_ENDIAN)
                                 const uint16_t endian_hash = DENSITY_LITTLE_ENDIAN_16(hash);
                                 DENSITY_MEMCPY(*out, &endian_hash, sizeof(uint16_t));
 #else
@@ -142,9 +142,9 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel_4(uint8_t **DENSITY_RESTRIC
                             }
                         } else {
                             density_lion_encode_push_code_to_signature(out, signature_pointer, signature, shift, density_lion_form_model_get_encoding(data, DENSITY_LION_FORM_DICTIONARY_C));
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifdef DENSITY_LITTLE_ENDIAN
                             DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined(DENSITY_BIG_ENDIAN)
                             const uint16_t endian_hash = DENSITY_LITTLE_ENDIAN_16(hash);
                             DENSITY_MEMCPY(*out, &endian_hash, sizeof(uint16_t));
 #else
@@ -154,9 +154,9 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel_4(uint8_t **DENSITY_RESTRIC
                         }
                     } else {
                         density_lion_encode_push_code_to_signature(out, signature_pointer, signature, shift, density_lion_form_model_get_encoding(data, DENSITY_LION_FORM_DICTIONARY_B));
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifdef DENSITY_LITTLE_ENDIAN
                         DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined(DENSITY_BIG_ENDIAN)
                         const uint16_t endian_hash = DENSITY_LITTLE_ENDIAN_16(hash);
                         DENSITY_MEMCPY(*out, &endian_hash, sizeof(uint16_t));
 #else
@@ -168,9 +168,9 @@ DENSITY_FORCE_INLINE void density_lion_encode_kernel_4(uint8_t **DENSITY_RESTRIC
                     *(uint32_t *) in_dictionary = unit; // Does not ensure dictionary content consistency between endiannesses
                 } else {
                     density_lion_encode_push_code_to_signature(out, signature_pointer, signature, shift, density_lion_form_model_get_encoding(data, DENSITY_LION_FORM_DICTIONARY_A));
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifdef DENSITY_LITTLE_ENDIAN
                     DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined(DENSITY_BIG_ENDIAN)
                     const uint16_t endian_hash = DENSITY_LITTLE_ENDIAN_16(hash);
                     DENSITY_MEMCPY(*out, &endian_hash, sizeof(uint16_t));
 #else
@@ -242,7 +242,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
             DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
         } else {
             const uint8_t *out_start = *out;
-			DENSITY_PREFETCH(*in + DENSITY_LION_WORK_BLOCK_SIZE);
+            DENSITY_PREFETCH(*in + DENSITY_LION_WORK_BLOCK_SIZE);
             density_lion_encode_256(in, out, &last_hash, &signature_pointer, &signature, &shift, (density_lion_dictionary *const) state->dictionary, &data, &unit);
             DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*out - out_start), DENSITY_LION_WORK_BLOCK_SIZE);
         }
@@ -259,9 +259,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
         case 2:
         case 3:
             density_lion_encode_push_code_to_signature(out, &signature_pointer, &signature, &shift, density_lion_form_model_get_encoding(&data, DENSITY_LION_FORM_PLAIN)); // End marker
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_lion_signature));
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined(DENSITY_BIG_ENDIAN)
             const density_lion_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
             DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_lion_signature));
 #else
@@ -277,9 +277,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
         density_lion_encode_4(in, out, &last_hash, &signature_pointer, &signature, &shift, (density_lion_dictionary *const) state->dictionary, &data, &unit);
 
     density_lion_encode_push_code_to_signature(out, &signature_pointer, &signature, &shift, density_lion_form_model_get_encoding(&data, DENSITY_LION_FORM_PLAIN)); // End marker
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifdef DENSITY_LITTLE_ENDIAN
     DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_lion_signature));
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined(DENSITY_BIG_ENDIAN)
     const density_lion_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
     DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_lion_signature));
 #else

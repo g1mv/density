@@ -165,9 +165,9 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **DENSITY_RES
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(const uint8_t **DENSITY_RESTRICT in, density_cheetah_signature *DENSITY_RESTRICT signature) {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifdef DENSITY_LITTLE_ENDIAN
     DENSITY_MEMCPY(signature, *in, sizeof(density_cheetah_signature));
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined(DENSITY_BIG_ENDIAN)
     density_cheetah_signature endian_signature;
     DENSITY_MEMCPY(&endian_signature, *in, sizeof(density_cheetah_signature));
     *signature = DENSITY_LITTLE_ENDIAN_64(endian_signature);

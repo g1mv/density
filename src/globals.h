@@ -54,6 +54,18 @@
 #define DENSITY_PREFETCH(x)			__builtin_prefetch(x)
 #define DENSITY_CTZ(x)				__builtin_ctz(x)
 
+#if defined(__BYTE_ORDER__)
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define DENSITY_LITTLE_ENDIAN
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define DENSITY_BIG_ENDIAN
+#else
+#error Unsupported endianness
+#endif
+#else
+#error Unkwnown endianness
+#endif
+
 #elif defined(_MSC_VER)
 #include <string.h>
 #include <intrin.h>
@@ -77,17 +89,17 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 }
 #define DENSITY_CTZ(x)				density_msvc_ctz(x)
 
+#define DENSITY_LITTLE_ENDIAN	// Little endian by default on Windows
+
 #else
-#error Unsupported compiler.
+#error Unsupported compiler
 #endif
 
-//#define DENSITY_FORCE_INLINE    inline __attribute__((always_inline))
-
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifdef DENSITY_LITTLE_ENDIAN
 #define DENSITY_LITTLE_ENDIAN_64(b)   ((uint64_t)b)
 #define DENSITY_LITTLE_ENDIAN_32(b)   ((uint32_t)b)
 #define DENSITY_LITTLE_ENDIAN_16(b)   ((uint16_t)b)
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined(DENSITY_BIG_ENDIAN)
 #if __GNUC__ * 100 + __GNUC_MINOR__ >= 403
 #define DENSITY_LITTLE_ENDIAN_64(b)   __builtin_bswap64(b)
 #define DENSITY_LITTLE_ENDIAN_32(b)   __builtin_bswap32(b)
