@@ -32,6 +32,6 @@ build_script:
 
     file %LAUNCH_PATH:\=/%*
 
-    %LAUNCH_PATH%benchmark.exe -f
+    %LAUNCH_PATH%benchmark.exe -h -f
 test_script:
 - cmd:

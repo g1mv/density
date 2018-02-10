@@ -268,6 +268,5 @@ script:
   - ${PRE_SCRIPT}
   - $C_COMPILER -v
   - make CC=$C_COMPILER $MAKE_OPTIONS
-  - file ./build/libdensity.*
-  - file ./build/benchmark
-  - $QEMU_INTERPRETER ./build/benchmark -f
+  - file ./build/*
+  - $QEMU_INTERPRETER ./build/benchmark -h -f
