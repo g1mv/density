@@ -40,7 +40,7 @@ Benchmarks
 
 **Quick benchmark**
 
-DENSITY features an **integrated in-memory benchmark**. After building the project (see [build](#build)), a *benchmark* executable will be present in the build/bin/Release directory. If run without arguments, usage help will be displayed.
+DENSITY features an **integrated in-memory benchmark**. After building the project (see [build](#build)), a *benchmark* executable will be present in the build directory. If run without arguments, usage help will be displayed.
 
 File used : enwik8 (100 MB)
 
@@ -131,7 +131,7 @@ to choose alternative compilers. For a quick test of resulting binaries, run
 
 **Windows**
 
-On Windows, things can be done in two different ways. The first is to use mingw's gcc compiler; for that we'll use the [chocolatey package manager](https://chocolatey.org/) for simplicity.
+On Windows, things can be done in different ways. The first is to use mingw's gcc compiler; for that we'll use the [chocolatey package manager](https://chocolatey.org/) for simplicity.
 
 1) Install [chocolatey](https://chocolatey.org/install).
 
@@ -152,7 +152,7 @@ On Windows, things can be done in two different ways. The first is to use mingw'
 
 Alternatively, it is possible to use Microsoft's [Visual Studio IDE community edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community).
 
-1) Install [Visual Studio IDE community edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community).
+1) Install [Visual Studio IDE community edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community), [chocolatey](https://chocolatey.org/install) and git as previously.
 
 2) Open a [developer command prompt](https://docs.microsoft.com/en-us/dotnet/framework/tools/developer-command-prompt-for-vs) and type :
 
@@ -250,6 +250,6 @@ And that's it ! We've done a compression/decompression round trip with a few lin
 Related projects
 ----------------
 
-*   **densityxx** (c++ port of density) [https://github.com/charlesw1234/densityxx](https://github.com/charlesw1234/densityxx)
-*   **fsbench-density** (in-memory transformations benchmark) [https://github.com/gpnuma/fsbench-density](https://github.com/gpnuma/fsbench-density)
 *   **SHARC** (archiver using density algorithms) [https://github.com/gpnuma/sharc](https://github.com/gpnuma/sharc)
+*   **fsbench-density** (in-memory transformations benchmark) [https://github.com/gpnuma/fsbench-density](https://github.com/gpnuma/fsbench-density)
+*   **densityxx** (c++ port of density) [https://github.com/charlesw1234/densityxx](https://github.com/charlesw1234/densityxx)
