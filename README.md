@@ -44,7 +44,7 @@ DENSITY features an **integrated in-memory benchmark**. After building the proje
 
 File used : enwik8 (100 MB)
 
-Platform : MacBook Pro, MacOS 10.13.2, 2.3 GHz Intel Core i7, 8Gb 1600 MHz DDR, SSD, compiling with Clang/LLVM 9.0.0
+Platform : MacBook Pro, MacOS 10.13.3, 2.3 GHz Intel Core i7, 8Gb 1600 MHz DDR, SSD, compiling with Clang/LLVM 9.0.0
 
 Timing : using the *time* function, and taking the best *user* output after multiple runs. In the case of density, the in-memory integrated benchmark's best value (which uses the same usermode CPU timing) is used.
 
