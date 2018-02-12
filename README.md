@@ -131,37 +131,37 @@ to choose alternative compilers. For a quick test of resulting binaries, run
 
 **Windows**
 
-On Windows, things can be done in different ways. The first is to use mingw's gcc compiler; for that we'll use the [chocolatey package manager](https://chocolatey.org/) for simplicity.
+Please install [git for Windows](https://git-scm.com/download/win) to begin with.
 
-1) Install [chocolatey](https://chocolatey.org/install).
+On Windows, density can be built in different ways.
+The **first method** is to use mingw's gcc compiler; for that it is necessary to download and install [mingw-w64](https://sourceforge.net/projects/mingw-w64/).
 
-2) From the command line, get the prerequisites :
+1) Once mingw-w64 is installed, get the source :
 
 ```
-    choco install git mingw
     git clone https://github.com/centaurean/density.git
     cd density
 ```
 
-3) Build and test :
+2) Build and test :
 
 ```
     mingw32-make.exe
-    build\benchmark.exe -f
+    build/benchmark.exe -f
 ```
 
-Alternatively, it is possible to use Microsoft's [Visual Studio IDE community edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community).
+As an alternative, [MSYS2](http://www.msys2.org/) also offers a linux-like environment for Windows.
 
-1) Install [Visual Studio IDE community edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community), [chocolatey](https://chocolatey.org/install) and git as previously.
+The **second method** is to download and install Microsoft's [Visual Studio IDE community edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community). It comes with Microsoft's own compilers and is free.
 
-2) Open a [developer command prompt](https://docs.microsoft.com/en-us/dotnet/framework/tools/developer-command-prompt-for-vs) and type :
+1) Once Visual Studio is installed, open a [developer command prompt](https://docs.microsoft.com/en-us/dotnet/framework/tools/developer-command-prompt-for-vs) and type :
 
 ```
     git clone https://github.com/centaurean/density.git
     cd density\msvc
 ```
 
-3) Build and test :
+2) Build and test :
 
 ```
     msbuild Density.sln
