@@ -96,7 +96,7 @@ DENSITY_FORCE_INLINE density_context* density_allocate_context(const DENSITY_ALG
     context->dictionary_type = custom_dictionary;
     if(!context->dictionary_type) {
         context->dictionary = mem_alloc(context->dictionary_size);
-        memset(context->dictionary, 0, context->dictionary_size);
+        DENSITY_MEMSET(context->dictionary, 0, context->dictionary_size);
     }
     return context;
 }

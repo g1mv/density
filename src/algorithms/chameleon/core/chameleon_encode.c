@@ -44,36 +44,43 @@
 
 #include "chameleon_encode.h"
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_signature(uint8_t **DENSITY_RESTRICT out, uint_fast64_t **DENSITY_RESTRICT signature_pointer, uint_fast64_t *const DENSITY_RESTRICT signature) {
+DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_signature(uint8_t **DENSITY_RESTRICT out, density_chameleon_signature **DENSITY_RESTRICT signature_pointer, density_chameleon_signature *const DENSITY_RESTRICT signature) {
     *signature = 0;
     *signature_pointer = (density_chameleon_signature *) *out;
     *out += sizeof(density_chameleon_signature);
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(uint8_t **DENSITY_RESTRICT out, const uint16_t hash, const uint_fast8_t shift, uint_fast64_t *const DENSITY_RESTRICT signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
+DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(uint8_t **DENSITY_RESTRICT out, const uint16_t hash, const uint_fast8_t shift, density_chameleon_signature *const DENSITY_RESTRICT signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
     density_chameleon_dictionary_entry *const found = &dictionary->entries[hash];
 
     switch (*unit ^ found->as_uint32_t) {
         case 0:
             *signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP << shift);
+#ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
+#elif defined(DENSITY_BIG_ENDIAN)
+            const uint16_t endian_hash = DENSITY_LITTLE_ENDIAN_16(hash);
+            DENSITY_MEMCPY(*out, &endian_hash, sizeof(uint16_t));
+#else
+#error
+#endif
             *out += sizeof(uint16_t);
             break;
         default:
-            found->as_uint32_t = *unit;
+            found->as_uint32_t = *unit; // Does not ensure dictionary content consistency between endiannesses
             DENSITY_MEMCPY(*out, unit, sizeof(uint32_t));
             *out += sizeof(uint32_t);
             break;
     }
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast8_t shift, uint_fast64_t *const DENSITY_RESTRICT signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
+DENSITY_FORCE_INLINE void density_chameleon_encode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast8_t shift, density_chameleon_signature *const DENSITY_RESTRICT signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
     DENSITY_MEMCPY(unit, *in, sizeof(uint32_t));
-    density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(*unit), shift, signature, dictionary, unit);
+    density_chameleon_encode_kernel(out, DENSITY_CHAMELEON_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(*unit)), shift, signature, dictionary, unit);
     *in += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE void density_chameleon_encode_256(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast64_t *const DENSITY_RESTRICT signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
+DENSITY_FORCE_INLINE void density_chameleon_encode_256(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, density_chameleon_signature *const DENSITY_RESTRICT signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
     uint_fast8_t count = 0;
 
 #ifdef __clang__
@@ -111,7 +118,14 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
             density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
             DENSITY_PREFETCH(*in + DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
             density_chameleon_encode_256(in, out, &signature, (density_chameleon_dictionary *const) state->dictionary, &unit);
+#ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
+#elif defined(DENSITY_BIG_ENDIAN)
+            const density_chameleon_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
+            DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_chameleon_signature));
+#else
+#error
+#endif
             DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*out - out_start), DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
         }
     }
@@ -127,8 +141,15 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
         case 2:
         case 3:
             density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
-            signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK);      // End marker
+            signature = ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK);    // End marker
+#ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
+#elif defined(DENSITY_BIG_ENDIAN)
+            const density_chameleon_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
+            DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_chameleon_signature));
+#else
+#error
+#endif
             goto process_remaining_bytes;
         default:
             break;
@@ -139,8 +160,15 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     for (uint_fast8_t shift = 0; shift != limit_4; shift++)
         density_chameleon_encode_4(in, out, shift, &signature, (density_chameleon_dictionary *const) state->dictionary, &unit);
 
-    signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK << limit_4);   // End marker
+    signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK << limit_4);    // End marker
+#ifdef DENSITY_LITTLE_ENDIAN
     DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
+#elif defined(DENSITY_BIG_ENDIAN)
+    const density_chameleon_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
+    DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_chameleon_signature));
+#else
+#error
+#endif
 
     process_remaining_bytes:
     remaining = in_size & 0x3;

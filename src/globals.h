@@ -48,10 +48,23 @@
 #define DENSITY_RESTRICT_DECLARE
 #define DENSITY_MEMCPY				__builtin_memcpy
 #define DENSITY_MEMMOVE				__builtin_memmove
+#define DENSITY_MEMSET				__builtin_memset
 #define DENSITY_LIKELY(x)			__builtin_expect(!!(x), 1)
 #define DENSITY_UNLIKELY(x)			__builtin_expect(!!(x), 0)
 #define DENSITY_PREFETCH(x)			__builtin_prefetch(x)
 #define DENSITY_CTZ(x)				__builtin_ctz(x)
+
+#if defined(__BYTE_ORDER__)
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define DENSITY_LITTLE_ENDIAN
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define DENSITY_BIG_ENDIAN
+#else
+#error Unsupported endianness
+#endif
+#else
+#error Unkwnown endianness
+#endif
 
 #elif defined(_MSC_VER)
 #include <string.h>
@@ -62,11 +75,12 @@
 #define DENSITY_RESTRICT_DECLARE	__restrict
 #define DENSITY_MEMCPY				memcpy
 #define DENSITY_MEMMOVE				memmove
+#define DENSITY_MEMSET				memset
 #define DENSITY_LIKELY(x)			(x)
 #define DENSITY_UNLIKELY(x)			(x)
 #define DENSITY_PREFETCH(x)			((void)(x))
 
-uint_fast8_t __forceinline density_msvc_ctz(uint64_t value) {
+DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 	unsigned long trailing_zero = 0;
 	if (_BitScanForward(&trailing_zero, (unsigned long)value))
 		return (uint_fast8_t)trailing_zero;
@@ -75,17 +89,17 @@ uint_fast8_t __forceinline density_msvc_ctz(uint64_t value) {
 }
 #define DENSITY_CTZ(x)				density_msvc_ctz(x)
 
+#define DENSITY_LITTLE_ENDIAN	// Little endian by default on Windows
+
 #else
-#error Unsupported compiler.
+#error Unsupported compiler
 #endif
 
-//#define DENSITY_FORCE_INLINE    inline __attribute__((always_inline))
-
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifdef DENSITY_LITTLE_ENDIAN
 #define DENSITY_LITTLE_ENDIAN_64(b)   ((uint64_t)b)
 #define DENSITY_LITTLE_ENDIAN_32(b)   ((uint32_t)b)
 #define DENSITY_LITTLE_ENDIAN_16(b)   ((uint16_t)b)
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined(DENSITY_BIG_ENDIAN)
 #if __GNUC__ * 100 + __GNUC_MINOR__ >= 403
 #define DENSITY_LITTLE_ENDIAN_64(b)   __builtin_bswap64(b)
 #define DENSITY_LITTLE_ENDIAN_32(b)   __builtin_bswap32(b)
@@ -97,7 +111,7 @@ uint_fast8_t __forceinline density_msvc_ctz(uint64_t value) {
 #define DENSITY_LITTLE_ENDIAN_16(b)   ((((b) & 0xFF00) >> 8) | (((b) & 0x00FF) << 8))
 #endif
 #else
-#error Unknow endianness
+#error Unsupported endianness
 #endif
 
 #define DENSITY_MAX_2(a, b) (((a)>(b))?(a):(b))
@@ -211,7 +225,7 @@ DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
 
 #define DENSITY_MAJOR_VERSION   0
 #define DENSITY_MINOR_VERSION   14
-#define DENSITY_REVISION        1
+#define DENSITY_REVISION        2
 
 
 

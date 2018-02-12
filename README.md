@@ -8,7 +8,7 @@ It is focused on high-speed compression, at the best ratio possible. **All three
 
 DENSITY features a simple API to enable quick integration in any project.
 
-Branch|Linux & OSX|Windows
+Branch|Linux & MacOS|Windows
 --- | --- | ---
 master|[![Build Status](https://travis-ci.org/centaurean/density.svg?branch=master)](https://travis-ci.org/centaurean/density)|[![Build status](https://ci.appveyor.com/api/projects/status/rf7x3x829il72cii/branch/master?svg=true)](https://ci.appveyor.com/project/gpnuma/density/branch/master)
 dev|[![Build Status](https://travis-ci.org/centaurean/density.svg?branch=dev)](https://travis-ci.org/centaurean/density)|[![Build status](https://ci.appveyor.com/api/projects/status/rf7x3x829il72cii/branch/dev?svg=true)](https://ci.appveyor.com/project/gpnuma/density/branch/dev)
@@ -40,21 +40,21 @@ Benchmarks
 
 **Quick benchmark**
 
-DENSITY features an **integrated in-memory benchmark**. After building the project (see [build](#build)), a *benchmark* executable will be present in the build/bin/Release directory. If run without arguments, usage help will be displayed.
+DENSITY features an **integrated in-memory benchmark**. After building the project (see [build](#build)), a *benchmark* executable will be present in the build directory. If run without arguments, usage help will be displayed.
 
 File used : enwik8 (100 MB)
 
-Platform : MacBook Pro, OSX 10.13.2, 2.3 GHz Intel Core i7, 8Gb 1600 MHz DDR, SSD, compiling with Clang/LLVM 9.0.0
+Platform : MacBook Pro, MacOS 10.13.3, 2.3 GHz Intel Core i7, 8Gb 1600 MHz DDR, SSD, compiling with Clang/LLVM 9.0.0
 
 Timing : using the *time* function, and taking the best *user* output after multiple runs. In the case of density, the in-memory integrated benchmark's best value (which uses the same usermode CPU timing) is used.
 
 <sub>Library</sub>|<sub>Algorithm</sub>|<sub>Compress</sub>|<sub>Decompress</sub>|<sub>Size</sub>|<sub>Ratio</sub>|<sub>Round trip</sub>
 ---|---|---|---|---|---|---
-<sub>**density** 0.14.0</sub>|<sub>Chameleon</sub>|<sub>0.094s (1059 MB/s)</sub>|<sub>0.066s (1514 MB/s)</sub>|<sub>61 524 084</sub>|<sub>61,52%</sub>|<sub>0.160s</sub>
+<sub>**density** 0.14.2</sub>|<sub>Chameleon</sub>|<sub>0.092s (1085 MB/s)</sub>|<sub>0.059s (1684 MB/s)</sub>|<sub>61 524 084</sub>|<sub>61,52%</sub>|<sub>0.151s</sub>
 <sub>lz4 r129</sub>|<sub>-1</sub>|<sub>0.468s (214 MB/s)</sub>|<sub>0.115s (870 MB/s)</sub>|<sub>57 285 990</sub>|<sub>57,29%</sub>|<sub>0.583s</sub>
 <sub>lzo 2.08</sub>|<sub>-1</sub>|<sub>0.367s (272 MB/s)</sub>|<sub>0.309s (324 MB/s)</sub>|<sub>56 709 096</sub>|<sub>56,71%</sub>|<sub>0.676s</sub>
-<sub>**density** 0.14.0</sub>|<sub>Cheetah</sub>|<sub>0.177s (564 MB/s)</sub>|<sub>0.130s (768 MB/s)</sub>|<sub>53 156 668</sub>|<sub>53,16%</sub>|<sub>0.307s</sub>
-<sub>**density** 0.14.0</sub>|<sub>Lion</sub>|<sub>0.329s (304 MB/s)</sub>|<sub>0.301s (332 MB/s)</sub>|<sub>47 817 692</sub>|<sub>47,82%</sub>|<sub>0.630s</sub>
+<sub>**density** 0.14.2</sub>|<sub>Cheetah</sub>|<sub>0.170s (587 MB/s)</sub>|<sub>0.126s (796 MB/s)</sub>|<sub>53 156 668</sub>|<sub>53,16%</sub>|<sub>0.296s</sub>
+<sub>**density** 0.14.2</sub>|<sub>Lion</sub>|<sub>0.303s (330 MB/s)</sub>|<sub>0.288s (347 MB/s)</sub>|<sub>47 817 692</sub>|<sub>47,82%</sub>|<sub>0.591s</sub>
 <sub>lz4 r129</sub>|<sub>-3</sub>|<sub>1.685s (59 MB/s)</sub>|<sub>0.118s (847 MB/s)</sub>|<sub>44 539 940</sub>|<sub>44,54%</sub>|<sub>1.803s</sub>
 <sub>lzo 2.08</sub>|<sub>-7</sub>|<sub>9.562s (10 MB/s)</sub>|<sub>0.319s (313 MB/s)</sub>|<sub>41 720 721</sub>|<sub>41,72%</sub>|<sub>9.881s</sub>
 
@@ -71,37 +71,26 @@ The original author's repository [can be found here](https://chiselapp.com/user/
 
 Build
 -----
-DENSITY can be built on a number of platforms. It uses the [premake](http://premake.github.io/) build system.
+DENSITY can be built on a number of platforms, via the provided makefiles.
 
 It was developed and optimized against Clang/LLVM which makes it the preferred compiler, but GCC and MSVC are also supported. Please use the latest compiler versions for best performance.
 
-**Mac OS X**
+**MacOS**
 
-On OS X, Clang/LLVM is the default compiler, which makes things simpler.
+On MacOS, Clang/LLVM is the default compiler, which makes things simpler.
 
-1) First things first, install the [homebrew package manager](https://brew.sh/).
-
-2) Then the prerequisites from the command line :
-
-```
-    brew install git wget
-```
-
-3) Now the source code, and premake :
+1) Get the source code :
 
 ```
     git clone https://github.com/centaurean/density.git
-    cd density/build
-    wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-macosx.tar.gz -O premake.tar.gz
-    tar zxvf premake.tar.gz
+    cd density
 ```
 
-5) Finally, build and test :
+2) Build and test :
 
 ```
-    ./premake5 gmake
     make
-    bin/Release/benchmark -f
+    build/benchmark -f
 ```
 
 **Linux**
@@ -112,60 +101,74 @@ The following example assumes a Debian or Ubuntu distribution with *apt-get*.
 1) From the command line, install Clang/LLVM (*optional*, GCC is also supported if Clang/LLVM can't be used) and other prerequisites.
 
 ```
-    sudo apt-get install clang git wget
+    sudo apt-get install clang git
 ```
 
-2) Get the source code and premake :
+2) Get the source code :
 
 ```
     git clone https://github.com/centaurean/density.git
-    cd density/build
-    wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz -O premake.tar.gz
-    tar zxvf premake.tar.gz
+    cd density
 ```
 
-3) And finally, build and test :
+3) Build and test :
 
 ```
-    ./premake5 gmake
     make
-    bin/Release/benchmark -f
+```
+or
+```
+    make CC=gcc-... AR=gcc-ar-...
+```
+or
+```
+    make CC=clang-... AR=llvm-ar-...
+```
+to choose alternative compilers. For a quick test of resulting binaries, run
+```
+    build/benchmark -f
 ```
 
 **Windows**
 
-On Windows, things are (slightly) more complicated. We'll use the [chocolatey package manager](https://chocolatey.org/) for simplicity.
+Please install [git for Windows](https://git-scm.com/download/win) to begin with.
 
-1) Please install [chocolatey](https://chocolatey.org/install).
+On Windows, density can be built in different ways.
+The **first method** is to use mingw's gcc compiler; for that it is necessary to download and install [mingw-w64](https://sourceforge.net/projects/mingw-w64/).
 
-2) From the command line, get the prerequisites :
-
-```
-    choco install git wget unzip
-```
-
-3) Install the [Visual Studio IDE community edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community) if you don't already have it.
-
-4) Download and install [Clang/LLVM for Windows](http://releases.llvm.org/5.0.1/LLVM-5.0.1-win64.exe) (*optional*, MSVC compiler is also supported but resulting binaries might be slower).
-
-5) Open a [developer command prompt](https://docs.microsoft.com/en-us/dotnet/framework/tools/developer-command-prompt-for-vs) and type :
+1) Once mingw-w64 is installed, get the source :
 
 ```
     git clone https://github.com/centaurean/density.git
-    cd density/build
-    wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-windows.zip -O premake.zip
-    unzip premake.zip
+    cd density
 ```
 
-6) Build and test :
+2) Build and test :
 
 ```
-    premake5.exe vs2017
+    mingw32-make.exe
+    build/benchmark.exe -f
+```
+
+As an alternative, [MSYS2](http://www.msys2.org/) also offers a linux-like environment for Windows.
+
+The **second method** is to download and install Microsoft's [Visual Studio IDE community edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community). It comes with Microsoft's own compilers and is free.
+
+1) Once Visual Studio is installed, open a [developer command prompt](https://docs.microsoft.com/en-us/dotnet/framework/tools/developer-command-prompt-for-vs) and type :
+
+```
+    git clone https://github.com/centaurean/density.git
+    cd density\msvc
+```
+
+2) Build and test :
+
+```
     msbuild Density.sln
     bin\Release\benchmark.exe -f
 ```
 
-And that's it ! If you open the Visual Studio IDE, in the solutions explorer by right-clicking on project names you can change platform toolsets, if you also want to try other compilers.
+An extra **recommended step** would be to install *Clang/LLVM* for Windows. It is downloadable from [this link](http://releases.llvm.org/5.0.1/LLVM-5.0.1-win64.exe). Once installed, open the Visual Studio IDE by double-clicking on *Density.sln*, then right-click on project names and change the platform toolsets to *LLVM*. Rebuild the solution to generate binaries with Clang/LLVM.
 
 Output format
 -------------
@@ -247,6 +250,6 @@ And that's it ! We've done a compression/decompression round trip with a few lin
 Related projects
 ----------------
 
-*   **densityxx** (c++ port of density) [https://github.com/charlesw1234/densityxx](https://github.com/charlesw1234/densityxx)
+*   **SHARC** (archiver using density algorithms) [https://github.com/gpnuma/sharc](https://github.com/gpnuma/sharc)
 *   **fsbench-density** (in-memory transformations benchmark) [https://github.com/gpnuma/fsbench-density](https://github.com/gpnuma/fsbench-density)
-*   **SHARC** (archiver using density algorithms) [https://github.com/centaurean/sharc](https://github.com/centaurean/sharc)
+*   **densityxx** (c++ port of density) [https://github.com/charlesw1234/densityxx](https://github.com/charlesw1234/densityxx)

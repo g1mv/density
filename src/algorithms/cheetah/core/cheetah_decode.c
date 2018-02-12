@@ -48,7 +48,7 @@
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_predicted(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
     const uint32_t unit = dictionary->prediction_entries[*last_hash].next_chunk_prediction;
     DENSITY_MEMCPY(*out, &unit, sizeof(uint32_t));
-    *last_hash = DENSITY_CHEETAH_HASH_ALGORITHM(unit);
+    *last_hash = DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(unit));
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_a(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary, const uint16_t hash) {
@@ -60,24 +60,24 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_a(uint8_t **
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_b(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary, const uint16_t hash) {
-	DENSITY_PREFETCH(&dictionary->prediction_entries[hash]);
+    DENSITY_PREFETCH(&dictionary->prediction_entries[hash]);
     density_cheetah_dictionary_entry *const entry = &dictionary->entries[hash];
     const uint32_t unit = entry->chunk_b;
     entry->chunk_b = entry->chunk_a;
-    entry->chunk_a = unit;
+    entry->chunk_a = unit;  // Does not ensure dictionary content consistency between endiannesses
     DENSITY_MEMCPY(*out, &unit, sizeof(uint32_t));
     dictionary->prediction_entries[*last_hash].next_chunk_prediction = unit;
     *last_hash = hash;
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_uncompressed(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary, const uint32_t unit) {
-    const uint16_t hash = DENSITY_CHEETAH_HASH_ALGORITHM(unit);
-	DENSITY_PREFETCH(&dictionary->prediction_entries[hash]);
+    const uint16_t hash = DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(unit));
+    DENSITY_PREFETCH(&dictionary->prediction_entries[hash]);
     density_cheetah_dictionary_entry *const entry = &dictionary->entries[hash];
     entry->chunk_b = entry->chunk_a;
-    entry->chunk_a = unit;
+    entry->chunk_a = unit;  // Does not ensure dictionary content consistency between endiannesses
     DENSITY_MEMCPY(*out, &unit, sizeof(uint32_t));
-    dictionary->prediction_entries[*last_hash].next_chunk_prediction = unit;
+    dictionary->prediction_entries[*last_hash].next_chunk_prediction = unit;    // Does not ensure dictionary content consistency between endiannesses
     *last_hash = hash;
 }
 
@@ -91,12 +91,12 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_4(const uint8_t **DENSIT
             break;
         case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A:
             DENSITY_MEMCPY(&hash, *in, sizeof(uint16_t));
-            density_cheetah_decode_process_compressed_a(out, last_hash, dictionary, hash);
+            density_cheetah_decode_process_compressed_a(out, last_hash, dictionary, DENSITY_LITTLE_ENDIAN_16(hash));
             *in += sizeof(uint16_t);
             break;
         case DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B:
             DENSITY_MEMCPY(&hash, *in, sizeof(uint16_t));
-            density_cheetah_decode_process_compressed_b(out, last_hash, dictionary, hash);
+            density_cheetah_decode_process_compressed_b(out, last_hash, dictionary, DENSITY_LITTLE_ENDIAN_16(hash));
             *in += sizeof(uint16_t);
             break;
         default:    // DENSITY_CHEETAH_SIGNATURE_FLAG_CHUNK
@@ -118,11 +118,11 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_16(const uint8_t **DENSI
             density_cheetah_decode_process_predicted(out, last_hash, dictionary);, \
             DENSITY_CHEETAH_SIGNATURE_FLAG_PREDICTED, \
             DENSITY_MEMCPY(&hash, *in, sizeof(uint16_t)); \
-            density_cheetah_decode_process_compressed_a(out, last_hash, dictionary, hash);\
+            density_cheetah_decode_process_compressed_a(out, last_hash, dictionary, DENSITY_LITTLE_ENDIAN_16(hash));\
             *in += sizeof(uint16_t);, \
             DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_A, \
             DENSITY_MEMCPY(&hash, *in, sizeof(uint16_t)); \
-            density_cheetah_decode_process_compressed_b(out, last_hash, dictionary, hash);\
+            density_cheetah_decode_process_compressed_b(out, last_hash, dictionary, DENSITY_LITTLE_ENDIAN_16(hash));\
             *in += sizeof(uint16_t);, \
             DENSITY_CHEETAH_SIGNATURE_FLAG_MAP_B, \
             DENSITY_MEMCPY(&unit, *in, sizeof(uint32_t)); \
@@ -139,19 +139,19 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_kernel_16(const uint8_t **DENSI
     *out += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE uint8_t density_cheetah_decode_read_flag(const uint_fast64_t signature, const uint_fast8_t shift) {
+DENSITY_FORCE_INLINE uint8_t density_cheetah_decode_read_flag(const density_cheetah_signature signature, const uint_fast8_t shift) {
     return (uint8_t const) ((signature >> shift) & 0x3);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint_fast64_t signature, const uint_fast8_t shift, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const density_cheetah_signature signature, const uint_fast8_t shift, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
     density_cheetah_decode_kernel_4(in, out, last_hash, density_cheetah_decode_read_flag(signature, shift), dictionary);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_16(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint_fast64_t signature, const uint_fast8_t shift, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_16(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const density_cheetah_signature signature, const uint_fast8_t shift, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
     density_cheetah_decode_kernel_16(in, out, last_hash, (uint8_t const) ((signature >> shift) & 0xff), dictionary);
 }
 
-DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const uint_fast64_t signature, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
+DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, const density_cheetah_signature signature, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary) {
 #ifdef __clang__
     uint_fast8_t count = 0;
     for (uint_fast8_t count_b = 0; count_b < 8; count_b ++) {
@@ -165,7 +165,15 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **DENSITY_RES
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(const uint8_t **DENSITY_RESTRICT in, density_cheetah_signature *DENSITY_RESTRICT signature) {
+#ifdef DENSITY_LITTLE_ENDIAN
     DENSITY_MEMCPY(signature, *in, sizeof(density_cheetah_signature));
+#elif defined(DENSITY_BIG_ENDIAN)
+    density_cheetah_signature endian_signature;
+    DENSITY_MEMCPY(&endian_signature, *in, sizeof(density_cheetah_signature));
+    *signature = DENSITY_LITTLE_ENDIAN_64(endian_signature);
+#else
+#error
+#endif
     *in += sizeof(density_cheetah_signature);
 }
 
