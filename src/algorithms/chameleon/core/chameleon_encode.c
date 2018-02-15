@@ -80,6 +80,20 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_4(const uint8_t **DENSITY_RES
     *in += sizeof(uint32_t);
 }
 
+DENSITY_FORCE_INLINE void density_swift_encode_128(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, density_swift_signature *const DENSITY_RESTRICT signature, density_swift_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
+    uint_fast8_t count = 0;
+
+#ifdef __clang__
+    for (uint_fast8_t count_b = 0; count_b < 32; count_b++) {
+        density_chameleon_encode_4(in, out, count++, signature, dictionary, unit);
+    }
+#else
+    for (uint_fast8_t count_b = 0; count_b < 16; count_b++) {
+        DENSITY_UNROLL_2(density_chameleon_encode_4(in, out, count++, signature, dictionary, unit));
+    }
+#endif
+}
+
 DENSITY_FORCE_INLINE void density_chameleon_encode_256(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, density_chameleon_signature *const DENSITY_RESTRICT signature, density_chameleon_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
     uint_fast8_t count = 0;
 
