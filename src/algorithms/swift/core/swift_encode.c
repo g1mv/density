@@ -67,23 +67,32 @@ DENSITY_FORCE_INLINE void density_swift_encode_kernel(uint8_t **DENSITY_RESTRICT
     }
 }
 
-DENSITY_FORCE_INLINE const uint32_t density_swift_encode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast8_t shift, density_swift_signature *const DENSITY_RESTRICT signature, density_swift_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
+DENSITY_FORCE_INLINE const uint16_t density_swift_encode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast8_t shift, density_swift_signature *const DENSITY_RESTRICT signature, density_swift_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
     DENSITY_MEMCPY(unit, *in, sizeof(uint32_t));
 #ifdef DENSITY_LITTLE_ENDIAN
-    const uint16_t a = *unit & 0xffff;
-    const uint16_t b = *unit >> 16;
+    const uint16_t a = (uint16_t)(*unit & 0xffff);
+    const uint16_t b = (uint16_t)(*unit >> 16);
 #elif defined(DENSITY_BIG_ENDIAN)
     const uint32_t endian_unit = DENSITY_LITTLE_ENDIAN_32(*unit);
-    const uint16_t a = endian_unit & 0xffff;
-    const uint16_t b = endian_unit >> 16;
+    const uint16_t a = (uint16_t)(endian_unit & 0xffff);
+    const uint16_t b = (uint16_t)(endian_unit >> 16);
 #else
 #error
 #endif
+    //const uint64_t mul_value = ((uint64_t)(*unit & 0xffff) | (((uint64_t)(*unit >> 16)) << 48)) * DENSITY_SWIFT_HASH_MULTIPLIER;
+    //const uint64_t test = (a | ((uint64_t)b << 48)) * DENSITY_SWIFT_HASH_MULTIPLIER;
     const uint32_t mul_value_a = a * DENSITY_SWIFT_HASH_MULTIPLIER;
     const uint32_t mul_value_b = b * DENSITY_SWIFT_HASH_MULTIPLIER;
-    density_swift_encode_kernel(out, mul_value_a >> (32 - DENSITY_SWIFT_HASH_BITS), shift, signature, dictionary, &a);
-    density_swift_encode_kernel(out, mul_value_b >> (32 - DENSITY_SWIFT_HASH_BITS), shift, signature, dictionary, &b);
+    const uint8_t hash_a = (uint8_t)(mul_value_a >> (32 - DENSITY_SWIFT_HASH_BITS));
+    //DENSITY_PREFETCH(&dictionary->entries[hash_a]);
+    const uint8_t hash_b = (uint8_t)(mul_value_b >> (32 - DENSITY_SWIFT_HASH_BITS));
+    //DENSITY_PREFETCH(&dictionary->entries[hash_b]);
+    density_swift_encode_kernel(out, hash_a, shift, signature, dictionary, &a);
+    density_swift_encode_kernel(out, hash_b, shift + (uint8_t)1, signature, dictionary, &b);
+    //density_swift_encode_kernel(out, (uint8_t)(mul_value >> 8), shift, signature, dictionary, (uint16_t*)unit/*&a*/);
+    //density_swift_encode_kernel(out, (uint8_t)(mul_value >> 40), shift + (uint8_t)1, signature, dictionary, (uint16_t*)unit + 1/*&b*/);
     *in += sizeof(uint32_t);
 
-    return mul_value_b + (mul_value_a >> 16);   // Hash used by other algorithms
+    //return (uint16_t)(((mul_value >> 16) & 0xffff) + (mul_value >> 48));   // Hash used by other algorithms
+    return (uint16_t)(mul_value_b + (mul_value_a >> 16));   // Hash used by other algorithms
 }

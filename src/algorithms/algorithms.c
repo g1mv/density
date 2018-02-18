@@ -34,7 +34,7 @@
 
 #include "algorithms.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_algorithms_prepare_state(density_algorithm_state *const DENSITY_RESTRICT state, void *const DENSITY_RESTRICT dictionary) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_algorithms_prepare_state(density_algorithm_state *const DENSITY_RESTRICT state, void *const DENSITY_RESTRICT warmup_dictionary, void *const DENSITY_RESTRICT dictionary) {
     state->dictionary = dictionary;
     state->copy_penalty = 0;
     state->copy_penalty_start = 1;

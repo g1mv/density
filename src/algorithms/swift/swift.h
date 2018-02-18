@@ -57,8 +57,8 @@ typedef enum {
 
 typedef uint64_t density_swift_signature;
 
-#define DENSITY_SWIFT_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE            (density_bitsizeof(density_chameleon_signature) * sizeof(uint16_t))   // Uncompressed chunks
-#define DENSITY_SWIFT_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE                  (density_bitsizeof(density_chameleon_signature) * sizeof(uint16_t))
+#define DENSITY_SWIFT_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE            (density_bitsizeof(density_swift_signature) * sizeof(uint16_t))   // Uncompressed chunks
+#define DENSITY_SWIFT_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE                  (density_bitsizeof(density_swift_signature) * sizeof(uint16_t))
 
 #define DENSITY_SWIFT_MAXIMUM_COMPRESSED_UNIT_SIZE                          (sizeof(density_swift_signature) + DENSITY_SWIFT_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 #define DENSITY_SWIFT_DECOMPRESSED_UNIT_SIZE                                (DENSITY_SWIFT_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)

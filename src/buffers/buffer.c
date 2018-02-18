@@ -92,12 +92,15 @@ DENSITY_FORCE_INLINE density_processing_result density_make_result(const DENSITY
 DENSITY_FORCE_INLINE density_context* density_allocate_context(const DENSITY_ALGORITHM algorithm, const bool custom_dictionary, void *(*mem_alloc)(size_t)) {
     density_context* context = mem_alloc(sizeof(density_context));
     context->algorithm = algorithm;
+
     context->dictionary_size = density_get_dictionary_size(context->algorithm);
     context->dictionary_type = custom_dictionary;
     if(!context->dictionary_type) {
         context->dictionary = mem_alloc(context->dictionary_size);
+        //DENSITY_MEMSET(context->dictionary, 0, sizeof(density_swift_dictionary));
         DENSITY_MEMSET(context->dictionary, 0, context->dictionary_size);
     }
+
     return context;
 }
 
@@ -132,7 +135,7 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_compress_with_context(c
     density_header_write(&out, context->algorithm);
 
     // Compression
-    density_algorithms_prepare_state(&state, context->dictionary);
+    density_algorithms_prepare_state(&state, context->internal, context->dictionary);
     switch (context->algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
             status = density_chameleon_encode(&state, &in, input_size, &out, output_size);
@@ -178,7 +181,7 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_with_context
     density_algorithm_exit_status status = DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;
 
     // Decompression
-    density_algorithms_prepare_state(&state, context->dictionary);
+    density_algorithms_prepare_state(&state, context->internal, context->dictionary);
     switch (context->algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
             status = density_chameleon_decode(&state, &in, input_size, &out, output_size);

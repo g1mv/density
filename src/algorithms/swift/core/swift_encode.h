@@ -48,6 +48,7 @@
 #include "../dictionary/swift_dictionary.h"
 #include "../../algorithms.h"
 
-DENSITY_WINDOWS_EXPORT const uint32_t density_swift_encode_4(const uint8_t **DENSITY_RESTRICT_DECLARE, uint8_t **DENSITY_RESTRICT_DECLARE, const uint_fast8_t, density_swift_signature *const DENSITY_RESTRICT_DECLARE, density_swift_dictionary *const DENSITY_RESTRICT_DECLARE, uint32_t *DENSITY_RESTRICT_DECLARE);
+DENSITY_WINDOWS_EXPORT void density_swift_encode_prepare_signature(uint8_t **DENSITY_RESTRICT_DECLARE, density_swift_signature **DENSITY_RESTRICT_DECLARE, density_swift_signature *DENSITY_RESTRICT_DECLARE);
+DENSITY_WINDOWS_EXPORT const uint16_t density_swift_encode_4(const uint8_t **DENSITY_RESTRICT_DECLARE, uint8_t **DENSITY_RESTRICT_DECLARE, uint_fast8_t, density_swift_signature *DENSITY_RESTRICT_DECLARE, density_swift_dictionary *DENSITY_RESTRICT_DECLARE, uint32_t *DENSITY_RESTRICT_DECLARE);
 
 #endif

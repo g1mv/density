@@ -37,7 +37,7 @@
 DENSITY_WINDOWS_EXPORT size_t density_get_dictionary_size(DENSITY_ALGORITHM algorithm) {
     switch(algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
-            return sizeof(density_chameleon_dictionary);
+            return sizeof(density_chameleon_dictionaries);
         case DENSITY_ALGORITHM_CHEETAH:
             return sizeof(density_cheetah_dictionary);
         case DENSITY_ALGORITHM_LION:

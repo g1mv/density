@@ -43,6 +43,7 @@
  */
 
 #include "chameleon_encode.h"
+#include "../dictionary/chameleon_dictionary.h"
 
 DENSITY_FORCE_INLINE void density_chameleon_encode_prepare_signature(uint8_t **DENSITY_RESTRICT out, density_chameleon_signature **DENSITY_RESTRICT signature_pointer, density_chameleon_signature *const DENSITY_RESTRICT signature) {
     *signature = 0;
@@ -59,7 +60,7 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_kernel(uint8_t **DENSITY_REST
 #ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
 #elif defined(DENSITY_BIG_ENDIAN)
-            const uint16_t endian_hash = DENSITY_LITTLE_ENDIAN_16(hash);
+        const uint16_t endian_hash = DENSITY_LITTLE_ENDIAN_16(hash);
             DENSITY_MEMCPY(*out, &endian_hash, sizeof(uint16_t));
 #else
 #error
@@ -80,16 +81,18 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_4(const uint8_t **DENSITY_RES
     *in += sizeof(uint32_t);
 }
 
-DENSITY_FORCE_INLINE void density_swift_encode_128(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, density_swift_signature *const DENSITY_RESTRICT signature, density_swift_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
+DENSITY_FORCE_INLINE void density_chameleon_encode_only_with_swift_128(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, density_swift_signature *const DENSITY_RESTRICT signature, density_chameleon_dictionaries *const DENSITY_RESTRICT dictionaries, uint32_t *DENSITY_RESTRICT unit) {
     uint_fast8_t count = 0;
 
 #ifdef __clang__
     for (uint_fast8_t count_b = 0; count_b < 32; count_b++) {
-        density_chameleon_encode_4(in, out, count++, signature, dictionary, unit);
+        const uint16_t hash = density_swift_encode_4(in, out, count += 2, signature, &dictionaries->swift_dictionary, unit);
+        dictionaries->main_dictionary.entries[hash].as_uint32_t = *unit;    // Does not ensure dictionary content consistency between endiannesses
     }
 #else
+    uint16_t hash;
     for (uint_fast8_t count_b = 0; count_b < 16; count_b++) {
-        DENSITY_UNROLL_2(density_chameleon_encode_4(in, out, count++, signature, dictionary, unit));
+        DENSITY_UNROLL_2(chameleon_dictionary->entries[density_swift_encode_4(in, out, count += 2, signature, swift_dictionary, unit)].as_uint32_t = *unit);   // Does not ensure dictionary content consistency between endiannesses
     }
 #endif
 }
@@ -112,37 +115,62 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     if (out_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
-    density_chameleon_signature signature;
-    density_chameleon_signature *signature_pointer;
     uint32_t unit;
+    density_swift_signature swift_signature;
+    density_swift_signature *swift_signature_pointer;
 
+    const uint_fast64_t swift_only = DENSITY_MIN(in_size, 1 << 17); // 16k
+    uint_fast64_t limit_swift_128 = (swift_only >> 7);
     uint8_t *out_limit = *out + out_size - DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE;
-    uint_fast64_t limit_256 = (in_size >> 8);
 
-    while (DENSITY_LIKELY(limit_256-- && *out <= out_limit)) {
-        if (DENSITY_UNLIKELY(!(state->counter & 0xf))) {
-            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
-        }
-        state->counter++;
-        if (DENSITY_UNLIKELY(state->copy_penalty)) {
-            DENSITY_ALGORITHM_COPY(DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
-            DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
-        } else {
-            const uint8_t *out_start = *out;
-            density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
-            DENSITY_PREFETCH(*in + DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
-            density_chameleon_encode_256(in, out, &signature, (density_chameleon_dictionary *const) state->dictionary, &unit);
+    while (DENSITY_LIKELY(limit_swift_128-- && *out <= out_limit)) {
+        density_swift_encode_prepare_signature(out, &swift_signature_pointer, &swift_signature);
+        DENSITY_PREFETCH(*in + DENSITY_SWIFT_WORK_BLOCK_SIZE);
+        density_chameleon_encode_only_with_swift_128(in, out, &swift_signature, (density_chameleon_dictionaries *const) state->dictionary, &unit);
 #ifdef DENSITY_LITTLE_ENDIAN
-            DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
+        DENSITY_MEMCPY(swift_signature_pointer, &swift_signature, sizeof(density_swift_signature));
 #elif defined(DENSITY_BIG_ENDIAN)
-            const density_chameleon_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
-            DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_chameleon_signature));
+        const density_swift_signature swift_endian_signature = DENSITY_LITTLE_ENDIAN_64(swift_signature);
+        DENSITY_MEMCPY(swift_signature_pointer, &swift_endian_signature, sizeof(density_swift_signature));
 #else
 #error
 #endif
-            DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*out - out_start), DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
+    }
+
+    if (*out > out_limit)
+        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+
+    density_chameleon_signature signature;
+    density_chameleon_signature *signature_pointer;
+
+    if(in_size > swift_only) {
+        uint_fast64_t limit_256 = ((in_size - swift_only) >> 8);
+
+        while (DENSITY_LIKELY(limit_256-- && *out <= out_limit)) {
+            if (DENSITY_UNLIKELY(!(state->counter & 0xf))) {
+                DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
+            }
+            state->counter++;
+            if (DENSITY_UNLIKELY(state->copy_penalty)) {
+                DENSITY_ALGORITHM_COPY(DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
+                DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;
+            } else {
+                const uint8_t *out_start = *out;
+                density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
+                DENSITY_PREFETCH(*in + DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
+                density_chameleon_encode_256(in, out, &signature, &((density_chameleon_dictionaries *const) state->dictionary)->main_dictionary, &unit);
+#ifdef DENSITY_LITTLE_ENDIAN
+                DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
+#elif defined(DENSITY_BIG_ENDIAN)
+                const density_chameleon_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
+                                DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_chameleon_signature));
+#endif
+                DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY((*out - out_start), DENSITY_CHAMELEON_WORK_BLOCK_SIZE);
+            }
         }
     }
+
+    return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;//todo
 
     if (*out > out_limit)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
@@ -159,7 +187,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 #ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
 #elif defined(DENSITY_BIG_ENDIAN)
-            const density_chameleon_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
+        const density_chameleon_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
             DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_chameleon_signature));
 #else
 #error
@@ -186,8 +214,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 
     process_remaining_bytes:
     remaining = in_size & 0x3;
-    if (remaining)
+    if (remaining) {
         DENSITY_ALGORITHM_COPY(remaining);
+    }
 
     return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
 }

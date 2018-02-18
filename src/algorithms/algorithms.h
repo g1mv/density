@@ -54,8 +54,8 @@ typedef struct {
 
 #define DENSITY_ALGORITHM_COPY(work_block_size)\
             DENSITY_MEMCPY(*out, *in, work_block_size);\
-            *in += work_block_size;\
-            *out += work_block_size;
+            *in += (work_block_size);\
+            *out += (work_block_size);
 
 #define DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START\
             if(!(--state->copy_penalty))\
@@ -66,13 +66,13 @@ typedef struct {
                 state->copy_penalty_start >>= 1;
 
 #define DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(span, work_block_size)\
-            if (DENSITY_UNLIKELY(span & ~(work_block_size - 1))) {\
+            if (DENSITY_UNLIKELY((span) & ~((work_block_size) - 1))) {\
                 if (state->previous_incompressible)\
                     state->copy_penalty = state->copy_penalty_start;\
                 state->previous_incompressible = true;\
             } else\
                 state->previous_incompressible = false;
 
-DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const DENSITY_RESTRICT_DECLARE, void *const DENSITY_RESTRICT_DECLARE);
+DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *DENSITY_RESTRICT_DECLARE, void *DENSITY_RESTRICT_DECLARE, void *DENSITY_RESTRICT_DECLARE);
 
 #endif

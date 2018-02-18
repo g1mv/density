@@ -96,9 +96,9 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 #endif
 
 #ifdef DENSITY_LITTLE_ENDIAN
-#define DENSITY_LITTLE_ENDIAN_64(b)   ((uint64_t)b)
-#define DENSITY_LITTLE_ENDIAN_32(b)   ((uint32_t)b)
-#define DENSITY_LITTLE_ENDIAN_16(b)   ((uint16_t)b)
+#define DENSITY_LITTLE_ENDIAN_64(b)   ((uint64_t)(b))
+#define DENSITY_LITTLE_ENDIAN_32(b)   ((uint32_t)(b))
+#define DENSITY_LITTLE_ENDIAN_16(b)   ((uint16_t)(b))
 #elif defined(DENSITY_BIG_ENDIAN)
 #if __GNUC__ * 100 + __GNUC_MINOR__ >= 403
 #define DENSITY_LITTLE_ENDIAN_64(b)   __builtin_bswap64(b)
@@ -114,12 +114,13 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 #error Unsupported endianness
 #endif
 
-#define DENSITY_MAX_2(a, b) (((a)>(b))?(a):(b))
-#define DENSITY_MAX_3(a, b, c) (DENSITY_MAX_2(DENSITY_MAX_2(a, b), c))
+#define DENSITY_MAX(a, b) (((a)>(b))?(a):(b))
+#define DENSITY_MAX_3(a, b, c) (DENSITY_MAX(DENSITY_MAX(a, b), c))
+#define DENSITY_MIN(a, b)   (((a)<(b))?(a):(b))
 
 #define DENSITY_FORMAT(v)               0##v##llu
 
-#define DENSITY_ISOLATE(b, p)           ((DENSITY_FORMAT(b) / p) & 0x1)
+#define DENSITY_ISOLATE(b, p)           ((DENSITY_FORMAT(b) / (p)) & 0x1)
 
 #define DENSITY_BINARY_TO_UINT(b)        ((DENSITY_ISOLATE(b, 1llu) ? 0x1 : 0)\
                                         + (DENSITY_ISOLATE(b, 8llu) ? 0x2 : 0)\
@@ -142,20 +143,9 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 
 #define DENSITY_UNROLL_2(op)     op; op
 #define DENSITY_UNROLL_4(op)     DENSITY_UNROLL_2(op);    DENSITY_UNROLL_2(op)
-#define DENSITY_UNROLL_8(op)     DENSITY_UNROLL_4(op);    DENSITY_UNROLL_4(op)
-#define DENSITY_UNROLL_16(op)    DENSITY_UNROLL_8(op);    DENSITY_UNROLL_8(op)
-#define DENSITY_UNROLL_32(op)    DENSITY_UNROLL_16(op);   DENSITY_UNROLL_16(op)
-#define DENSITY_UNROLL_64(op)    DENSITY_UNROLL_32(op);   DENSITY_UNROLL_32(op)
-
-#define DENSITY_CASE_GENERATOR_2(op_a, flag_a, op_b, flag_b, op_mid, shift)\
-    case ((flag_b << shift) | flag_a):\
-        op_a;\
-        op_mid;\
-        op_b;\
-        break;
 
 #define DENSITY_CASE_GENERATOR_4(op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift)\
-    case ((flag_d << (shift * 3)) | (flag_c << (shift * 2)) | (flag_b << shift) | flag_a):\
+    case (((flag_d) << ((shift) * 3)) | ((flag_c) << ((shift) * 2)) | ((flag_b) << (shift)) | (flag_a)):\
         op_a;\
         op_mid;\
         op_b;\
@@ -164,18 +154,6 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
         op_mid;\
         op_d;\
         break;
-
-#define DENSITY_CASE_GENERATOR_4_2_LAST_1_COMBINED(op_1, flag_1, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift)\
-    DENSITY_CASE_GENERATOR_2(op_1, flag_1, op_a, flag_a, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_2(op_1, flag_1, op_b, flag_b, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_2(op_1, flag_1, op_c, flag_c, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_2(op_1, flag_1, op_d, flag_d, op_mid, shift);
-
-#define DENSITY_CASE_GENERATOR_4_2_COMBINED(op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift)\
-    DENSITY_CASE_GENERATOR_4_2_LAST_1_COMBINED(op_a, flag_a, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_4_2_LAST_1_COMBINED(op_b, flag_b, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_4_2_LAST_1_COMBINED(op_c, flag_c, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_4_2_LAST_1_COMBINED(op_d, flag_d, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);
 
 #define DENSITY_CASE_GENERATOR_4_4_LAST_1_COMBINED(op_1, flag_1, op_2, flag_2, op_3, flag_3, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift)\
     DENSITY_CASE_GENERATOR_4(op_1, flag_1, op_2, flag_2, op_3, flag_3, op_a, flag_a, op_mid, shift);\
@@ -201,20 +179,7 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
     DENSITY_CASE_GENERATOR_4_4_LAST_3_COMBINED(op_c, flag_c, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);\
     DENSITY_CASE_GENERATOR_4_4_LAST_3_COMBINED(op_d, flag_d, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);
 
-#define DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT    6
-#define DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE          (1 << DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT)
-
-
 #define density_bitsizeof(x) (8 * sizeof(x))
-
-#define DENSITY_SPOOKYHASH_SEED_1                                 (0xabc)
-#define DENSITY_SPOOKYHASH_SEED_2                                 (0xdef)
-
-DENSITY_WINDOWS_EXPORT uint8_t density_version_major();
-
-DENSITY_WINDOWS_EXPORT uint8_t density_version_minor();
-
-DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
 
 
 /**********************************************************************************************************************
@@ -226,7 +191,5 @@ DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
 #define DENSITY_MAJOR_VERSION   0
 #define DENSITY_MINOR_VERSION   14
 #define DENSITY_REVISION        2
-
-
 
 #endif
