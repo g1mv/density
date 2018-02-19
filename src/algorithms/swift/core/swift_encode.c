@@ -43,6 +43,7 @@
  */
 
 #include "swift_encode.h"
+#include "../dictionary/swift_dictionary.h"
 
 DENSITY_FORCE_INLINE void density_swift_encode_prepare_signature(uint8_t **DENSITY_RESTRICT out, density_swift_signature **DENSITY_RESTRICT signature_pointer, density_swift_signature *const DENSITY_RESTRICT signature) {
     *signature = 0;
@@ -67,6 +68,90 @@ DENSITY_FORCE_INLINE void density_swift_encode_kernel(uint8_t **DENSITY_RESTRICT
     }
 }
 
+DENSITY_FORCE_INLINE void density_swift_encode_kernel_dual(uint8_t **DENSITY_RESTRICT out, const uint8_t hash_a, const uint8_t hash_b, const uint_fast8_t shift, density_swift_signature *const DENSITY_RESTRICT signature, density_swift_dictionary *const DENSITY_RESTRICT dictionary, const uint32_t *DENSITY_RESTRICT unit) {
+    density_swift_dictionary_entry *const found_a = &dictionary->entries[hash_a];
+    density_swift_dictionary_entry *const found_b = &dictionary->entries[hash_b];
+
+    const uint32_t xor = *unit ^ ((found_b->as_uint16_t << 16) | found_a->as_uint16_t);
+    const uint_fast8_t ctz_xor = DENSITY_CTZ(xor);
+
+    /*if(xor) {
+        if(xor & 0xffff) {
+            found_a->as_uint16_t = (uint16_t)*unit; // Does not ensure dictionary content consistency between endiannesses
+            if(xor & 0xffff0000) {
+                *signature |= ((uint64_t)((DENSITY_SWIFT_SIGNATURE_FLAG_CHUNK << 1) | DENSITY_SWIFT_SIGNATURE_FLAG_CHUNK) << shift);
+                found_b->as_uint16_t = (uint16_t)(*unit >> 16); // Does not ensure dictionary content consistency between endiannesses
+                DENSITY_MEMCPY(*out, unit, sizeof(uint32_t)); // todo endian
+                *out += sizeof(uint32_t);
+            } else {
+                *signature |= ((uint64_t)((DENSITY_SWIFT_SIGNATURE_FLAG_MAP << 1) | DENSITY_SWIFT_SIGNATURE_FLAG_CHUNK) << shift);
+                DENSITY_MEMCPY(*out, unit, sizeof(uint16_t)); // todo endian
+                DENSITY_MEMCPY(*out, &hash_b, sizeof(uint8_t));
+                *out += sizeof(uint16_t) + sizeof(uint8_t);
+            }
+        } else {
+            *signature |= ((uint64_t)((DENSITY_SWIFT_SIGNATURE_FLAG_CHUNK << 1) | DENSITY_SWIFT_SIGNATURE_FLAG_MAP) << shift);
+            found_b->as_uint16_t = (uint16_t)(*unit >> 16); // Does not ensure dictionary content consistency between endiannesses
+            DENSITY_MEMCPY(*out, &hash_a, sizeof(uint8_t));
+            DENSITY_MEMCPY(*out, &found_b->as_uint16_t, sizeof(uint16_t)); // todo endian
+            *out += sizeof(uint8_t) + sizeof(uint16_t);
+        }
+    } else {
+        *signature |= ((uint64_t)((DENSITY_SWIFT_SIGNATURE_FLAG_MAP << 1) | DENSITY_SWIFT_SIGNATURE_FLAG_MAP) << shift);
+        const uint16_t hashes = (((hash_b) << 8) | hash_a);
+        DENSITY_MEMCPY(*out, &hashes, sizeof(uint16_t));    // todo endian
+        *out += sizeof(uint16_t);
+    }*/
+
+    switch (ctz_xor) {
+        case 0:
+            if(xor)
+                goto jump;
+            else {
+                *signature |= ((uint64_t) ((DENSITY_SWIFT_SIGNATURE_FLAG_MAP << 1) | DENSITY_SWIFT_SIGNATURE_FLAG_MAP) << shift);
+                const uint16_t hashes = (((hash_b) << 8) | hash_a);
+                DENSITY_MEMCPY(*out, &hashes, sizeof(uint16_t));    // todo endian
+                *out += sizeof(uint16_t);
+            }
+            break;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        jump:
+            found_a->as_uint16_t = (uint16_t)*unit; // Does not ensure dictionary content consistency between endiannesses
+            if(xor & 0xffff0000) {
+                *signature |= ((uint64_t)((DENSITY_SWIFT_SIGNATURE_FLAG_CHUNK << 1) | DENSITY_SWIFT_SIGNATURE_FLAG_CHUNK) << shift);
+                found_b->as_uint16_t = (uint16_t)(*unit >> 16);
+                DENSITY_MEMCPY(*out, unit, sizeof(uint32_t)); // todo endian
+                *out += sizeof(uint32_t);
+            } else {
+                *signature |= ((uint64_t)((DENSITY_SWIFT_SIGNATURE_FLAG_MAP << 1) | DENSITY_SWIFT_SIGNATURE_FLAG_CHUNK) << shift);
+                DENSITY_MEMCPY(*out, unit, sizeof(uint16_t)); // todo endian
+                DENSITY_MEMCPY(*out, &hash_b, sizeof(uint8_t));
+                *out += sizeof(uint16_t) + sizeof(uint8_t);
+            }
+            break;
+        default:
+            *signature |= ((uint64_t)((DENSITY_SWIFT_SIGNATURE_FLAG_CHUNK << 1) | DENSITY_SWIFT_SIGNATURE_FLAG_MAP) << shift);
+            found_b->as_uint16_t = (uint16_t)(*unit >> 16);
+            DENSITY_MEMCPY(*out, &hash_a, sizeof(uint8_t));
+            DENSITY_MEMCPY(*out, &found_b->as_uint16_t, sizeof(uint16_t)); // todo endian
+            *out += sizeof(uint8_t) + sizeof(uint16_t);
+            break;
+    }
+}
+
 DENSITY_FORCE_INLINE const uint16_t density_swift_encode_4(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, const uint_fast8_t shift, density_swift_signature *const DENSITY_RESTRICT signature, density_swift_dictionary *const DENSITY_RESTRICT dictionary, uint32_t *DENSITY_RESTRICT unit) {
     DENSITY_MEMCPY(unit, *in, sizeof(uint32_t));
 #ifdef DENSITY_LITTLE_ENDIAN
@@ -87,8 +172,12 @@ DENSITY_FORCE_INLINE const uint16_t density_swift_encode_4(const uint8_t **DENSI
     //DENSITY_PREFETCH(&dictionary->entries[hash_a]);
     const uint8_t hash_b = (uint8_t)(mul_value_b >> (32 - DENSITY_SWIFT_HASH_BITS));
     //DENSITY_PREFETCH(&dictionary->entries[hash_b]);
+
     density_swift_encode_kernel(out, hash_a, shift, signature, dictionary, &a);
     density_swift_encode_kernel(out, hash_b, shift + (uint8_t)1, signature, dictionary, &b);
+
+    //density_swift_encode_kernel_dual(out, hash_a, hash_b, shift, signature, dictionary, unit);
+
     //density_swift_encode_kernel(out, (uint8_t)(mul_value >> 8), shift, signature, dictionary, (uint16_t*)unit/*&a*/);
     //density_swift_encode_kernel(out, (uint8_t)(mul_value >> 40), shift + (uint8_t)1, signature, dictionary, (uint16_t*)unit + 1/*&b*/);
     *in += sizeof(uint32_t);
