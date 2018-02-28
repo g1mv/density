@@ -42,6 +42,8 @@
 
 #include "density_api.h"
 
+#define DENSITY_NOT_ZERO(x) (!!(x))
+
 #if defined(__clang__) || defined(__GNUC__)
 #define DENSITY_FORCE_INLINE		inline __attribute__((always_inline))
 #define DENSITY_RESTRICT			restrict
@@ -49,8 +51,8 @@
 #define DENSITY_MEMCPY				__builtin_memcpy
 #define DENSITY_MEMMOVE				__builtin_memmove
 #define DENSITY_MEMSET				__builtin_memset
-#define DENSITY_LIKELY(x)			__builtin_expect(!!(x), 1)
-#define DENSITY_UNLIKELY(x)			__builtin_expect(!!(x), 0)
+#define DENSITY_LIKELY(x)			__builtin_expect(DENSITY_NOT_ZERO(x), 1)
+#define DENSITY_UNLIKELY(x)			__builtin_expect(DENSITY_NOT_ZERO(x), 0)
 #define DENSITY_PREFETCH(x)			__builtin_prefetch(x)
 #define DENSITY_CTZ(x)				__builtin_ctz(x)
 
@@ -114,9 +116,9 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 #error Unsupported endianness
 #endif
 
-#define DENSITY_MAX(a, b) (((a)>(b))?(a):(b))
-#define DENSITY_MAX_3(a, b, c) (DENSITY_MAX(DENSITY_MAX(a, b), c))
-#define DENSITY_MIN(a, b)   (((a)<(b))?(a):(b))
+#define DENSITY_MIN(x, y)   (((x)<(y))?(x):(y))
+#define DENSITY_MAX(x, y)   (((x)>(y))?(x):(y))
+#define DENSITY_MAX_3(x, y, z) (DENSITY_MAX(DENSITY_MAX(x, y), z))
 
 #define DENSITY_FORMAT(v)               0##v##llu
 
@@ -179,8 +181,34 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
     DENSITY_CASE_GENERATOR_4_4_LAST_3_COMBINED(op_c, flag_c, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);\
     DENSITY_CASE_GENERATOR_4_4_LAST_3_COMBINED(op_d, flag_d, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);
 
-#define density_bitsizeof(x) (8 * sizeof(x))
 
+#define DENSITY_ADD_2_2 4
+#define DENSITY_ADD_2_4 6
+#define DENSITY_ADD_2_6 8
+#define DENSITY_ADD_2_8 10
+#define DENSITY_ADD_4_2 6
+#define DENSITY_ADD_4_4 8
+#define DENSITY_ADD_4_6 10
+#define DENSITY_ADD_4_8 12
+#define DENSITY_ADD_6_2 8
+#define DENSITY_ADD_6_4 10
+#define DENSITY_ADD_6_6 12
+#define DENSITY_ADD_6_8 14
+#define DENSITY_ADD_8_2 10
+#define DENSITY_ADD_8_4 12
+#define DENSITY_ADD_8_6 14
+#define DENSITY_ADD_8_8 16
+#define DENSITY_ADD_16_2 18
+#define DENSITY_ADD_16_4 20
+#define DENSITY_ADD_16_6 22
+#define DENSITY_ADD_16_8 24
+
+#define DENSITY_ADD(x, y) DENSITY_ADD_##x##_##y
+
+#define DENSITY_PASTE_CONCAT(x, y) x##y
+#define DENSITY_EVAL_CONCAT(x, y) DENSITY_PASTE_CONCAT(x,y)
+
+#define density_bitsizeof(x) (8 * sizeof(x))
 
 /**********************************************************************************************************************
  *                                                                                                                    *

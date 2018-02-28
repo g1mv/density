@@ -79,7 +79,6 @@ typedef struct {
     bool dictionary_type;
     size_t dictionary_size;
     void* dictionary;
-    void* internal;
 } density_context;
 
 typedef struct {

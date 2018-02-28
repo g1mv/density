@@ -49,6 +49,8 @@
 #include "../../algorithms.h"
 
 DENSITY_WINDOWS_EXPORT void density_swift_encode_prepare_signature(uint8_t **DENSITY_RESTRICT_DECLARE, density_swift_signature **DENSITY_RESTRICT_DECLARE, density_swift_signature *DENSITY_RESTRICT_DECLARE);
-DENSITY_WINDOWS_EXPORT const uint16_t density_swift_encode_4(const uint8_t **DENSITY_RESTRICT_DECLARE, uint8_t **DENSITY_RESTRICT_DECLARE, uint_fast8_t, density_swift_signature *DENSITY_RESTRICT_DECLARE, density_swift_dictionary *DENSITY_RESTRICT_DECLARE, uint32_t *DENSITY_RESTRICT_DECLARE);
+DENSITY_WINDOWS_EXPORT void density_swift_encode_4(const uint32_t, const uint8_t **DENSITY_RESTRICT_DECLARE, uint8_t **DENSITY_RESTRICT_DECLARE, uint_fast8_t, density_swift_signature *DENSITY_RESTRICT_DECLARE, density_swift_dictionary *DENSITY_RESTRICT_DECLARE, uint32_t *DENSITY_RESTRICT_DECLARE);
+DENSITY_WINDOWS_EXPORT void density_picoz_encode_prepare_signature(uint8_t **DENSITY_RESTRICT_DECLARE, density_swift_signature **DENSITY_RESTRICT_DECLARE, density_swift_signature *const DENSITY_RESTRICT_DECLARE);
+DENSITY_WINDOWS_EXPORT void density_picoz_encode_4(const uint8_t **DENSITY_RESTRICT_DECLARE, uint8_t **DENSITY_RESTRICT_DECLARE, uint_fast8_t *const DENSITY_RESTRICT_DECLARE, density_swift_signature **DENSITY_RESTRICT_DECLARE, density_swift_signature *const DENSITY_RESTRICT_DECLARE, density_picoz_dictionary *const DENSITY_RESTRICT_DECLARE, uint32_t *const DENSITY_RESTRICT_DECLARE, uint64_t *const DENSITY_RESTRICT_DECLARE, uint8_t *const DENSITY_RESTRICT_DECLARE, uint8_t *const DENSITY_RESTRICT_DECLARE);
 
 #endif

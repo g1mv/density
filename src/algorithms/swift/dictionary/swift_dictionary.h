@@ -32,14 +32,14 @@
  * 14/02/18 14:37
  *
  * ---------------
- * Swift algorithm
+ * PicoZ algorithm
  * ---------------
  *
  * Author(s)
  * Guillaume Voirin (https://github.com/gpnuma)
  *
  * Description
- * Hash based kernel derived from Chameleon, with very small memory footprint and quicker learning for small datasets
+ * LZ based kernel derived from Chameleon, with very small memory footprint and quick learning curve
  */
 
 #ifndef DENSITY_SWIFT_DICTIONARY_H
@@ -52,12 +52,38 @@
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    uint16_t as_uint16_t;
+    uint32_t as_uint32_t;
 } density_swift_dictionary_entry;
 
 typedef struct {
     density_swift_dictionary_entry entries[1 << DENSITY_SWIFT_HASH_BITS];
 } density_swift_dictionary;
+
+typedef struct {
+    union {
+        uint8_t letter_a;
+        uint8_t letter_b;
+    };
+
+    uint16_t as_uint16_t;
+} density_picoz_dictionary_entry_2;
+
+typedef struct {
+    uint16_t as_uint16_t;
+    uint16_t as_uint8_t;
+} density_picoz_dictionary_entry_3;
+
+typedef struct {
+    uint16_t as_uint16_t;
+} density_picoz_dictionary_entry_4;
+
+typedef struct {
+    uint64_t as_uint64_t;
+} density_picoz_dictionary_entry;
+
+typedef struct {
+    density_picoz_dictionary_entry entries[1 << 8];
+} density_picoz_dictionary;
 #pragma pack(pop)
 
 #endif

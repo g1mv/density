@@ -135,7 +135,7 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_compress_with_context(c
     density_header_write(&out, context->algorithm);
 
     // Compression
-    density_algorithms_prepare_state(&state, context->internal, context->dictionary);
+    density_algorithms_prepare_state(&state, context->dictionary);
     switch (context->algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
             status = density_chameleon_encode(&state, &in, input_size, &out, output_size);
@@ -181,7 +181,7 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_with_context
     density_algorithm_exit_status status = DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;
 
     // Decompression
-    density_algorithms_prepare_state(&state, context->internal, context->dictionary);
+    density_algorithms_prepare_state(&state, context->dictionary);
     switch (context->algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
             status = density_chameleon_decode(&state, &in, input_size, &out, output_size);

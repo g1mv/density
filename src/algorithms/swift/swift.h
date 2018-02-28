@@ -63,6 +63,6 @@ typedef uint64_t density_swift_signature;
 #define DENSITY_SWIFT_MAXIMUM_COMPRESSED_UNIT_SIZE                          (sizeof(density_swift_signature) + DENSITY_SWIFT_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 #define DENSITY_SWIFT_DECOMPRESSED_UNIT_SIZE                                (DENSITY_SWIFT_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
 
-#define DENSITY_SWIFT_WORK_BLOCK_SIZE                                       128
+#define DENSITY_SWIFT_WORK_BLOCK_SIZE                                       256
 
 #endif

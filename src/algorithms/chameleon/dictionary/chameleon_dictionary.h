@@ -46,24 +46,19 @@
 #define DENSITY_CHAMELEON_DICTIONARY_H
 
 #include "../chameleon.h"
-#include "../../swift/dictionary/swift_dictionary.h"
+#include "../../algorithms.h"
 
 #include <string.h>
 
 #pragma pack(push)
 #pragma pack(4)
 typedef struct {
-    uint32_t as_uint32_t;
+    uint64_t as_uint64_t;
 } density_chameleon_dictionary_entry;
 
 typedef struct {
-    density_chameleon_dictionary_entry entries[1 << DENSITY_CHAMELEON_HASH_BITS];
+    density_chameleon_dictionary_entry entries[1 << DENSITY_ALGORITHMS_MAX_DICTIONARY_BITS];
 } density_chameleon_dictionary;
-
-typedef struct {
-    density_swift_dictionary swift_dictionary;
-    density_chameleon_dictionary main_dictionary;
-} density_chameleon_dictionaries;
 #pragma pack(pop)
 
 #endif
