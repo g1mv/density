@@ -144,9 +144,15 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
                                         + (DENSITY_ISOLATE(b, 2251799813685248llu) ? 0x20000 : 0))
 
 #define DENSITY_UNROLL_2(op)     op; op;
+#define DENSITY_UNROLL_3(op)     op; op; op;
 #define DENSITY_UNROLL_4(op)     DENSITY_UNROLL_2(op)    DENSITY_UNROLL_2(op)
+#define DENSITY_UNROLL_5(op)     DENSITY_UNROLL_2(op)    DENSITY_UNROLL_3(op)
+#define DENSITY_UNROLL_7(op)     DENSITY_UNROLL_2(op)    DENSITY_UNROLL_5(op)
 #define DENSITY_UNROLL_8(op)     DENSITY_UNROLL_4(op)    DENSITY_UNROLL_4(op)
+#define DENSITY_UNROLL_9(op)     DENSITY_UNROLL_4(op)    DENSITY_UNROLL_5(op)
+#define DENSITY_UNROLL_15(op)    DENSITY_UNROLL_7(op)    DENSITY_UNROLL_8(op)
 #define DENSITY_UNROLL_16(op)    DENSITY_UNROLL_8(op)    DENSITY_UNROLL_8(op)
+#define DENSITY_UNROLL_31(op)    DENSITY_UNROLL_16(op)    DENSITY_UNROLL_15(op)
 #define DENSITY_UNROLL_32(op)    DENSITY_UNROLL_16(op)    DENSITY_UNROLL_16(op)
 #define DENSITY_UNROLL_64(op)    DENSITY_UNROLL_32(op)    DENSITY_UNROLL_32(op)
 
