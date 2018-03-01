@@ -143,8 +143,12 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
                                         + (DENSITY_ISOLATE(b, 281474976710656llu) ? 0x10000 : 0)\
                                         + (DENSITY_ISOLATE(b, 2251799813685248llu) ? 0x20000 : 0))
 
-#define DENSITY_UNROLL_2(op)     op; op
-#define DENSITY_UNROLL_4(op)     DENSITY_UNROLL_2(op);    DENSITY_UNROLL_2(op)
+#define DENSITY_UNROLL_2(op)     op; op;
+#define DENSITY_UNROLL_4(op)     DENSITY_UNROLL_2(op)    DENSITY_UNROLL_2(op)
+#define DENSITY_UNROLL_8(op)     DENSITY_UNROLL_4(op)    DENSITY_UNROLL_4(op)
+#define DENSITY_UNROLL_16(op)    DENSITY_UNROLL_8(op)    DENSITY_UNROLL_8(op)
+#define DENSITY_UNROLL_32(op)    DENSITY_UNROLL_16(op)    DENSITY_UNROLL_16(op)
+#define DENSITY_UNROLL_64(op)    DENSITY_UNROLL_32(op)    DENSITY_UNROLL_32(op)
 
 #define DENSITY_CASE_GENERATOR_4(op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift)\
     case (((flag_d) << ((shift) * 3)) | ((flag_c) << ((shift) * 2)) | ((flag_b) << (shift)) | (flag_a)):\

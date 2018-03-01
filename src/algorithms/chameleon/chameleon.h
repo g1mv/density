@@ -48,6 +48,7 @@
 #include "../../globals.h"
 #include "../algorithms.h"
 
+
 typedef enum {
     DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK = 0x0,
     DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP = 0x1,
@@ -60,7 +61,5 @@ typedef uint64_t density_chameleon_signature;
 
 #define DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE                      (sizeof(density_chameleon_signature) + DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 #define DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE                            (DENSITY_CHAMELEON_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
-
-//#define DENSITY_CHAMELEON_WORK_BLOCK_SIZE                                   256
 
 #endif

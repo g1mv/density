@@ -148,6 +148,7 @@ typedef struct {
         switch (unit ^ *value) {\
             case 0:\
                 total_bits += ((HASH_BITS) + 1);\
+                DENSITY_CHAMELEON_ENCODE_PUSH_TO_SIGNATURE(DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP);\
                 (HITS)++;\
                 break;\
             default:\
@@ -158,6 +159,9 @@ typedef struct {
                 (INSERTS) += was_not_set;\
                 (COLLISIONS) += !was_not_set;\
                 *bitmap = *bitmap | mask;\
+                DENSITY_CHAMELEON_ENCODE_PUSH_TO_SIGNATURE(DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK);\
+                DENSITY_MEMCPY(*out, unit, BYTE_GROUP_SIZE);\
+                *out += sizeof(BYTE_GROUP_SIZE);\
                 total_bits += (((BYTE_GROUP_SIZE) << 3) + 1);\
                 break;\
         }\

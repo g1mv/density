@@ -96,11 +96,6 @@ DENSITY_FORCE_INLINE void density_chameleon_encode_batch(const uint8_t **DENSITY
 //#endif
 }
 
-#define DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE \
-    *signature = 0;\
-    *signature_pointer = (density_chameleon_signature *) *out;\
-    *out += sizeof(density_chameleon_signature);
-
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_chameleon_encode(density_algorithm_state *const DENSITY_RESTRICT state, const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t out_size) {
     if (out_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
@@ -109,46 +104,50 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint_fast64_t inserts = 0;
     uint_fast64_t total_inserts = 0;
     uint_fast64_t collisions = 0;
-    uint_fast64_t total_bits = 0;
 
     uint64_t memcopy_64;
     const uint8_t *limit_in = *in + in_size - 8;
     uint_fast32_t transition_counter = 0;
     bool cleared_16bits = false;
 
-    uint_fast8_t shift = 0;
     density_chameleon_signature signature;
-    density_chameleon_signature *signature_pointer;
+    density_chameleon_signature* signature_pointer;
 
     uint8_t *out_limit = *out + out_size - DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE;
-    density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
+
+    DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE(*out, signature, signature_pointer);
+
+    uint_fast8_t shift;
+    uint64_t unit;
+    uint64_t hash;
+    uint64_t* value;
 
     kernel_8_2:
-DENSITY_ALGORITHMS_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 8, 2, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter);
+DENSITY_CHAMELEON_ENCODE_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 8, 2, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
     goto finished;
 
     kernel_8_4:
-DENSITY_ALGORITHMS_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 8, 4, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter);
+DENSITY_CHAMELEON_ENCODE_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 8, 4, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
     goto finished;
 
     kernel_8_6:
-DENSITY_ALGORITHMS_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 8, 6, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter);
+DENSITY_CHAMELEON_ENCODE_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 8, 6, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
     goto finished;
 
     kernel_8_8:
-DENSITY_ALGORITHMS_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 8, 8, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter);
+DENSITY_CHAMELEON_ENCODE_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 8, 8, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
     goto finished;
 
     kernel_16_4:
-DENSITY_ALGORITHMS_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 16, 4, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter);
+DENSITY_CHAMELEON_ENCODE_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 16, 4, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
     goto finished;
 
     kernel_16_6:
-DENSITY_ALGORITHMS_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 16, 6, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter);
+DENSITY_CHAMELEON_ENCODE_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 16, 6, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
     goto finished;
 
     kernel_16_8:
-DENSITY_ALGORITHMS_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 16, 8, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter);
+DENSITY_CHAMELEON_ENCODE_GENERATE_KERNEL(*in, limit_in, *out, out_limit, 16, 8, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     kernel_8_10:
     kernel_8_12:
