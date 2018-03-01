@@ -116,9 +116,9 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 #error Unsupported endianness
 #endif
 
-#define DENSITY_MIN(x, y)   (((x)<(y))?(x):(y))
-#define DENSITY_MAX(x, y)   (((x)>(y))?(x):(y))
-#define DENSITY_MAX_3(x, y, z) (DENSITY_MAX(DENSITY_MAX(x, y), z))
+#define DENSITY_MINIMUM(x, y)   (((x)<(y))?(x):(y))
+#define DENSITY_MAXIMUM(x, y)   (((x)>(y))?(x):(y))
+#define DENSITY_MAXIMUM_3(x, y, z) (DENSITY_MAXIMUM(DENSITY_MAXIMUM(x, y), z))
 
 #define DENSITY_FORMAT(v)               0##v##llu
 
@@ -217,7 +217,7 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
  **********************************************************************************************************************/
 
 #define DENSITY_MAJOR_VERSION   0
-#define DENSITY_MINOR_VERSION   14
-#define DENSITY_REVISION        2
+#define DENSITY_MINOR_VERSION   15
+#define DENSITY_REVISION        0
 
 #endif
