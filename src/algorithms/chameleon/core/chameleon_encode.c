@@ -54,7 +54,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint_fast64_t collisions = 0;
 
     uint64_t memcopy_64;
-    const uint8_t *limit_in = *in + in_size - 8;
+//    const uint8_t *limit_in = *in + in_size - 8;
+    uint_fast64_t counter = 0;
+    const uint_fast64_t limit = in_size - sizeof(uint64_t);
     uint_fast32_t transition_counter = 0;
     bool cleared_16bits = false;
 
@@ -72,25 +74,25 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint_fast32_t stability;
 
     study_kernel_8_2:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(*in, limit_in, *out, out_limit, 8, 2, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(counter, limit, *out, out_limit, 8, 2, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     study_kernel_8_4:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(*in, limit_in, *out, out_limit, 8, 4, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(counter, limit, *out, out_limit, 8, 4, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     study_kernel_8_6:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(*in, limit_in, *out, out_limit, 8, 6, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(counter, limit, *out, out_limit, 8, 6, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     study_kernel_8_8:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(*in, limit_in, *out, out_limit, 8, 8, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(counter, limit, *out, out_limit, 8, 8, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     study_kernel_16_4:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(*in, limit_in, *out, out_limit, 16, 4, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(counter, limit, *out, out_limit, 16, 4, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     study_kernel_16_6:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(*in, limit_in, *out, out_limit, 16, 6, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(counter, limit, *out, out_limit, 16, 6, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     study_kernel_16_8:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(*in, limit_in, *out, out_limit, 16, 8, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(counter, limit, *out, out_limit, 16, 8, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     study_kernel_8_10:
     study_kernel_8_12:
@@ -102,25 +104,25 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(*in, limit_in, *out, out_limit, 1
     goto finished;
 
     fast_kernel_8_2:
-DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(*in, limit_in, *out, out_limit, 8, 2, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(counter, limit, *out, out_limit, 8, 2, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     fast_kernel_8_4:
-DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(*in, limit_in, *out, out_limit, 8, 4, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(counter, limit, *out, out_limit, 8, 4, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     fast_kernel_8_6:
-DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(*in, limit_in, *out, out_limit, 8, 6, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(counter, limit, *out, out_limit, 8, 6, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     fast_kernel_8_8:
-DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(*in, limit_in, *out, out_limit, 8, 8, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(counter, limit, *out, out_limit, 8, 8, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     fast_kernel_16_4:
-DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(*in, limit_in, *out, out_limit, 16, 4, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(counter, limit, *out, out_limit, 16, 4, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     fast_kernel_16_6:
-DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(*in, limit_in, *out, out_limit, 16, 6, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(counter, limit, *out, out_limit, 16, 6, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
     fast_kernel_16_8:
-DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(*in, limit_in, *out, out_limit, 16, 8, (density_chameleon_dictionary*)state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
+DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(counter, limit, *out, out_limit, 16, 8, (density_chameleon_dictionary *) state->dictionary, cleared_16bits, memcopy_64, hits, inserts, total_inserts, collisions, transition_counter, signature, signature_pointer);
 
 
 finished:

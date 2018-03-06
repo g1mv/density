@@ -38,6 +38,7 @@
 #include "../globals.h"
 
 #define DENSITY_ALGORITHMS_MULTIPLIER_64        0x88c65c9962e277c1llu
+//#define DENSITY_ALGORITHMS_MULTIPLIER_64        0x8dc65c9962e277c1llu
 #define DENSITY_ALGORITHMS_MAX_DICTIONARY_BITS  16
 
 typedef enum {

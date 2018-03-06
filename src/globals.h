@@ -44,6 +44,25 @@
 
 #define DENSITY_NOT_ZERO(x) (!!(x))
 
+#define DENSITY_MINIMUM(x, y)   (((x)<(y))?(x):(y))
+#define DENSITY_MAXIMUM(x, y)   (((x)>(y))?(x):(y))
+#define DENSITY_MAXIMUM_3(x, y, z) (DENSITY_MAXIMUM(DENSITY_MAXIMUM(x, y), z))
+
+#if UINTPTR_MAX == 0xffffffff
+#define DENSITY_32
+#elif UINTPTR_MAX == 0xffffffffffffffff
+#define DENSITY_64
+#else
+#error
+#endif
+
+// __builtin_memcpy performance fix (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=84719)
+#if defined(DENSITY_64) && !defined(__clang__) && defined(__GNUC__)
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(INTENDED) DENSITY_MAXIMUM(8, INTENDED)
+#else
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(INTENDED) INTENDED
+#endif
+
 #if defined(__clang__) || defined(__GNUC__)
 #define DENSITY_FORCE_INLINE		inline __attribute__((always_inline))
 #define DENSITY_RESTRICT			restrict
@@ -115,10 +134,6 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 #else
 #error Unsupported endianness
 #endif
-
-#define DENSITY_MINIMUM(x, y)   (((x)<(y))?(x):(y))
-#define DENSITY_MAXIMUM(x, y)   (((x)>(y))?(x):(y))
-#define DENSITY_MAXIMUM_3(x, y, z) (DENSITY_MAXIMUM(DENSITY_MAXIMUM(x, y), z))
 
 #define DENSITY_FORMAT(v)               0##v##llu
 
@@ -192,18 +207,22 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
     DENSITY_CASE_GENERATOR_4_4_LAST_3_COMBINED(op_d, flag_d, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);
 
 
+#define DENSITY_ADD_2_1 3
 #define DENSITY_ADD_2_2 4
 #define DENSITY_ADD_2_4 6
 #define DENSITY_ADD_2_6 8
 #define DENSITY_ADD_2_8 10
+#define DENSITY_ADD_4_1 5
 #define DENSITY_ADD_4_2 6
 #define DENSITY_ADD_4_4 8
 #define DENSITY_ADD_4_6 10
 #define DENSITY_ADD_4_8 12
+#define DENSITY_ADD_6_1 7
 #define DENSITY_ADD_6_2 8
 #define DENSITY_ADD_6_4 10
 #define DENSITY_ADD_6_6 12
 #define DENSITY_ADD_6_8 14
+#define DENSITY_ADD_8_1 9
 #define DENSITY_ADD_8_2 10
 #define DENSITY_ADD_8_4 12
 #define DENSITY_ADD_8_6 14
