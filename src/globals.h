@@ -207,29 +207,15 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
     DENSITY_CASE_GENERATOR_4_4_LAST_3_COMBINED(op_d, flag_d, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);
 
 
-#define DENSITY_ADD_2_1 3
 #define DENSITY_ADD_2_2 4
-#define DENSITY_ADD_2_4 6
-#define DENSITY_ADD_2_6 8
-#define DENSITY_ADD_2_8 10
-#define DENSITY_ADD_4_1 5
+#define DENSITY_ADD_2_4 4
 #define DENSITY_ADD_4_2 6
 #define DENSITY_ADD_4_4 8
-#define DENSITY_ADD_4_6 10
-#define DENSITY_ADD_4_8 12
-#define DENSITY_ADD_6_1 7
 #define DENSITY_ADD_6_2 8
 #define DENSITY_ADD_6_4 10
-#define DENSITY_ADD_6_6 12
-#define DENSITY_ADD_6_8 14
-#define DENSITY_ADD_8_1 9
 #define DENSITY_ADD_8_2 10
 #define DENSITY_ADD_8_4 12
-#define DENSITY_ADD_8_6 14
 #define DENSITY_ADD_8_8 16
-#define DENSITY_ADD_16_2 18
-#define DENSITY_ADD_16_4 20
-#define DENSITY_ADD_16_6 22
 #define DENSITY_ADD_16_8 24
 
 #define DENSITY_ADD(x, y) DENSITY_ADD_##x##_##y

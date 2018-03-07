@@ -45,8 +45,8 @@
 #ifndef DENSITY_CHAMELEON_ENCODE_H
 #define DENSITY_CHAMELEON_ENCODE_H
 
-#include "../dictionary/chameleon_dictionary.h"
 #include "../../algorithms.h"
+#include "../dictionary/chameleon_dictionary.h"
 
 #define DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE \
     signature = 0;\
@@ -153,9 +153,7 @@
         }\
         if (collisions > hits) {\
             DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << 8) >> 3);\
-            DENSITY_ALGORITHMS_PRINT_SWITCH(HASH_BITS, BYTE_GROUP_SIZE, 8, 2);\
-            DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_TO(HASH_BITS, BYTE_GROUP_SIZE, 8, 2, DENSITY_ALGORITHMS_TRANSITION_ROUNDS(8), );\
-            goto study_kernel_8_2;\
+            goto study_kernel_8_2; /* No transition here as the current dictionary is not efficient */\
         }\
         hits = 0;\
         inserts = 0;\
@@ -179,16 +177,16 @@
         DENSITY_CHAMELEON_ENCODE_PUSH_SIGNATURE;\
         if (DENSITY_UNLIKELY(!((hits + inserts + collisions) & (0x7ff)))) {\
             if (!inserts) {\
-                if (total_inserts < (((uint64_t)1 << (HASH_BITS)) * 1) / 3 && (BYTE_GROUP_SIZE) <= 4) {\
-                    DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << (HASH_BITS)) >> 3);\
-                    DENSITY_ALGORITHMS_PRINT_SWITCH(HASH_BITS, BYTE_GROUP_SIZE, HASH_BITS, DENSITY_ADD(BYTE_GROUP_SIZE,4));\
-                    DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_TO(HASH_BITS, BYTE_GROUP_SIZE, HASH_BITS, DENSITY_ADD(BYTE_GROUP_SIZE,4), DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BITS), );\
-                    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(study_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,4)));\
-                } else if (total_inserts < (((uint64_t)1 << (HASH_BITS)) * 2) / 3 && (BYTE_GROUP_SIZE) <= 6) {\
-                    DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << (HASH_BITS)) >> 3);\
-                    DENSITY_ALGORITHMS_PRINT_SWITCH(HASH_BITS, BYTE_GROUP_SIZE, HASH_BITS, DENSITY_ADD(BYTE_GROUP_SIZE,2));\
-                    DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_TO(HASH_BITS, BYTE_GROUP_SIZE, HASH_BITS, DENSITY_ADD(BYTE_GROUP_SIZE,2), DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BITS), );\
-                    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(study_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,2)));\
+                if (total_inserts < (((uint64_t)1 << (HASH_BITS)) * 2) / 3 && (BYTE_GROUP_SIZE) <= 6) {\
+                    if (total_inserts < (((uint64_t)1 << (HASH_BITS)) * 1) / 3 && (BYTE_GROUP_SIZE) <= 4) {\
+                        DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << (HASH_BITS)) >> 3);\
+                        DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_TO(HASH_BITS, BYTE_GROUP_SIZE, HASH_BITS, DENSITY_ADD(BYTE_GROUP_SIZE,4), DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BITS), );\
+                        goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(study_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,4)));\
+                    } else {\
+                        DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << (HASH_BITS)) >> 3);\
+                        DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_TO(HASH_BITS, BYTE_GROUP_SIZE, HASH_BITS, DENSITY_ADD(BYTE_GROUP_SIZE,2), DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BITS), );\
+                        goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(study_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,2)));\
+                    }\
                 }\
                 if(++stability & ~0xf) {\
                     goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(fast_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
@@ -198,7 +196,6 @@
                 if (total_inserts > ((((uint64_t)1 << (HASH_BITS)) * 15) >> 4)) {\
                     if ((HASH_BITS) < DENSITY_ALGORITHMS_MAX_DICTIONARY_BITS && (BYTE_GROUP_SIZE) <= 6) {\
                         DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << (DENSITY_ADD(HASH_BITS,8))) >> 3);\
-                        DENSITY_ALGORITHMS_PRINT_SWITCH(HASH_BITS, BYTE_GROUP_SIZE, DENSITY_ADD(HASH_BITS,8), DENSITY_ADD(BYTE_GROUP_SIZE,2));\
                         if(cleared) {\
                             DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_TO(HASH_BITS, BYTE_GROUP_SIZE, DENSITY_ADD(HASH_BITS,8), DENSITY_ADD(BYTE_GROUP_SIZE,2), DENSITY_ALGORITHMS_TRANSITION_ROUNDS(DENSITY_ADD(HASH_BITS,8)), );\
                             goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(study_kernel_,DENSITY_ADD(HASH_BITS,8)),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,2)));\
@@ -209,9 +206,7 @@
                         }\
                     } else if (collisions > hits) {\
                         DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << 8) >> 3);\
-                        DENSITY_ALGORITHMS_PRINT_SWITCH(HASH_BITS, BYTE_GROUP_SIZE, 8, 2);\
-                        DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_TO(HASH_BITS, BYTE_GROUP_SIZE, 8, 2, DENSITY_ALGORITHMS_TRANSITION_ROUNDS(8), );\
-                        goto study_kernel_8_2;\
+                        goto study_kernel_8_2; /* No transition here as the current dictionary is not efficient */\
                     }\
                 }\
                 stability = 0;\
