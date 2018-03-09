@@ -139,7 +139,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
         } else {
             const uint8_t *out_start = *out;
             density_cheetah_encode_prepare_signature(out, &signature_pointer, &signature);
-            DENSITY_PREFETCH(*in + DENSITY_CHEETAH_WORK_BLOCK_SIZE);
+            DENSITY_PREFETCH(*in + DENSITY_CHEETAH_WORK_BLOCK_SIZE, 0, 0);
             density_cheetah_encode_128(in, out, &last_hash, &signature, (density_cheetah_dictionary *const) state->dictionary, &unit);
 #ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));

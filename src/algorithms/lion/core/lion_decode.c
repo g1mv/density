@@ -123,7 +123,7 @@ void density_lion_decode_prediction_c(const uint8_t **DENSITY_RESTRICT in, uint8
 
 void density_lion_decode_dictionary_a(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_lion_dictionary *const DENSITY_RESTRICT dictionary, uint16_t *DENSITY_RESTRICT const hash, uint32_t *DENSITY_RESTRICT const unit) {
     density_lion_decode_read_hash(in, hash);
-    DENSITY_PREFETCH(&dictionary->predictions[*hash]);
+    DENSITY_PREFETCH(&dictionary->predictions[*hash], 0, 3);
     *unit = dictionary->chunks[*hash].chunk_a;
     density_lion_decode_dictionary_generic(out, last_hash, dictionary, unit);
 
@@ -132,7 +132,7 @@ void density_lion_decode_dictionary_a(const uint8_t **DENSITY_RESTRICT in, uint8
 
 void density_lion_decode_dictionary_b(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_lion_dictionary *const DENSITY_RESTRICT dictionary, uint16_t *DENSITY_RESTRICT const hash, uint32_t *DENSITY_RESTRICT const unit) {
     density_lion_decode_read_hash(in, hash);
-  	DENSITY_PREFETCH(&dictionary->predictions[*hash]);
+    DENSITY_PREFETCH(&dictionary->predictions[*hash], 0, 3);
     density_lion_dictionary_chunk_entry *entry = &dictionary->chunks[*hash];
     *unit = entry->chunk_b;
     density_lion_decode_update_dictionary_model(entry, *unit);
@@ -143,7 +143,7 @@ void density_lion_decode_dictionary_b(const uint8_t **DENSITY_RESTRICT in, uint8
 
 void density_lion_decode_dictionary_c(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_lion_dictionary *const DENSITY_RESTRICT dictionary, uint16_t *DENSITY_RESTRICT const hash, uint32_t *DENSITY_RESTRICT const unit) {
     density_lion_decode_read_hash(in, hash);
-  	DENSITY_PREFETCH(&dictionary->predictions[*hash]);
+    DENSITY_PREFETCH(&dictionary->predictions[*hash], 0, 3);
     density_lion_dictionary_chunk_entry *entry = &dictionary->chunks[*hash];
     *unit = entry->chunk_c;
     density_lion_decode_update_dictionary_model(entry, *unit);
@@ -154,7 +154,7 @@ void density_lion_decode_dictionary_c(const uint8_t **DENSITY_RESTRICT in, uint8
 
 void density_lion_decode_dictionary_d(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_lion_dictionary *const DENSITY_RESTRICT dictionary, uint16_t *DENSITY_RESTRICT const hash, uint32_t *DENSITY_RESTRICT const unit) {
     density_lion_decode_read_hash(in, hash);
-  	DENSITY_PREFETCH(&dictionary->predictions[*hash]);
+    DENSITY_PREFETCH(&dictionary->predictions[*hash], 0, 3);
     density_lion_dictionary_chunk_entry *entry = &dictionary->chunks[*hash];
     *unit = entry->chunk_d;
     density_lion_decode_update_dictionary_model(entry, *unit);

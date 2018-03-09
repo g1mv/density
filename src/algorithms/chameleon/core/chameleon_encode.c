@@ -45,7 +45,7 @@
 #include "chameleon_encode.h"
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_chameleon_encode(density_algorithm_state *const DENSITY_RESTRICT state, const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t out_size) {
-    if (out_size < DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE)
+    if (out_size < DENSITY_CHAMELEON_ENCODE_OUT_SAFE_DISTANCE(1, 2))
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 
     uint_fast64_t hits = 0;
@@ -59,20 +59,22 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     bool cleared = false;
 
     density_chameleon_signature signature;
-    density_chameleon_signature* signature_pointer;
+    density_chameleon_signature *signature_pointer;
     density_chameleon_dictionary *const dictionary = (density_chameleon_dictionary *) state->dictionary;
 
     uint_fast64_t in_position = 0;
-    const uint_fast64_t in_limit = in_size - sizeof(uint64_t);
-    const uint8_t *out_limit = *out + out_size - DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE;
+    uint_fast64_t in_limit;
+    uint8_t *out_limit;
 
     DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE;
 
     uint_fast8_t shift;
     uint64_t unit;
     uint64_t hash;
-    uint64_t* value;
+    uint64_t *value;
     uint_fast32_t stability;
+
+    // Study kernels
 
     study_kernel_8_2:
 DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(8, 2);
@@ -95,14 +97,7 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(16, 6);
     study_kernel_16_8:
 DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(16, 8);
 
-    study_kernel_8_10:
-    study_kernel_8_12:
-    study_kernel_16_10:
-    study_kernel_16_12:
-    study_kernel_24_6:
-    study_kernel_24_8:
-    study_kernel_24_10:
-    goto finished;
+    // Fast kernels
 
     fast_kernel_8_2:
 DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(8, 2);
@@ -125,57 +120,43 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(16, 6);
     fast_kernel_16_8:
 DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(16, 8);
 
+    // Completion kernels
 
-finished:
-//    printf("-> %llu bytes\n", (unsigned long long) (total_bits >> 3));
+    completion_kernel_8_2:
+DENSITY_CHAMELEON_ENCODE_GENERATE_COMPLETION_KERNEL(8, 2);
 
-    return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;//todo
+    completion_kernel_8_4:
+DENSITY_CHAMELEON_ENCODE_GENERATE_COMPLETION_KERNEL(8, 4);
 
-//    if (*out > out_limit)
-//        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
-//
-//    uint_fast64_t remaining;
-//
-//    switch (in_size & 0xff) {
-//        case 0:
-//        case 1:
-//        case 2:
-//        case 3:
-//            density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
-//            signature = ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK);    // End marker
-//#ifdef DENSITY_LITTLE_ENDIAN
-//            DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
-//#elif defined(DENSITY_BIG_ENDIAN)
-//        const density_chameleon_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
-//            DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_chameleon_signature));
-//#else
-//#error
-//#endif
-//            goto process_remaining_bytes;
-//        default:
-//            break;
-//    }
-//
-//    const uint_fast64_t limit_4 = (in_size & 0xff) >> 2;
-//    density_chameleon_encode_prepare_signature(out, &signature_pointer, &signature);
-//    for (uint_fast8_t shift = 0; shift != limit_4; shift++)
-//        density_chameleon_encode_4(in, out, shift, &signature, (density_chameleon_dictionary *const) state->dictionary, &unit);
-//
-//    signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK << limit_4);    // End marker
-//#ifdef DENSITY_LITTLE_ENDIAN
-//    DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
-//#elif defined(DENSITY_BIG_ENDIAN)
-//    const density_chameleon_signature endian_signature = DENSITY_LITTLE_ENDIAN_64(signature);
-//    DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_chameleon_signature));
-//#else
-//#error
-//#endif
-//
-//    process_remaining_bytes:
-//    remaining = in_size & 0x3;
-//    if (remaining) {
-//        DENSITY_ALGORITHM_COPY(remaining);
-//    }
-//
-//    return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
+    completion_kernel_8_6:
+DENSITY_CHAMELEON_ENCODE_GENERATE_COMPLETION_KERNEL(8, 6);
+
+    completion_kernel_8_8:
+DENSITY_CHAMELEON_ENCODE_GENERATE_COMPLETION_KERNEL(8, 8);
+
+    completion_kernel_16_4:
+DENSITY_CHAMELEON_ENCODE_GENERATE_COMPLETION_KERNEL(16, 4);
+
+    completion_kernel_16_6:
+DENSITY_CHAMELEON_ENCODE_GENERATE_COMPLETION_KERNEL(16, 6);
+
+    completion_kernel_16_8:
+DENSITY_CHAMELEON_ENCODE_GENERATE_COMPLETION_KERNEL(16, 8);
+
+    study_kernel_8_10:
+    study_kernel_8_12:
+    study_kernel_16_10:
+    study_kernel_16_12:
+    study_kernel_24_6:
+    study_kernel_24_8:
+    study_kernel_24_10:
+
+    finish:
+    *in += in_position;
+    const uint_fast64_t remaining = in_size - in_position;
+    DENSITY_MEMCPY(*out, *in, remaining);
+    *in += remaining;
+    *out += remaining;
+
+    return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
 }

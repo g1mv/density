@@ -52,7 +52,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_process_predicted(uint8_t **DEN
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_a(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary, const uint16_t hash) {
-    DENSITY_PREFETCH(&dictionary->prediction_entries[hash]);
+    DENSITY_PREFETCH(&dictionary->prediction_entries[hash], 0, 0);
     const uint32_t unit = dictionary->entries[hash].chunk_a;
     DENSITY_MEMCPY(*out, &unit, sizeof(uint32_t));
     dictionary->prediction_entries[*last_hash].next_chunk_prediction = unit;
@@ -60,7 +60,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_a(uint8_t **
 }
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_b(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary, const uint16_t hash) {
-    DENSITY_PREFETCH(&dictionary->prediction_entries[hash]);
+    DENSITY_PREFETCH(&dictionary->prediction_entries[hash], 0, 3);
     density_cheetah_dictionary_entry *const entry = &dictionary->entries[hash];
     const uint32_t unit = entry->chunk_b;
     entry->chunk_b = entry->chunk_a;
@@ -72,7 +72,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_process_compressed_b(uint8_t **
 
 DENSITY_FORCE_INLINE void density_cheetah_decode_process_uncompressed(uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_cheetah_dictionary *const DENSITY_RESTRICT dictionary, const uint32_t unit) {
     const uint16_t hash = DENSITY_CHEETAH_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(unit));
-    DENSITY_PREFETCH(&dictionary->prediction_entries[hash]);
+    DENSITY_PREFETCH(&dictionary->prediction_entries[hash], 0, 3);
     density_cheetah_dictionary_entry *const entry = &dictionary->entries[hash];
     entry->chunk_b = entry->chunk_a;
     entry->chunk_a = unit;  // Does not ensure dictionary content consistency between endiannesses

@@ -72,7 +72,7 @@
 #define DENSITY_MEMSET				__builtin_memset
 #define DENSITY_LIKELY(x)			__builtin_expect(DENSITY_NOT_ZERO(x), 1)
 #define DENSITY_UNLIKELY(x)			__builtin_expect(DENSITY_NOT_ZERO(x), 0)
-#define DENSITY_PREFETCH(x)			__builtin_prefetch(x)
+#define DENSITY_PREFETCH(x, y, z)    __builtin_prefetch(x, y, z)
 #define DENSITY_CTZ(x)				__builtin_ctz(x)
 
 #if defined(__BYTE_ORDER__)
@@ -99,7 +99,7 @@
 #define DENSITY_MEMSET				memset
 #define DENSITY_LIKELY(x)			(x)
 #define DENSITY_UNLIKELY(x)			(x)
-#define DENSITY_PREFETCH(x)			((void)(x))
+#define DENSITY_PREFETCH(x, y, z)	((void)(x, y, z))
 
 DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 	unsigned long trailing_zero = 0;

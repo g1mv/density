@@ -48,6 +48,9 @@
 #include "../../algorithms.h"
 #include "../dictionary/chameleon_dictionary.h"
 
+#define DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(UNIT_GROUPS, BYTE_GROUP_SIZE) ((UNIT_GROUPS) * (BYTE_GROUP_SIZE))  // Maximum bytes read per unit processing
+#define DENSITY_CHAMELEON_ENCODE_OUT_SAFE_DISTANCE(UNIT_GROUPS, BYTE_GROUP_SIZE) (sizeof(density_chameleon_signature) + (UNIT_GROUPS) * (BYTE_GROUP_SIZE))  // Maximum bytes written per unit processing
+
 #define DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE \
     signature = 0;\
     signature_pointer = (density_chameleon_signature *) *out;\
@@ -117,6 +120,7 @@
     DENSITY_ALGORITHMS_PRINT_TRANSITION(HASH_BITS, BYTE_GROUP_SIZE, NEXT_HASH_BITS, NEXT_GROUP_BYTE_SIZE, SPAN)\
     total_inserts = 0;\
     transition_counter = SPAN;\
+    in_limit = in_size - DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE);\
     while (DENSITY_LIKELY(in_position < in_limit && transition_counter)) {\
         for(uint_fast8_t shift = 0; shift < 0x40; shift++) {\
             DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_COMPRESSION_UNIT(DENSITY_MAXIMUM(BYTE_GROUP_SIZE, NEXT_GROUP_BYTE_SIZE), HASH_BITS, BYTE_GROUP_SIZE);\
@@ -138,11 +142,13 @@
     hits = 0;\
     inserts = 0;\
     collisions = 0;\
+    in_limit = in_size - DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE);\
     while (DENSITY_LIKELY(in_position < in_limit)) {\
         samples_counter = 0x800;\
         while (DENSITY_LIKELY(in_position < in_limit && samples_counter--)) {\
             shift = 0;\
             for(uint_fast8_t unroll = 0; unroll < 9; unroll++) {\
+                DENSITY_PREFETCH(&(*in)[in_position + DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(7, BYTE_GROUP_SIZE)], 0, 0);\
                 DENSITY_UNROLL_7(\
                     DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_COMPRESSION_UNIT(BYTE_GROUP_SIZE, HASH_BITS, BYTE_GROUP_SIZE);\
                     shift ++;\
@@ -159,17 +165,19 @@
         inserts = 0;\
         collisions = 0;\
     }\
-    goto finished;
+    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));
 
 #define DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(HASH_BITS, BYTE_GROUP_SIZE) \
     hits = 0;\
     inserts = 0;\
     collisions = 0;\
     stability = 0;\
+    in_limit = in_size - DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE);\
     while (DENSITY_LIKELY(in_position < in_limit)) {\
         shift = 0;\
-        for(uint_fast8_t unroll = 0; unroll < 4; unroll++) {\
-            DENSITY_UNROLL_16(\
+        for(uint_fast8_t unroll = 0; unroll < 8; unroll++) {\
+            DENSITY_PREFETCH(&(*in)[in_position + DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(8, BYTE_GROUP_SIZE)], 0, 0);\
+            DENSITY_UNROLL_8(\
                 DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_COMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE);\
                 shift ++;\
             );\
@@ -216,7 +224,20 @@
             collisions = 0;\
         }\
     }\
-    goto finished;
+    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));
+
+#define DENSITY_CHAMELEON_ENCODE_GENERATE_COMPLETION_KERNEL(HASH_BITS, BYTE_GROUP_SIZE) \
+    in_limit = in_size - DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(1, BYTE_GROUP_SIZE);\
+    shift = 0;\
+    while (in_position < in_limit) {\
+        DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_COMPRESSION_UNIT(BYTE_GROUP_SIZE, HASH_BITS, BYTE_GROUP_SIZE);\
+        shift ++;\
+        if(DENSITY_UNLIKELY(!(shift & 0x3f))) {\
+            DENSITY_CHAMELEON_ENCODE_PUSH_SIGNATURE;\
+            shift = 0;\
+        }\
+    }\
+    goto finish;
 
 DENSITY_WINDOWS_EXPORT density_algorithm_exit_status density_chameleon_encode(density_algorithm_state *DENSITY_RESTRICT_DECLARE, const uint8_t **DENSITY_RESTRICT_DECLARE, uint_fast64_t, uint8_t **DENSITY_RESTRICT_DECLARE, uint_fast64_t);
 
