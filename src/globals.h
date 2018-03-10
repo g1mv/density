@@ -117,19 +117,22 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 #endif
 
 #ifdef DENSITY_LITTLE_ENDIAN
-#define DENSITY_LITTLE_ENDIAN_64(b)   ((uint64_t)(b))
-#define DENSITY_LITTLE_ENDIAN_32(b)   ((uint32_t)(b))
-#define DENSITY_LITTLE_ENDIAN_16(b)   ((uint16_t)(b))
+#define DENSITY_CORRECT_ENDIANNESS_64(b)   ((uint64_t)(b))
+#define DENSITY_CORRECT_ENDIANNESS_32(b)   ((uint32_t)(b))
+#define DENSITY_CORRECT_ENDIANNESS_16(b)   ((uint16_t)(b))
+#define DENSITY_CORRECT_ENDIANNESS_8(b)    (b)  // Used by generator macros
 #elif defined(DENSITY_BIG_ENDIAN)
 #if __GNUC__ * 100 + __GNUC_MINOR__ >= 403
-#define DENSITY_LITTLE_ENDIAN_64(b)   __builtin_bswap64(b)
-#define DENSITY_LITTLE_ENDIAN_32(b)   __builtin_bswap32(b)
-#define DENSITY_LITTLE_ENDIAN_16(b)   __builtin_bswap16(b)
+#define DENSITY_CORRECT_ENDIANNESS_64(b)   __builtin_bswap64(b)
+#define DENSITY_CORRECT_ENDIANNESS_32(b)   __builtin_bswap32(b)
+#define DENSITY_CORRECT_ENDIANNESS_16(b)   __builtin_bswap16(b)
+#define DENSITY_CORRECT_ENDIANNESS_8(b)    (b)
 #else
 #warning Using bulk byte swap routines. Expect performance issues.
-#define DENSITY_LITTLE_ENDIAN_64(b)   ((((b) & 0xFF00000000000000ull) >> 56) | (((b) & 0x00FF000000000000ull) >> 40) | (((b) & 0x0000FF0000000000ull) >> 24) | (((b) & 0x000000FF00000000ull) >> 8) | (((b) & 0x00000000FF000000ull) << 8) | (((b) & 0x0000000000FF0000ull) << 24ull) | (((b) & 0x000000000000FF00ull) << 40) | (((b) & 0x00000000000000FFull) << 56))
-#define DENSITY_LITTLE_ENDIAN_32(b)   ((((b) & 0xFF000000) >> 24) | (((b) & 0x00FF0000) >> 8) | (((b) & 0x0000FF00) << 8) | (((b) & 0x000000FF) << 24))
-#define DENSITY_LITTLE_ENDIAN_16(b)   ((((b) & 0xFF00) >> 8) | (((b) & 0x00FF) << 8))
+#define DENSITY_CORRECT_ENDIANNESS_64(b)   ((((b) & 0xFF00000000000000ull) >> 56) | (((b) & 0x00FF000000000000ull) >> 40) | (((b) & 0x0000FF0000000000ull) >> 24) | (((b) & 0x000000FF00000000ull) >> 8) | (((b) & 0x00000000FF000000ull) << 8) | (((b) & 0x0000000000FF0000ull) << 24ull) | (((b) & 0x000000000000FF00ull) << 40) | (((b) & 0x00000000000000FFull) << 56))
+#define DENSITY_CORRECT_ENDIANNESS_32(b)   ((((b) & 0xFF000000) >> 24) | (((b) & 0x00FF0000) >> 8) | (((b) & 0x0000FF00) << 8) | (((b) & 0x000000FF) << 24))
+#define DENSITY_CORRECT_ENDIANNESS_16(b)   ((((b) & 0xFF00) >> 8) | (((b) & 0x00FF) << 8))
+#define DENSITY_CORRECT_ENDIANNESS_8(b)    (b)
 #endif
 #else
 #error Unsupported endianness
@@ -222,6 +225,16 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 
 #define DENSITY_PASTE_CONCAT(x, y) x##y
 #define DENSITY_EVAL_CONCAT(x, y) DENSITY_PASTE_CONCAT(x,y)
+
+#ifdef DENSITY_LITTLE_ENDIAN
+#define DENSITY_ENDIAN_COPY(TARGET, SOURCE, BITS)   DENSITY_MEMCPY(&(TARGET), &(SOURCE), DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT((BITS) >> 3))
+#elif defined(DENSITY_BIG_ENDIAN)
+#define DENSITY_ENDIAN_COPY(TARGET, SOURCE, BITS)\
+const DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(uint, BITS), _t) DENSITY_EVAL_CONCAT(endian_, BITS) = DENSITY_EVAL_CONCAT(DENSITY_CORRECT_ENDIANNESS_, BITS)(SOURCE);\
+DENSITY_MEMCPY(&(TARGET), &DENSITY_EVAL_CONCAT(endian_, BITS), DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT((BITS) >> 3));
+#else
+#error
+#endif
 
 #define density_bitsizeof(x) (8 * sizeof(x))
 

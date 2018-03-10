@@ -80,7 +80,7 @@
     switch (unit ^ *value) {\
         case 0:\
             signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP << shift);\
-            DENSITY_MEMCPY(&out_array[out_position], &hash, DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT((HASH_BITS) >> 3));\
+            DENSITY_ENDIAN_COPY(out_array[out_position], hash, HASH_BITS);\
             out_position += ((HASH_BITS) >> 3);\
             break;\
         default:\
@@ -100,7 +100,7 @@
         case 0:\
             hits++;\
             signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP << shift);\
-            DENSITY_MEMCPY(&out_array[out_position], &hash, DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT((HASH_BITS) >> 3));\
+            DENSITY_ENDIAN_COPY(out_array[out_position], hash, HASH_BITS);\
             out_position += ((HASH_BITS) >> 3);\
             break;\
         default:\

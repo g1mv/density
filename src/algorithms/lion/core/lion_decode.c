@@ -50,7 +50,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_read_signature(const uint8_t **DEN
 #elif defined(DENSITY_BIG_ENDIAN)
     density_lion_signature endian_signature;
     DENSITY_MEMCPY(&endian_signature, *in, sizeof(density_lion_signature));
-    *signature = DENSITY_LITTLE_ENDIAN_64(endian_signature);
+    *signature = DENSITY_CORRECT_ENDIANNESS_64(endian_signature);
 #else
 #error
 #endif
@@ -73,7 +73,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_read_hash(const uint8_t **DENSITY_
 #elif defined(DENSITY_BIG_ENDIAN)
     uint16_t endian_hash;
     DENSITY_MEMCPY(&endian_hash, *in, sizeof(uint16_t));
-    *hash = DENSITY_LITTLE_ENDIAN_16(endian_hash);
+    *hash = DENSITY_CORRECT_ENDIANNESS_16(endian_hash);
 #else
 #error
 #endif
@@ -81,7 +81,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_read_hash(const uint8_t **DENSITY_
 }
 
 DENSITY_FORCE_INLINE void density_lion_decode_prediction_generic(uint8_t **DENSITY_RESTRICT out, uint16_t *DENSITY_RESTRICT const hash, uint32_t *DENSITY_RESTRICT const unit) {
-    *hash = DENSITY_LION_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(*unit));
+    *hash = DENSITY_LION_HASH_ALGORITHM(DENSITY_CORRECT_ENDIANNESS_32(*unit));
     DENSITY_MEMCPY(*out, unit, sizeof(uint32_t));
     *out += sizeof(uint32_t);
 }
@@ -166,7 +166,7 @@ void density_lion_decode_dictionary_d(const uint8_t **DENSITY_RESTRICT in, uint8
 void density_lion_decode_plain(const uint8_t **DENSITY_RESTRICT in, uint8_t **DENSITY_RESTRICT out, uint_fast16_t *DENSITY_RESTRICT last_hash, density_lion_dictionary *const DENSITY_RESTRICT dictionary, uint16_t *DENSITY_RESTRICT const hash, uint32_t *DENSITY_RESTRICT const unit) {
     DENSITY_MEMCPY(unit, *in, sizeof(uint32_t));
     *in += sizeof(uint32_t);
-    *hash = DENSITY_LION_HASH_ALGORITHM(DENSITY_LITTLE_ENDIAN_32(*unit));
+    *hash = DENSITY_LION_HASH_ALGORITHM(DENSITY_CORRECT_ENDIANNESS_32(*unit));
     density_lion_dictionary_chunk_entry *entry = &dictionary->chunks[*hash];
     density_lion_decode_update_dictionary_model(entry, *unit);
     DENSITY_MEMCPY(*out, unit, sizeof(uint32_t));
