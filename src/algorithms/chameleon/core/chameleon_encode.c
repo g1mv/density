@@ -62,9 +62,12 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     density_chameleon_signature *signature_pointer;
     density_chameleon_dictionary *const dictionary = (density_chameleon_dictionary *) state->dictionary;
 
+    const uint8_t *const in_array = *in;
     uint_fast64_t in_position = 0;
     uint_fast64_t in_limit;
-    uint8_t *out_limit;
+    uint8_t *const out_array = *out;
+    uint_fast64_t out_position = 0;
+    uint_fast64_t out_limit;
 
     DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE;
 
@@ -151,12 +154,18 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_COMPLETION_KERNEL(16, 8);
     study_kernel_24_8:
     study_kernel_24_10:
 
-    finish:
-    *in += in_position;
+    finish:;
     const uint_fast64_t remaining = in_size - in_position;
-    DENSITY_MEMCPY(*out, *in, remaining);
-    *in += remaining;
-    *out += remaining;
-
+    if (out_position + remaining > out_size) {
+        goto output_stall;
+    }
+    DENSITY_MEMCPY(&out_array[out_position], &in_array[in_position], remaining);
+    *in += in_size;
+    *out += out_position + remaining;
     return DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED;
+
+    output_stall:
+    *in += in_position;
+    *out += out_position;
+    return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
 }
