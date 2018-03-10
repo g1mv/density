@@ -34,7 +34,6 @@
 #include <inttypes.h>
 #include <time.h>
 #include "../../src/density_api.h"
-#include "../libs/cputime/src/cputime_api.h"
 #include "../libs/spookyhash/src/spookyhash_api.h"
 
 #if defined(_WIN64) || defined(_WIN32)
