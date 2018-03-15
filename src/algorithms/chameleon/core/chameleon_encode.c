@@ -45,8 +45,9 @@
 #include "chameleon_encode.h"
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_chameleon_encode(density_algorithm_state *const DENSITY_RESTRICT state, const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t out_size) {
-    if (out_size < DENSITY_CHAMELEON_ENCODE_OUT_SAFE_DISTANCE(1, 2))
+    if (out_size < DENSITY_CHAMELEON_ENCODE_OUT_SAFE_DISTANCE(1, 2)) {
         return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
+    }
 
     uint_fast64_t hits = 0;
     uint_fast64_t inserts = 0;
@@ -78,7 +79,6 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint_fast32_t stability;
 
     // Study kernels
-
     study_kernel_8_2:
 DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(8, 2);
 
@@ -101,7 +101,6 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(16, 6);
 DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(16, 8);
 
     // Fast kernels
-
     fast_kernel_8_2:
 DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(8, 2);
 
@@ -124,7 +123,6 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(16, 6);
 DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_KERNEL(16, 8);
 
     // Completion kernels
-
     completion_kernel_8_2:
 DENSITY_CHAMELEON_ENCODE_GENERATE_COMPLETION_KERNEL(8, 2);
 

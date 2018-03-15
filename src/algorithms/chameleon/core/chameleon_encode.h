@@ -49,15 +49,18 @@
 #include "../dictionary/chameleon_dictionary.h"
 
 #define DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(UNIT_GROUPS, BYTE_GROUP_SIZE) ((UNIT_GROUPS) * (BYTE_GROUP_SIZE))  // Maximum bytes read per unit processing
-#define DENSITY_CHAMELEON_ENCODE_OUT_SAFE_DISTANCE(UNIT_GROUPS, BYTE_GROUP_SIZE) (sizeof(density_chameleon_signature) + (UNIT_GROUPS) * (BYTE_GROUP_SIZE))  // Maximum bytes written per unit processing
+#define DENSITY_CHAMELEON_ENCODE_OUT_SAFE_DISTANCE(UNIT_GROUPS, BYTE_GROUP_SIZE) ((1 + ((UNIT_GROUPS) >> 6)) * sizeof(density_chameleon_signature) + (UNIT_GROUPS) * (BYTE_GROUP_SIZE))  // Maximum bytes written per unit processing
 
 #define DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE \
     signature = 0;\
     signature_pointer = (density_chameleon_signature *) &out_array[out_position];\
     out_position += sizeof(density_chameleon_signature);
 
+#define DENSITY_CHAMELEON_ENCODE_COPY_SIGNATURE \
+    DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));
+
 #define DENSITY_CHAMELEON_ENCODE_PUSH_SIGNATURE \
-    DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_chameleon_signature));\
+    DENSITY_CHAMELEON_ENCODE_COPY_SIGNATURE;\
     DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE;
 
 #define DENSITY_CHAMELEON_ENCODE_CLEAR_DICTIONARY(HASH_BITS, SPAN) \
@@ -248,6 +251,11 @@
         }\
         if(out_position > out_limit)\
             goto output_stall;\
+    }\
+    if(!shift) {\
+        out_position -= sizeof(density_chameleon_signature);\
+    } else {\
+        DENSITY_CHAMELEON_ENCODE_COPY_SIGNATURE;\
     }\
     goto finish;
 

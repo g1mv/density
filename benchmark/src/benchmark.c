@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
         clock_t compress_time_elapsed = 0;
         clock_t decompress_time_elapsed = 0;
 
-        while (total_time / CLOCKS_PER_SEC <= 10.0) {
+        while (total_time / CLOCKS_PER_SEC < 10) {
             ++iterations;
 
             clock_t start = clock();
