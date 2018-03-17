@@ -81,14 +81,6 @@ typedef struct {
 #define DENSITY_ALGORITHMS_EXTRACT_64(MEM_64, BYTE_GROUP_SIZE)  ((MEM_64) & (0xffffffffffffffffllu >> (64 - ((BYTE_GROUP_SIZE) << 3))))
 #define DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BITS)         (((uint32_t)((uint32_t)1 << (HASH_BITS))) >> ((uint32_t)1 << ((HASH_BITS) >> 3)))
 
-#ifdef DEBUG
-#define DENSITY_ALGORITHMS_PRINT_TRANSITION(FROM_BITS, FROM_BYTES, TO_BITS, TO_BYTES, SPAN) printf("%llu\t====> entering transition from [%u bits, %u bytes] to [%u bits, %u bytes] in %u rounds\n", in_position, FROM_BITS, FROM_BYTES, TO_BITS, TO_BYTES, SPAN);
-#define DENSITY_ALGORITHMS_PRINT_CLEAR(START, END) printf("%llu\t======> clearing dictionary from key %u to %u\n", in_position, START, END);
-#else
-#define DENSITY_ALGORITHMS_PRINT_TRANSITION(FROM_BITS, FROM_BYTES, TO_BITS, TO_BYTES, SPAN)
-#define DENSITY_ALGORITHMS_PRINT_CLEAR(START, END)
-#endif
-
 DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *DENSITY_RESTRICT_DECLARE, void *DENSITY_RESTRICT_DECLARE);
 
 #endif
