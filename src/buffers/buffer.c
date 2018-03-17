@@ -33,7 +33,6 @@
  */
 
 #include "buffer.h"
-#include "../algorithms/chameleon/dictionary/chameleon_dictionary.h"
 
 DENSITY_WINDOWS_EXPORT uint_fast64_t density_compress_safe_size(const uint_fast64_t input_size) {
     const uint_fast64_t slack = DENSITY_MAXIMUM_3(DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE, DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE, DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE);
@@ -98,9 +97,12 @@ DENSITY_FORCE_INLINE density_context* density_allocate_context(const DENSITY_ALG
     context->dictionary_type = custom_dictionary;
     if(!context->dictionary_type) {
         context->dictionary = mem_alloc(context->dictionary_size);
-        //DENSITY_MEMSET(context->dictionary, 0, sizeof(density_swift_dictionary));
-//        DENSITY_MEMSET(context->dictionary, 0, context->dictionary_size);
-        DENSITY_MEMSET(context->dictionary, 0, (1024 + 256) * sizeof(uint64_t));   // todo bitmap size + 8 bit dictionary size
+        if (context->algorithm == DENSITY_ALGORITHM_CHAMELEON) {
+            // todo in progress, for adaptative chameleon, init only bitmap and 8-bit dictionary sizes
+            DENSITY_MEMSET(context->dictionary, 0, (((1 << DENSITY_ALGORITHMS_MAX_DICTIONARY_BITS) >> 6) + (1 << 8)) * sizeof(uint64_t));
+        } else {
+            DENSITY_MEMSET(context->dictionary, 0, context->dictionary_size);
+        }
     }
 
     return context;
