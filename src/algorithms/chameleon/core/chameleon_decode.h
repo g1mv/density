@@ -69,14 +69,14 @@
     if((signature >> shift) & DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) {\
         DENSITY_MEMCPY(&memcopy_64, &in_array[in_position], DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT((HASH_BITS) >> 3));\
         in_position += ((HASH_BITS) >> 3);\
-        hash = DENSITY_ENDIAN_CORRECT(DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, (HASH_BITS) >> 3), (HASH_BITS) >> 3);\
+        hash = DENSITY_ENDIAN_CORRECT(DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, (HASH_BITS) >> 3), HASH_BITS);\
         DENSITY_MEMCPY(&out_array[out_position], &dictionary->entries[hash], DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(BYTE_GROUP_SIZE));\
         out_position += (BYTE_GROUP_SIZE);\
     } else {\
         DENSITY_MEMCPY(&memcopy_64, &in_array[in_position], DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(BYTE_GROUP_SIZE));\
         in_position += (BYTE_GROUP_SIZE);\
         unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, BYTE_GROUP_SIZE);\
-        hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(DENSITY_ENDIAN_CORRECT(unit, BYTE_GROUP_SIZE), HASH_BITS);\
+        hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(DENSITY_ENDIAN_CORRECT(unit, DENSITY_ENDIAN_MATCH_BYTES(BYTE_GROUP_SIZE)), HASH_BITS);\
         dictionary->entries[hash] = unit;\
         DENSITY_MEMCPY(&out_array[out_position], &unit, DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(BYTE_GROUP_SIZE));\
         out_position += (BYTE_GROUP_SIZE);\
@@ -86,7 +86,7 @@
     if((signature >> shift) & DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) {\
         DENSITY_MEMCPY(&memcopy_64, &in_array[in_position], DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT((HASH_BITS) >> 3));\
         in_position += ((HASH_BITS) >> 3);\
-        hash = DENSITY_ENDIAN_CORRECT(DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, (HASH_BITS) >> 3), (HASH_BITS) >> 3);\
+        hash = DENSITY_ENDIAN_CORRECT(DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, (HASH_BITS) >> 3), HASH_BITS);\
         DENSITY_MEMCPY(&out_array[out_position], &dictionary->entries[hash], DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(BYTE_GROUP_SIZE));\
         out_position += (BYTE_GROUP_SIZE);\
         hits++;\
@@ -94,7 +94,7 @@
         DENSITY_MEMCPY(&memcopy_64, &in_array[in_position], DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(BYTE_GROUP_SIZE));\
         in_position += (BYTE_GROUP_SIZE);\
         unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, BYTE_GROUP_SIZE);\
-        hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(DENSITY_ENDIAN_CORRECT(unit, BYTE_GROUP_SIZE), HASH_BITS);\
+        hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(DENSITY_ENDIAN_CORRECT(unit, DENSITY_ENDIAN_MATCH_BYTES(BYTE_GROUP_SIZE)), HASH_BITS);\
         dictionary->entries[hash] = unit;\
         uint64_t *const bitmap = &dictionary->bitmap[hash >> 6];\
         const uint64_t mask = ((uint64_t) 1 << (hash & 0x3f));\
@@ -117,7 +117,7 @@
             DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE);\
             DENSITY_MEMCPY(&memcopy_64, &out_array[out_position - (NEXT_BYTE_GROUP_SIZE)], DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(NEXT_BYTE_GROUP_SIZE));\
             const uint64_t new_unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, NEXT_BYTE_GROUP_SIZE);\
-            const uint64_t new_hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(DENSITY_ENDIAN_CORRECT(new_unit, NEXT_BYTE_GROUP_SIZE), NEXT_HASH_BITS);\
+            const uint64_t new_hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(DENSITY_ENDIAN_CORRECT(new_unit, DENSITY_ENDIAN_MATCH_BYTES(NEXT_BYTE_GROUP_SIZE)), NEXT_HASH_BITS);\
             dictionary->entries[new_hash] = new_unit;\
             uint64_t *const bitmap = &dictionary->bitmap[new_hash >> 6];\
             const uint64_t mask = ((uint64_t) 1 << (new_hash & 0x3f));\
