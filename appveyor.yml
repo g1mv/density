@@ -1,4 +1,4 @@
-version: 0.14.2.{build}
+version: 0.15.0.{build}
 image: Visual Studio 2015
 init:
 - cmd:
