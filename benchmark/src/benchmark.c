@@ -245,7 +245,7 @@ int main(int argc, char *argv[]) {
 
             printf("Uncompressed and round-trip data hashes match. ");
         }
-        printf("Starting main bench.\n");
+        printf("Starting main benchmark.\n");
         if (compression_only) {
             printf("Compressing ");
         } else {
@@ -343,7 +343,7 @@ int main(int argc, char *argv[]) {
     free(in);
     free(out);
 
-    printf("Allocated memory released.\n\n");
+    printf("Released allocated memory.\n\n");
 
     return EXIT_SUCCESS;
 }

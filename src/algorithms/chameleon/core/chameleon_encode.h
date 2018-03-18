@@ -64,8 +64,8 @@
     DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE;
 
 #define DENSITY_CHAMELEON_ENCODE_CLEAR_DICTIONARY(HASH_BITS, SPAN) \
-    const uint_fast32_t step = ((((uint32_t)1 << (HASH_BITS)) - 256) / (SPAN)) + 1;\
-    const uint_fast32_t start = ((uint32_t)1 << 8) + transition_counter * step;\
+    const uint_fast32_t step = ((((uint32_t)1 << (HASH_BITS)) - ((uint32_t)1 << ((HASH_BITS) - 8))) / (SPAN)) + 1;\
+    const uint_fast32_t start = ((uint32_t)1 << ((HASH_BITS) - 8)) + transition_counter * step;\
     const uint_fast32_t end = DENSITY_MINIMUM(start + step, (uint32_t)1 << (HASH_BITS));\
     for(uint_fast32_t counter = start; counter < end; counter ++) {\
         const uint64_t bitmap = dictionary->bitmap[counter >> 6];\
