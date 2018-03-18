@@ -50,7 +50,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_read_signature(const uint8_t **DEN
 #elif defined(DENSITY_BIG_ENDIAN)
     density_lion_signature endian_signature;
     DENSITY_MEMCPY(&endian_signature, *in, sizeof(density_lion_signature));
-    *signature = DENSITY_CORRECT_ENDIANNESS_64(endian_signature);
+    *signature = DENSITY_ENDIAN_CORRECT_64(endian_signature);
 #else
 #error
 #endif
@@ -73,7 +73,7 @@ DENSITY_FORCE_INLINE void density_lion_decode_read_hash(const uint8_t **DENSITY_
 #elif defined(DENSITY_BIG_ENDIAN)
     uint16_t endian_hash;
     DENSITY_MEMCPY(&endian_hash, *in, sizeof(uint16_t));
-    *hash = DENSITY_CORRECT_ENDIANNESS_16(endian_hash);
+    *hash = DENSITY_ENDIAN_CORRECT_16(endian_hash);
 #else
 #error
 #endif

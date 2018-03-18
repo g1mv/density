@@ -170,7 +170,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_read_signature(const uint8_t **
 #elif defined(DENSITY_BIG_ENDIAN)
     density_cheetah_signature endian_signature;
     DENSITY_MEMCPY(&endian_signature, *in, sizeof(density_cheetah_signature));
-    *signature = DENSITY_CORRECT_ENDIANNESS_64(endian_signature);
+    *signature = DENSITY_ENDIAN_CORRECT_64(endian_signature);
 #else
 #error
 #endif

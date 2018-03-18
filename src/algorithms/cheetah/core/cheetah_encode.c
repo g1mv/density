@@ -68,7 +68,7 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(uint8_t **DENSITY_RESTRI
 #ifdef DENSITY_LITTLE_ENDIAN
                 DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
 #elif defined(DENSITY_BIG_ENDIAN)
-                const uint16_t endian_hash = DENSITY_CORRECT_ENDIANNESS_16(hash);
+                const uint16_t endian_hash = DENSITY_ENDIAN_CORRECT_16(hash);
                 DENSITY_MEMCPY(*out, &endian_hash, sizeof(uint16_t));
 #else
 #error
@@ -82,7 +82,7 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_kernel(uint8_t **DENSITY_RESTRI
 #ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(*out, &hash, sizeof(uint16_t));
 #elif defined(DENSITY_BIG_ENDIAN)
-            const uint16_t endian_hash = DENSITY_CORRECT_ENDIANNESS_16(hash);
+            const uint16_t endian_hash = DENSITY_ENDIAN_CORRECT_16(hash);
             DENSITY_MEMCPY(*out, &endian_hash, sizeof(uint16_t));
 #else
 #error
@@ -144,7 +144,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 #ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
 #elif defined(DENSITY_BIG_ENDIAN)
-            const density_cheetah_signature endian_signature = DENSITY_CORRECT_ENDIANNESS_64(signature);
+            const density_cheetah_signature endian_signature = DENSITY_ENDIAN_CORRECT_64(signature);
             DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_cheetah_signature));
 #else
 #error
@@ -168,7 +168,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 #ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
 #elif defined(DENSITY_BIG_ENDIAN)
-        const density_cheetah_signature endian_signature = DENSITY_CORRECT_ENDIANNESS_64(signature);
+        const density_cheetah_signature endian_signature = DENSITY_ENDIAN_CORRECT_64(signature);
         DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_cheetah_signature));
 #else
 #error
@@ -188,7 +188,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 #ifdef DENSITY_LITTLE_ENDIAN
     DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_cheetah_signature));
 #elif defined(DENSITY_BIG_ENDIAN)
-    const density_cheetah_signature endian_signature = DENSITY_CORRECT_ENDIANNESS_64(signature);
+    const density_cheetah_signature endian_signature = DENSITY_ENDIAN_CORRECT_64(signature);
     DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_cheetah_signature));
 #else
 #error
