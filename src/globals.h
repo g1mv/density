@@ -214,7 +214,7 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 
 
 #define DENSITY_ADD_2_2 4
-#define DENSITY_ADD_2_4 4
+#define DENSITY_ADD_2_4 6
 #define DENSITY_ADD_4_2 6
 #define DENSITY_ADD_4_4 8
 #define DENSITY_ADD_6_2 8

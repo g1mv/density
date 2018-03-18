@@ -96,6 +96,50 @@ DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(16, 6);
     study_kernel_16_8:
 DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(16, 8);
 
+    // Transition kernels
+    transition_kernel_8_2_8_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 2, 8, 4);
+
+    transition_kernel_8_2_8_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 2, 8, 6);
+
+    transition_kernel_8_2_16_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 2, 16, 4);
+
+    transition_kernel_8_4_8_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 4, 8, 6);
+
+    transition_kernel_8_4_8_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 4, 8, 8);
+
+    transition_kernel_8_4_16_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 4, 16, 6);
+
+    transition_kernel_8_6_8_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 6, 8, 8);
+
+    transition_kernel_8_6_16_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 6, 16, 8);
+
+    transition_kernel_16_4_16_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(16, 4, 16, 6);
+
+    transition_kernel_16_4_16_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(16, 4, 16, 8);
+
+    transition_kernel_16_6_16_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(16, 6, 16, 8);
+
+    // Transition init kernels
+    transition_init_kernel_8_2_16_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_INIT_KERNEL(8, 2, 16, 4);
+
+    transition_init_kernel_8_4_16_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_INIT_KERNEL(8, 4, 16, 6);
+
+    transition_init_kernel_8_6_16_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_INIT_KERNEL(8, 6, 16, 8);
+
     // Fast kernels
     fast_kernel_8_2:
 DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(8, 2);
@@ -140,13 +184,22 @@ DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(16, 6);
     completion_kernel_16_8:
 DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(16, 8);
 
-    study_kernel_8_10:
-    study_kernel_8_12:
-    study_kernel_16_10:
-    study_kernel_16_12:
-    study_kernel_24_6:
-    study_kernel_24_8:
-    study_kernel_24_10:
+    // Unused kernels
+    transition_kernel_8_6_8_10:
+    transition_kernel_8_8_8_10:
+    transition_kernel_8_8_8_12:
+    transition_kernel_8_8_16_10:
+    transition_kernel_16_4_24_6:
+    transition_kernel_16_6_16_10:
+    transition_kernel_16_6_24_8:
+    transition_kernel_16_8_16_10:
+    transition_kernel_16_8_16_12:
+    transition_kernel_16_8_24_10:
+
+    transition_init_kernel_8_8_16_10:
+    transition_init_kernel_16_4_24_6:
+    transition_init_kernel_16_6_24_8:
+    transition_init_kernel_16_8_24_10:
 
     finish:;
     const uint_fast64_t remaining = in_size - in_position;
