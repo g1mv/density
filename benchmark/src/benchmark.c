@@ -40,7 +40,6 @@ void density_benchmark_client_usage() {
     printf("                                    If unspecified, all algorithms are tested (default).\n");
     printf("                                    LEVEL can have the following values (as values become higher,\n");
     printf("                                    compression ratio increases and speed diminishes) :\n");
-    printf("                                    0 = Copy (no compression)\n");
     printf("                                    1 = Chameleon algorithm\n");
     printf("                                    2 = Cheetah algorithm\n");
     printf("                                    3 = Lion algorithm\n");
