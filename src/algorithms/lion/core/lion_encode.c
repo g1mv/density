@@ -262,7 +262,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 #ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_lion_signature));
 #elif defined(DENSITY_BIG_ENDIAN)
-        const density_lion_signature endian_signature = DENSITY_ENDIAN_CORRECT_16(signature);
+        const density_lion_signature endian_signature = DENSITY_ENDIAN_CORRECT_64(signature);
         DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_lion_signature));
 #else
 #error
@@ -280,7 +280,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 #ifdef DENSITY_LITTLE_ENDIAN
     DENSITY_MEMCPY(signature_pointer, &signature, sizeof(density_lion_signature));
 #elif defined(DENSITY_BIG_ENDIAN)
-    const density_lion_signature endian_signature = DENSITY_ENDIAN_CORRECT_16(signature);
+    const density_lion_signature endian_signature = DENSITY_ENDIAN_CORRECT_64(signature);
     DENSITY_MEMCPY(signature_pointer, &endian_signature, sizeof(density_lion_signature));
 #else
 #error
