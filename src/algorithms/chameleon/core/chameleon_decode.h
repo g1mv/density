@@ -77,7 +77,7 @@
         unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, BYTE_GROUP_SIZE);\
         hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(unit, HASH_BITS);\
         dictionary->entries[hash] = unit;\
-        DENSITY_FAST_MEMCPY(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
+        DENSITY_FAST_MEMCPY_BYTES(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
         in_position += (BYTE_GROUP_SIZE);\
         out_position += (BYTE_GROUP_SIZE);\
     }
@@ -101,7 +101,7 @@
         inserts += was_not_set;\
         collisions += !was_not_set;\
         *bitmap = *bitmap | mask;\
-        DENSITY_FAST_MEMCPY(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
+        DENSITY_FAST_MEMCPY_BYTES(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
         in_position += (BYTE_GROUP_SIZE);\
         out_position += (BYTE_GROUP_SIZE);\
     }

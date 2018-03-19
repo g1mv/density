@@ -86,7 +86,7 @@
             break;\
         default:\
             *value = unit;\
-            DENSITY_FAST_MEMCPY(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
+            DENSITY_FAST_MEMCPY_BYTES(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
             out_position += (BYTE_GROUP_SIZE);\
             break;\
     }\
@@ -112,7 +112,7 @@
             inserts += was_not_set;\
             collisions += !was_not_set;\
             *bitmap = *bitmap | mask;\
-            DENSITY_FAST_MEMCPY(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
+            DENSITY_FAST_MEMCPY_BYTES(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
             out_position += (BYTE_GROUP_SIZE);\
             break;\
     }\
