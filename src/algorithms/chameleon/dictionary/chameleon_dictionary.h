@@ -57,8 +57,8 @@
 //} density_chameleon_dictionary_entry;
 
 typedef struct {
-    uint64_t bitmap[(1 << DENSITY_ALGORITHMS_MAX_DICTIONARY_BITS) >> 6];
-    uint64_t entries[1 << DENSITY_ALGORITHMS_MAX_DICTIONARY_BITS];
+    uint64_t bitmap[(1 << DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS) >> 6];
+    uint64_t entries[1 << DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS];
 } density_chameleon_dictionary;
 #pragma pack(pop)
 

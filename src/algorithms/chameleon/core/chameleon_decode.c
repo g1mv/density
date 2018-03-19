@@ -75,131 +75,131 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint_fast32_t stability;
 
     // Study kernels
-    study_kernel_8_2:
-DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(8, 2);
+    study_kernel_1_2:
+DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(1, 2);
 
-    study_kernel_8_4:
-DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(8, 4);
+    study_kernel_1_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(1, 4);
 
-    study_kernel_8_6:
-DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(8, 6);
+    study_kernel_1_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(1, 6);
 
-    study_kernel_8_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(8, 8);
+    study_kernel_1_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(1, 8);
 
-    study_kernel_16_4:
-DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(16, 4);
+    study_kernel_2_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(2, 4);
 
-    study_kernel_16_6:
-DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(16, 6);
+    study_kernel_2_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(2, 6);
 
-    study_kernel_16_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(16, 8);
+    study_kernel_2_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(2, 8);
 
     // Transition kernels
-    transition_kernel_8_2_8_4:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 2, 8, 4);
+    transition_kernel_1_2_1_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(1, 2, 1, 4);
 
-    transition_kernel_8_2_8_6:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 2, 8, 6);
+    transition_kernel_1_2_1_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(1, 2, 1, 6);
 
-    transition_kernel_8_2_16_4:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 2, 16, 4);
+    transition_kernel_1_2_2_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(1, 2, 2, 4);
 
-    transition_kernel_8_4_8_6:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 4, 8, 6);
+    transition_kernel_1_4_1_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(1, 4, 1, 6);
 
-    transition_kernel_8_4_8_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 4, 8, 8);
+    transition_kernel_1_4_1_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(1, 4, 1, 8);
 
-    transition_kernel_8_4_16_6:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 4, 16, 6);
+    transition_kernel_1_4_2_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(1, 4, 2, 6);
 
-    transition_kernel_8_6_8_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 6, 8, 8);
+    transition_kernel_1_6_1_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(1, 6, 1, 8);
 
-    transition_kernel_8_6_16_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(8, 6, 16, 8);
+    transition_kernel_1_6_2_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(1, 6, 2, 8);
 
-    transition_kernel_16_4_16_6:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(16, 4, 16, 6);
+    transition_kernel_2_4_2_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(2, 4, 2, 6);
 
-    transition_kernel_16_4_16_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(16, 4, 16, 8);
+    transition_kernel_2_4_2_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(2, 4, 2, 8);
 
-    transition_kernel_16_6_16_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(16, 6, 16, 8);
+    transition_kernel_2_6_2_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(2, 6, 2, 8);
 
     // Transition init kernels
-    transition_init_kernel_8_2_16_4:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_INIT_KERNEL(8, 2, 16, 4);
+    transition_init_kernel_1_2_2_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_INIT_KERNEL(1, 2, 2, 4);
 
-    transition_init_kernel_8_4_16_6:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_INIT_KERNEL(8, 4, 16, 6);
+    transition_init_kernel_1_4_2_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_INIT_KERNEL(1, 4, 2, 6);
 
-    transition_init_kernel_8_6_16_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_INIT_KERNEL(8, 6, 16, 8);
+    transition_init_kernel_1_6_2_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_INIT_KERNEL(1, 6, 2, 8);
 
     // Fast kernels
-    fast_kernel_8_2:
-DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(8, 2);
+    fast_kernel_1_2:
+DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(1, 2);
 
-    fast_kernel_8_4:
-DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(8, 4);
+    fast_kernel_1_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(1, 4);
 
-    fast_kernel_8_6:
-DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(8, 6);
+    fast_kernel_1_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(1, 6);
 
-    fast_kernel_8_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(8, 8);
+    fast_kernel_1_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(1, 8);
 
-    fast_kernel_16_4:
-DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(16, 4);
+    fast_kernel_2_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(2, 4);
 
-    fast_kernel_16_6:
-DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(16, 6);
+    fast_kernel_2_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(2, 6);
 
-    fast_kernel_16_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(16, 8);
+    fast_kernel_2_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(2, 8);
 
     // Completion kernels
-    completion_kernel_8_2:
-DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(8, 2);
+    completion_kernel_1_2:
+DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(1, 2);
 
-    completion_kernel_8_4:
-DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(8, 4);
+    completion_kernel_1_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(1, 4);
 
-    completion_kernel_8_6:
-DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(8, 6);
+    completion_kernel_1_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(1, 6);
 
-    completion_kernel_8_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(8, 8);
+    completion_kernel_1_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(1, 8);
 
-    completion_kernel_16_4:
-DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(16, 4);
+    completion_kernel_2_4:
+DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(2, 4);
 
-    completion_kernel_16_6:
-DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(16, 6);
+    completion_kernel_2_6:
+DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(2, 6);
 
-    completion_kernel_16_8:
-DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(16, 8);
+    completion_kernel_2_8:
+DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(2, 8);
 
     // Unused kernels
-    transition_kernel_8_6_8_10:
-    transition_kernel_8_8_8_10:
-    transition_kernel_8_8_8_12:
-    transition_kernel_8_8_16_10:
-    transition_kernel_16_4_24_6:
-    transition_kernel_16_6_16_10:
-    transition_kernel_16_6_24_8:
-    transition_kernel_16_8_16_10:
-    transition_kernel_16_8_16_12:
-    transition_kernel_16_8_24_10:
+    transition_kernel_1_6_1_10:
+    transition_kernel_1_8_1_10:
+    transition_kernel_1_8_1_12:
+    transition_kernel_1_8_2_10:
+    transition_kernel_2_4_3_6:
+    transition_kernel_2_6_2_10:
+    transition_kernel_2_6_3_8:
+    transition_kernel_2_8_2_10:
+    transition_kernel_2_8_2_12:
+    transition_kernel_2_8_3_10:
 
-    transition_init_kernel_8_8_16_10:
-    transition_init_kernel_16_4_24_6:
-    transition_init_kernel_16_6_24_8:
-    transition_init_kernel_16_8_24_10:
+    transition_init_kernel_1_8_2_10:
+    transition_init_kernel_2_4_3_6:
+    transition_init_kernel_2_6_3_8:
+    transition_init_kernel_2_8_3_10:
 
     finish:;
     const uint_fast64_t remaining = in_size - in_position;

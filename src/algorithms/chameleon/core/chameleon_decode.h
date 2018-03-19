@@ -52,7 +52,7 @@
 #define DENSITY_CHAMELEON_DECODE_OUT_SAFE_DISTANCE(UNIT_NUMBER, BYTE_GROUP_SIZE) ((UNIT_NUMBER) * (BYTE_GROUP_SIZE))  // Maximum bytes written per unit processing
 
 #define DENSITY_CHAMELEON_DECODE_POP_SIGNATURE \
-    DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_BYTES(&signature, &in_array[in_position], 8);\
+    DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_64BITS(&signature, &in_array[in_position], 8);\
     in_position += sizeof(density_chameleon_signature);
 
 #define DENSITY_CHAMELEON_DECODE_CLEAR_DICTIONARY(HASH_BITS, SPAN) \
@@ -65,35 +65,35 @@
         dictionary->entries[counter] = DENSITY_NOT_ZERO(bitmap & mask) * dictionary->entries[counter];\
     }
 
-#define DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE) \
+#define DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(HASH_BYTES, BYTE_GROUP_SIZE) \
     if((signature >> shift) & DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) {\
-        DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_BITS(&memcopy_64, &in_array[in_position], HASH_BITS);\
-        hash = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, (HASH_BITS) >> 3);\
-        DENSITY_ENDIAN_CORRECT_BYTES_AND_FAST_MEMCPY(&out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);\
-        in_position += ((HASH_BITS) >> 3);\
+        DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_64BITS(&memcopy_64, &in_array[in_position], HASH_BYTES);\
+        hash = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, HASH_BYTES);\
+        DENSITY_ENDIAN_CORRECT_64BITS_AND_FAST_MEMCPY(&out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);\
+        in_position += (HASH_BYTES);\
         out_position += (BYTE_GROUP_SIZE);\
     } else {\
-        DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_BYTES(&memcopy_64, &in_array[in_position], BYTE_GROUP_SIZE);\
+        DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_64BITS(&memcopy_64, &in_array[in_position], BYTE_GROUP_SIZE);\
         unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, BYTE_GROUP_SIZE);\
-        hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(unit, HASH_BITS);\
+        hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(unit, HASH_BYTES);\
         dictionary->entries[hash] = unit;\
-        DENSITY_FAST_MEMCPY_BYTES(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
+        DENSITY_FAST_MEMCPY(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
         in_position += (BYTE_GROUP_SIZE);\
         out_position += (BYTE_GROUP_SIZE);\
     }
 
-#define DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_DECOMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE) \
+#define DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_DECOMPRESSION_UNIT(HASH_BYTES, BYTE_GROUP_SIZE) \
     if((signature >> shift) & DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP) {\
-        DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_BITS(&memcopy_64, &in_array[in_position], HASH_BITS);\
-        hash = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, (HASH_BITS) >> 3);\
-        DENSITY_ENDIAN_CORRECT_BYTES_AND_FAST_MEMCPY(&out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);\
-        in_position += ((HASH_BITS) >> 3);\
+        DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_64BITS(&memcopy_64, &in_array[in_position], HASH_BYTES);\
+        hash = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, HASH_BYTES);\
+        DENSITY_ENDIAN_CORRECT_64BITS_AND_FAST_MEMCPY(&out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);\
+        in_position += (HASH_BYTES);\
         out_position += (BYTE_GROUP_SIZE);\
         hits++;\
     } else {\
-        DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_BYTES(&memcopy_64, &in_array[in_position], BYTE_GROUP_SIZE);\
+        DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_64BITS(&memcopy_64, &in_array[in_position], BYTE_GROUP_SIZE);\
         unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, BYTE_GROUP_SIZE);\
-        hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(unit, HASH_BITS);\
+        hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(unit, HASH_BYTES);\
         dictionary->entries[hash] = unit;\
         uint64_t *const bitmap = &dictionary->bitmap[hash >> 6];\
         const uint64_t mask = ((uint64_t) 1 << (hash & 0x3f));\
@@ -101,23 +101,23 @@
         inserts += was_not_set;\
         collisions += !was_not_set;\
         *bitmap = *bitmap | mask;\
-        DENSITY_FAST_MEMCPY_BYTES(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
+        DENSITY_FAST_MEMCPY(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
         in_position += (BYTE_GROUP_SIZE);\
         out_position += (BYTE_GROUP_SIZE);\
     }
 
-#define DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BITS, BYTE_GROUP_SIZE, NEXT_HASH_BITS, NEXT_BYTE_GROUP_SIZE, SPECIAL_LOOP_INSTRUCTIONS, SPECIAL_END_INSTRUCTIONS) \
+#define DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GROUP_SIZE, NEXT_HASH_BYTES, NEXT_BYTE_GROUP_SIZE, SPECIAL_LOOP_INSTRUCTIONS, SPECIAL_END_INSTRUCTIONS) \
     total_inserts = 0;\
-    transition_counter = DENSITY_ALGORITHMS_TRANSITION_ROUNDS(NEXT_HASH_BITS);\
+    transition_counter = DENSITY_ALGORITHMS_TRANSITION_ROUNDS(NEXT_HASH_BYTES);\
     in_limit = in_size - DENSITY_CHAMELEON_DECODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE);\
     out_limit = out_size - DENSITY_CHAMELEON_DECODE_OUT_SAFE_DISTANCE(64, BYTE_GROUP_SIZE);\
     while (DENSITY_LIKELY(in_position <= in_limit && transition_counter)) {\
         DENSITY_CHAMELEON_DECODE_POP_SIGNATURE;\
         for(shift = 0; shift < 0x40; shift++) {\
-            DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE);\
-            DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_BYTES(&memcopy_64, &out_array[out_position - (NEXT_BYTE_GROUP_SIZE)], NEXT_BYTE_GROUP_SIZE);\
+            DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(HASH_BYTES, BYTE_GROUP_SIZE);\
+            DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_64BITS(&memcopy_64, &out_array[out_position - (NEXT_BYTE_GROUP_SIZE)], NEXT_BYTE_GROUP_SIZE);\
             const uint64_t new_unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, NEXT_BYTE_GROUP_SIZE);\
-            const uint64_t new_hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(new_unit, NEXT_HASH_BITS);\
+            const uint64_t new_hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(new_unit, NEXT_HASH_BYTES);\
             dictionary->entries[new_hash] = new_unit;\
             uint64_t *const bitmap = &dictionary->bitmap[new_hash >> 6];\
             const uint64_t mask = ((uint64_t) 1 << (new_hash & 0x3f));\
@@ -128,18 +128,18 @@
             SPECIAL_LOOP_INSTRUCTIONS;\
         }\
         if(DENSITY_UNLIKELY(out_position > out_limit))\
-            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
+            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
     }\
     ;SPECIAL_END_INSTRUCTIONS;\
-    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(study_kernel_,NEXT_HASH_BITS),DENSITY_EVAL_CONCAT(_,NEXT_BYTE_GROUP_SIZE));
+    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(study_kernel_,NEXT_HASH_BYTES),DENSITY_EVAL_CONCAT(_,NEXT_BYTE_GROUP_SIZE));
 
-#define DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(HASH_BITS, BYTE_GROUP_SIZE, NEXT_HASH_BITS, NEXT_BYTE_GROUP_SIZE) \
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BITS, BYTE_GROUP_SIZE, NEXT_HASH_BITS, NEXT_BYTE_GROUP_SIZE,,);
+#define DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL(HASH_BYTES, BYTE_GROUP_SIZE, NEXT_HASH_BYTES, NEXT_BYTE_GROUP_SIZE) \
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GROUP_SIZE, NEXT_HASH_BYTES, NEXT_BYTE_GROUP_SIZE,,);
 
-#define DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_INIT_KERNEL(HASH_BITS, BYTE_GROUP_SIZE, NEXT_HASH_BITS, NEXT_BYTE_GROUP_SIZE) \
-DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BITS, BYTE_GROUP_SIZE, NEXT_HASH_BITS, NEXT_BYTE_GROUP_SIZE,DENSITY_CHAMELEON_DECODE_CLEAR_DICTIONARY(NEXT_HASH_BITS, DENSITY_ALGORITHMS_TRANSITION_ROUNDS(NEXT_HASH_BITS)),cleared = true);
+#define DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_INIT_KERNEL(HASH_BYTES, BYTE_GROUP_SIZE, NEXT_HASH_BYTES, NEXT_BYTE_GROUP_SIZE) \
+DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GROUP_SIZE, NEXT_HASH_BYTES, NEXT_BYTE_GROUP_SIZE,DENSITY_CHAMELEON_DECODE_CLEAR_DICTIONARY((NEXT_HASH_BYTES) << 3, DENSITY_ALGORITHMS_TRANSITION_ROUNDS(NEXT_HASH_BYTES)),cleared = true);
 
-#define DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(HASH_BITS, BYTE_GROUP_SIZE) \
+#define DENSITY_CHAMELEON_DECODE_GENERATE_FAST_KERNEL(HASH_BYTES, BYTE_GROUP_SIZE) \
     hits = 0;\
     inserts = 0;\
     collisions = 0;\
@@ -153,25 +153,25 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BITS, BYTE_GRO
             for(uint_fast8_t unroll = 0; unroll < 9; unroll++) {\
                 /*DENSITY_PREFETCH(&in_array[in_position + DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(4, BYTE_GROUP_SIZE)], 0, 0);*/\
                 DENSITY_UNROLL_7(\
-                    DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE);\
+                    DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(HASH_BYTES, BYTE_GROUP_SIZE);\
                     shift ++;\
                 );\
             }\
-            DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_DECOMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE);\
+            DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_DECOMPRESSION_UNIT(HASH_BYTES, BYTE_GROUP_SIZE);\
             if(DENSITY_UNLIKELY(out_position > out_limit))\
-                goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
+                goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
         }\
         if (collisions > hits) {\
             DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << 8) >> 3);\
-            goto study_kernel_8_2; /* No transition here as the current dictionary is inefficient */\
+            goto study_kernel_1_2; /* No transition here as the current dictionary is inefficient */\
         }\
         hits = 0;\
         inserts = 0;\
         collisions = 0;\
     }\
-    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));
+    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));
 
-#define DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(HASH_BITS, BYTE_GROUP_SIZE) \
+#define DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(HASH_BYTES, BYTE_GROUP_SIZE) \
     hits = 0;\
     inserts = 0;\
     collisions = 0;\
@@ -184,38 +184,38 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BITS, BYTE_GRO
         for(uint_fast8_t unroll = 0; unroll < 8; unroll++) {\
            /* DENSITY_PREFETCH(&in_array[in_position + DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(4, BYTE_GROUP_SIZE)], 0, 0);*/\
             DENSITY_UNROLL_8(\
-                DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_DECOMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE);\
+                DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_DECOMPRESSION_UNIT(HASH_BYTES, BYTE_GROUP_SIZE);\
                 shift ++;\
             );\
         }\
         if(DENSITY_UNLIKELY(out_position > out_limit))\
-            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
+            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
         if (DENSITY_UNLIKELY(!((hits + inserts + collisions) & (0x7ff)))) {\
             if (!inserts) {\
-                if (total_inserts < (((uint64_t)1 << (HASH_BITS)) * 2) / 3 && (BYTE_GROUP_SIZE) <= 6) {\
-                    DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << (HASH_BITS)) >> 3);\
-                    if (total_inserts < (((uint64_t)1 << (HASH_BITS)) * 1) / 3 && (BYTE_GROUP_SIZE) <= 4) {\
-                        goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(transition_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE)),DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(_,HASH_BITS),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,4))));\
+                if (total_inserts < (((uint64_t)1 << ((HASH_BYTES) << 3)) * 2) / 3 && (BYTE_GROUP_SIZE) <= 6) {\
+                    DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << ((HASH_BYTES) << 3)) >> 3);\
+                    if (total_inserts < (((uint64_t)1 << ((HASH_BYTES) << 3)) * 1) / 3 && (BYTE_GROUP_SIZE) <= 4) {\
+                        goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(transition_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE)),DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,4))));\
                     } else {\
-                        goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(transition_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE)),DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(_,HASH_BITS),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,2))));\
+                        goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(transition_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE)),DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,2))));\
                     }\
                 }\
                 if(++stability & ~0xf) {\
-                    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(fast_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
+                    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(fast_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
                 }\
             } else {\
                 total_inserts += inserts;\
-                if (total_inserts > ((((uint64_t)1 << (HASH_BITS)) * 15) >> 4)) {\
-                    if ((HASH_BITS) < DENSITY_ALGORITHMS_MAX_DICTIONARY_BITS && (BYTE_GROUP_SIZE) <= 6) {\
-                        DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << (DENSITY_ADD(HASH_BITS,8))) >> 3);\
+                if (total_inserts > ((((uint64_t)1 << ((HASH_BYTES) << 3)) * 15) >> 4)) {\
+                    if (((HASH_BYTES) << 3) < DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS && (BYTE_GROUP_SIZE) <= 6) {\
+                        DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << (DENSITY_ADD(HASH_BYTES,1) << 3)) >> 3);\
                         if(cleared) {\
-                            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(transition_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE)),DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(_,DENSITY_ADD(HASH_BITS,8)),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,2))));\
+                            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(transition_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE)),DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(_,DENSITY_ADD(HASH_BYTES,1)),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,2))));\
                         } else {\
-                            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(transition_init_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE)),DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(_,DENSITY_ADD(HASH_BITS,8)),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,2))));\
+                            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(transition_init_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE)),DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(_,DENSITY_ADD(HASH_BYTES,1)),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,2))));\
                         }\
                     } else if (collisions > hits) {\
                         DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << 8) >> 3);\
-                        goto study_kernel_8_2; /* No transition here as the current dictionary is inefficient */\
+                        goto study_kernel_1_2; /* No transition here as the current dictionary is inefficient */\
                     }\
                 }\
                 stability = 0;\
@@ -225,15 +225,15 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BITS, BYTE_GRO
             collisions = 0;\
         }\
     }\
-    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BITS),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));
+    goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));
 
-#define DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(HASH_BITS, BYTE_GROUP_SIZE) \
+#define DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(HASH_BYTES, BYTE_GROUP_SIZE) \
     in_limit = in_size - (BYTE_GROUP_SIZE);\
     out_limit = out_size - DENSITY_CHAMELEON_DECODE_OUT_SAFE_DISTANCE(1, BYTE_GROUP_SIZE);\
     DENSITY_CHAMELEON_DECODE_POP_SIGNATURE;\
     shift = 0;\
     while(in_position <= in_limit) {\
-        DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE);\
+        DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(HASH_BYTES, BYTE_GROUP_SIZE);\
         shift ++;\
         if(DENSITY_UNLIKELY(!(shift & 0x3f))) {\
             if(in_position <= in_size - sizeof(density_chameleon_signature)) {\
@@ -247,9 +247,9 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BITS, BYTE_GRO
             goto output_stall;\
         }\
     }\
-    in_limit = in_size - ((HASH_BITS) >> 3);\
+    in_limit = in_size - (HASH_BYTES);\
     while(in_position <= in_limit && ((signature >> shift) & DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP)) {\
-        DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE);\
+        DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(HASH_BYTES, BYTE_GROUP_SIZE);\
         shift ++;\
         if(out_position > out_limit) {\
             goto output_stall;\
