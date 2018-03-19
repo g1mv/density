@@ -57,7 +57,7 @@
     out_position += sizeof(density_chameleon_signature);
 
 #define DENSITY_CHAMELEON_ENCODE_COPY_SIGNATURE \
-    DENSITY_ENDIAN_CORRECT_BYTES_AND_MEMCPY(signature_pointer, &signature, 8);
+    DENSITY_ENDIAN_CORRECT_BYTES_AND_FAST_MEMCPY(signature_pointer, &signature, 8);
 
 #define DENSITY_CHAMELEON_ENCODE_PUSH_SIGNATURE \
     DENSITY_CHAMELEON_ENCODE_COPY_SIGNATURE;\
@@ -74,14 +74,14 @@
     }
 
 #define DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_COMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE) \
-    DENSITY_ENDIAN_MEMCPY_AND_CORRECT_BYTES(&memcopy_64, &in_array[in_position], BYTE_GROUP_SIZE);\
+    DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_BYTES(&memcopy_64, &in_array[in_position], BYTE_GROUP_SIZE);\
     unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, BYTE_GROUP_SIZE);\
     hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(unit, HASH_BITS);\
     value = &dictionary->entries[hash];\
     switch (unit ^ *value) {\
         case 0:\
             signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP << shift);\
-            DENSITY_ENDIAN_CORRECT_BITS_AND_MEMCPY(&out_array[out_position], &hash, HASH_BITS);\
+            DENSITY_ENDIAN_CORRECT_BITS_AND_FAST_MEMCPY(&out_array[out_position], &hash, HASH_BITS);\
             out_position += ((HASH_BITS) >> 3);\
             break;\
         default:\
@@ -93,7 +93,7 @@
     in_position += (BYTE_GROUP_SIZE);
 
 #define DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_COMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE) \
-    DENSITY_ENDIAN_MEMCPY_AND_CORRECT_BYTES(&memcopy_64, &in_array[in_position], BYTE_GROUP_SIZE);\
+    DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_BYTES(&memcopy_64, &in_array[in_position], BYTE_GROUP_SIZE);\
     unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, BYTE_GROUP_SIZE);\
     hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(unit, HASH_BITS);\
     value = &dictionary->entries[hash];\
@@ -101,7 +101,7 @@
         case 0:\
             hits++;\
             signature |= ((uint64_t) DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP << shift);\
-            DENSITY_ENDIAN_CORRECT_BITS_AND_MEMCPY(&out_array[out_position], &hash, HASH_BITS);\
+            DENSITY_ENDIAN_CORRECT_BITS_AND_FAST_MEMCPY(&out_array[out_position], &hash, HASH_BITS);\
             out_position += ((HASH_BITS) >> 3);\
             break;\
         default:\
@@ -126,7 +126,7 @@
     while (DENSITY_LIKELY(in_position <= in_limit && transition_counter)) {\
         for(shift = 0; shift < 0x40; shift++) {\
             DENSITY_CHAMELEON_ENCODE_GENERATE_FAST_COMPRESSION_UNIT(HASH_BITS, BYTE_GROUP_SIZE);\
-            DENSITY_ENDIAN_MEMCPY_AND_CORRECT_BYTES(&memcopy_64, &in_array[in_position - (NEXT_BYTE_GROUP_SIZE)], NEXT_BYTE_GROUP_SIZE);\
+            DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_BYTES(&memcopy_64, &in_array[in_position - (NEXT_BYTE_GROUP_SIZE)], NEXT_BYTE_GROUP_SIZE);\
             const uint64_t new_unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, NEXT_BYTE_GROUP_SIZE);\
             const uint64_t new_hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(new_unit, NEXT_HASH_BITS);\
             dictionary->entries[new_hash] = new_unit;\
