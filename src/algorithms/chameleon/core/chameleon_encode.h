@@ -64,8 +64,8 @@
     DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE;
 
 #define DENSITY_CHAMELEON_ENCODE_CLEAR_DICTIONARY(HASH_BITS, SPAN) \
-    const uint_fast32_t step = ((((uint32_t)1 << (HASH_BITS)) - ((uint32_t)1 << ((HASH_BITS) - 8))) / (SPAN)) + 1;\
-    const uint_fast32_t start = ((uint32_t)1 << ((HASH_BITS) - 8)) + transition_counter * step;\
+    const uint_fast32_t step = ((((uint32_t)1 << (HASH_BITS)) - ((uint32_t)1 << ((HASH_BITS) - DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS))) / (SPAN)) + 1;\
+    const uint_fast32_t start = ((uint32_t)1 << ((HASH_BITS) - DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS)) + transition_counter * step;\
     const uint_fast32_t end = DENSITY_MINIMUM(start + step, (uint32_t)1 << (HASH_BITS));\
     for(uint_fast32_t counter = start; counter < end; counter ++) {\
         const uint64_t bitmap = dictionary->bitmap[counter >> 6];\
@@ -219,7 +219,7 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
                 total_inserts += inserts;\
                 if (total_inserts > ((((uint64_t)1 << ((HASH_BYTES) << 3)) * 15) >> 4)) {\
                     if (((HASH_BYTES) << 3) < DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS && (BYTE_GROUP_SIZE) <= 6) {\
-                        DENSITY_FAST_CLEAR(dictionary->bitmap, ((uint32_t) 1 << (DENSITY_ADD(HASH_BYTES,1) << 3)) >> 3);\
+                        DENSITY_FAST_CLEAR_ARRAY_64(dictionary->bitmap, ((uint32_t) 1 << (DENSITY_ADD(HASH_BYTES,1) << 3)) >> 6);\
                         if(cleared) {\
                             goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(transition_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE)),DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(_,DENSITY_ADD(HASH_BYTES,1)),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,2))));\
                         } else {\
