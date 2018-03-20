@@ -35,7 +35,7 @@
 #include "buffer.h"
 
 DENSITY_WINDOWS_EXPORT uint_fast64_t density_compress_safe_size(const uint_fast64_t input_size) {
-    const uint_fast64_t slack = DENSITY_MAX_3(DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE, DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE, DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE);
+    const uint_fast64_t slack = DENSITY_MAXIMUM_3(DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE, DENSITY_CHEETAH_MAXIMUM_COMPRESSED_UNIT_SIZE, DENSITY_LION_MAXIMUM_COMPRESSED_UNIT_SIZE);
 
     // Chameleon longest output
     uint_fast64_t chameleon_longest_output_size = 0;
@@ -58,11 +58,11 @@ DENSITY_WINDOWS_EXPORT uint_fast64_t density_compress_safe_size(const uint_fast6
     lion_longest_output_size += sizeof(density_lion_signature);                                             // Eventual supplementary signature for end marker
     lion_longest_output_size += input_size;                                                                 // Everything encoded as plain data
 
-    return DENSITY_MAX_3(chameleon_longest_output_size, cheetah_longest_output_size, lion_longest_output_size) + slack;
+    return DENSITY_MAXIMUM_3(chameleon_longest_output_size, cheetah_longest_output_size, lion_longest_output_size) + slack;
 }
 
 DENSITY_WINDOWS_EXPORT uint_fast64_t density_decompress_safe_size(const uint_fast64_t expected_decompressed_output_size) {
-    const uint_fast64_t slack = DENSITY_MAX_3(DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE, DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE, DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE);
+    const uint_fast64_t slack = DENSITY_MAXIMUM_3(DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE, DENSITY_CHEETAH_DECOMPRESSED_UNIT_SIZE, DENSITY_LION_MAXIMUM_DECOMPRESSED_UNIT_SIZE);
 
     return expected_decompressed_output_size + slack;
 }
@@ -92,12 +92,20 @@ DENSITY_FORCE_INLINE density_processing_result density_make_result(const DENSITY
 DENSITY_FORCE_INLINE density_context* density_allocate_context(const DENSITY_ALGORITHM algorithm, const bool custom_dictionary, void *(*mem_alloc)(size_t)) {
     density_context* context = mem_alloc(sizeof(density_context));
     context->algorithm = algorithm;
+
     context->dictionary_size = density_get_dictionary_size(context->algorithm);
     context->dictionary_type = custom_dictionary;
     if(!context->dictionary_type) {
         context->dictionary = mem_alloc(context->dictionary_size);
-        DENSITY_MEMSET(context->dictionary, 0, context->dictionary_size);
+        if (context->algorithm == DENSITY_ALGORITHM_CHAMELEON) {
+            // todo in progress, for adaptative chameleon, init only 8-bit bitmap and 8-bit dictionary sizes
+            DENSITY_MEMSET(&((density_chameleon_dictionary *) context->dictionary)->bitmap, 0, ((uint32_t) 1 << DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS) >> 3);
+            DENSITY_FAST_CLEAR_ARRAY_64(((density_chameleon_dictionary *) context->dictionary)->entries, ((uint32_t) 1 << DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS));
+        } else {
+            DENSITY_MEMSET(context->dictionary, 0, context->dictionary_size);
+        }
     }
+
     return context;
 }
 

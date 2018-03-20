@@ -46,11 +46,8 @@
 #define DENSITY_CHAMELEON_H
 
 #include "../../globals.h"
+#include "../algorithms.h"
 
-#define DENSITY_CHAMELEON_HASH_BITS                                         16
-#define DENSITY_CHAMELEON_HASH_MULTIPLIER                                   (uint32_t)0x9D6EF916lu
-
-#define DENSITY_CHAMELEON_HASH_ALGORITHM(value32)                           (uint16_t)((value32 * DENSITY_CHAMELEON_HASH_MULTIPLIER) >> (32 - DENSITY_CHAMELEON_HASH_BITS))
 
 typedef enum {
     DENSITY_CHAMELEON_SIGNATURE_FLAG_CHUNK = 0x0,
@@ -64,7 +61,5 @@ typedef uint64_t density_chameleon_signature;
 
 #define DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_UNIT_SIZE                      (sizeof(density_chameleon_signature) + DENSITY_CHAMELEON_MAXIMUM_COMPRESSED_BODY_SIZE_PER_SIGNATURE)
 #define DENSITY_CHAMELEON_DECOMPRESSED_UNIT_SIZE                            (DENSITY_CHAMELEON_DECOMPRESSED_BODY_SIZE_PER_SIGNATURE)
-
-#define DENSITY_CHAMELEON_WORK_BLOCK_SIZE                                   256
 
 #endif

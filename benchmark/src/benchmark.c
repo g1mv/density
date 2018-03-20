@@ -26,7 +26,7 @@ void density_benchmark_version() {
     printf("\nSingle threaded ");
     DENSITY_BENCHMARK_BOLD(printf("in-memory benchmark"));
     printf(" powered by ");
-    DENSITY_BENCHMARK_BOLD(printf("Centaurean Density %i.%i.%i\n", density_version_major(), density_version_minor(), density_version_revision()));
+    DENSITY_BENCHMARK_BOLD(printf("Density %i.%i.%i\n", density_version_major(), density_version_minor(), density_version_revision()));
     printf("Copyright (C) 2015 Guillaume Voirin\n");
     printf("Built for %s (%s endian system, %u bits) using " DENSITY_BENCHMARK_COMPILER ", %s %s\n", DENSITY_BENCHMARK_PLATFORM_STRING, DENSITY_BENCHMARK_ENDIAN_STRING, (unsigned int) (8 * sizeof(void *)), DENSITY_BENCHMARK_COMPILER_VERSION, __DATE__, __TIME__);
 }
@@ -40,7 +40,6 @@ void density_benchmark_client_usage() {
     printf("                                    If unspecified, all algorithms are tested (default).\n");
     printf("                                    LEVEL can have the following values (as values become higher,\n");
     printf("                                    compression ratio increases and speed diminishes) :\n");
-    printf("                                    0 = Copy (no compression)\n");
     printf("                                    1 = Chameleon algorithm\n");
     printf("                                    2 = Cheetah algorithm\n");
     printf("                                    3 = Lion algorithm\n");
@@ -246,11 +245,12 @@ int main(int argc, char *argv[]) {
 
             printf("Uncompressed and round-trip data hashes match. ");
         }
-        printf("Starting main bench.\n");
-        if (compression_only)
+        printf("Starting main benchmark.\n");
+        if (compression_only) {
             printf("Compressing ");
-        else
+        } else {
             printf("Round-tripping ");
+        }
         density_benchmark_format_decimal(uncompressed_size);
         printf(" bytes to ");
         density_benchmark_format_decimal(compressed_size);
@@ -258,88 +258,92 @@ int main(int argc, char *argv[]) {
         DENSITY_BENCHMARK_BOLD(printf("%.2lf%%", (100.0 * compressed_size) / uncompressed_size));
         printf(" or ");
         DENSITY_BENCHMARK_BOLD(printf("%.3fx", (1.0 * uncompressed_size) / compressed_size));
-        if (compression_only)
+        if (compression_only) {
             printf(")\n");
-        else
+        } else {
             printf(") and back\n");
+        }
         fflush(stdout);
 
         // Main benchmark
         unsigned int iterations = 0;
-        double compress_time_high = 0.0;
-        double compress_time_low = 60.0;
-        double decompress_time_high = 0.0;
-        double decompress_time_low = 60.0;
-        double total_compress_time = 0.0;
-        double total_decompress_time = 0.0;
-        double total_time = 0.0;
+        clock_t compress_time_high = 0;
+        clock_t compress_time_low = 60 * CLOCKS_PER_SEC;
+        clock_t decompress_time_high = 0;
+        clock_t decompress_time_low = 60 * CLOCKS_PER_SEC;
+        clock_t total_compress_time = 0;
+        clock_t total_decompress_time = 0;
+        clock_t total_time = 0;
         double decompress_speed = 0.0;
         double decompress_speed_low = 0.0;
         double decompress_speed_high = 0.0;
-        double compress_time_elapsed = 0.0;
-        double decompress_time_elapsed = 0.0;
-        cputime_chronometer chrono;
+        clock_t compress_time_elapsed = 0;
+        clock_t decompress_time_elapsed = 0;
 
-        while (total_time <= 10.0) {
+        while (total_time / CLOCKS_PER_SEC < 10) {
             ++iterations;
 
-            cputime_chronometer_start(&chrono);
+            clock_t start = clock();
             density_compress(in, uncompressed_size, out, memory_allocated, compression_mode);
-            compress_time_elapsed = cputime_chronometer_stop(&chrono);
+            compress_time_elapsed = clock() - start;
 
             if (!compression_only) {
-                cputime_chronometer_start(&chrono);
+                start = clock();
                 density_decompress(out, compressed_size, in, memory_allocated);
-                decompress_time_elapsed = cputime_chronometer_stop(&chrono);
+                decompress_time_elapsed = clock() - start;
             }
 
             total_compress_time += compress_time_elapsed;
 
-            if (compress_time_elapsed < compress_time_low)
+            if (compress_time_elapsed < compress_time_low) {
                 compress_time_low = compress_time_elapsed;
-            if (compress_time_elapsed > compress_time_high)
+            }
+            if (compress_time_elapsed > compress_time_high) {
                 compress_time_high = compress_time_elapsed;
+            }
 
-            double compress_speed = ((1.0 * uncompressed_size * iterations) / (total_compress_time * 1000.0 * 1000.0));
-            double compress_speed_low = ((1.0 * uncompressed_size) / (compress_time_high * 1000.0 * 1000.0));
-            double compress_speed_high = ((1.0 * uncompressed_size) / (compress_time_low * 1000.0 * 1000.0));
+            double compress_speed = ((1.0 * uncompressed_size * iterations) / (1000000.0 * total_compress_time / CLOCKS_PER_SEC));
+            double compress_speed_low = ((1.0 * uncompressed_size) / (1000000.0 * compress_time_high / CLOCKS_PER_SEC));
+            double compress_speed_high = ((1.0 * uncompressed_size) / (1000000.0 * compress_time_low / CLOCKS_PER_SEC));
 
             total_time += compress_time_elapsed;
 
             if (!compression_only) {
                 total_decompress_time += decompress_time_elapsed;
 
-                if (decompress_time_elapsed < decompress_time_low)
+                if (decompress_time_elapsed < decompress_time_low) {
                     decompress_time_low = decompress_time_elapsed;
-                if (decompress_time_elapsed > decompress_time_high)
+                }
+                if (decompress_time_elapsed > decompress_time_high) {
                     decompress_time_high = decompress_time_elapsed;
+                }
 
-                decompress_speed = ((1.0 * uncompressed_size * iterations) / (total_decompress_time * 1000.0 * 1000.0));
-                decompress_speed_low = ((1.0 * uncompressed_size) / (decompress_time_high * 1000.0 * 1000.0));
-                decompress_speed_high = ((1.0 * uncompressed_size) / (decompress_time_low * 1000.0 * 1000.0));
+                decompress_speed = ((1.0 * uncompressed_size * iterations) / (1000000.0 * total_decompress_time / CLOCKS_PER_SEC));
+                decompress_speed_low = ((1.0 * uncompressed_size) / (1000000.0 * decompress_time_high / CLOCKS_PER_SEC));
+                decompress_speed_high = ((1.0 * uncompressed_size) / (1000000.0 * decompress_time_low / CLOCKS_PER_SEC));
 
                 total_time += decompress_time_elapsed;
             }
 
             DENSITY_BENCHMARK_BLUE(printf("\rCompress speed ");
             DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", compress_speed)));
-            printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs) ", compress_speed_low, compress_speed_high, compress_time_low);
+            printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs) ", compress_speed_low, compress_speed_high, 1.0 * compress_time_low / CLOCKS_PER_SEC);
 
             if (!compression_only) {
                 printf("<=> ");
                 DENSITY_BENCHMARK_BLUE(printf("Decompress speed ");
                 DENSITY_BENCHMARK_BOLD(printf("%.0lf MB/s", decompress_speed)));
-                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs)    ", decompress_speed_low, decompress_speed_high, decompress_time_low);
+                printf(" (min %.0lf MB/s, max %.0lf MB/s, best %.4lfs)    ", decompress_speed_low, decompress_speed_high, 1.0 * decompress_time_low / CLOCKS_PER_SEC);
             }
             fflush(stdout);
         }
-        printf("\nRun time %.3lfs (%i iterations)\n\n", total_time, iterations);
+        printf("\nRun time %.3lfs (%i iterations)\n\n", 1.0 * total_time / CLOCKS_PER_SEC, iterations);
     }
 
     free(in);
     free(out);
 
-    printf("Allocated memory released.\n\n");
+    printf("Released allocated memory.\n\n");
 
     return EXIT_SUCCESS;
 }

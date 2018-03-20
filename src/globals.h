@@ -42,6 +42,20 @@
 
 #include "density_api.h"
 
+#define DENSITY_NOT_ZERO(x) (!!(x))
+
+#define DENSITY_MINIMUM(x, y)   (((x)<(y))?(x):(y))
+#define DENSITY_MAXIMUM(x, y)   (((x)>(y))?(x):(y))
+#define DENSITY_MAXIMUM_3(x, y, z) (DENSITY_MAXIMUM(DENSITY_MAXIMUM(x, y), z))
+
+#if UINTPTR_MAX == 0xffffffff
+#define DENSITY_32
+#elif UINTPTR_MAX == 0xffffffffffffffff
+#define DENSITY_64
+#else
+#error
+#endif
+
 #if defined(__clang__) || defined(__GNUC__)
 #define DENSITY_FORCE_INLINE		inline __attribute__((always_inline))
 #define DENSITY_RESTRICT			restrict
@@ -49,9 +63,9 @@
 #define DENSITY_MEMCPY				__builtin_memcpy
 #define DENSITY_MEMMOVE				__builtin_memmove
 #define DENSITY_MEMSET				__builtin_memset
-#define DENSITY_LIKELY(x)			__builtin_expect(!!(x), 1)
-#define DENSITY_UNLIKELY(x)			__builtin_expect(!!(x), 0)
-#define DENSITY_PREFETCH(x)			__builtin_prefetch(x)
+#define DENSITY_LIKELY(x)			__builtin_expect(DENSITY_NOT_ZERO(x), 1)
+#define DENSITY_UNLIKELY(x)			__builtin_expect(DENSITY_NOT_ZERO(x), 0)
+#define DENSITY_PREFETCH(x, y, z)    __builtin_prefetch(x, y, z)
 #define DENSITY_CTZ(x)				__builtin_ctz(x)
 
 #if defined(__BYTE_ORDER__)
@@ -78,7 +92,7 @@
 #define DENSITY_MEMSET				memset
 #define DENSITY_LIKELY(x)			(x)
 #define DENSITY_UNLIKELY(x)			(x)
-#define DENSITY_PREFETCH(x)			((void)(x))
+#define DENSITY_PREFETCH(x, y, z)	((void)(x, y, z))
 
 DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 	unsigned long trailing_zero = 0;
@@ -96,30 +110,30 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 #endif
 
 #ifdef DENSITY_LITTLE_ENDIAN
-#define DENSITY_LITTLE_ENDIAN_64(b)   ((uint64_t)b)
-#define DENSITY_LITTLE_ENDIAN_32(b)   ((uint32_t)b)
-#define DENSITY_LITTLE_ENDIAN_16(b)   ((uint16_t)b)
+#define DENSITY_ENDIAN_CORRECT_64(b)   ((uint64_t)(b))
+#define DENSITY_ENDIAN_CORRECT_32(b)   ((uint32_t)(b))
+#define DENSITY_ENDIAN_CORRECT_16(b)   ((uint16_t)(b))
+#define DENSITY_ENDIAN_CORRECT_8(b)    ((uint8_t)(b))
 #elif defined(DENSITY_BIG_ENDIAN)
 #if __GNUC__ * 100 + __GNUC_MINOR__ >= 403
-#define DENSITY_LITTLE_ENDIAN_64(b)   __builtin_bswap64(b)
-#define DENSITY_LITTLE_ENDIAN_32(b)   __builtin_bswap32(b)
-#define DENSITY_LITTLE_ENDIAN_16(b)   __builtin_bswap16(b)
+#define DENSITY_ENDIAN_CORRECT_64(b)   __builtin_bswap64(b)
+#define DENSITY_ENDIAN_CORRECT_32(b)   __builtin_bswap32(b)
+#define DENSITY_ENDIAN_CORRECT_16(b)   __builtin_bswap16(b)
+#define DENSITY_ENDIAN_CORRECT_8(b)    ((uint8_t)(b))
 #else
 #warning Using bulk byte swap routines. Expect performance issues.
-#define DENSITY_LITTLE_ENDIAN_64(b)   ((((b) & 0xFF00000000000000ull) >> 56) | (((b) & 0x00FF000000000000ull) >> 40) | (((b) & 0x0000FF0000000000ull) >> 24) | (((b) & 0x000000FF00000000ull) >> 8) | (((b) & 0x00000000FF000000ull) << 8) | (((b) & 0x0000000000FF0000ull) << 24ull) | (((b) & 0x000000000000FF00ull) << 40) | (((b) & 0x00000000000000FFull) << 56))
-#define DENSITY_LITTLE_ENDIAN_32(b)   ((((b) & 0xFF000000) >> 24) | (((b) & 0x00FF0000) >> 8) | (((b) & 0x0000FF00) << 8) | (((b) & 0x000000FF) << 24))
-#define DENSITY_LITTLE_ENDIAN_16(b)   ((((b) & 0xFF00) >> 8) | (((b) & 0x00FF) << 8))
+#define DENSITY_ENDIAN_CORRECT_64(b)   ((((b) & 0xFF00000000000000ull) >> 56) | (((b) & 0x00FF000000000000ull) >> 40) | (((b) & 0x0000FF0000000000ull) >> 24) | (((b) & 0x000000FF00000000ull) >> 8) | (((b) & 0x00000000FF000000ull) << 8) | (((b) & 0x0000000000FF0000ull) << 24ull) | (((b) & 0x000000000000FF00ull) << 40) | (((b) & 0x00000000000000FFull) << 56))
+#define DENSITY_ENDIAN_CORRECT_32(b)   ((((b) & 0xFF000000) >> 24) | (((b) & 0x00FF0000) >> 8) | (((b) & 0x0000FF00) << 8) | (((b) & 0x000000FF) << 24))
+#define DENSITY_ENDIAN_CORRECT_16(b)   ((((b) & 0xFF00) >> 8) | (((b) & 0x00FF) << 8))
+#define DENSITY_ENDIAN_CORRECT_8(b)    ((uint8_t)(b))
 #endif
 #else
 #error Unsupported endianness
 #endif
 
-#define DENSITY_MAX_2(a, b) (((a)>(b))?(a):(b))
-#define DENSITY_MAX_3(a, b, c) (DENSITY_MAX_2(DENSITY_MAX_2(a, b), c))
-
 #define DENSITY_FORMAT(v)               0##v##llu
 
-#define DENSITY_ISOLATE(b, p)           ((DENSITY_FORMAT(b) / p) & 0x1)
+#define DENSITY_ISOLATE(b, p)           ((DENSITY_FORMAT(b) / (p)) & 0x1)
 
 #define DENSITY_BINARY_TO_UINT(b)        ((DENSITY_ISOLATE(b, 1llu) ? 0x1 : 0)\
                                         + (DENSITY_ISOLATE(b, 8llu) ? 0x2 : 0)\
@@ -140,22 +154,21 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
                                         + (DENSITY_ISOLATE(b, 281474976710656llu) ? 0x10000 : 0)\
                                         + (DENSITY_ISOLATE(b, 2251799813685248llu) ? 0x20000 : 0))
 
-#define DENSITY_UNROLL_2(op)     op; op
-#define DENSITY_UNROLL_4(op)     DENSITY_UNROLL_2(op);    DENSITY_UNROLL_2(op)
-#define DENSITY_UNROLL_8(op)     DENSITY_UNROLL_4(op);    DENSITY_UNROLL_4(op)
-#define DENSITY_UNROLL_16(op)    DENSITY_UNROLL_8(op);    DENSITY_UNROLL_8(op)
-#define DENSITY_UNROLL_32(op)    DENSITY_UNROLL_16(op);   DENSITY_UNROLL_16(op)
-#define DENSITY_UNROLL_64(op)    DENSITY_UNROLL_32(op);   DENSITY_UNROLL_32(op)
-
-#define DENSITY_CASE_GENERATOR_2(op_a, flag_a, op_b, flag_b, op_mid, shift)\
-    case ((flag_b << shift) | flag_a):\
-        op_a;\
-        op_mid;\
-        op_b;\
-        break;
+#define DENSITY_UNROLL_2(op)     op; op;
+#define DENSITY_UNROLL_3(op)     op; op; op;
+#define DENSITY_UNROLL_4(op)     DENSITY_UNROLL_2(op)    DENSITY_UNROLL_2(op)
+#define DENSITY_UNROLL_5(op)     DENSITY_UNROLL_2(op)    DENSITY_UNROLL_3(op)
+#define DENSITY_UNROLL_7(op)     DENSITY_UNROLL_2(op)    DENSITY_UNROLL_5(op)
+#define DENSITY_UNROLL_8(op)     DENSITY_UNROLL_4(op)    DENSITY_UNROLL_4(op)
+#define DENSITY_UNROLL_9(op)     DENSITY_UNROLL_4(op)    DENSITY_UNROLL_5(op)
+#define DENSITY_UNROLL_15(op)    DENSITY_UNROLL_7(op)    DENSITY_UNROLL_8(op)
+#define DENSITY_UNROLL_16(op)    DENSITY_UNROLL_8(op)    DENSITY_UNROLL_8(op)
+#define DENSITY_UNROLL_31(op)    DENSITY_UNROLL_16(op)    DENSITY_UNROLL_15(op)
+#define DENSITY_UNROLL_32(op)    DENSITY_UNROLL_16(op)    DENSITY_UNROLL_16(op)
+#define DENSITY_UNROLL_64(op)    DENSITY_UNROLL_32(op)    DENSITY_UNROLL_32(op)
 
 #define DENSITY_CASE_GENERATOR_4(op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift)\
-    case ((flag_d << (shift * 3)) | (flag_c << (shift * 2)) | (flag_b << shift) | flag_a):\
+    case (((flag_d) << ((shift) * 3)) | ((flag_c) << ((shift) * 2)) | ((flag_b) << (shift)) | (flag_a)):\
         op_a;\
         op_mid;\
         op_b;\
@@ -164,18 +177,6 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
         op_mid;\
         op_d;\
         break;
-
-#define DENSITY_CASE_GENERATOR_4_2_LAST_1_COMBINED(op_1, flag_1, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift)\
-    DENSITY_CASE_GENERATOR_2(op_1, flag_1, op_a, flag_a, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_2(op_1, flag_1, op_b, flag_b, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_2(op_1, flag_1, op_c, flag_c, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_2(op_1, flag_1, op_d, flag_d, op_mid, shift);
-
-#define DENSITY_CASE_GENERATOR_4_2_COMBINED(op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift)\
-    DENSITY_CASE_GENERATOR_4_2_LAST_1_COMBINED(op_a, flag_a, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_4_2_LAST_1_COMBINED(op_b, flag_b, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_4_2_LAST_1_COMBINED(op_c, flag_c, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);\
-    DENSITY_CASE_GENERATOR_4_2_LAST_1_COMBINED(op_d, flag_d, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);
 
 #define DENSITY_CASE_GENERATOR_4_4_LAST_1_COMBINED(op_1, flag_1, op_2, flag_2, op_3, flag_3, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift)\
     DENSITY_CASE_GENERATOR_4(op_1, flag_1, op_2, flag_2, op_3, flag_3, op_a, flag_a, op_mid, shift);\
@@ -201,21 +202,74 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
     DENSITY_CASE_GENERATOR_4_4_LAST_3_COMBINED(op_c, flag_c, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);\
     DENSITY_CASE_GENERATOR_4_4_LAST_3_COMBINED(op_d, flag_d, op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift);
 
-#define DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT    6
-#define DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE          (1 << DENSITY_DICTIONARY_PREFERRED_RESET_CYCLE_SHIFT)
+
+#define DENSITY_ADD_1_1 2
+#define DENSITY_ADD_2_1 3
+#define DENSITY_ADD_2_2 4
+#define DENSITY_ADD_2_4 6
+#define DENSITY_ADD_4_2 6
+#define DENSITY_ADD_4_4 8
+#define DENSITY_ADD_6_2 8
+#define DENSITY_ADD_6_4 10
+#define DENSITY_ADD_8_2 10
+#define DENSITY_ADD_8_4 12
+#define DENSITY_ADD_8_8 16
+#define DENSITY_ADD_16_8 24
+
+#define DENSITY_ADD(x, y) DENSITY_ADD_##x##_##y
+
+#define DENSITY_PASTE_CONCAT(x, y) x##y
+#define DENSITY_EVAL_CONCAT(x, y) DENSITY_PASTE_CONCAT(x,y)
+
+#define DENSITY_PASTE(x) x
+#define DENSITY_EVAL(x) DENSITY_PASTE(x)
+
+// __builtin_memcpy performance fix (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=84719)
+#if defined(DENSITY_64) && !defined(__clang__) && defined(__GNUC__)
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_1 8
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_2 8
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_4 8
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_6 8
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_8 8
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(INTENDED) DENSITY_EVAL_CONCAT(DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_, INTENDED)
+#elif defined(DENSITY_32) && !defined(__clang__) && defined(__GNUC__)
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_1 4
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_2 4
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_4 4
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_6 8
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_8 8
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(INTENDED) DENSITY_EVAL_CONCAT(DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT_, INTENDED)
+#else
+#define DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(INTENDED) INTENDED
+#endif
+
+// Optimize bytes copied in memcpy
+#define DENSITY_FAST_MEMCPY(DESTINATION, SOURCE, BYTES) DENSITY_MEMCPY(DESTINATION, SOURCE, DENSITY_BUILTIN_MEMCPY_FASTEST_BYTE_COUNT(BYTES))
+
+#ifdef DENSITY_LITTLE_ENDIAN
+#define DENSITY_ENDIAN_CORRECT_64BITS_AND_FAST_MEMCPY(DESTINATION, SOURCE, BYTES) DENSITY_FAST_MEMCPY(DESTINATION, SOURCE, BYTES)
+#define DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_64BITS(DESTINATION, SOURCE, BYTES) DENSITY_FAST_MEMCPY(DESTINATION, SOURCE, BYTES)
+#elif defined(DENSITY_BIG_ENDIAN)
+#define DENSITY_ENDIAN_CORRECT_64BITS_AND_FAST_MEMCPY(DESTINATION, SOURCE, BYTES)\
+const uint64_t endian_64 = DENSITY_ENDIAN_CORRECT_64(*(SOURCE));\
+DENSITY_FAST_MEMCPY(DESTINATION, &endian_64, BYTES);
+
+#define DENSITY_ENDIAN_FAST_MEMCPY_AND_CORRECT_64BITS(DESTINATION, SOURCE, BYTES)\
+DENSITY_FAST_MEMCPY(DESTINATION, SOURCE, BYTES);\
+*(DESTINATION) = DENSITY_ENDIAN_CORRECT_64(*(DESTINATION));
+#else
+#error
+#endif
+
+// Fast 64-bit array clear, entries  > 8
+#define DENSITY_FAST_CLEAR_ARRAY_64(ARRAY, ENTRIES) \
+for(uint_fast32_t clear_index = (ENTRIES); DENSITY_LIKELY(clear_index);) {\
+    DENSITY_PREFETCH(&(ARRAY)[clear_index - 2], 1, 3);\
+    (ARRAY)[--clear_index] = 0;\
+}
 
 
 #define density_bitsizeof(x) (8 * sizeof(x))
-
-#define DENSITY_SPOOKYHASH_SEED_1                                 (0xabc)
-#define DENSITY_SPOOKYHASH_SEED_2                                 (0xdef)
-
-DENSITY_WINDOWS_EXPORT uint8_t density_version_major();
-
-DENSITY_WINDOWS_EXPORT uint8_t density_version_minor();
-
-DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
-
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -224,9 +278,7 @@ DENSITY_WINDOWS_EXPORT uint8_t density_version_revision();
  **********************************************************************************************************************/
 
 #define DENSITY_MAJOR_VERSION   0
-#define DENSITY_MINOR_VERSION   14
-#define DENSITY_REVISION        2
-
-
+#define DENSITY_MINOR_VERSION   15
+#define DENSITY_REVISION        0
 
 #endif

@@ -37,6 +37,10 @@
 
 #include "../globals.h"
 
+#define DENSITY_ALGORITHMS_MULTIPLIER_64        0x88c65c9962e277c1llu
+#define DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS  8
+#define DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS  16
+
 typedef enum {
     DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED = 0,
     DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING,
@@ -54,8 +58,8 @@ typedef struct {
 
 #define DENSITY_ALGORITHM_COPY(work_block_size)\
             DENSITY_MEMCPY(*out, *in, work_block_size);\
-            *in += work_block_size;\
-            *out += work_block_size;
+            *in += (work_block_size);\
+            *out += (work_block_size);
 
 #define DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START\
             if(!(--state->copy_penalty))\
@@ -66,13 +70,17 @@ typedef struct {
                 state->copy_penalty_start >>= 1;
 
 #define DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(span, work_block_size)\
-            if (DENSITY_UNLIKELY(span & ~(work_block_size - 1))) {\
+            if (DENSITY_UNLIKELY((span) & ~((work_block_size) - 1))) {\
                 if (state->previous_incompressible)\
                     state->copy_penalty = state->copy_penalty_start;\
                 state->previous_incompressible = true;\
             } else\
                 state->previous_incompressible = false;
 
-DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *const DENSITY_RESTRICT_DECLARE, void *const DENSITY_RESTRICT_DECLARE);
+#define DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(UNIT, HASH_BYTES)  (((UNIT) * DENSITY_ALGORITHMS_MULTIPLIER_64) >> (64 - ((HASH_BYTES) << 3)))
+#define DENSITY_ALGORITHMS_EXTRACT_64(MEM_64, BYTE_GROUP_SIZE)  ((MEM_64) & (0xffffffffffffffffllu >> (64 - ((BYTE_GROUP_SIZE) << 3))))
+#define DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES)        (((uint32_t)((uint32_t)1 << ((HASH_BYTES) << 3))) >> ((uint32_t)1 << (HASH_BYTES)))
+
+DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *DENSITY_RESTRICT_DECLARE, void *DENSITY_RESTRICT_DECLARE);
 
 #endif

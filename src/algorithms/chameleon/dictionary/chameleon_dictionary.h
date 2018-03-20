@@ -46,17 +46,16 @@
 #define DENSITY_CHAMELEON_DICTIONARY_H
 
 #include "../chameleon.h"
+#include "../../algorithms.h"
 
 #include <string.h>
 
 #pragma pack(push)
 #pragma pack(4)
-typedef struct {
-    uint32_t as_uint32_t;
-} density_chameleon_dictionary_entry;
 
 typedef struct {
-    density_chameleon_dictionary_entry entries[1 << DENSITY_CHAMELEON_HASH_BITS];
+    uint64_t bitmap[(1 << DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS) >> 6];
+    uint64_t entries[1 << DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS];
 } density_chameleon_dictionary;
 #pragma pack(pop)
 
