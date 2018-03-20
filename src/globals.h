@@ -261,6 +261,14 @@ DENSITY_FAST_MEMCPY(DESTINATION, SOURCE, BYTES);\
 #error
 #endif
 
+// Fast clear, &target must point to uint64_t values and number of bytes has to be a multiple of 256
+#define DENSITY_FAST_CLEAR(TARGET, NUMBER_OF_BYTES) \
+for(uint_fast32_t bitmap_clear = (NUMBER_OF_BYTES) >> 3; DENSITY_LIKELY(bitmap_clear);) {\
+    DENSITY_PREFETCH(&(TARGET)[bitmap_clear - 9], 1, 3);\
+    DENSITY_UNROLL_32((TARGET)[--bitmap_clear] = 0);\
+}
+
+
 #define density_bitsizeof(x) (8 * sizeof(x))
 
 /**********************************************************************************************************************

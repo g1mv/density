@@ -77,9 +77,9 @@ typedef struct {
             } else\
                 state->previous_incompressible = false;
 
-#define DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(UNIT, HASH_BYTES)   (((UNIT) * DENSITY_ALGORITHMS_MULTIPLIER_64) >> (64 - ((HASH_BYTES) << 3)))
+#define DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(UNIT, HASH_BYTES)  (((UNIT) * DENSITY_ALGORITHMS_MULTIPLIER_64) >> (64 - ((HASH_BYTES) << 3)))
 #define DENSITY_ALGORITHMS_EXTRACT_64(MEM_64, BYTE_GROUP_SIZE)  ((MEM_64) & (0xffffffffffffffffllu >> (64 - ((BYTE_GROUP_SIZE) << 3))))
-#define DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES)         (((uint32_t)((uint32_t)1 << ((HASH_BYTES) << 3))) >> ((uint32_t)1 << (HASH_BYTES)))
+#define DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES)        (((uint32_t)((uint32_t)1 << ((HASH_BYTES) << 3))) >> ((uint32_t)1 << (HASH_BYTES)))
 
 DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *DENSITY_RESTRICT_DECLARE, void *DENSITY_RESTRICT_DECLARE);
 

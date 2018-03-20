@@ -207,8 +207,7 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
                 total_inserts += inserts;\
                 if (total_inserts > ((((uint64_t)1 << ((HASH_BYTES) << 3)) * 15) >> 4)) {\
                     if (((HASH_BYTES) << 3) < DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS && (BYTE_GROUP_SIZE) <= 6) {\
-                        uint_fast32_t bitmap_clear = ((uint32_t) 1 << (DENSITY_ADD(HASH_BYTES,1) << 3)) >> 6;\
-                        while(DENSITY_LIKELY(bitmap_clear)) {DENSITY_PREFETCH(&dictionary->bitmap[bitmap_clear - 8], 1, 3); DENSITY_UNROLL_32(dictionary->bitmap[--bitmap_clear] = 0);} /* Faster than memset */\
+                        DENSITY_FAST_CLEAR(dictionary->bitmap, ((uint32_t) 1 << (DENSITY_ADD(HASH_BYTES,1) << 3)) >> 3);\
                         if(cleared) {\
                             goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(transition_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE)),DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(_,DENSITY_ADD(HASH_BYTES,1)),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,2))));\
                         } else {\

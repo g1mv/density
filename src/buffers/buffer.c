@@ -99,7 +99,8 @@ DENSITY_FORCE_INLINE density_context* density_allocate_context(const DENSITY_ALG
         context->dictionary = mem_alloc(context->dictionary_size);
         if (context->algorithm == DENSITY_ALGORITHM_CHAMELEON) {
             // todo in progress, for adaptative chameleon, init only bitmap and 8-bit dictionary sizes
-            DENSITY_MEMSET(context->dictionary, 0, (((1 << DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS) >> 6) + (1 << 8)) * sizeof(uint64_t));
+            DENSITY_MEMSET(&((density_chameleon_dictionary *) context->dictionary)->bitmap, 0, ((uint32_t) 1 << 8) >> 3);
+            DENSITY_FAST_CLEAR(((density_chameleon_dictionary *) context->dictionary)->entries, ((uint32_t) 1 << 8) << 3);
         } else {
             DENSITY_MEMSET(context->dictionary, 0, context->dictionary_size);
         }
