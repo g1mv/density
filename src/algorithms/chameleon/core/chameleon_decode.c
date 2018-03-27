@@ -57,7 +57,6 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint64_t memcopy_64;
     uint_fast32_t transition_counter = 0;
     uint_fast32_t samples_counter = 0;
-    bool cleared = false;
 
     density_chameleon_signature signature;
     density_chameleon_dictionary *const dictionary = (density_chameleon_dictionary *) state->dictionary;

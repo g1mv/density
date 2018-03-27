@@ -50,27 +50,33 @@ typedef enum {
 
 typedef struct {
     void *dictionary;
+    bool dictionary_cleared;
     uint_fast8_t copy_penalty;
     uint_fast8_t copy_penalty_start;
     bool previous_incompressible;
     uint_fast64_t counter;
 } density_algorithm_state;
 
-#define DENSITY_ALGORITHM_COPY(work_block_size)\
-            DENSITY_MEMCPY(*out, *in, work_block_size);\
-            *in += (work_block_size);\
-            *out += (work_block_size);
+#define DENSITY_ALGORITHM_FAST_COPY(NUMBER_OF_BYTES)\
+            DENSITY_FAST_COPY_ARRAY_8(out_array, in_array, out_position, in_position, NUMBER_OF_BYTES);\
+            out_position += (NUMBER_OF_BYTES);\
+            in_position += (NUMBER_OF_BYTES);
+
+#define DENSITY_ALGORITHM_COPY(NUMBER_OF_BYTES)\
+            DENSITY_MEMCPY(*out, *in, NUMBER_OF_BYTES);\
+            *in += (NUMBER_OF_BYTES);\
+            *out += (NUMBER_OF_BYTES);
 
 #define DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START\
             if(!(--state->copy_penalty))\
                 state->copy_penalty_start++;
 
-#define DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START\
+#define DENSITY_ALGORITHM_DECREASE_COPY_PENALTY_START\
             if (state->copy_penalty_start & ~0x1)\
                 state->copy_penalty_start >>= 1;
 
-#define DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(span, work_block_size)\
-            if (DENSITY_UNLIKELY((span) & ~((work_block_size) - 1))) {\
+#define DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(SPAN, NUMBER_OF_BYTES)\
+            if (DENSITY_UNLIKELY((SPAN) & ~((NUMBER_OF_BYTES) - 1))) {\
                 if (state->previous_incompressible)\
                     state->copy_penalty = state->copy_penalty_start;\
                 state->previous_incompressible = true;\
@@ -79,8 +85,9 @@ typedef struct {
 
 #define DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(UNIT, HASH_BYTES)  (((UNIT) * DENSITY_ALGORITHMS_MULTIPLIER_64) >> (64 - ((HASH_BYTES) << 3)))
 #define DENSITY_ALGORITHMS_EXTRACT_64(MEM_64, BYTE_GROUP_SIZE)  ((MEM_64) & (0xffffffffffffffffllu >> (64 - ((BYTE_GROUP_SIZE) << 3))))
-#define DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES)        (((uint32_t)((uint32_t)1 << ((HASH_BYTES) << 3))) >> ((uint32_t)1 << (HASH_BYTES)))
+#define DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES, NEXT_HASH_BYTES)   (((1 << ((NEXT_HASH_BYTES) << 3)) - (1 << ((HASH_BYTES) << 3))) >> 6)
 
+DENSITY_WINDOWS_EXPORT void density_algorithms_reset_state(density_algorithm_state *DENSITY_RESTRICT_DECLARE);
 DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *DENSITY_RESTRICT_DECLARE, void *DENSITY_RESTRICT_DECLARE);
 
 #endif

@@ -234,7 +234,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 
     while (DENSITY_LIKELY(limit_256-- && *out <= out_limit)) {
         if (DENSITY_UNLIKELY(!(state->counter & 0xf))) {
-            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
+            DENSITY_ALGORITHM_DECREASE_COPY_PENALTY_START;
         }
         state->counter++;
         if (DENSITY_UNLIKELY(state->copy_penalty)) {
