@@ -145,8 +145,8 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
     hits = 0;\
     inserts = 0;\
     collisions = 0;\
-    in_limit = in_size - DENSITY_CHAMELEON_DECODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - 8; /* Make sure we don't fast memcpy from  outside bounds */\
-    out_limit = out_size - DENSITY_CHAMELEON_DECODE_OUT_SAFE_DISTANCE(64, BYTE_GROUP_SIZE);\
+    in_limit = in_size - DENSITY_CHAMELEON_DECODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - DENSITY_FAST_MEMCPY_EXTRA_BYTES(BYTE_GROUP_SIZE);\
+    out_limit = out_size - DENSITY_CHAMELEON_DECODE_OUT_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - DENSITY_FAST_MEMCPY_EXTRA_BYTES(BYTE_GROUP_SIZE);\
     while (DENSITY_LIKELY(in_position <= in_limit)) {\
         samples_counter = 0x800;\
         while (DENSITY_LIKELY(in_position <= in_limit && samples_counter--)) {\
@@ -173,8 +173,26 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
     }\
     goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));
 
-#define DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_BRANCHING(HASH_BYTES, BYTE_GROUP_SIZE) \
-    if (DENSITY_UNLIKELY(!((hits + inserts + collisions) & (0x7ff)))) {\
+#define DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(HASH_BYTES, BYTE_GROUP_SIZE) \
+    hits = 0;\
+    inserts = 0;\
+    collisions = 0;\
+    stability = 0;\
+    in_limit = in_size - DENSITY_CHAMELEON_DECODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - DENSITY_FAST_MEMCPY_EXTRA_BYTES(BYTE_GROUP_SIZE);\
+    out_limit = out_size - DENSITY_CHAMELEON_DECODE_OUT_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - DENSITY_FAST_MEMCPY_EXTRA_BYTES(BYTE_GROUP_SIZE);\
+    while (DENSITY_LIKELY(in_position <= in_limit)) {\
+        DENSITY_CHAMELEON_DECODE_POP_SIGNATURE(DENSITY_FAST_MEMCPY);\
+        shift = 0;\
+        for(uint_fast8_t unroll = 0; unroll < 8; unroll++) {\
+           /* DENSITY_PREFETCH(&in_array[in_position + DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(4, BYTE_GROUP_SIZE)], 0, 0);*/\
+            DENSITY_UNROLL_8(\
+                DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_DECOMPRESSION_UNIT(DENSITY_FAST_MEMCPY, HASH_BYTES, BYTE_GROUP_SIZE);\
+                shift ++;\
+            );\
+        }\
+        if(DENSITY_UNLIKELY(out_position > out_limit))\
+            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
+        if (DENSITY_UNLIKELY(!((hits + inserts + collisions) & (0x7ff)))) {\
             if (!inserts) {\
                 if (total_inserts < (((uint64_t)1 << ((HASH_BYTES) << 3)) * 2) / 3 && (BYTE_GROUP_SIZE) <= 6) {\
                     DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << ((HASH_BYTES) << 3)) >> 3);\
@@ -207,42 +225,21 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
             hits = 0;\
             inserts = 0;\
             collisions = 0;\
-        }
-
-#define DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(HASH_BYTES, BYTE_GROUP_SIZE) \
-    hits = 0;\
-    inserts = 0;\
-    collisions = 0;\
-    stability = 0;\
-    in_limit = in_size - DENSITY_CHAMELEON_DECODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - 8; /* Make sure we don't fast memcpy from  outside bounds */\
-    out_limit = out_size - DENSITY_CHAMELEON_DECODE_OUT_SAFE_DISTANCE(64, BYTE_GROUP_SIZE);\
-    while (DENSITY_LIKELY(in_position <= in_limit)) {\
-        DENSITY_CHAMELEON_DECODE_POP_SIGNATURE(DENSITY_FAST_MEMCPY);\
-        shift = 0;\
-        for(uint_fast8_t unroll = 0; unroll < 8; unroll++) {\
-           /* DENSITY_PREFETCH(&in_array[in_position + DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(4, BYTE_GROUP_SIZE)], 0, 0);*/\
-            DENSITY_UNROLL_8(\
-                DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_DECOMPRESSION_UNIT(DENSITY_FAST_MEMCPY, HASH_BYTES, BYTE_GROUP_SIZE);\
-                shift ++;\
-            );\
         }\
-        if(DENSITY_UNLIKELY(out_position > out_limit))\
-            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
-        DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_BRANCHING(HASH_BYTES, BYTE_GROUP_SIZE);\
     }\
     goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));
 
 #define DENSITY_CHAMELEON_DECODE_GENERATE_COMPLETION_KERNEL(HASH_BYTES, BYTE_GROUP_SIZE) \
     in_limit = in_size - (BYTE_GROUP_SIZE);\
     out_limit = out_size - DENSITY_CHAMELEON_DECODE_OUT_SAFE_DISTANCE(1, BYTE_GROUP_SIZE);\
-    DENSITY_CHAMELEON_DECODE_POP_SIGNATURE(DENSITY_MEMCPY); /* Normal memcpy as end of in_array is near */\
+    DENSITY_CHAMELEON_DECODE_POP_SIGNATURE(DENSITY_MEMCPY);\
     shift = 0;\
     while(in_position <= in_limit) {\
-        DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(DENSITY_MEMCPY, HASH_BYTES, BYTE_GROUP_SIZE); /* Normal memcpy as end of in_array is near */\
+        DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(DENSITY_MEMCPY, HASH_BYTES, BYTE_GROUP_SIZE);\
         shift ++;\
         if(DENSITY_UNLIKELY(!(shift & 0x3f))) {\
             if(in_position <= in_size - sizeof(density_chameleon_signature)) {\
-                DENSITY_CHAMELEON_DECODE_POP_SIGNATURE(DENSITY_MEMCPY); /* Normal memcpy as end of in_array is near */\
+                DENSITY_CHAMELEON_DECODE_POP_SIGNATURE(DENSITY_MEMCPY);\
                 shift = 0;\
             } else {\
                 goto finish;\
@@ -254,7 +251,7 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
     }\
     in_limit = in_size - (HASH_BYTES);\
     while(in_position <= in_limit && ((signature >> shift) & DENSITY_CHAMELEON_SIGNATURE_FLAG_MAP)) {\
-        DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(DENSITY_MEMCPY, HASH_BYTES, BYTE_GROUP_SIZE); /* Normal memcpy as end of in_array is near */\
+        DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DECOMPRESSION_UNIT(DENSITY_MEMCPY, HASH_BYTES, BYTE_GROUP_SIZE);\
         shift ++;\
         if(out_position > out_limit) {\
             goto output_stall;\
