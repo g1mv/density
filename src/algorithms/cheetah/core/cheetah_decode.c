@@ -159,7 +159,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **DENSITY_RES
         count += 8;
     }
 #else
-    for (uint_fast8_t count_b = 0; count_b < density_bitsizeof(density_cheetah_signature); count_b += 8)
+    for (uint_fast8_t count_b = 0; count_b < DENSITY_BITSIZEOF(density_cheetah_signature); count_b += 8)
         density_cheetah_decode_16(in, out, last_hash, signature, count_b, dictionary);
 #endif
 }

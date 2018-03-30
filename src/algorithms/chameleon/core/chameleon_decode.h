@@ -145,7 +145,7 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
     hits = 0;\
     inserts = 0;\
     collisions = 0;\
-    in_limit = in_size - DENSITY_CHAMELEON_DECODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE);\
+    in_limit = in_size - DENSITY_CHAMELEON_DECODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - 8; /* Make sure we don't fast memcpy from  outside bounds */\
     out_limit = out_size - DENSITY_CHAMELEON_DECODE_OUT_SAFE_DISTANCE(64, BYTE_GROUP_SIZE);\
     while (DENSITY_LIKELY(in_position <= in_limit)) {\
         samples_counter = 0x800;\
@@ -214,7 +214,7 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
     inserts = 0;\
     collisions = 0;\
     stability = 0;\
-    in_limit = in_size - DENSITY_CHAMELEON_DECODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE);\
+    in_limit = in_size - DENSITY_CHAMELEON_DECODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - 8; /* Make sure we don't fast memcpy from  outside bounds */\
     out_limit = out_size - DENSITY_CHAMELEON_DECODE_OUT_SAFE_DISTANCE(64, BYTE_GROUP_SIZE);\
     while (DENSITY_LIKELY(in_position <= in_limit)) {\
         DENSITY_CHAMELEON_DECODE_POP_SIGNATURE(DENSITY_FAST_MEMCPY);\
