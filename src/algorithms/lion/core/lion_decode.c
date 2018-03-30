@@ -193,12 +193,12 @@ DENSITY_FORCE_INLINE DENSITY_LION_FORM density_lion_decode_read_form(const uint8
         *shift = (uint_fast8_t)((*shift + (trailing_zeroes + 1)) & 0x3f);
         return density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool + trailing_zeroes);
     } else {
-        if (DENSITY_LIKELY(*shift <= (density_bitsizeof(density_lion_signature) - 7))) {
+        if (DENSITY_LIKELY(*shift <= (DENSITY_BITSIZEOF(density_lion_signature) - 7))) {
             *shift = (uint_fast8_t)((*shift + 7) & 0x3f);
             return density_lion_form_model_increment_usage(form_data, (density_lion_form_node *) form_data->formsPool + 7);
         } else {
             density_lion_decode_read_signature(in, signature);
-            const uint_fast8_t primary_trailing_zeroes = (uint_fast8_t)(density_bitsizeof(density_lion_signature) - *shift);
+            const uint_fast8_t primary_trailing_zeroes = (uint_fast8_t) (DENSITY_BITSIZEOF(density_lion_signature) - *shift);
             const uint_fast8_t ctz_barrier_shift = (uint_fast8_t)(7 - primary_trailing_zeroes);
             const uint_fast8_t secondary_trailing_zeroes = DENSITY_CTZ(((uint64_t)1 << ctz_barrier_shift) | *signature);
             if (DENSITY_LIKELY(secondary_trailing_zeroes != ctz_barrier_shift))

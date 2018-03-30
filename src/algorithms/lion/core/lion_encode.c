@@ -59,7 +59,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(uint8_t **DENSIT
     if (DENSITY_LIKELY(*shift)) {
         density_lion_encode_push_to_proximity_signature(signature, shift, content, bits);
 
-        if (DENSITY_UNLIKELY(*shift >= density_bitsizeof(density_lion_signature))) {
+        if (DENSITY_UNLIKELY(*shift >= DENSITY_BITSIZEOF(density_lion_signature))) {
 #ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
 #elif defined(DENSITY_BIG_ENDIAN)
@@ -86,7 +86,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(uint8_t **D
     if (DENSITY_LIKELY(*shift)) {
         *shift += bits;
 
-        if (DENSITY_UNLIKELY(*shift >= density_bitsizeof(density_lion_signature))) {
+        if (DENSITY_UNLIKELY(*shift >= DENSITY_BITSIZEOF(density_lion_signature))) {
 #ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
 #elif defined(DENSITY_BIG_ENDIAN)

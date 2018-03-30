@@ -253,7 +253,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
             break;
     }
 
-    if (DENSITY_UNLIKELY(shift == density_bitsizeof(density_cheetah_signature)))
+    if (DENSITY_UNLIKELY(shift == DENSITY_BITSIZEOF(density_cheetah_signature)))
         goto read_signature;
     else
         goto read_and_decode_4;

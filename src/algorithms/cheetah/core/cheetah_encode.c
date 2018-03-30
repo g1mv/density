@@ -104,7 +104,7 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_128(const uint8_t **DENSITY_RES
     uint_fast8_t count = 0;
 
 #ifdef __clang__
-    for(; count < density_bitsizeof(density_cheetah_signature); count += 2) {
+    for (; count < DENSITY_BITSIZEOF(density_cheetah_signature); count += 2) {
         density_cheetah_encode_4(in, out, last_hash, count, signature, dictionary, unit);
     }
 #else
