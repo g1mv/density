@@ -104,7 +104,7 @@ DENSITY_FORCE_INLINE void density_cheetah_encode_128(const uint8_t **DENSITY_RES
     uint_fast8_t count = 0;
 
 #ifdef __clang__
-    for(; count < density_bitsizeof(density_cheetah_signature); count += 2) {
+    for (; count < DENSITY_BITSIZEOF(density_cheetah_signature); count += 2) {
         density_cheetah_encode_4(in, out, last_hash, count, signature, dictionary, unit);
     }
 #else
@@ -130,7 +130,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 
     while (DENSITY_LIKELY(limit_128-- && *out <= out_limit)) {
         if (DENSITY_UNLIKELY(!(state->counter & 0x1f))) {
-            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
+            DENSITY_ALGORITHM_DECREASE_COPY_PENALTY_START;
         }
         state->counter++;
         if (DENSITY_UNLIKELY(state->copy_penalty)) {

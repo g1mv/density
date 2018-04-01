@@ -59,7 +59,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_to_signature(uint8_t **DENSIT
     if (DENSITY_LIKELY(*shift)) {
         density_lion_encode_push_to_proximity_signature(signature, shift, content, bits);
 
-        if (DENSITY_UNLIKELY(*shift >= density_bitsizeof(density_lion_signature))) {
+        if (DENSITY_UNLIKELY(*shift >= DENSITY_BITSIZEOF(density_lion_signature))) {
 #ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
 #elif defined(DENSITY_BIG_ENDIAN)
@@ -86,7 +86,7 @@ DENSITY_FORCE_INLINE void density_lion_encode_push_zero_to_signature(uint8_t **D
     if (DENSITY_LIKELY(*shift)) {
         *shift += bits;
 
-        if (DENSITY_UNLIKELY(*shift >= density_bitsizeof(density_lion_signature))) {
+        if (DENSITY_UNLIKELY(*shift >= DENSITY_BITSIZEOF(density_lion_signature))) {
 #ifdef DENSITY_LITTLE_ENDIAN
             DENSITY_MEMCPY(*signature_pointer, signature, sizeof(density_lion_signature));
 #elif defined(DENSITY_BIG_ENDIAN)
@@ -234,7 +234,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 
     while (DENSITY_LIKELY(limit_256-- && *out <= out_limit)) {
         if (DENSITY_UNLIKELY(!(state->counter & 0xf))) {
-            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
+            DENSITY_ALGORITHM_DECREASE_COPY_PENALTY_START;
         }
         state->counter++;
         if (DENSITY_UNLIKELY(state->copy_penalty)) {

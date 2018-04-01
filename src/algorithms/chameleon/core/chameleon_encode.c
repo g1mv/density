@@ -55,9 +55,8 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint_fast64_t collisions = 0;
 
     uint64_t memcopy_64;
-    uint_fast32_t transition_counter = 0;
-    uint_fast32_t samples_counter = 0;
-    bool cleared = false;
+    uint_fast64_t transition_counter = 0;
+    uint_fast64_t samples_counter = 0;
 
     density_chameleon_signature signature;
     density_chameleon_signature *signature_pointer;
@@ -70,8 +69,6 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint_fast64_t out_position = 0;
     uint_fast64_t out_limit;
 
-    DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE;
-
     uint_fast8_t shift;
     uint64_t unit;
     uint64_t hash;
@@ -80,25 +77,25 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 
     // Study kernels
     study_kernel_1_2:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(1, 2);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(1, 2, DENSITY_VOID, DENSITY_VOID);
 
     study_kernel_1_4:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(1, 4);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(1, 4, DENSITY_VOID, DENSITY_VOID);
 
     study_kernel_1_6:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(1, 6);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(1, 6, DENSITY_VOID, DENSITY_VOID);
 
     study_kernel_1_8:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(1, 8);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(1, 8, DENSITY_VOID, DENSITY_VOID);
 
     study_kernel_2_4:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(2, 4);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(2, 4, DENSITY_ALGORITHM_INCOMPRESSIBLE_PROTECTION_FUNCTION_START, DENSITY_ALGORITHM_INCOMPRESSIBLE_PROTECTION_FUNCTION_END);
 
     study_kernel_2_6:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(2, 6);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(2, 6, DENSITY_VOID, DENSITY_VOID);
 
     study_kernel_2_8:
-DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(2, 8);
+DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_KERNEL(2, 8, DENSITY_VOID, DENSITY_VOID);
 
     // Transition kernels
     transition_kernel_1_2_1_4:

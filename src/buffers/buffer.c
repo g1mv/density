@@ -110,25 +110,30 @@ DENSITY_FORCE_INLINE density_context* density_allocate_context(const DENSITY_ALG
 }
 
 DENSITY_WINDOWS_EXPORT void density_free_context(density_context *const context, void (*mem_free)(void *)) {
-    if(mem_free == NULL)
+    if (mem_free == NULL) {
         mem_free = free;
-    if(!context->dictionary_type)
+    }
+    if (!context->dictionary_type) {
         mem_free(context->dictionary);
+    }
     mem_free(context);
 }
 
 DENSITY_WINDOWS_EXPORT density_processing_result density_compress_prepare_context(const DENSITY_ALGORITHM algorithm, const bool custom_dictionary, void *(*mem_alloc)(size_t)) {
-    if(mem_alloc == NULL)
+    if (mem_alloc == NULL) {
         mem_alloc = malloc;
+    }
 
     return density_make_result(DENSITY_STATE_OK, 0, 0, density_allocate_context(algorithm, custom_dictionary, mem_alloc));
 }
 
 DENSITY_WINDOWS_EXPORT density_processing_result density_compress_with_context(const uint8_t * input_buffer, const uint_fast64_t input_size, uint8_t * output_buffer, const uint_fast64_t output_size, density_context *const context) {
-    if (output_size < sizeof(density_header))
+    if (output_size < sizeof(density_header)) {
         return density_make_result(DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL, 0, 0, context);
-    if(context == NULL)
+    }
+    if (context == NULL) {
         return density_make_result(DENSITY_STATE_ERROR_INVALID_CONTEXT, 0, 0, context);
+    }
 
     // Variables setup
     const uint8_t *in = input_buffer;
@@ -158,26 +163,29 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_compress_with_context(c
 }
 
 DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_prepare_context(const uint8_t *input_buffer, const uint_fast64_t input_size, const bool custom_dictionary, void *(*mem_alloc)(size_t)) {
-    if (input_size < sizeof(density_header))
+    if (input_size < sizeof(density_header)) {
         return density_make_result(DENSITY_STATE_ERROR_INPUT_BUFFER_TOO_SMALL, 0, 0, NULL);
+    }
 
     // Variables setup
     const uint8_t* in = input_buffer;
-    if(mem_alloc == NULL)
+    if (mem_alloc == NULL) {
         mem_alloc = malloc;
+    }
 
     // Read header
     density_header main_header;
     density_header_read(&in, &main_header);
 
     // Setup context
-    density_context *const context = density_allocate_context(main_header.algorithm, custom_dictionary, mem_alloc);
+    density_context *const context = density_allocate_context((const DENSITY_ALGORITHM) main_header.algorithm, custom_dictionary, mem_alloc);
     return density_make_result(DENSITY_STATE_OK, in - input_buffer, 0, context);
 }
 
 DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_with_context(const uint8_t * input_buffer, const uint_fast64_t input_size, uint8_t * output_buffer, const uint_fast64_t output_size, density_context *const context) {
-    if(context == NULL)
+    if (context == NULL) {
         return density_make_result(DENSITY_STATE_ERROR_INVALID_CONTEXT, 0, 0, context);
+    }
 
     // Variables setup
     const uint8_t *in = input_buffer;

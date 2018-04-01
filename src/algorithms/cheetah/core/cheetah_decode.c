@@ -159,7 +159,7 @@ DENSITY_FORCE_INLINE void density_cheetah_decode_128(const uint8_t **DENSITY_RES
         count += 8;
     }
 #else
-    for (uint_fast8_t count_b = 0; count_b < density_bitsizeof(density_cheetah_signature); count_b += 8)
+    for (uint_fast8_t count_b = 0; count_b < DENSITY_BITSIZEOF(density_cheetah_signature); count_b += 8)
         density_cheetah_decode_16(in, out, last_hash, signature, count_b, dictionary);
 #endif
 }
@@ -198,7 +198,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
 
     while (DENSITY_LIKELY(*in <= in_limit && *out <= out_limit)) {
         if (DENSITY_UNLIKELY(!(state->counter & 0x1f))) {
-            DENSITY_ALGORITHM_REDUCE_COPY_PENALTY_START;
+            DENSITY_ALGORITHM_DECREASE_COPY_PENALTY_START;
         }
         state->counter++;
         if (DENSITY_UNLIKELY(state->copy_penalty)) {
@@ -253,7 +253,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
             break;
     }
 
-    if (DENSITY_UNLIKELY(shift == density_bitsizeof(density_cheetah_signature)))
+    if (DENSITY_UNLIKELY(shift == DENSITY_BITSIZEOF(density_cheetah_signature)))
         goto read_signature;
     else
         goto read_and_decode_4;
