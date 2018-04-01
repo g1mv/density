@@ -286,6 +286,8 @@ DENSITY_MEMCPY(&(DESTINATION_ARRAY)[DESTINATION_OFFSET], &(SOURCE_ARRAY)[SOURCE_
 
 #define DENSITY_BITSIZEOF(x) (8 * sizeof(x))
 
+#define DENSITY_VOID(ARGUMENT_A, ARGUMENT_B)
+
 /**********************************************************************************************************************
  *                                                                                                                    *
  * Global compile-time switches                                                                                       *

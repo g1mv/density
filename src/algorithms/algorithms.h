@@ -37,7 +37,7 @@
 
 #include "../globals.h"
 
-#define DENSITY_ALGORITHMS_MULTIPLIER_64        0x88c65c9962e277c1
+#define DENSITY_ALGORITHMS_MULTIPLIER_64        0x88c65c9962e277c1llu
 #define DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS  8
 #define DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS  16
 
@@ -58,30 +58,45 @@ typedef struct {
 } density_algorithm_state;
 
 #define DENSITY_ALGORITHM_FAST_COPY(NUMBER_OF_BYTES)\
-            DENSITY_FAST_COPY_ARRAY_8(out_array, in_array, out_position, in_position, NUMBER_OF_BYTES);\
-            out_position += (NUMBER_OF_BYTES);\
-            in_position += (NUMBER_OF_BYTES);
+    DENSITY_FAST_COPY_ARRAY_8(out_array, in_array, out_position, in_position, NUMBER_OF_BYTES);\
+    out_position += (NUMBER_OF_BYTES);\
+    in_position += (NUMBER_OF_BYTES);
 
 #define DENSITY_ALGORITHM_COPY(NUMBER_OF_BYTES)\
-            DENSITY_MEMCPY(*out, *in, NUMBER_OF_BYTES);\
-            *in += (NUMBER_OF_BYTES);\
-            *out += (NUMBER_OF_BYTES);
+    DENSITY_MEMCPY(*out, *in, NUMBER_OF_BYTES);\
+    *in += (NUMBER_OF_BYTES);\
+    *out += (NUMBER_OF_BYTES);
 
 #define DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START\
-            if(!(--state->copy_penalty))\
-                state->copy_penalty_start++;
+    if(!(--state->copy_penalty))\
+        state->copy_penalty_start++;
 
 #define DENSITY_ALGORITHM_DECREASE_COPY_PENALTY_START\
-            if (state->copy_penalty_start & ~0x1)\
-                state->copy_penalty_start >>= 1;
+    if (state->copy_penalty_start & ~0x1)\
+        state->copy_penalty_start >>= 1;
 
 #define DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(SPAN, NUMBER_OF_BYTES)\
-            if (DENSITY_UNLIKELY((SPAN) & ~((NUMBER_OF_BYTES) - 1))) {\
-                if (state->previous_incompressible)\
-                    state->copy_penalty = state->copy_penalty_start;\
-                state->previous_incompressible = true;\
-            } else\
-                state->previous_incompressible = false;
+    if (DENSITY_UNLIKELY((SPAN) & ~((NUMBER_OF_BYTES) - 1))) {\
+        if (state->previous_incompressible)\
+            state->copy_penalty = state->copy_penalty_start;\
+        state->previous_incompressible = true;\
+    } else\
+        state->previous_incompressible = false;
+
+#define DENSITY_ALGORITHM_INCOMPRESSIBLE_PROTECTION_FUNCTION_START(POSITION, BYTES) \
+    if (DENSITY_UNLIKELY(!(state->counter & 0x3))) {\
+        DENSITY_ALGORITHM_DECREASE_COPY_PENALTY_START;\
+    }\
+    state->counter++;\
+    if (/*DENSITY_UNLIKELY(*/state->copy_penalty/*)*/) {\
+        DENSITY_ALGORITHM_FAST_COPY(BYTES);\
+        DENSITY_ALGORITHM_INCREASE_COPY_PENALTY_START;\
+    } else {\
+        const uint_fast64_t marker = POSITION;
+
+#define DENSITY_ALGORITHM_INCOMPRESSIBLE_PROTECTION_FUNCTION_END(POSITION, BYTES) \
+        DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(((POSITION) - marker), BYTES);\
+    }
 
 #define DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(UNIT, HASH_BYTES)  (((UNIT) * DENSITY_ALGORITHMS_MULTIPLIER_64) >> (64 - ((HASH_BYTES) << 3)))
 #define DENSITY_ALGORITHMS_EXTRACT_64(MEM_64, BYTE_GROUP_SIZE)  ((MEM_64) & (0xffffffffffffffffllu >> (64 - ((BYTE_GROUP_SIZE) << 3))))
