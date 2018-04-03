@@ -91,7 +91,8 @@
 #define DENSITY_CHAMELEON_DECODE_GENERATE_FAST_DUAL_DECOMPRESSION_UNIT(COPY_FUNCTION, HASH_BYTES, BYTE_GROUP_SIZE) \
     switch((signature >> shift) & 0x3) {\
         case 0x0:\
-            DENSITY_ENDIAN_MEMCPY_AND_CORRECT_64(COPY_FUNCTION, &memcopy_64, &in_array[in_position], DENSITY_ADD(BYTE_GROUP_SIZE, BYTE_GROUP_SIZE));\
+            /* Avoiding local variable redefinition with {} */\
+            {DENSITY_ENDIAN_MEMCPY_AND_CORRECT_64(COPY_FUNCTION, &memcopy_64, &in_array[in_position], DENSITY_ADD(BYTE_GROUP_SIZE, BYTE_GROUP_SIZE));}\
             unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, BYTE_GROUP_SIZE);\
             hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(unit, HASH_BYTES);\
             dictionary->entries[hash] = unit;\
@@ -103,9 +104,9 @@
             out_position += ((BYTE_GROUP_SIZE) << 1);\
             break;\
         case 0x1:\
-            DENSITY_ENDIAN_MEMCPY_AND_CORRECT_64(COPY_FUNCTION, &memcopy_64, &in_array[in_position], DENSITY_ADD(HASH_BYTES, BYTE_GROUP_SIZE));\
+            {DENSITY_ENDIAN_MEMCPY_AND_CORRECT_64(COPY_FUNCTION, &memcopy_64, &in_array[in_position], DENSITY_ADD(HASH_BYTES, BYTE_GROUP_SIZE));}\
             hash = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, HASH_BYTES);\
-            DENSITY_ENDIAN_CORRECT_64_AND_MEMCPY(COPY_FUNCTION, &out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);\
+            {DENSITY_ENDIAN_CORRECT_64_AND_MEMCPY(COPY_FUNCTION, &out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);}\
             in_position += (HASH_BYTES);\
             out_position += (BYTE_GROUP_SIZE);\
             unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64 >> ((HASH_BYTES) << 3), BYTE_GROUP_SIZE);\
@@ -116,24 +117,24 @@
             out_position += (BYTE_GROUP_SIZE);\
             break;\
         case 0x2:\
-            DENSITY_ENDIAN_MEMCPY_AND_CORRECT_64(COPY_FUNCTION, &memcopy_64, &in_array[in_position], DENSITY_ADD(BYTE_GROUP_SIZE, HASH_BYTES));\
+            {DENSITY_ENDIAN_MEMCPY_AND_CORRECT_64(COPY_FUNCTION, &memcopy_64, &in_array[in_position], DENSITY_ADD(BYTE_GROUP_SIZE, HASH_BYTES));}\
             unit = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, BYTE_GROUP_SIZE);\
             hash = DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(unit, HASH_BYTES);\
             dictionary->entries[hash] = unit;\
             COPY_FUNCTION(&out_array[out_position], &in_array[in_position], BYTE_GROUP_SIZE);\
             out_position += (BYTE_GROUP_SIZE);\
             hash = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64 >> ((BYTE_GROUP_SIZE) << 3), HASH_BYTES);\
-            DENSITY_ENDIAN_CORRECT_64_AND_MEMCPY(COPY_FUNCTION, &out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);\
+            {DENSITY_ENDIAN_CORRECT_64_AND_MEMCPY(COPY_FUNCTION, &out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);}\
             in_position += (BYTE_GROUP_SIZE) + (HASH_BYTES);\
             out_position += (BYTE_GROUP_SIZE);\
             break;\
         case 0x3:\
-            DENSITY_ENDIAN_MEMCPY_AND_CORRECT_64(COPY_FUNCTION, &memcopy_64, &in_array[in_position], DENSITY_ADD(HASH_BYTES, HASH_BYTES));\
+            {DENSITY_ENDIAN_MEMCPY_AND_CORRECT_64(COPY_FUNCTION, &memcopy_64, &in_array[in_position], DENSITY_ADD(HASH_BYTES, HASH_BYTES));}\
             hash = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64, HASH_BYTES);\
-            DENSITY_ENDIAN_CORRECT_64_AND_MEMCPY(COPY_FUNCTION, &out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);\
+            {DENSITY_ENDIAN_CORRECT_64_AND_MEMCPY(COPY_FUNCTION, &out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);}\
             out_position += (BYTE_GROUP_SIZE);\
             hash = DENSITY_ALGORITHMS_EXTRACT_64(memcopy_64 >> ((HASH_BYTES) << 3), HASH_BYTES);\
-            DENSITY_ENDIAN_CORRECT_64_AND_MEMCPY(COPY_FUNCTION, &out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);\
+            {DENSITY_ENDIAN_CORRECT_64_AND_MEMCPY(COPY_FUNCTION, &out_array[out_position], &dictionary->entries[hash], BYTE_GROUP_SIZE);}\
             in_position += ((HASH_BYTES) << 1);\
             out_position += (BYTE_GROUP_SIZE);\
             break;\
