@@ -119,7 +119,9 @@
     transition_counter = DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES, NEXT_HASH_BYTES);\
     in_limit = in_size - DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - DENSITY_FAST_MEMCPY_EXTRA_BYTES(BYTE_GROUP_SIZE); /* Make sure we don't fast memcpy from outside bounds */\
     out_limit = out_size - DENSITY_CHAMELEON_ENCODE_OUT_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - DENSITY_FAST_MEMCPY_EXTRA_BYTES(BYTE_GROUP_SIZE);\
-    while (DENSITY_LIKELY(in_position <= in_limit && transition_counter)) {\
+    while (DENSITY_LIKELY(transition_counter)) {\
+        if(DENSITY_UNLIKELY((out_position > out_limit) || (in_position > in_limit)))\
+            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
         DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE;\
         for(shift = 0; DENSITY_LIKELY(shift < 0x40 && transition_counter);) {\
             for(uint_fast8_t unroll = 0; unroll < 0x4; unroll ++) {\
@@ -137,8 +139,6 @@
             SPECIAL_LOOP_INSTRUCTIONS;\
         };\
         DENSITY_CHAMELEON_ENCODE_COPY_SIGNATURE(DENSITY_FAST_MEMCPY);\
-        if(DENSITY_UNLIKELY(out_position > out_limit))\
-            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
     }\
     ;SPECIAL_END_INSTRUCTIONS;\
     goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(study_kernel_,NEXT_HASH_BYTES),DENSITY_EVAL_CONCAT(_,NEXT_BYTE_GROUP_SIZE));
@@ -158,6 +158,8 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
     while (DENSITY_LIKELY(in_position <= in_limit)) {\
         samples_counter = 0x800;\
         while (DENSITY_LIKELY(in_position <= in_limit && samples_counter--)) {\
+            if(DENSITY_UNLIKELY(out_position > out_limit))\
+                goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
             DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE;\
             shift = 0;\
             for(uint_fast8_t unroll = 0; unroll < 9; unroll++) {\
@@ -169,8 +171,6 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
             }\
             DENSITY_CHAMELEON_ENCODE_GENERATE_STUDY_COMPRESSION_UNIT(DENSITY_FAST_MEMCPY, HASH_BYTES, BYTE_GROUP_SIZE);\
             DENSITY_CHAMELEON_ENCODE_COPY_SIGNATURE(DENSITY_FAST_MEMCPY);\
-            if(DENSITY_UNLIKELY(out_position > out_limit))\
-                goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
         }\
         /*printf("%lld / %lld\n", collisions, hits);*/\
         if ((collisions << 1) > hits) {\
@@ -192,6 +192,8 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
     in_limit = in_size - DENSITY_CHAMELEON_ENCODE_IN_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - DENSITY_FAST_MEMCPY_EXTRA_BYTES(BYTE_GROUP_SIZE);\
     out_limit = out_size - DENSITY_CHAMELEON_ENCODE_OUT_SAFE_DISTANCE(64, BYTE_GROUP_SIZE) - DENSITY_FAST_MEMCPY_EXTRA_BYTES(BYTE_GROUP_SIZE);\
     while (DENSITY_LIKELY(in_position <= in_limit)) {\
+        if(DENSITY_UNLIKELY(out_position > out_limit))\
+            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
         INCOMPRESSIBLE_PROTECTION_FUNCTION_START(out_position, 64 * (BYTE_GROUP_SIZE));\
         DENSITY_CHAMELEON_ENCODE_PREPARE_SIGNATURE;\
         shift = 0;\
@@ -204,8 +206,6 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
         }\
         DENSITY_CHAMELEON_ENCODE_COPY_SIGNATURE(DENSITY_FAST_MEMCPY);\
         INCOMPRESSIBLE_PROTECTION_FUNCTION_END(out_position, 64 * (BYTE_GROUP_SIZE));\
-        if(DENSITY_UNLIKELY(out_position > out_limit))\
-            goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
         if (DENSITY_UNLIKELY(!((hits + inserts + collisions) & (0x1ff)))) {\
             if (!inserts) {\
                 if (total_inserts < (((uint64_t)1 << ((HASH_BYTES) << 3)) * 2) / 3 && (BYTE_GROUP_SIZE) <= 6) {\
