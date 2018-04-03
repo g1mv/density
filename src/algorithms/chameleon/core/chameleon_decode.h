@@ -255,7 +255,7 @@ DENSITY_CHAMELEON_DECODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
         INCOMPRESSIBLE_PROTECTION_FUNCTION_END(in_position, 64 * (BYTE_GROUP_SIZE));\
         if(DENSITY_UNLIKELY(out_position > out_limit))\
             goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(completion_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE));\
-        if (DENSITY_UNLIKELY(!((hits + inserts + collisions) & (0x7ff)))) {\
+        if (DENSITY_UNLIKELY(!((hits + inserts + collisions) & (0x1ff)))) {\
             if (!inserts) {\
                 if (total_inserts < (((uint64_t)1 << ((HASH_BYTES) << 3)) * 2) / 3 && (BYTE_GROUP_SIZE) <= 6) {\
                     DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << ((HASH_BYTES) << 3)) >> 3);\
