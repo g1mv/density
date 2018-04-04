@@ -35,15 +35,15 @@
 #ifndef DENSITY_BUFFER_H
 #define DENSITY_BUFFER_H
 
-#include "../globals.h"
-#include "../density_api.h"
-#include "../structure/header.h"
-#include "../algorithms/chameleon/core/chameleon_encode.h"
 #include "../algorithms/chameleon/core/chameleon_decode.h"
-#include "../algorithms/cheetah/core/cheetah_encode.h"
+#include "../algorithms/chameleon/core/chameleon_encode.h"
 #include "../algorithms/cheetah/core/cheetah_decode.h"
-#include "../algorithms/lion/core/lion_encode.h"
+#include "../algorithms/cheetah/core/cheetah_encode.h"
 #include "../algorithms/lion/core/lion_decode.h"
+#include "../algorithms/lion/core/lion_encode.h"
+#include "../density_api.h"
+#include "../globals.h"
+#include "../structure/header.h"
 
 DENSITY_WINDOWS_EXPORT uint_fast64_t density_compress_safe_size(const uint_fast64_t);
 DENSITY_WINDOWS_EXPORT uint_fast64_t density_decompress_safe_size(const uint_fast64_t);
