@@ -98,6 +98,13 @@ typedef struct {
         DENSITY_ALGORITHM_TEST_INCOMPRESSIBILITY(((POSITION) - marker), BYTES);\
     }
 
+#define DENSITY_ALGORITHM_READ_PROTECTION(DISTANCE, EXIT_LABEL) \
+    if(in_size < (DISTANCE)) {\
+        goto DENSITY_EVAL(EXIT_LABEL);\
+    } else {\
+        in_limit = in_size - (DISTANCE);\
+    }
+
 #define DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(UNIT, HASH_BYTES)  (((UNIT) * DENSITY_ALGORITHMS_MULTIPLIER_64) >> (64 - ((HASH_BYTES) << 3)))
 #define DENSITY_ALGORITHMS_EXTRACT_64(MEM_64, BYTE_GROUP_SIZE)  ((MEM_64) & (0xffffffffffffffffllu >> (64 - ((BYTE_GROUP_SIZE) << 3))))
 #define DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES, NEXT_HASH_BYTES)   (((1 << ((NEXT_HASH_BYTES) << 3)) - (1 << ((HASH_BYTES) << 3))) >> 6)

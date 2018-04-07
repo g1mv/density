@@ -35,10 +35,10 @@
 #ifndef DENSITY_GLOBALS_H
 #define DENSITY_GLOBALS_H
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 
 #include "density_api.h"
 

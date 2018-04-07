@@ -45,10 +45,6 @@
 #include "chameleon_decode.h"
 
 DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_chameleon_decode(density_algorithm_state *const DENSITY_RESTRICT state, const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t out_size) {
-    if (out_size < DENSITY_CHAMELEON_DECODE_OUT_SAFE_DISTANCE(1, 2)) {
-        return DENSITY_ALGORITHMS_EXIT_STATUS_OUTPUT_STALL;
-    }
-
     uint_fast64_t hits = 0;
     uint_fast64_t inserts = 0;
     uint_fast64_t total_inserts = 0;
@@ -66,7 +62,6 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint_fast64_t in_limit;
     uint8_t *const out_array = *out;
     uint_fast64_t out_position = 0;
-    uint_fast64_t out_limit;
 
     uint_fast8_t shift;
     uint64_t unit;
