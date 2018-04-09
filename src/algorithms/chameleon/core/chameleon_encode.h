@@ -222,7 +222,7 @@ DENSITY_CHAMELEON_ENCODE_GENERATE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GR
         if (DENSITY_UNLIKELY(!((hits + inserts + collisions) & (0x1ff)))) {\
             if (!inserts) {\
                 if (total_inserts < (((uint64_t)1 << ((HASH_BYTES) << 3)) * 2) / 3 && (BYTE_GROUP_SIZE) <= 6) {\
-                    if(in_position + DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES, DENSITY_ADD(HASH_BYTES,1)) * DENSITY_ALGORITHMS_TRANSITION_UNROLL * (BYTE_GROUP_SIZE) < in_size) {\
+                    if(in_position + DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES, HASH_BYTES) * DENSITY_ALGORITHMS_TRANSITION_UNROLL * (BYTE_GROUP_SIZE) < in_size) {\
                         DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << ((HASH_BYTES) << 3)) >> 3);\
                         if (total_inserts < (((uint64_t)1 << ((HASH_BYTES) << 3)) * 1) / 3 && (BYTE_GROUP_SIZE) <= 4) {\
                             goto DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(transition_kernel_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,BYTE_GROUP_SIZE)),DENSITY_EVAL_CONCAT(DENSITY_EVAL_CONCAT(_,HASH_BYTES),DENSITY_EVAL_CONCAT(_,DENSITY_ADD(BYTE_GROUP_SIZE,4))));\

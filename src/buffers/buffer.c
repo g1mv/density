@@ -203,7 +203,7 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_with_context
     density_algorithms_prepare_state(&state, context->dictionary.pointer);
     switch (context->header.algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
-            status = density_chameleon_decode(&state, &in, input_size, &out, output_size);
+            status = density_chameleon_decode(&state, &in, input_size, &out, output_size, context->header.original_size);
             break;
         case DENSITY_ALGORITHM_CHEETAH:
             status = density_cheetah_decode(&state, &in, input_size, &out, output_size);

@@ -341,5 +341,3 @@ DENSITY_MEMCPY(&(DESTINATION_ARRAY)[DESTINATION_OFFSET], &(SOURCE_ARRAY)[SOURCE_
 #define DENSITY_REVISION        0
 
 #endif
-
-#pragma clang diagnostic pop
