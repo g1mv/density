@@ -32,27 +32,19 @@
  * 11/10/13 02:06
  */
 
-#ifndef DENSITY_FILE_HEADER_H
-#define DENSITY_FILE_HEADER_H
+#ifndef DENSITY_STRUCTURE_HEADER_H
+#define DENSITY_STRUCTURE_HEADER_H
 
 #include <stdio.h>
 #include <time.h>
 
+#include "../api.h"
 #include "../globals.h"
-#include "../density_api.h"
 
-#pragma pack(push)
-#pragma pack(4)
+#define DENSITY_HEADER_ORIGINAL_SIZE_BYTES(ORIGINAL_SIZE)    (8 - (DENSITY_CLZ(ORIGINAL_SIZE) / 8))
 
-typedef struct {
-    density_byte version[3];
-    density_byte algorithm;
-    density_byte reserved[4];
-} density_header;
+DENSITY_WINDOWS_EXPORT bool density_header_read(const uint8_t ** DENSITY_RESTRICT_DECLARE, uint_fast64_t, density_header * DENSITY_RESTRICT_DECLARE);
 
-#pragma pack(pop)
-
-DENSITY_WINDOWS_EXPORT void density_header_read(const uint8_t ** DENSITY_RESTRICT_DECLARE, density_header * DENSITY_RESTRICT_DECLARE);
-DENSITY_WINDOWS_EXPORT void density_header_write(uint8_t ** DENSITY_RESTRICT_DECLARE, const DENSITY_ALGORITHM);
+DENSITY_WINDOWS_EXPORT void density_header_write(uint8_t ** DENSITY_RESTRICT_DECLARE, density_header * DENSITY_RESTRICT_DECLARE);
 
 #endif

@@ -32,26 +32,44 @@
  * 11/10/13 17:56
  */
 
+#include "../api.h"
 #include "header.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_read(const uint8_t **DENSITY_RESTRICT in, density_header *DENSITY_RESTRICT header) {
-    header->version[0] = *(*in);
-    header->version[1] = *(*in + 1);
-    header->version[2] = *(*in + 2);
-    header->algorithm = *(*in + 3);
+DENSITY_WINDOWS_EXPORT bool density_header_read(const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, density_header *DENSITY_RESTRICT header) {
+    if (in_size < 5) {
+        return false;
+    }
 
-    *in += sizeof(density_header);
+    header->version_major = *((*in)++);
+    header->version_minor = *((*in)++);
+    header->version_revision = *((*in)++);
+    header->algorithm = *((*in)++);
+    const uint8_t original_size_bytes = *((*in)++);
+    if (in_size < 5 + original_size_bytes) {
+        return false;
+    }
+
+    if (original_size_bytes) {
+        DENSITY_ENDIAN_MEMCPY_AND_CORRECT_64(DENSITY_MEMCPY, &header->original_size, *in, original_size_bytes);
+        (*in) += original_size_bytes;
+    } else {
+        header->original_size = 0;
+    }
+
+    return true;
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_header_write(uint8_t **DENSITY_RESTRICT out, const DENSITY_ALGORITHM algorithm) {
-    *(*out) = DENSITY_MAJOR_VERSION;
-    *(*out + 1) = DENSITY_MINOR_VERSION;
-    *(*out + 2) = DENSITY_REVISION;
-    *(*out + 3) = algorithm;
-    *(*out + 4) = 0;
-    *(*out + 5) = 0;
-    *(*out + 6) = 0;
-    *(*out + 7) = 0;
-
-    *out += sizeof(density_header);
+DENSITY_WINDOWS_EXPORT void density_header_write(uint8_t **DENSITY_RESTRICT out, density_header *DENSITY_RESTRICT header) {
+    *((*out)++) = DENSITY_MAJOR_VERSION;
+    *((*out)++) = DENSITY_MINOR_VERSION;
+    *((*out)++) = DENSITY_REVISION;
+    *((*out)++) = header->algorithm;
+    if (header->original_size) {
+        const uint8_t original_size_bytes = DENSITY_HEADER_ORIGINAL_SIZE_BYTES(header->original_size);
+        *((*out)++) = original_size_bytes;
+        DENSITY_ENDIAN_CORRECT_64_AND_MEMCPY(DENSITY_MEMCPY, *out, &header->original_size, original_size_bytes);
+        (*out) += original_size_bytes;
+    } else {
+        *((*out)++) = 0;
+    }
 }

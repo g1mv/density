@@ -25,16 +25,16 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 
+#include "../../src/api.h"
+#include "../libs/spookyhash/src/spookyhash_api.h"
+#include <inttypes.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <inttypes.h>
 #include <time.h>
-#include "../../src/density_api.h"
-#include "../libs/spookyhash/src/spookyhash_api.h"
 
 #if defined(_WIN64) || defined(_WIN32)
 #else
@@ -110,7 +110,7 @@
 #endif
 
 #define DENSITY_BENCHMARK_UNDERLINE(n)      printf("\n");\
-                                            for(int i = 0; i < n; i++)  printf("=");
+                                            for(int i = 0; i < (n); i++)  printf("=");
 
 #define DENSITY_BENCHMARK_ERROR(op, issue)  DENSITY_BENCHMARK_RED(DENSITY_BENCHMARK_BOLD(printf("\nAn error has occured !\n")));\
                                             op;\
