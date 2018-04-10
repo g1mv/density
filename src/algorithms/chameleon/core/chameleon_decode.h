@@ -259,7 +259,7 @@ DENSITY_CHAMELEON_DECODE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GROUP_SIZE,
         INCOMPRESSIBLE_PROTECTION_FUNCTION_END(in_position, 64 * (BYTE_GROUP_SIZE));\
         if (DENSITY_UNLIKELY(!((hits + inserts + collisions) & (0x1ff)))) {\
             if (!inserts) {\
-                if (total_inserts < (((uint64_t)1 << ((HASH_BYTES) << 3)) * 2) / 3 && (BYTE_GROUP_SIZE) <= 6) {\
+                if (total_inserts < ((1llu << ((HASH_BYTES) << 3)) * 2) / 3 && (BYTE_GROUP_SIZE) <= 6) {\
                     if(out_position + DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES, HASH_BYTES) * DENSITY_ALGORITHMS_TRANSITION_UNROLL * (BYTE_GROUP_SIZE) < original_size) {\
                         DENSITY_MEMSET(&dictionary->bitmap, 0, ((uint32_t) 1 << ((HASH_BYTES) << 3)) >> 3);\
                         if (total_inserts < (((uint64_t)1 << ((HASH_BYTES) << 3)) * 1) / 3 && (BYTE_GROUP_SIZE) <= 4) {\
@@ -276,7 +276,7 @@ DENSITY_CHAMELEON_DECODE_TRANSITION_KERNEL_TEMPLATE(HASH_BYTES, BYTE_GROUP_SIZE,
                 }\
             } else {\
                 total_inserts += inserts;\
-                if (total_inserts > ((((uint64_t)1 << ((HASH_BYTES) << 3)) * 15) >> 4)) {\
+                if (total_inserts > (((1llu << ((HASH_BYTES) << 3)) * 15) >> 4)) {\
                     if (((HASH_BYTES) << 3) < DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS && (BYTE_GROUP_SIZE) <= 6) {\
                         if(out_position + DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES, DENSITY_ADD(HASH_BYTES,1)) * DENSITY_ALGORITHMS_TRANSITION_UNROLL * (BYTE_GROUP_SIZE) < original_size) {\
                             DENSITY_FAST_CLEAR_ARRAY_64(dictionary->bitmap, ((uint32_t) 1 << (DENSITY_ADD(HASH_BYTES,1) << 3)) >> 6);\

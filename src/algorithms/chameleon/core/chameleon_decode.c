@@ -68,6 +68,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint64_t hash = 0;
     uint_fast32_t stability;
 
+    // Initial branching
+    DENSITY_CHAMELEON_INITIAL_BRANCHING;
+
     // Study kernels
     study_kernel_1_2:
 DENSITY_CHAMELEON_DECODE_GENERATE_STUDY_KERNEL(1, 2, DENSITY_VOID, DENSITY_VOID);

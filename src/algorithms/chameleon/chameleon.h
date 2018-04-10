@@ -56,4 +56,68 @@ typedef enum {
 
 typedef uint64_t density_chameleon_signature;
 
+#define DENSITY_CHAMELEON_INITIAL_BRANCHING\
+    switch(dictionary->state.active_mode) {\
+        case DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE_STUDY:\
+            switch(dictionary->state.active_hash_bytes) {\
+                case 1:\
+                    switch(dictionary->state.active_group_bytes) {\
+                        case 2:\
+                            goto study_kernel_1_2;\
+                        case 4:\
+                            goto study_kernel_1_4;\
+                        case 6:\
+                            goto study_kernel_1_6;\
+                        case 8:\
+                            goto study_kernel_1_8;\
+                        default:\
+                            return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+                    }\
+                case 2:\
+                    switch(dictionary->state.active_group_bytes) {\
+                        case 4:\
+                            goto study_kernel_2_4;\
+                        case 6:\
+                            goto study_kernel_2_6;\
+                        case 8:\
+                            goto study_kernel_2_8;\
+                        default:\
+                            return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+                    }\
+                default:\
+                    return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+            }\
+        case DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE_FAST:\
+            switch(dictionary->state.active_hash_bytes) {\
+                case 1:\
+                    switch(dictionary->state.active_group_bytes) {\
+                        case 2:\
+                            goto fast_kernel_1_2;\
+                        case 4:\
+                            goto fast_kernel_1_4;\
+                        case 6:\
+                            goto fast_kernel_1_6;\
+                        case 8:\
+                            goto fast_kernel_1_8;\
+                        default:\
+                            return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+                    }\
+                case 2:\
+                    switch(dictionary->state.active_group_bytes) {\
+                        case 4:\
+                            goto fast_kernel_2_4;\
+                        case 6:\
+                            goto fast_kernel_2_6;\
+                        case 8:\
+                            goto fast_kernel_2_8;\
+                        default:\
+                            return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+                    }\
+                default:\
+                    return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+            }\
+        default:\
+            return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+    }
+
 #endif
