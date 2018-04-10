@@ -37,9 +37,9 @@
 
 #include "../globals.h"
 
-#define DENSITY_ALGORITHMS_MULTIPLIER_64        0x88c65c9962e277c1llu
-#define DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS  8
-#define DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS  16
+#define DENSITY_ALGORITHMS_MULTIPLIER_64                0x88c65c9962e277c1llu
+#define DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS  8u
+#define DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS      16u
 
 typedef enum {
     DENSITY_ALGORITHMS_EXIT_STATUS_FINISHED = 0,
@@ -50,7 +50,6 @@ typedef enum {
 
 typedef struct {
     void *dictionary;
-    bool dictionary_cleared;
     uint_fast8_t copy_penalty;
     uint_fast8_t copy_penalty_start;
     bool previous_incompressible;
@@ -107,7 +106,8 @@ typedef struct {
 
 #define DENSITY_ALGORITHMS_MULTIPLY_SHIFT_64(UNIT, HASH_BYTES)  (((UNIT) * DENSITY_ALGORITHMS_MULTIPLIER_64) >> (64 - ((HASH_BYTES) << 3)))
 #define DENSITY_ALGORITHMS_EXTRACT_64(MEM_64, BYTE_GROUP_SIZE)  ((MEM_64) & (0xffffffffffffffffllu >> (64 - ((BYTE_GROUP_SIZE) << 3))))
-#define DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES, NEXT_HASH_BYTES)   (((1 << ((NEXT_HASH_BYTES) << 3)) - (1 << ((HASH_BYTES) << 3))) >> 6)
+#define DENSITY_ALGORITHMS_TRANSITION_UNROLL    4
+#define DENSITY_ALGORITHMS_TRANSITION_ROUNDS(HASH_BYTES, NEXT_HASH_BYTES)   ((NEXT_HASH_BYTES) > (HASH_BYTES) ? (((1 << ((NEXT_HASH_BYTES) << 3)) - (1 << ((HASH_BYTES) << 3))) >> 6) : ((1 << ((HASH_BYTES) >> 3)) >> (1 << (HASH_BYTES))))
 
 DENSITY_WINDOWS_EXPORT void density_algorithms_reset_state(density_algorithm_state *DENSITY_RESTRICT_DECLARE);
 DENSITY_WINDOWS_EXPORT void density_algorithms_prepare_state(density_algorithm_state *DENSITY_RESTRICT_DECLARE, void *DENSITY_RESTRICT_DECLARE);

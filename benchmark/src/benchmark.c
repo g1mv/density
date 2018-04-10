@@ -20,6 +20,7 @@
  * 5/04/15 19:30
  */
 
+#include "../../src/globals.h"
 #include "benchmark.h"
 
 void density_benchmark_version() {
@@ -45,7 +46,7 @@ void density_benchmark_client_usage() {
     printf("                                    3 = Lion algorithm\n");
     printf("  -c                                Compress only\n");
     printf("  -f                                Activate fuzzer mode (pseudorandom generated data)\n");
-    printf("  -h                                Print data hashing informations\n\n");
+    printf("  -h                                Print data hashing information\n\n");
     exit(EXIT_SUCCESS);
 }
 
@@ -84,8 +85,9 @@ int main(int argc, char *argv[]) {
     bool hash_info = false;
     char *file_path = NULL;
 
-    if (argc <= 1)
+    if (argc <= 1) {
         density_benchmark_client_usage();
+    }
     for (int count = 1; count < argc; count++) {
         if (argv[count][0] == '-') {
             switch (argv[count][1]) {
@@ -113,8 +115,9 @@ int main(int argc, char *argv[]) {
                 default:
                     density_benchmark_client_usage();
             }
-        } else
+        } else {
             file_path = argv[argc - 1];
+        }
     }
 
     uint8_t *in;
@@ -124,18 +127,23 @@ int main(int argc, char *argv[]) {
     if (fuzzer) {
         srand((unsigned int) (time(NULL) * 14521937821257379531llu));
         uncompressed_size = (uint_fast64_t) (((uint64_t) (rand() * 100000000llu)) / RAND_MAX);
-        memory_allocated = density_compress_safe_size(uncompressed_size);
+        memory_allocated = DENSITY_MAXIMUM_3(
+                density_compress_safe_output_size(DENSITY_ALGORITHM_CHAMELEON, uncompressed_size),
+                density_compress_safe_output_size(DENSITY_ALGORITHM_CHEETAH, uncompressed_size),
+                density_compress_safe_output_size(DENSITY_ALGORITHM_LION, uncompressed_size)
+        );
         in = malloc(memory_allocated * sizeof(uint8_t));
         uint8_t value = (uint8_t) rand();
         for (unsigned int count = 0; count < uncompressed_size; count++) {
-            if (!(rand() & 0xf))
-                value += (uint8_t)rand();
+            if (!(rand() & (uint8_t) 0xf)) {
+                value += (uint8_t) rand();
+            }
             in[count] = value;
         }
         out = malloc(memory_allocated * sizeof(uint8_t));
     } else {
         // Open file and get infos
-        FILE *file = fopen(file_path, "rb");
+        FILE *file = fopen(file_path, "rbe");
         if (file == NULL) {
             DENSITY_BENCHMARK_ERROR(printf("Error opening file %s.", file_path), false);
         }
@@ -144,7 +152,11 @@ int main(int argc, char *argv[]) {
 
         // Allocate memory and copy file to memory
         uncompressed_size = (uint_fast64_t) file_attributes.st_size;
-        memory_allocated = density_compress_safe_size(uncompressed_size);
+        memory_allocated = DENSITY_MAXIMUM_3(
+                density_compress_safe_output_size(DENSITY_ALGORITHM_CHAMELEON, uncompressed_size),
+                density_compress_safe_output_size(DENSITY_ALGORITHM_CHEETAH, uncompressed_size),
+                density_compress_safe_output_size(DENSITY_ALGORITHM_LION, uncompressed_size)
+        );
         in = malloc(memory_allocated * sizeof(uint8_t));
         size_t read = fread(in, sizeof(uint8_t), uncompressed_size, file);
         if(uncompressed_size != read) {
@@ -200,7 +212,7 @@ int main(int argc, char *argv[]) {
         if (result.state) {
             DENSITY_BENCHMARK_ERROR(printf("During compress API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
         }
-        const uint_fast64_t compressed_size = result.bytesWritten;
+        const uint_fast64_t compressed_size = result.bytes_written;
 
         uint64_t hash_1 = DENSITY_BENCHMARK_HASH_SEED_1;
         uint64_t hash_2 = DENSITY_BENCHMARK_HASH_SEED_2;
@@ -217,9 +229,9 @@ int main(int argc, char *argv[]) {
             if (result.state) {
                 DENSITY_BENCHMARK_ERROR(printf("During decompress API returned error %i (%s).", result.state, density_benchmark_convert_state_to_text(result.state)), true);
             }
-            if (result.bytesWritten != uncompressed_size) {
+            if (result.bytes_written != uncompressed_size) {
                 DENSITY_BENCHMARK_ERROR(printf("Round-trip size differs from original size (");
-                density_benchmark_format_decimal(result.bytesWritten);
+                                                density_benchmark_format_decimal(result.bytes_written);
                 printf(" bytes against ");
                 density_benchmark_format_decimal(uncompressed_size);
                 printf(" bytes).");, true);

@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "density_api.h"
+#include "api.h"
 
 #define DENSITY_NOT_ZERO(x) (!!(x))
 
@@ -65,8 +65,9 @@
 #define DENSITY_MEMSET				__builtin_memset
 #define DENSITY_LIKELY(x)			__builtin_expect(DENSITY_NOT_ZERO(x), 1)
 #define DENSITY_UNLIKELY(x)			__builtin_expect(DENSITY_NOT_ZERO(x), 0)
-#define DENSITY_PREFETCH(x, y, z)    __builtin_prefetch(x, y, z)
-#define DENSITY_CTZ(x)				__builtin_ctz(x)
+#define DENSITY_PREFETCH(x, y, z)   __builtin_prefetch(x, y, z)
+#define DENSITY_CLZ(x)                __builtin_clzll(x)
+#define DENSITY_CTZ(x)                __builtin_ctzll(x)
 
 #if defined(__BYTE_ORDER__)
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -94,9 +95,18 @@
 #define DENSITY_UNLIKELY(x)			(x)
 #define DENSITY_PREFETCH(x, y, z)	((void)(x, y, z))
 
+DENSITY_FORCE_INLINE uint_fast8_t density_msvc_clz(uint64_t value) {
+	unsigned long leading_zero = 0;
+	if (_BitScanReverse64(&leading_zero, value))
+		return (uint_fast8_t)leading_zero;
+	else
+		return 0;
+}
+#define DENSITY_CLZ(x)				density_msvc_clz(x)
+
 DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 	unsigned long trailing_zero = 0;
-	if (_BitScanForward(&trailing_zero, (unsigned long)value))
+	if (_BitScanForward64(&trailing_zero, value))
 		return (uint_fast8_t)trailing_zero;
 	else
 		return 0;
@@ -169,7 +179,7 @@ DENSITY_FORCE_INLINE uint_fast8_t density_msvc_ctz(uint64_t value) {
 
 #define DENSITY_CASE_GENERATOR_4(op_a, flag_a, op_b, flag_b, op_c, flag_c, op_d, flag_d, op_mid, shift)\
     case (((flag_d) << ((shift) * 3)) | ((flag_c) << ((shift) * 2)) | ((flag_b) << (shift)) | (flag_a)):\
-        op_a;\
+        ;op_a;\
         op_mid;\
         op_b;\
         op_mid;\

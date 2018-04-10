@@ -44,7 +44,7 @@
 
 #include "chameleon_decode.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_chameleon_decode(density_algorithm_state *const DENSITY_RESTRICT state, const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t out_size) {
+DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status density_chameleon_decode(density_algorithm_state *const DENSITY_RESTRICT state, const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, uint8_t **DENSITY_RESTRICT out, const uint_fast64_t out_size, const uint64_t original_size) {
     uint_fast64_t hits = 0;
     uint_fast64_t inserts = 0;
     uint_fast64_t total_inserts = 0;
@@ -67,6 +67,9 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint64_t unit;
     uint64_t hash = 0;
     uint_fast32_t stability;
+
+    // Initial branching
+    DENSITY_CHAMELEON_DICTIONARY_INITIAL_BRANCHING_FROM_STATE;
 
     // Study kernels
     study_kernel_1_2:

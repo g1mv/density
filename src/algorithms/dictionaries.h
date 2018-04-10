@@ -32,14 +32,12 @@
  * 13/01/18 17:26
  */
 
-#ifndef DENSITY_DICTIONARIES_H
-#define DENSITY_DICTIONARIES_H
+#ifndef DENSITY_ALGORITHMS_DICTIONARIES_H
+#define DENSITY_ALGORITHMS_DICTIONARIES_H
 
-#include "../globals.h"
 #include "../algorithms/chameleon/dictionary/chameleon_dictionary.h"
 #include "../algorithms/cheetah/dictionary/cheetah_dictionary.h"
 #include "../algorithms/lion/dictionary/lion_dictionary.h"
-
-DENSITY_WINDOWS_EXPORT size_t density_get_dictionary_size(DENSITY_ALGORITHM);
+#include "../globals.h"
 
 #endif

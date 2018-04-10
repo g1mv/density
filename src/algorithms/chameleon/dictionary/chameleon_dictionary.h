@@ -42,21 +42,103 @@
  * Hash based superfast kernel
  */
 
-#ifndef DENSITY_CHAMELEON_DICTIONARY_H
-#define DENSITY_CHAMELEON_DICTIONARY_H
+#ifndef DENSITY_ALGORITHMS_CHAMELEON_DICTIONARY_H
+#define DENSITY_ALGORITHMS_CHAMELEON_DICTIONARY_H
 
-#include "../chameleon.h"
 #include "../../algorithms.h"
+#include "../chameleon.h"
 
 #include <string.h>
 
+typedef enum {
+    DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE_STUDY = 1,
+    DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE_FAST = 2,
+} DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE;
+
 #pragma pack(push)
-#pragma pack(4)
+#pragma pack(8)
 
 typedef struct {
-    uint64_t bitmap[(1 << DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS) >> 6];
-    uint64_t entries[1 << DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS];
+    bool cleared;
+    DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE active_mode;
+    uint8_t active_hash_bytes;
+    uint8_t active_group_bytes;
+} density_dictionary_state;
+
+typedef struct {
+    density_dictionary_state state;
+    uint64_t bitmap[(1u << DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS) / 64];
+    uint64_t entries[1u << DENSITY_ALGORITHMS_MAX_DICTIONARY_KEY_BITS];
 } density_chameleon_dictionary;
+
 #pragma pack(pop)
+
+#define DENSITY_CHAMELEON_DICTIONARY_INITIAL_BRANCHING_FROM_STATE\
+    switch(dictionary->state.active_mode) {\
+        case DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE_STUDY:\
+            switch(dictionary->state.active_hash_bytes) {\
+                case 1:\
+                    switch(dictionary->state.active_group_bytes) {\
+                        case 2:\
+                            goto study_kernel_1_2;\
+                        case 4:\
+                            goto study_kernel_1_4;\
+                        case 6:\
+                            goto study_kernel_1_6;\
+                        case 8:\
+                            goto study_kernel_1_8;\
+                        default:\
+                            return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+                    }\
+                case 2:\
+                    switch(dictionary->state.active_group_bytes) {\
+                        case 4:\
+                            goto study_kernel_2_4;\
+                        case 6:\
+                            goto study_kernel_2_6;\
+                        case 8:\
+                            goto study_kernel_2_8;\
+                        default:\
+                            return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+                    }\
+                default:\
+                    return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+            }\
+        case DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE_FAST:\
+            switch(dictionary->state.active_hash_bytes) {\
+                case 1:\
+                    switch(dictionary->state.active_group_bytes) {\
+                        case 2:\
+                            goto fast_kernel_1_2;\
+                        case 4:\
+                            goto fast_kernel_1_4;\
+                        case 6:\
+                            goto fast_kernel_1_6;\
+                        case 8:\
+                            goto fast_kernel_1_8;\
+                        default:\
+                            return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+                    }\
+                case 2:\
+                    switch(dictionary->state.active_group_bytes) {\
+                        case 4:\
+                            goto fast_kernel_2_4;\
+                        case 6:\
+                            goto fast_kernel_2_6;\
+                        case 8:\
+                            goto fast_kernel_2_8;\
+                        default:\
+                            return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+                    }\
+                default:\
+                    return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+            }\
+        default:\
+            return DENSITY_ALGORITHMS_EXIT_STATUS_ERROR_DURING_PROCESSING;\
+    }
+
+DENSITY_WINDOWS_EXPORT void density_chameleon_dictionary_initialize(density_chameleon_dictionary *);
+
+DENSITY_WINDOWS_EXPORT void density_chameleon_dictionary_update_state(density_chameleon_dictionary *, DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE, uint8_t, uint8_t);
 
 #endif

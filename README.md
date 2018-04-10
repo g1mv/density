@@ -222,8 +222,8 @@ When this is done you can start using the **DENSITY API** :
     uint64_t text_length = (uint64_t)strlen(text);
 
     // Determine safe buffer sizes
-    uint_fast64_t compress_safe_size = density_compress_safe_size(text_length);
-    uint_fast64_t decompress_safe_size = density_decompress_safe_size(text_length);
+    uint_fast64_t compress_safe_size = density_compress_safe_output_size(text_length);
+    uint_fast64_t decompress_safe_size = density_decompress_safe_output_size(text_length);
 
     // Allocate required memory
     uint8_t *outCompressed   = malloc(compress_safe_size * sizeof(char));
@@ -233,12 +233,12 @@ When this is done you can start using the **DENSITY API** :
     // Compress
     result = density_compress(text, text_length, outCompressed, compress_safe_size, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM);
     if(!result.state)
-        printf("Compressed %llu bytes to %llu bytes\n", result.bytesRead, result.bytesWritten);
+        printf("Compressed %llu bytes to %llu bytes\n", result.bytes_read, result.bytes_written);
 
     // Decompress
-    result = density_decompress(outCompressed, result.bytesWritten, outDecompressed, decompress_safe_size);
+    result = density_decompress(outCompressed, result.bytes_written, outDecompressed, decompress_safe_size);
     if(!result.state)
-        printf("Decompressed %llu bytes to %llu bytes\n", result.bytesRead, result.bytesWritten);
+        printf("Decompressed %llu bytes to %llu bytes\n", result.bytes_read, result.bytes_written);
 
     // Free memory_allocated
     free(outCompressed);

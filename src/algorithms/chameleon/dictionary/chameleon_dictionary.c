@@ -1,7 +1,7 @@
 /*
  * Centaurean Density
  *
- * Copyright (c) 2015, Guillaume Voirin
+ * Copyright (c) 2018, Guillaume Voirin
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,19 +29,32 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * 14/10/15 02:06
+ * 10/04/18 12:00
+ *
+ * -------------------
+ * Chameleon algorithm
+ * -------------------
+ *
+ * Author(s)
+ * Guillaume Voirin (https://github.com/gpnuma)
+ *
+ * Description
+ * Hash based superfast kernel
  */
 
-#include "algorithms.h"
+#include "chameleon_dictionary.h"
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_algorithms_reset_state(density_algorithm_state *const DENSITY_RESTRICT state) {
-    state->copy_penalty = 0;
-    state->copy_penalty_start = 1;
-    state->previous_incompressible = false;
-    state->counter = 0;
+void density_chameleon_dictionary_initialize(density_chameleon_dictionary *dictionary) {
+    DENSITY_MEMSET(dictionary->bitmap, 0, ((uint32_t) 1 << DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS) >> (uint8_t) 3);
+    DENSITY_FAST_CLEAR_ARRAY_64(dictionary->entries, ((uint32_t) 1 << DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS));
+    dictionary->state.cleared = false;
+    dictionary->state.active_mode = DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE_STUDY;
+    dictionary->state.active_hash_bytes = 1;
+    dictionary->state.active_group_bytes = 2;
 }
 
-DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE void density_algorithms_prepare_state(density_algorithm_state *const DENSITY_RESTRICT state, void *const DENSITY_RESTRICT dictionary) {
-    state->dictionary = dictionary;
-    density_algorithms_reset_state(state);
+void density_chameleon_dictionary_update_state(density_chameleon_dictionary *dictionary, DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE mode, uint8_t hash_bytes, uint8_t group_bytes) {
+    dictionary->state.active_mode = mode;
+    dictionary->state.active_hash_bytes = hash_bytes;
+    dictionary->state.active_group_bytes = group_bytes;
 }
