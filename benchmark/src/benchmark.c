@@ -126,17 +126,17 @@ int main(int argc, char *argv[]) {
     uint_fast64_t memory_allocated;
     if (fuzzer) {
         srand((unsigned int) (time(NULL) * 14521937821257379531llu));
-        uncompressed_size = (uint_fast64_t) (((uint64_t) (arc4random() * 100000000llu)) / RAND_MAX);
+        uncompressed_size = (uint_fast64_t) (((uint64_t) (rand() * 100000000llu)) / RAND_MAX);
         memory_allocated = DENSITY_MAXIMUM_3(
                 density_compress_safe_output_size(DENSITY_ALGORITHM_CHAMELEON, uncompressed_size),
                 density_compress_safe_output_size(DENSITY_ALGORITHM_CHEETAH, uncompressed_size),
                 density_compress_safe_output_size(DENSITY_ALGORITHM_LION, uncompressed_size)
         );
         in = malloc(memory_allocated * sizeof(uint8_t));
-        uint8_t value = (uint8_t) arc4random();
+        uint8_t value = (uint8_t) rand();
         for (unsigned int count = 0; count < uncompressed_size; count++) {
-            if (!(arc4random() & (uint8_t) 0xf)) {
-                value += (uint8_t) arc4random();
+            if (!(rand() & (uint8_t) 0xf)) {
+                value += (uint8_t) rand();
             }
             in[count] = value;
         }
