@@ -50,7 +50,6 @@ typedef enum {
 
 typedef struct {
     void *dictionary;
-    bool dictionary_cleared;
     uint_fast8_t copy_penalty;
     uint_fast8_t copy_penalty_start;
     bool previous_incompressible;

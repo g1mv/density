@@ -47,6 +47,7 @@
 void density_chameleon_dictionary_initialize(density_chameleon_dictionary *dictionary) {
     DENSITY_MEMSET(dictionary->bitmap, 0, ((uint32_t) 1 << DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS) >> (uint8_t) 3);
     DENSITY_FAST_CLEAR_ARRAY_64(dictionary->entries, ((uint32_t) 1 << DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS));
+    dictionary->state.cleared = false;
     dictionary->state.active_mode = DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE_STUDY;
     dictionary->state.active_hash_bytes = 1;
     dictionary->state.active_group_bytes = 2;

@@ -50,15 +50,16 @@
 
 #include <string.h>
 
-#pragma pack(push)
-#pragma pack(4)
-
 typedef enum {
     DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE_STUDY = 1,
     DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE_FAST = 2,
 } DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE;
 
+#pragma pack(push)
+#pragma pack(8)
+
 typedef struct {
+    bool cleared;
     DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE active_mode;
     uint8_t active_hash_bytes;
     uint8_t active_group_bytes;
