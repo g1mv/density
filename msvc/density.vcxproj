@@ -77,6 +77,7 @@
     <ClCompile Include="..\src\algorithms\algorithms.c" />
     <ClCompile Include="..\src\algorithms\chameleon\core\chameleon_decode.c" />
     <ClCompile Include="..\src\algorithms\chameleon\core\chameleon_encode.c" />
+    <ClCompile Include="..\src\algorithms\chameleon\dictionary\chameleon_dictionary.c" />
     <ClCompile Include="..\src\algorithms\cheetah\core\cheetah_decode.c" />
     <ClCompile Include="..\src\algorithms\cheetah\core\cheetah_encode.c" />
     <ClCompile Include="..\src\algorithms\dictionaries.c" />
