@@ -51,3 +51,9 @@ void density_chameleon_dictionary_initialize(density_chameleon_dictionary *dicti
     dictionary->state.active_hash_bytes = 1;
     dictionary->state.active_group_bytes = 2;
 }
+
+void density_chameleon_dictionary_update_state(density_chameleon_dictionary *dictionary, DENSITY_CHAMELEON_DICTIONARY_ACTIVE_MODE mode, uint8_t hash_bytes, uint8_t group_bytes) {
+    dictionary->state.active_mode = mode;
+    dictionary->state.active_hash_bytes = hash_bytes;
+    dictionary->state.active_group_bytes = group_bytes;
+}

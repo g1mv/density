@@ -71,7 +71,7 @@ DENSITY_WINDOWS_EXPORT DENSITY_FORCE_INLINE density_algorithm_exit_status densit
     uint_fast32_t stability;
 
     // Initial branching
-    DENSITY_CHAMELEON_INITIAL_BRANCHING;
+    DENSITY_CHAMELEON_DICTIONARY_INITIAL_BRANCHING_FROM_STATE;
 
     // Study kernels
     study_kernel_1_2:
