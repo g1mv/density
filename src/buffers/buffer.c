@@ -42,9 +42,9 @@ DENSITY_WINDOWS_EXPORT uint64_t density_compress_safe_output_size(const DENSITY_
 
     switch (algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
-            safe_size += DENSITY_HEADER_ORIGINAL_SIZE_BYTES(input_size);                        // Header size
-            safe_size += 1 + ((input_size / 2) / 8);                                            // Worst case, signature space with 2-byte groups
-            safe_size += input_size;                                                            // Everything encoded as plain data
+            safe_size += DENSITY_HEADER_BASE_SIZE + DENSITY_HEADER_ORIGINAL_SIZE_BYTES(input_size);     // Header size
+            safe_size += 8 + ((input_size / 2) / 8);                                                    // Worst case, signature space with 2-byte groups
+            safe_size += input_size;                                                                    // Everything encoded as plain data
             return safe_size;
 
         default:;
@@ -90,16 +90,14 @@ density_processing_result density_make_result(const DENSITY_STATE state, const u
     return result;
 }
 
-density_context *density_allocate_context(const DENSITY_ALGORITHM algorithm, const uint64_t original_size, const bool is_dictionary_custom, void *(*mem_alloc)(size_t)) {
+density_context *density_allocate_context(density_metadata metadata, const bool is_dictionary_custom, void *(*mem_alloc)(size_t)) {
     density_context* context = mem_alloc(sizeof(density_context));
-    context->header.algorithm = algorithm;
-    context->header.original_size = original_size;
-
-    context->dictionary.size = density_get_dictionary_size((DENSITY_ALGORITHM) context->header.algorithm);
+    context->metadata = metadata;
+    context->dictionary.size = density_get_dictionary_size((DENSITY_ALGORITHM) context->metadata.algorithm);
     context->dictionary.is_custom = is_dictionary_custom;
     if (!context->dictionary.is_custom) {
         context->dictionary.pointer = mem_alloc(context->dictionary.size);
-        if (context->header.algorithm == DENSITY_ALGORITHM_CHAMELEON) {
+        if (context->metadata.algorithm == DENSITY_ALGORITHM_CHAMELEON) {
             // todo in progress, for adaptative chameleon, init only 8-bit bitmap and 8-bit dictionary sizes
             DENSITY_MEMSET(&((density_chameleon_dictionary *) context->dictionary.pointer)->bitmap, 0, ((uint32_t) 1 << DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS) >> (uint8_t) 3);
             DENSITY_FAST_CLEAR_ARRAY_64(((density_chameleon_dictionary *) context->dictionary.pointer)->entries, ((uint32_t) 1 << DENSITY_ALGORITHMS_INITIAL_DICTIONARY_KEY_BITS));
@@ -126,15 +124,24 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_compress_prepare_contex
         mem_alloc = malloc;
     }
 
-    return density_make_result(DENSITY_STATE_OK, 0, 0, density_allocate_context(algorithm, original_size, is_dictionary_custom, mem_alloc));
+    // Prepare metadata
+    density_metadata metadata;
+    metadata.version_major = density_version_major();
+    metadata.version_minor = density_version_minor();
+    metadata.version_revision = density_version_revision();
+    metadata.algorithm = algorithm;
+    metadata.original_size = original_size;
+
+    return density_make_result(DENSITY_STATE_OK, 0, 0, density_allocate_context(metadata, is_dictionary_custom, mem_alloc));
 }
 
 DENSITY_WINDOWS_EXPORT density_processing_result density_compress_with_context(const uint8_t *input_buffer, const uint64_t input_size, uint8_t *output_buffer, const uint64_t output_size, density_context *const context) {
-    if (output_size < sizeof(density_header)) {
-        return density_make_result(DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL, 0, 0, context);
-    }
     if (context == NULL) {
         return density_make_result(DENSITY_STATE_ERROR_INVALID_CONTEXT, 0, 0, context);
+    }
+
+    if (density_compress_safe_output_size((const DENSITY_ALGORITHM) context->metadata.algorithm, input_size) > output_size) {
+        return density_make_result(DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL, 0, 0, context);
     }
 
     // Variables setup
@@ -144,11 +151,11 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_compress_with_context(c
     density_algorithm_exit_status status;
 
     // Header
-    density_header_write(&out, &context->header);
+    density_header_write(&out, &context->metadata);
 
     // Compression
     density_algorithms_prepare_state(&state, context->dictionary.pointer);
-    switch (context->header.algorithm) {
+    switch (context->metadata.algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
             status = density_chameleon_encode(&state, &in, input_size, &out, output_size);
             break;
@@ -173,14 +180,14 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_prepare_cont
         mem_alloc = malloc;
     }
 
-    // Read header
-    density_header header;
-    if (!density_header_read(&in, input_size, &header)) {
+    // Read metadata
+    density_metadata metadata;
+    if (!density_header_read(&in, input_size, &metadata)) {
         return density_make_result(DENSITY_STATE_ERROR_INPUT_BUFFER_TOO_SMALL, in - input_buffer, 0, NULL);
     }
 
     // Setup context
-    density_context *const context = density_allocate_context((const DENSITY_ALGORITHM) header.algorithm, header.original_size, is_dictionary_custom, mem_alloc);
+    density_context *const context = density_allocate_context(metadata, is_dictionary_custom, mem_alloc);
     return density_make_result(DENSITY_STATE_OK, in - input_buffer, 0, context);
 }
 
@@ -189,7 +196,7 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_with_context
         return density_make_result(DENSITY_STATE_ERROR_INVALID_CONTEXT, 0, 0, context);
     }
 
-    if (context->header.original_size > output_size) {
+    if (context->metadata.original_size > output_size) {
         return density_make_result(DENSITY_STATE_ERROR_OUTPUT_BUFFER_TOO_SMALL, 0, 0, context);
     }
 
@@ -201,9 +208,9 @@ DENSITY_WINDOWS_EXPORT density_processing_result density_decompress_with_context
 
     // Decompression
     density_algorithms_prepare_state(&state, context->dictionary.pointer);
-    switch (context->header.algorithm) {
+    switch (context->metadata.algorithm) {
         case DENSITY_ALGORITHM_CHAMELEON:
-            status = density_chameleon_decode(&state, &in, input_size, &out, output_size, context->header.original_size);
+            status = density_chameleon_decode(&state, &in, input_size, &out, output_size, context->metadata.original_size);
             break;
         case DENSITY_ALGORITHM_CHEETAH:
             status = density_cheetah_decode(&state, &in, input_size, &out, output_size);

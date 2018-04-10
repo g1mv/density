@@ -77,7 +77,7 @@ typedef struct {
     uint8_t version_revision;
     uint8_t algorithm;
     uint64_t original_size;
-} density_header;
+} density_metadata;
 
 typedef struct {
     bool is_custom;
@@ -86,7 +86,7 @@ typedef struct {
 } density_dictionary;
 
 typedef struct {
-    density_header header;
+    density_metadata metadata;
     density_dictionary dictionary;
 } density_context;
 

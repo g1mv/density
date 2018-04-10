@@ -41,10 +41,11 @@
 #include "../api.h"
 #include "../globals.h"
 
+#define DENSITY_HEADER_BASE_SIZE    5
 #define DENSITY_HEADER_ORIGINAL_SIZE_BYTES(ORIGINAL_SIZE)    (8 - (DENSITY_CLZ(ORIGINAL_SIZE) / 8))
 
-DENSITY_WINDOWS_EXPORT bool density_header_read(const uint8_t ** DENSITY_RESTRICT_DECLARE, uint_fast64_t, density_header * DENSITY_RESTRICT_DECLARE);
+DENSITY_WINDOWS_EXPORT bool density_header_read(const uint8_t ** DENSITY_RESTRICT_DECLARE, uint_fast64_t, density_metadata * DENSITY_RESTRICT_DECLARE);
 
-DENSITY_WINDOWS_EXPORT void density_header_write(uint8_t ** DENSITY_RESTRICT_DECLARE, density_header * DENSITY_RESTRICT_DECLARE);
+DENSITY_WINDOWS_EXPORT void density_header_write(uint8_t ** DENSITY_RESTRICT_DECLARE, density_metadata * DENSITY_RESTRICT_DECLARE);
 
 #endif

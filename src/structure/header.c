@@ -35,39 +35,40 @@
 #include "../api.h"
 #include "header.h"
 
-DENSITY_WINDOWS_EXPORT bool density_header_read(const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, density_header *DENSITY_RESTRICT header) {
-    if (in_size < 5) {
+DENSITY_WINDOWS_EXPORT bool density_header_read(const uint8_t **DENSITY_RESTRICT in, const uint_fast64_t in_size, density_metadata *DENSITY_RESTRICT metadata) {
+    if (in_size < DENSITY_HEADER_BASE_SIZE) {
         return false;
     }
 
-    header->version_major = *((*in)++);
-    header->version_minor = *((*in)++);
-    header->version_revision = *((*in)++);
-    header->algorithm = *((*in)++);
+    metadata->version_major = *((*in)++);
+    metadata->version_minor = *((*in)++);
+    metadata->version_revision = *((*in)++);
+    metadata->algorithm = *((*in)++);
     const uint8_t original_size_bytes = *((*in)++);
-    if (in_size < 5 + original_size_bytes) {
+    if (in_size < DENSITY_HEADER_BASE_SIZE + original_size_bytes) {
         return false;
     }
 
     if (original_size_bytes) {
-        DENSITY_ENDIAN_MEMCPY_AND_CORRECT_64(DENSITY_MEMCPY, &header->original_size, *in, original_size_bytes);
+        metadata->original_size = 0;
+        DENSITY_ENDIAN_MEMCPY_AND_CORRECT_64(DENSITY_MEMCPY, &metadata->original_size, *in, original_size_bytes);
         (*in) += original_size_bytes;
     } else {
-        header->original_size = 0;
+        metadata->original_size = 0;
     }
 
     return true;
 }
 
-DENSITY_WINDOWS_EXPORT void density_header_write(uint8_t **DENSITY_RESTRICT out, density_header *DENSITY_RESTRICT header) {
-    *((*out)++) = DENSITY_MAJOR_VERSION;
-    *((*out)++) = DENSITY_MINOR_VERSION;
-    *((*out)++) = DENSITY_REVISION;
-    *((*out)++) = header->algorithm;
-    if (header->original_size) {
-        const uint8_t original_size_bytes = DENSITY_HEADER_ORIGINAL_SIZE_BYTES(header->original_size);
+DENSITY_WINDOWS_EXPORT void density_header_write(uint8_t **DENSITY_RESTRICT out, density_metadata *DENSITY_RESTRICT metadata) {
+    *((*out)++) = metadata->version_major;
+    *((*out)++) = metadata->version_minor;
+    *((*out)++) = metadata->version_revision;
+    *((*out)++) = metadata->algorithm;
+    if (metadata->original_size) {
+        const uint8_t original_size_bytes = DENSITY_HEADER_ORIGINAL_SIZE_BYTES(metadata->original_size);
         *((*out)++) = original_size_bytes;
-        DENSITY_ENDIAN_CORRECT_64_AND_MEMCPY(DENSITY_MEMCPY, *out, &header->original_size, original_size_bytes);
+        DENSITY_ENDIAN_CORRECT_64_AND_MEMCPY(DENSITY_MEMCPY, *out, &metadata->original_size, original_size_bytes);
         (*out) += original_size_bytes;
     } else {
         *((*out)++) = 0;
