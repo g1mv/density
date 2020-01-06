@@ -37,9 +37,10 @@ recursive_wildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call recursive
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = benchmark
-CFLAGS = -Ofast -flto -std=c99 -Wall
+CFLAGS = -Ofast -flto -std=c99 -Wall -MD
 LFLAGS = -flto
 
+DEPS=$(wildcard *.d)
 BUILD_DIRECTORY = ../build
 DENSITY_STATIC_LIBRARY = libdensity.a
 CLIENT_SRC_DIRECTORY = src
@@ -139,5 +140,8 @@ clean:
 	@echo ${bold}Cleaning Density benchmark build files${normal} ...
 	@rm -f $(BENCHMARK_OBJ)
 	@rm -f $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION)
+	@rm -f $(DEPS)
 	@echo Done.
 	@echo
+
+-include $(BENCHMARK_OBJ:.o=.d)
