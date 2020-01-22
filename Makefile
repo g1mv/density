@@ -37,7 +37,7 @@ recursive_wildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call recursive
 UPDATE_SUBMODULES := $(shell git submodule update --init --recursive)
 
 TARGET = libdensity
-CFLAGS = -Ofast -flto -std=c99 -Wall
+CFLAGS = -Ofast -flto -std=c99 -Wall -MD
 LFLAGS = -flto
 
 BUILD_DIRECTORY = build
@@ -99,6 +99,7 @@ else
 endif
 STATIC_EXTENSION = .a
 
+DEPS=$(wildcard *.d)
 DENSITY_SRC = $(call recursive_wildcard,$(SRC_DIRECTORY)/,*.c)
 DENSITY_OBJ = $(patsubst $(SRC_DIRECTORY)%.c, $(DENSITY_BUILD_DIRECTORY)%.o, $(DENSITY_SRC))
 
@@ -148,5 +149,8 @@ clean:
 	@rm -f $(DENSITY_OBJ)
 	@rm -f $(BUILD_DIRECTORY)/$(TARGET)$(EXTENSION)
 	@rm -f $(BUILD_DIRECTORY)/$(TARGET)$(STATIC_EXTENSION)
+	@rm -f $(DEPS)
 	@echo Done.
 	@echo
+
+-include $(DENSITY_OBJ:.o=.d)
