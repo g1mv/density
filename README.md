@@ -64,7 +64,7 @@ Here are a few other benchmarks featuring DENSITY (non exhaustive list) :
 
 *   [**squash**](https://github.com/quixdb/squash) is an abstraction layer for compression algorithms, and has an extremely exhaustive set of benchmark results, including density's, [available here](https://quixdb.github.io/squash-benchmark/?dataset=dickens&machine=s-desktop).
 
-*   [**lzbench**](https://github.com/inikep/lzbench) is an in-memory benchmark of open-source LZ77/LZSS/LZMA compressors. Although DENSITY is not LZ-based, results are well worth a [look here](https://github.com/inikep/lzbench/blob/master/lzbench171_sorted.md).
+*   [**lzbench**](https://github.com/inikep/lzbench) is an in-memory benchmark of open-source LZ77/LZSS/LZMA compressors.
 
 *   [**fsbench**](https://github.com/gpnuma/fsbench-density) is a command line utility that enables real-time testing of compression algorithms, but also hashes and much more. A fork with density releases is [available here](https://github.com/gpnuma/fsbench-density) for easy access.
 The original author's repository [can be found here](https://chiselapp.com/user/Justin_be_my_guide/repository/fsbench/).
