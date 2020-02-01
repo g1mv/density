@@ -93,6 +93,12 @@ On MacOS, Clang/LLVM is the default compiler, which makes things simpler.
     build/benchmark -f
 ```
 
+Alternatively, thanks to the [Homebrew project](https://brew.sh), DENSITY can also be installed with a single command on MacOS:
+
+```
+    brew install density
+```
+
 **Linux**
 
 On Linux, Clang/LLVM is not always available by default, but can be easily added thanks to the provided package managers.
