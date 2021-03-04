@@ -1,5 +1,5 @@
 /*
- * Centaurean Density benchmark
+ * Density benchmark
  *
  * Copyright (c) 2015, Guillaume Voirin
  * All rights reserved.
@@ -117,7 +117,7 @@
                                             op;\
                                             printf("\n");\
                                             if(issue) {\
-                                                printf("Please open an issue at <https://github.com/centaurean/density/issues>, with your platform information and any relevant file.\n");\
+                                                printf("Please open an issue at <https://github.com/k0dai/density/issues>, with your platform information and any relevant file.\n");\
                                                 DENSITY_BENCHMARK_BOLD(printf("Thank you !\n"));\
                                             }\
                                             fflush(stdout);\

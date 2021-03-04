@@ -1,5 +1,5 @@
 /*
- * Centaurean Density benchmark
+ * Density benchmark
  *
  * Copyright (c) 2015, Guillaume Voirin
  * All rights reserved.
@@ -26,7 +26,7 @@ void density_benchmark_version() {
     printf("\nSingle threaded ");
     DENSITY_BENCHMARK_BOLD(printf("in-memory benchmark"));
     printf(" powered by ");
-    DENSITY_BENCHMARK_BOLD(printf("Centaurean Density %i.%i.%i\n", density_version_major(), density_version_minor(), density_version_revision()));
+    DENSITY_BENCHMARK_BOLD(printf("Density %i.%i.%i\n", density_version_major(), density_version_minor(), density_version_revision()));
     printf("Copyright (C) 2015 Guillaume Voirin\n");
     printf("Built for %s (%s endian system, %u bits) using " DENSITY_BENCHMARK_COMPILER ", %s %s\n", DENSITY_BENCHMARK_PLATFORM_STRING, DENSITY_BENCHMARK_ENDIAN_STRING, (unsigned int) (8 * sizeof(void *)), DENSITY_BENCHMARK_COMPILER_VERSION, __DATE__, __TIME__);
 }

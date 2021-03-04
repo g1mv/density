@@ -1,5 +1,5 @@
 /*
- * Centaurean Density
+ * Density
  *
  * Copyright (c) 2013, Guillaume Voirin
  * All rights reserved.

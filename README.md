@@ -10,8 +10,8 @@ DENSITY features a simple API to enable quick integration in any project.
 
 Branch|Linux & MacOS|Windows
 --- | --- | ---
-master|[![Build Status](https://travis-ci.org/centaurean/density.svg?branch=master)](https://travis-ci.org/centaurean/density)|[![Build status](https://ci.appveyor.com/api/projects/status/rf7x3x829il72cii/branch/master?svg=true)](https://ci.appveyor.com/project/gpnuma/density/branch/master)
-dev|[![Build Status](https://travis-ci.org/centaurean/density.svg?branch=dev)](https://travis-ci.org/centaurean/density)|[![Build status](https://ci.appveyor.com/api/projects/status/rf7x3x829il72cii/branch/dev?svg=true)](https://ci.appveyor.com/project/gpnuma/density/branch/dev)
+master|[![Build Status](https://travis-ci.org/k0dai/density.svg?branch=master)](https://travis-ci.org/k0dai/density)|[![Build status](https://ci.appveyor.com/api/projects/status/rf7x3x829il72cii/branch/master?svg=true)](https://ci.appveyor.com/project/gpnuma/density/branch/master)
+dev|[![Build Status](https://travis-ci.org/k0dai/density.svg?branch=dev)](https://travis-ci.org/k0dai/density)|[![Build status](https://ci.appveyor.com/api/projects/status/rf7x3x829il72cii/branch/dev?svg=true)](https://ci.appveyor.com/project/gpnuma/density/branch/dev)
 
 Why is it so fast ?
 -------------------
@@ -82,7 +82,7 @@ On MacOS, Clang/LLVM is the default compiler, which makes things simpler.
 1) Get the source code :
 
 ```
-    git clone https://github.com/centaurean/density.git
+    git clone https://github.com/k0dai/density.git
     cd density
 ```
 
@@ -113,7 +113,7 @@ The following example assumes a Debian or Ubuntu distribution with *apt-get*.
 2) Get the source code :
 
 ```
-    git clone https://github.com/centaurean/density.git
+    git clone https://github.com/k0dai/density.git
     cd density
 ```
 
@@ -145,7 +145,7 @@ The **first method** is to use mingw's gcc compiler; for that it is necessary to
 1) Once mingw-w64 is installed, get the source :
 
 ```
-    git clone https://github.com/centaurean/density.git
+    git clone https://github.com/k0dai/density.git
     cd density
 ```
 
@@ -163,7 +163,7 @@ The **second method** is to download and install Microsoft's [Visual Studio IDE 
 1) Once Visual Studio is installed, open a [developer command prompt](https://docs.microsoft.com/en-us/dotnet/framework/tools/developer-command-prompt-for-vs) and type :
 
 ```
-    git clone https://github.com/centaurean/density.git
+    git clone https://github.com/k0dai/density.git
     cd density\msvc
 ```
 
