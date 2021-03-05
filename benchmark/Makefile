@@ -58,6 +58,8 @@ ifeq ($(ARCH),)
 	ifeq ($(NATIVE),)
 		ifeq ($(TARGET_ARCH),powerpc)
 			CFLAGS += -mtune=native
+		else ifeq ($(TARGET_ARCH),arm64)
+                        CFLAGS += -mtune=native
 		else
 			CFLAGS += -march=native
 		endif
