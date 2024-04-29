@@ -17,7 +17,10 @@ fn compress_raw_safe(bencher: Bencher, path: &str) {
     let mut output = vec![0_u8; in_memory_json.len() << 1];
 
     let mut chameleon = Chameleon::new();
-    assert!(chameleon.encode_safe(input, &mut output).is_ok());
+    match chameleon.encode_safe(input, &mut output) {
+        Ok(bytes) => { println!("{} bytes", bytes) }
+        Err(_) => { assert!(false); }
+    }
 
     bencher.bench_local(move || {
         let mut chameleon = Chameleon::new();
@@ -39,7 +42,10 @@ fn compress_raw_unsafe(bencher: Bencher, path: &str) {
     let mut output = vec![0_u8; in_memory_json.len() << 1];
 
     let mut chameleon = Chameleon::new();
-    assert!(unsafe { chameleon.encode_unsafe(input, &mut output).is_ok() });
+    match unsafe { chameleon.encode_unsafe(input, &mut output) } {
+        Ok(bytes) => { println!("{} bytes", bytes) }
+        Err(_) => { assert!(false); }
+    }
 
     bencher.bench_local(move || {
         let mut chameleon = Chameleon::new();

@@ -34,7 +34,7 @@ impl<'a> ChameleonWriter<'a> {
             dictionary: [0; 1 << CHAMELEON_HASH_BITS],
             signature: Signature { value: 0, shift: 0 },
             sgn_index: 0,
-            out_index: 0,
+            out_index: BYTE_SIZE_U64,
             // temp_buffer: [0; BYTE_SIZE_U128],
             // temp_size: 0,
         }
@@ -86,7 +86,7 @@ impl Write for ChameleonWriter<'_> {
     fn write(&mut self, input: &[u8]) -> Result<usize> {
         // println!("{}", input.len());
 
-        // let start_index = self.out_index;
+        let start_index = 0;
         // let mut shift_index = 0;    // BYTE_SIZE_U128 - self.temp_size;
 
         // if self.temp_size != 0 {
@@ -163,6 +163,9 @@ impl Write for ChameleonWriter<'_> {
             }
         }
 
+        self.buffer[self.sgn_index..self.sgn_index + BYTE_SIZE_U64].copy_from_slice(&self.signature.value.to_le_bytes());
+
+        println!("{} bytes", self.out_index - start_index);
         Ok(input.len())
     }
 
