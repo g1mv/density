@@ -1,8 +1,7 @@
 use std::fs::read_to_string;
 
 use divan::Bencher;
-use lz4_flex::{compress_into, compress_prepend_size};
-use density::codec::Codec;
+use lz4_flex::compress_into;
 
 fn main() {
     divan::main();
@@ -14,15 +13,15 @@ fn compress_file(bencher: Bencher, path: &str) {
     let mut binding = vec![0; in_memory_json.len() << 1];
     let output = binding.as_mut_slice();
 
-    assert!(unsafe {
+    assert!({
         let result = compress_into(input, output);
-        if let Ok(bytes) = result {
+        if let Ok(_bytes) = result {
             // println!("{} bytes", bytes)
         }
         result.is_ok()
     });
 
-    bencher.bench_local(move || unsafe {
+    bencher.bench_local(move || {
         compress_into(input, output)
     });
 }
