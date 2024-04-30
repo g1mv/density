@@ -56,9 +56,10 @@ fn compress_raw_unsafe(bencher: Bencher, path: &str) {
 fn compress_stream_safe(bencher: Bencher, path: &str) {
     let in_memory_json = read_to_string(path).unwrap();
     let mut input = in_memory_json.as_bytes();
-    let mut output = vec![0_u8; in_memory_json.len() << 1];
+    let mut output = vec![0_u8; in_memory_json.len() << 1]; // Vec::new();//
 
     assert!(std::io::copy(&mut input, &mut ChameleonWriter::new(&mut output)).is_ok());
+    // println!("{}", output.len());
     bencher.with_inputs(|| {
         let binding = vec![0; in_memory_json.len() << 1];
         (in_memory_json.to_owned(), binding)

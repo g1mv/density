@@ -5,7 +5,7 @@ use std::slice::from_raw_parts;
 use crate::codec::Codec;
 use crate::error::Error;
 
-pub(crate) const CHAMELEON_HASH_BITS: u64 = 16;
+pub(crate) const CHAMELEON_HASH_BITS: usize = 16;
 pub(crate) const CHAMELEON_HASH_MULTIPLIER: u32 = 0x9D6EF916;
 pub(crate) const BYTE_SIZE_U16: usize = size_of::<u16>();
 pub(crate) const BYTE_SIZE_U32: usize = size_of::<u32>();
@@ -131,7 +131,12 @@ impl Chameleon {
                 }
             }
         }
-        output[sgn_index..sgn_index + BYTE_SIZE_U64].copy_from_slice(&self.signature.value.to_le_bytes());
+        if self.signature.shift > 0 {
+            output[sgn_index..sgn_index + BYTE_SIZE_U64].copy_from_slice(&self.signature.value.to_le_bytes());
+        } else {
+            // Signature reserved space has not been used
+            out_index -= BYTE_SIZE_U64;
+        }
         // println!("{}", out_index - start_index);
         Ok(out_index - start_index)
     }
