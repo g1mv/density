@@ -107,8 +107,8 @@ impl<W: Write> Write for ChameleonWriter<W> {
             let mut input_index = 0;
 
             // Add to input buffer if not empty
-            if self.input_buffer.index > 0 {
-                let fill_bytes = BYTE_SIZE_U128 - self.input_buffer.index;
+            if !self.input_buffer.is_empty() {
+                let fill_bytes = self.input_buffer.remaining_space();
                 if input.len() < fill_bytes {
                     self.input_buffer.push(input);
                     return Ok(input.len());

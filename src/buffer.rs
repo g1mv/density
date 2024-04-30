@@ -19,8 +19,8 @@ impl<const N: usize> Buffer<N> {
     }
 
     #[inline(always)]
-    pub fn size(&self) -> usize {
-        self.buffer.len()
+    pub fn remaining_space(&self) -> usize {
+        N - self.index
     }
 
     #[inline(always)]
