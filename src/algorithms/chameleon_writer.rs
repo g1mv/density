@@ -2,18 +2,17 @@ use std::io::Result;
 use std::io::Write;
 
 use crate::algorithms::chameleon::{BYTE_SIZE_U128, BYTE_SIZE_U32, CHAMELEON_HASH_BITS, CHAMELEON_HASH_MULTIPLIER, Signature};
+use crate::buffer::Buffer;
 
-const FRAME_MAX_BYTE_SIZE: usize = 64 * BYTE_SIZE_U32;
+pub(crate) const FRAME_MAX_BYTE_SIZE: usize = 64 * BYTE_SIZE_U32;
 const BIT_SIZE_U32: usize = 8 * BYTE_SIZE_U32;
 
 pub struct ChameleonWriter<W: Write> {
     pub writer: W,
     pub dictionary: [u32; 1 << CHAMELEON_HASH_BITS],
     pub signature: Signature,
-    pub frame_buffer: [u8; FRAME_MAX_BYTE_SIZE],
-    pub frame_buffer_index: usize,
-    pub input_buffer: [u8; BYTE_SIZE_U128],
-    pub input_buffer_index: usize,
+    pub frame_buffer: Buffer<FRAME_MAX_BYTE_SIZE>,
+    pub input_buffer: Buffer<BYTE_SIZE_U128>,
     pub is_started: bool,
     pub is_flushed: bool,
 }
@@ -24,10 +23,8 @@ impl<W: Write> ChameleonWriter<W> {
             writer,
             dictionary: [0; 1 << CHAMELEON_HASH_BITS],
             signature: Signature { value: 0, shift: 0 },
-            frame_buffer: [0; FRAME_MAX_BYTE_SIZE],
-            frame_buffer_index: 0,
-            input_buffer: [0; BYTE_SIZE_U128],
-            input_buffer_index: 0,
+            frame_buffer: Buffer::new(),
+            input_buffer: Buffer::new(),
             is_started: false,
             is_flushed: false,
         }
@@ -51,20 +48,9 @@ impl<W: Write> ChameleonWriter<W> {
     }
 
     #[inline(always)]
-    pub fn push_bytes_to_frame_buffer(&mut self, bytes: &[u8]) {
-        self.frame_buffer[self.frame_buffer_index..self.frame_buffer_index + bytes.len()].copy_from_slice(&bytes);
-        self.frame_buffer_index += bytes.len();
-    }
-
-    #[inline(always)]
-    pub fn reset_frame_buffer(&mut self) {
-        self.frame_buffer_index = 0;
-    }
-
-    #[inline(always)]
     pub fn write_frame_buffer(&mut self) {
         self.writer.write_all(&self.signature.value.to_le_bytes()).expect("ouch");
-        self.writer.write_all(&self.frame_buffer[0..self.frame_buffer_index]).expect("ouch");
+        self.writer.write_all(&self.frame_buffer.buffer[0..self.frame_buffer.index]).expect("ouch");
     }
 
     #[inline(always)]
@@ -72,17 +58,17 @@ impl<W: Write> ChameleonWriter<W> {
         let hash_u16 = ((value_u32 * CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
         let dictionary_value = &mut self.dictionary[hash_u16 as usize];
         if &value_u32 == dictionary_value {
-            self.push_bytes_to_frame_buffer(&hash_u16.to_le_bytes());
+            self.frame_buffer.push(&hash_u16.to_le_bytes());
             if self.push_signature_bit(1) {
                 self.write_frame_buffer();
-                self.reset_frame_buffer();
+                self.frame_buffer.reset();
             }
         } else {
             *dictionary_value = value_u32;
-            self.push_bytes_to_frame_buffer(&value_u32.to_le_bytes());
+            self.frame_buffer.push(&value_u32.to_le_bytes());
             if self.push_signature_bit(0) {
                 self.write_frame_buffer();
-                self.reset_frame_buffer();
+                self.frame_buffer.reset();
             }
         }
     }
@@ -121,16 +107,16 @@ impl<W: Write> Write for ChameleonWriter<W> {
             let mut input_index = 0;
 
             // Add to input buffer if not empty
-            if self.input_buffer_index > 0 {
-                let fill_bytes = BYTE_SIZE_U128 - self.input_buffer_index;
+            if self.input_buffer.index > 0 {
+                let fill_bytes = BYTE_SIZE_U128 - self.input_buffer.index;
                 if input.len() < fill_bytes {
-                    self.input_buffer[self.input_buffer_index..self.input_buffer_index + input.len()].copy_from_slice(&input);
+                    self.input_buffer.push(input);
                     return Ok(input.len());
                 } else {
-                    self.input_buffer[self.input_buffer_index..BYTE_SIZE_U128].copy_from_slice(&input[0..fill_bytes]);
-                    self.process_chunk(u128::from_ne_bytes(self.input_buffer.try_into().unwrap()));
+                    self.input_buffer.push(&input[0..fill_bytes]);
+                    self.process_chunk(u128::from_ne_bytes(self.input_buffer.buffer.try_into().unwrap()));
 
-                    self.input_buffer_index = 0;
+                    self.input_buffer.reset();
                     input_index = fill_bytes;
                 }
             }
@@ -143,8 +129,7 @@ impl<W: Write> Write for ChameleonWriter<W> {
             }
 
             // Store remaining bytes in input buffer
-            self.input_buffer_index = input.len() - input_index;
-            self.input_buffer[0..self.input_buffer_index].copy_from_slice(&input[input_index..input.len()]);
+            self.input_buffer.push(&input[input_index..input.len()]);
         }
 
         Ok(input.len())
@@ -156,9 +141,9 @@ impl<W: Write> Write for ChameleonWriter<W> {
                 if self.signature.shift > 0 {
                     self.write_frame_buffer();
                 }
-                if self.input_buffer_index > 0 {
-                    self.writer.write_all(&self.input_buffer[0..self.input_buffer_index]).expect("ouch");
-                    self.input_buffer_index = 0;
+                if !self.input_buffer.is_empty() {
+                    self.writer.write_all(&self.input_buffer.buffer[0..self.input_buffer.index]).expect("ouch");
+                    self.input_buffer.reset();
                 }
                 self.is_flushed = true;
             }
