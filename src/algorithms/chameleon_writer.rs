@@ -1,11 +1,16 @@
 use std::io::Result;
 use std::io::Write;
 
-use crate::algorithms::chameleon::{BYTE_SIZE_U128, BYTE_SIZE_U32, CHAMELEON_HASH_BITS, CHAMELEON_HASH_MULTIPLIER, Signature};
+use crate::algorithms::chameleon::{BYTE_SIZE_U128, BYTE_SIZE_U32, CHAMELEON_HASH_BITS, CHAMELEON_HASH_MULTIPLIER};
 use crate::buffer::Buffer;
 
 pub(crate) const FRAME_MAX_BYTE_SIZE: usize = 64 * BYTE_SIZE_U32;
 const BIT_SIZE_U32: usize = 8 * BYTE_SIZE_U32;
+
+pub struct Signature {
+    pub(crate) value: u64,
+    pub(crate) shift: u8,
+}
 
 pub struct ChameleonWriter<W: Write> {
     pub writer: W,
