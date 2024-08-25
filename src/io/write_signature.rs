@@ -1,12 +1,12 @@
-pub struct EncodeSignature {
+pub struct WriteSignature {
     pub(crate) pos: usize,
     pub(crate) value: u64,
     pub(crate) shift: u8,
 }
 
-impl EncodeSignature {
+impl WriteSignature {
     pub fn new(pos: usize) -> Self {
-        EncodeSignature { pos, value: 0, shift: 0 }
+        WriteSignature { pos, value: 0, shift: 0 }
     }
 
     #[inline(always)]

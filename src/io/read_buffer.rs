@@ -1,11 +1,11 @@
-pub struct DecodeBuffer<'a> {
+pub struct ReadBuffer<'a> {
     pub buffer: &'a [u8],
     pub index: usize,
 }
 
-impl<'a> DecodeBuffer<'a> {
+impl<'a> ReadBuffer<'a> {
     pub fn new(buffer: &'a [u8]) -> Self {
-        DecodeBuffer {
+        ReadBuffer {
             buffer,
             index: 0,
         }

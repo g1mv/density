@@ -1,24 +1,17 @@
 pub mod codec;
 pub mod algorithms;
-mod buffer;
-mod encode_signature;
-pub mod encode_buffer;
-pub mod quad_encoder;
-mod errors;
-mod quad_decoder;
-mod decode_buffer;
-mod decode_signature;
+pub mod buffer;
+pub mod errors;
+pub mod io;
 
-pub(crate) const BYTE_SIZE_U16: usize = size_of::<u16>();
 pub(crate) const BYTE_SIZE_U32: usize = size_of::<u32>();
 pub(crate) const BIT_SIZE_U32: usize = BYTE_SIZE_U32 << 3;
 pub(crate) const BYTE_SIZE_U64: usize = size_of::<u64>();
-pub(crate) const BIT_SIZE_U64: usize = BYTE_SIZE_U64 << 3;
 pub(crate) const BYTE_SIZE_U128: usize = size_of::<u128>();
 
 #[cfg(test)]
 mod tests {
-    use crate::algorithms::chameleon::Chameleon;
+    use crate::algorithms::chameleon::chameleon::Chameleon;
 
     const TEST_DATA: &str = "testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttestt";
 

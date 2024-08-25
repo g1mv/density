@@ -1,6 +1,5 @@
 use crate::common::prepare_file;
 use divan;
-use std::env;
 
 mod common;
 
@@ -13,12 +12,10 @@ fn main() {
 #[divan::bench_group(sample_count = 25)]
 mod chameleon {
     use crate::common::{DATA_DIRECTORY, TEST_FILE};
-    use density::algorithms::chameleon::Chameleon;
+    use density::algorithms::chameleon::chameleon::Chameleon;
     use divan::counter::BytesCount;
     use divan::Bencher;
-    use std::env;
     use std::fs::read;
-    use std::io;
 
     #[divan::bench(name = "compress/raw")]
     fn encode_raw(bencher: Bencher) {
@@ -42,7 +39,7 @@ mod chameleon {
         print!("\r\t\t\t({:.3}x)   ", in_mem.len() as f64 / Chameleon::decode(&out_mem[0..size], &mut dec_mem).unwrap() as f64);
 
         bencher
-            .counter(BytesCount::of_slice(&out_mem[0..size]))
+            .counter(BytesCount::of_slice(&in_mem))
             .bench_local(|| { Chameleon::decode(&out_mem[0..size], &mut dec_mem) });
     }
 }
@@ -50,7 +47,7 @@ mod chameleon {
 #[divan::bench_group(sample_count = 25)]
 mod cheetah {
     use crate::common::{DATA_DIRECTORY, TEST_FILE};
-    use density::algorithms::cheetah::Cheetah;
+    use density::algorithms::cheetah::cheetah::Cheetah;
     use divan::counter::BytesCount;
     use divan::Bencher;
     use std::fs::read;

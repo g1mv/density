@@ -1,11 +1,11 @@
-pub struct DecodeSignature {
+pub struct ReadSignature {
     pub(crate) value: u64,
     pub(crate) shift: u8,
 }
 
-impl DecodeSignature {
+impl ReadSignature {
     pub fn new(value: u64) -> Self {
-        DecodeSignature { value, shift: 0 }
+        ReadSignature { value, shift: 0 }
     }
 
     #[inline(always)]

@@ -1,14 +1,14 @@
+use crate::io::write_signature::WriteSignature;
 use crate::BYTE_SIZE_U64;
-use crate::encode_signature::EncodeSignature;
 
-pub struct EncodeBuffer<'a> {
+pub struct WriteBuffer<'a> {
     pub buffer: &'a mut [u8],
     pub index: usize,
 }
 
-impl<'a> EncodeBuffer<'a> {
+impl<'a> WriteBuffer<'a> {
     pub fn new(buffer: &'a mut [u8], index: usize) -> Self {
-        EncodeBuffer {
+        WriteBuffer {
             buffer,
             index,
         }
@@ -22,7 +22,7 @@ impl<'a> EncodeBuffer<'a> {
     }
 
     #[inline(always)]
-    pub fn ink(&mut self, signature: &mut EncodeSignature) {
+    pub fn ink(&mut self, signature: &mut WriteSignature) {
         self.write_at(signature.pos, &signature.value.to_le_bytes());
         signature.init(self.index);
         self.skip(BYTE_SIZE_U64);
