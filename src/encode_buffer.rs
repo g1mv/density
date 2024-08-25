@@ -1,5 +1,5 @@
-use crate::algorithms::cheetah::BYTE_SIZE_U64;
-use crate::signature::Signature;
+use crate::BYTE_SIZE_U64;
+use crate::encode_signature::EncodeSignature;
 
 pub struct EncodeBuffer<'a> {
     pub buffer: &'a mut [u8],
@@ -22,7 +22,7 @@ impl<'a> EncodeBuffer<'a> {
     }
 
     #[inline(always)]
-    pub fn ink(&mut self, signature: &mut Signature) {
+    pub fn ink(&mut self, signature: &mut EncodeSignature) {
         self.write_at(signature.pos, &signature.value.to_le_bytes());
         signature.init(self.index);
         self.skip(BYTE_SIZE_U64);
