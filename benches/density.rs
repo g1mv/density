@@ -1,17 +1,16 @@
-use crate::common::prepare_file;
+use crate::common::prepare_default_test_file;
 use divan;
 
 mod common;
 
 fn main() {
-    // println!("{:?}", env::args().collect::<Vec<String>>());
-    prepare_file();
+    prepare_default_test_file();
     divan::main();
 }
 
 #[divan::bench_group(sample_count = 25)]
 mod chameleon {
-    use crate::common::{DATA_DIRECTORY, TEST_FILE};
+    use crate::common::test_file_path;
     use density::algorithms::chameleon::chameleon::Chameleon;
     use divan::counter::BytesCount;
     use divan::Bencher;
@@ -19,7 +18,7 @@ mod chameleon {
 
     #[divan::bench(name = "compress/raw")]
     fn encode_raw(bencher: Bencher) {
-        let in_mem = read(&format!("{}{}", DATA_DIRECTORY, TEST_FILE)).unwrap();
+        let in_mem = read(test_file_path()).unwrap();
         let mut out_mem = vec![0_u8; in_mem.len() << 1];
 
         print!("\r\t\t\t({:.3}x)   ", in_mem.len() as f64 / Chameleon::encode(&in_mem, &mut out_mem).unwrap() as f64);
@@ -29,9 +28,9 @@ mod chameleon {
             .bench_local(|| { Chameleon::encode(&in_mem, &mut out_mem) });
     }
 
-    #[divan::bench(name = "decompress/raw")]
+    #[divan::bench(name = "decompress/raw             ")]
     fn decode_raw(bencher: Bencher) {
-        let in_mem = read(&format!("{}{}", DATA_DIRECTORY, TEST_FILE)).unwrap();
+        let in_mem = read(test_file_path()).unwrap();
         let mut out_mem = vec![0_u8; in_mem.len() << 1];
         let size = Chameleon::encode(&in_mem, &mut out_mem).unwrap();
         let mut dec_mem = vec![0_u8; in_mem.len() << 1];
@@ -42,11 +41,25 @@ mod chameleon {
             .counter(BytesCount::of_slice(&in_mem))
             .bench_local(|| { Chameleon::decode(&out_mem[0..size], &mut dec_mem) });
     }
+    //
+    // #[divan::bench(name = "roundtrip/raw")]
+    // fn roundtrip_raw(bencher: Bencher) {
+    //     let in_mem = read(&format!("{}{}", DATA_DIRECTORY, TEST_FILE)).unwrap();
+    //     let mut out_mem = vec![0_u8; in_mem.len() << 1];
+    //     let mut dec_mem = vec![0_u8; in_mem.len() << 1];
+    //
+    //     bencher
+    //         .counter(BytesCount::new(in_mem.len() * 2))
+    //         .bench_local(|| {
+    //             let size = Chameleon::encode(&in_mem, &mut out_mem).unwrap();
+    //             Chameleon::decode(&out_mem[0..size], &mut dec_mem)
+    //         });
+    // }
 }
 
 #[divan::bench_group(sample_count = 25)]
 mod cheetah {
-    use crate::common::{DATA_DIRECTORY, TEST_FILE};
+    use crate::common::test_file_path;
     use density::algorithms::cheetah::cheetah::Cheetah;
     use divan::counter::BytesCount;
     use divan::Bencher;
@@ -54,7 +67,7 @@ mod cheetah {
 
     #[divan::bench(name = "compress/raw")]
     fn encode_raw(bencher: Bencher) {
-        let in_mem = read(&format!("{}{}", DATA_DIRECTORY, TEST_FILE)).unwrap();
+        let in_mem = read(test_file_path()).unwrap();
         let mut out_mem = vec![0_u8; in_mem.len() << 1];
 
         print!("\r\t\t\t({:.3}x)   ", in_mem.len() as f64 / Cheetah::encode(&in_mem, &mut out_mem).unwrap() as f64);
@@ -62,5 +75,19 @@ mod cheetah {
         bencher
             .counter(BytesCount::of_slice(&in_mem))
             .bench_local(|| { Cheetah::encode(&in_mem, &mut out_mem) });
+    }
+
+    #[divan::bench(name = "decompress/raw")]
+    fn decode_raw(bencher: Bencher) {
+        let in_mem = read(test_file_path()).unwrap();
+        let mut out_mem = vec![0_u8; in_mem.len() << 1];
+        let size = Cheetah::encode(&in_mem, &mut out_mem).unwrap();
+        let mut dec_mem = vec![0_u8; in_mem.len() << 1];
+
+        print!("\r\t\t\t({:.3}x)   ", in_mem.len() as f64 / Cheetah::decode(&out_mem[0..size], &mut dec_mem).unwrap() as f64);
+
+        bencher
+            .counter(BytesCount::of_slice(&in_mem))
+            .bench_local(|| { Cheetah::decode(&out_mem[0..size], &mut dec_mem) });
     }
 }

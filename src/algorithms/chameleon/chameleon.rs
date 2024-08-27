@@ -13,8 +13,6 @@ pub(crate) const CHAMELEON_HASH_BITS: usize = 16;
 pub(crate) const CHAMELEON_HASH_MULTIPLIER: u32 = 0x9D6EF916;
 
 pub(crate) const FLAG_SIZE_BITS: u8 = 1;
-pub(crate) const FLAG_MASK: u64 = 0x3;
-pub(crate) const FLAG_MASK_BITS: u8 = 2;
 pub(crate) const PLAIN_FLAG: u64 = 0x0;
 pub(crate) const MAP_FLAG: u64 = 0x1;
 
@@ -22,6 +20,9 @@ pub(crate) const PLAIN_PLAIN_FLAGS: u64 = (PLAIN_FLAG << 1) | PLAIN_FLAG;
 pub(crate) const PLAIN_MAP_FLAGS: u64 = (PLAIN_FLAG << 1) | MAP_FLAG;
 pub(crate) const MAP_PLAIN_FLAGS: u64 = (MAP_FLAG << 1) | PLAIN_FLAG;
 pub(crate) const _MAP_MAP_FLAGS: u64 = (MAP_FLAG << 1) | MAP_FLAG;
+
+pub(crate) const DECODE_FLAG_MASK: u64 = 0x3;
+pub(crate) const DECODE_FLAG_MASK_BITS: u8 = 2;
 
 pub struct State {
     pub(crate) chunk_map: [u32; 1 << CHAMELEON_HASH_BITS],
@@ -68,11 +69,11 @@ impl QuadEncoder for Chameleon {
 
 impl QuadDecoder for Chameleon {
     #[inline(always)]
-    fn decode_unit(&mut self, buffer: &mut ReadBuffer, signature: &mut ReadSignature, out_buffer: &mut WriteBuffer) {
-        let (quad_a, quad_b) = match signature.read_bits(FLAG_MASK, FLAG_MASK_BITS) {
+    fn decode_unit(&mut self, in_buffer: &mut ReadBuffer, signature: &mut ReadSignature, out_buffer: &mut WriteBuffer) {
+        let (quad_a, quad_b) = match signature.read_bits(DECODE_FLAG_MASK, DECODE_FLAG_MASK_BITS) {
             PLAIN_PLAIN_FLAGS => {
-                let quad_a = buffer.read_u32();
-                let quad_b = buffer.read_u32();
+                let quad_a = in_buffer.read_u32_le();
+                let quad_b = in_buffer.read_u32_le();
                 let hash_a = ((quad_a * CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
                 let hash_b = ((quad_b * CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
                 self.state.chunk_map[hash_a as usize] = quad_a;
@@ -80,24 +81,24 @@ impl QuadDecoder for Chameleon {
                 (quad_a, quad_b)
             }
             PLAIN_MAP_FLAGS => {
-                let quad_a = buffer.read_u32();
-                let hash_b = buffer.read_u16();
+                let quad_a = in_buffer.read_u32_le();
+                let hash_b = in_buffer.read_u16_le();
                 let hash_a = ((quad_a * CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
                 let quad_b = self.state.chunk_map[hash_b as usize];
                 self.state.chunk_map[hash_a as usize] = quad_a;
                 (quad_a, quad_b)
             }
             MAP_PLAIN_FLAGS => {
-                let hash_a = buffer.read_u16();
-                let quad_b = buffer.read_u32();
+                let hash_a = in_buffer.read_u16_le();
+                let quad_b = in_buffer.read_u32_le();
                 let quad_a = self.state.chunk_map[hash_a as usize];
                 let hash_b = ((quad_b * CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
                 self.state.chunk_map[hash_b as usize] = quad_b;
                 (quad_a, quad_b)
             }
             _ => {
-                let hash_a = buffer.read_u16();
-                let hash_b = buffer.read_u16();
+                let hash_a = in_buffer.read_u16_le();
+                let hash_b = in_buffer.read_u16_le();
                 let quad_a = self.state.chunk_map[hash_a as usize];
                 let quad_b = self.state.chunk_map[hash_b as usize];
                 (quad_a, quad_b)
@@ -109,7 +110,9 @@ impl QuadDecoder for Chameleon {
 }
 
 impl Codec for Chameleon {
-    fn encode_block_size(&self) -> usize { 256 }
+    #[inline(always)]
+    fn block_size(&self) -> usize { 256 }
 
-    fn decode_unit_items(&self) -> usize { self.encode_block_size() >> 3 }
+    #[inline(always)]
+    fn decode_units_per_block(&self) -> usize { 32 }
 }

@@ -18,33 +18,24 @@ impl<'a> ReadBuffer<'a> {
 
     #[inline(always)]
     pub fn read(&mut self, n: usize) -> &[u8] {
-        let start_index = self.index;
         let end_index = self.index + n;
+        let array = &self.buffer[self.index..end_index];
         self.index = end_index;
-        &self.buffer[start_index..end_index]
+        array
     }
 
     #[inline(always)]
-    pub fn read_u64(&mut self) -> u64 {
-        let start_index = self.index;
-        let end_index = self.index + size_of::<u64>();
-        self.index = end_index;
-        u64::from_le_bytes(<&[u8] as TryInto<[u8; size_of::<u64>()]>>::try_into(&self.buffer[start_index..end_index]).unwrap())
+    pub fn read_u64_le(&mut self) -> u64 {
+        u64::from_le_bytes(<&[u8] as TryInto<[u8; size_of::<u64>()]>>::try_into(self.read(size_of::<u64>())).unwrap())
     }
 
     #[inline(always)]
-    pub fn read_u32(&mut self) -> u32 {
-        let start_index = self.index;
-        let end_index = self.index + size_of::<u32>();
-        self.index = end_index;
-        u32::from_le_bytes(<&[u8] as TryInto<[u8; size_of::<u32>()]>>::try_into(&self.buffer[start_index..end_index]).unwrap())
+    pub fn read_u32_le(&mut self) -> u32 {
+        u32::from_le_bytes(<&[u8] as TryInto<[u8; size_of::<u32>()]>>::try_into(self.read(size_of::<u32>())).unwrap())
     }
 
     #[inline(always)]
-    pub fn read_u16(&mut self) -> u16 {
-        let start_index = self.index;
-        let end_index = self.index + size_of::<u16>();
-        self.index = end_index;
-        u16::from_le_bytes(<&[u8] as TryInto<[u8; size_of::<u16>()]>>::try_into(&self.buffer[start_index..end_index]).unwrap())
+    pub fn read_u16_le(&mut self) -> u16 {
+        u16::from_le_bytes(<&[u8] as TryInto<[u8; size_of::<u16>()]>>::try_into(self.read(size_of::<u16>())).unwrap())
     }
 }
