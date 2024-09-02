@@ -1,12 +1,11 @@
 #[derive(Debug)]
 pub struct ReadSignature {
     pub(crate) value: u64,
-    pub(crate) shift: u8,
 }
 
 impl ReadSignature {
     pub fn new(value: u64) -> Self {
-        ReadSignature { value, shift: 0 }
+        ReadSignature { value }
     }
 
     #[inline(always)]
@@ -14,8 +13,5 @@ impl ReadSignature {
         let value = self.value & mask;
         self.value >>= n;
         value
-        /*let value = (self.value >> self.shift) & mask;
-        self.shift += n;
-        value*/
     }
 }
