@@ -35,7 +35,7 @@ mod chameleon {
         let size = Chameleon::encode(&in_mem, &mut out_mem).unwrap();
         let mut dec_mem = vec![0_u8; in_mem.len() << 1];
 
-        print!("\r\t\t\t({:.3}x)   ", in_mem.len() as f64 / Chameleon::decode(&out_mem[0..size], &mut dec_mem).unwrap() as f64);
+        print!("\r\t\t\t({:.4}x)  ", in_mem.len() as f64 / Chameleon::decode(&out_mem[0..size], &mut dec_mem).unwrap() as f64);
 
         bencher
             .counter(BytesCount::of_slice(&in_mem))
@@ -84,7 +84,7 @@ mod cheetah {
         let size = Cheetah::encode(&in_mem, &mut out_mem).unwrap();
         let mut dec_mem = vec![0_u8; in_mem.len() << 1];
 
-        print!("\r\t\t\t({:.3}x)   ", in_mem.len() as f64 / Cheetah::decode(&out_mem[0..size], &mut dec_mem).unwrap() as f64);
+        print!("\r\t\t\t({:.4}x)  ", in_mem.len() as f64 / Cheetah::decode(&out_mem[0..size], &mut dec_mem).unwrap() as f64);
 
         bencher
             .counter(BytesCount::of_slice(&in_mem))

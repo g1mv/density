@@ -8,11 +8,9 @@ pub const DATA_DIRECTORY: &str = "benches/data/";
 pub const DEFAULT_TEST_FILE: &str = "enwik8";
 
 pub fn test_file_path() -> String {
-    let args = env::args().collect::<Vec<String>>();
-    if args.len() > 2 {
-        args.get(2).unwrap().to_owned()
-    } else {
-        format!("{}{}", DATA_DIRECTORY, DEFAULT_TEST_FILE)
+    match env::var("FILE") {
+        Ok(file) => { file.to_owned() }
+        Err(_) => { format!("{}{}", DATA_DIRECTORY, DEFAULT_TEST_FILE) }
     }
 }
 
