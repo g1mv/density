@@ -7,11 +7,11 @@ use crate::io::read_buffer::ReadBuffer;
 use crate::io::read_signature::ReadSignature;
 use crate::io::write_buffer::WriteBuffer;
 use crate::io::write_signature::WriteSignature;
-use crate::{BYTE_SIZE_SIGNATURE, BYTE_SIZE_U128, BYTE_SIZE_U32, BYTE_SIZE_U64};
+use crate::{BYTE_SIZE_SIGNATURE, BYTE_SIZE_U128, BYTE_SIZE_U32};
 
 pub trait Codec: QuadEncoder + Decoder {
     fn block_size(&self) -> usize;
-    fn decode_units_per_block(&self) -> usize;
+    fn decode_unit_size(&self) -> usize;
 
     #[inline(always)]
     fn encode_block(&mut self, block: &[u8], out_buffer: &mut WriteBuffer, signature: &mut WriteSignature, protection_state: &mut ProtectionState) {
@@ -49,7 +49,7 @@ pub trait Codec: QuadEncoder + Decoder {
                                 self.encode_quad(u32::from_ne_bytes(array), out_buffer, signature);
                             }
                             Err(_error) => {
-                                // Implicit signature plain flag
+                                // Implicit signature plain flag (0x0)
                                 out_buffer.push(bytes);
                             }
                         }
@@ -57,16 +57,17 @@ pub trait Codec: QuadEncoder + Decoder {
                 }
             }
         }
-        out_buffer.ink(signature);
+        out_buffer.ink_and_init(signature);
         /*protection_state.update(out_buffer.index - mark >= self.block_size());
     }*/
     }
 
     fn encode(&mut self, input: &[u8], output: &mut [u8]) -> Result<usize, EncodeError> {
+        let mut out_buffer = WriteBuffer::new(output);
         let mut signature = WriteSignature::new(0);
-        let mut out_buffer = WriteBuffer::new(output, BYTE_SIZE_U64);
         let mut protection_state = ProtectionState::new();
         for block in input.chunks(self.block_size()) {
+            out_buffer.skip(BYTE_SIZE_SIGNATURE);   // Signature has just been inited, either by initial instantiation or by encode_block()
             self.encode_block(block, &mut out_buffer, &mut signature, &mut protection_state);
         }
         Ok(out_buffer.index)
@@ -74,8 +75,9 @@ pub trait Codec: QuadEncoder + Decoder {
 
     fn decode(&mut self, input: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
         let mut in_buffer = ReadBuffer::new(input);
-        let mut out_buffer = WriteBuffer::new(output, 0);
+        let mut out_buffer = WriteBuffer::new(output);
         let mut protection_state = ProtectionState::new();
+        let iterations = self.block_size() / self.decode_unit_size();
 
         while in_buffer.remaining() >= BYTE_SIZE_SIGNATURE + self.block_size() {
             /*if protection_state.revert_to_copy() {
@@ -84,7 +86,7 @@ pub trait Codec: QuadEncoder + Decoder {
             } else {
                 let mark = in_buffer.index;*/
             let mut signature = ReadSignature::new(in_buffer.read_u64_le());
-            for _ in 0..self.decode_units_per_block() {
+            for _ in 0..iterations {
                 self.decode_unit(&mut in_buffer, &mut signature, &mut out_buffer);
             }
             /*protection_state.update(in_buffer.index - mark >= self.block_size());
@@ -99,12 +101,11 @@ pub trait Codec: QuadEncoder + Decoder {
             } else {
                 let mark = in_buffer.index;*/
             let mut signature = ReadSignature::new(in_buffer.read_u64_le());
-            for _ in 0..self.decode_units_per_block() {
-                if in_buffer.remaining() >= BYTE_SIZE_U32 << 1 {
+            for _ in 0..iterations {
+                if in_buffer.remaining() >= self.decode_unit_size() {
                     self.decode_unit(&mut in_buffer, &mut signature, &mut out_buffer);
                 } else {
-                    self.decode_partial_unit(&mut in_buffer, &mut signature, &mut out_buffer);
-                    break 'end;
+                    if self.decode_partial_unit(&mut in_buffer, &mut signature, &mut out_buffer) { break 'end; }
                 }
             }
             /*protection_state.update(in_buffer.index - mark >= self.block_size());

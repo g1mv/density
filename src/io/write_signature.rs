@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct WriteSignature {
     pub(crate) pos: usize,
     pub(crate) value: u64,

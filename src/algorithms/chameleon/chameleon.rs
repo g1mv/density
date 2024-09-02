@@ -1,3 +1,4 @@
+use crate::algorithms::PLAIN_FLAG;
 use crate::codec::codec::Codec;
 use crate::codec::decoder::Decoder;
 use crate::codec::quad_encoder::QuadEncoder;
@@ -7,19 +8,18 @@ use crate::io::read_buffer::ReadBuffer;
 use crate::io::read_signature::ReadSignature;
 use crate::io::write_buffer::WriteBuffer;
 use crate::io::write_signature::WriteSignature;
-use crate::BIT_SIZE_U32;
+use crate::{BIT_SIZE_U32, BYTE_SIZE_U32};
 
 pub(crate) const CHAMELEON_HASH_BITS: usize = 16;
 pub(crate) const CHAMELEON_HASH_MULTIPLIER: u32 = 0x9D6EF916;
 
 pub(crate) const FLAG_SIZE_BITS: u8 = 1;
-pub(crate) const PLAIN_FLAG: u64 = 0x0;
 pub(crate) const MAP_FLAG: u64 = 0x1;
 
 pub(crate) const PLAIN_PLAIN_FLAGS: u64 = (PLAIN_FLAG << 1) | PLAIN_FLAG;
-pub(crate) const PLAIN_MAP_FLAGS: u64 = (PLAIN_FLAG << 1) | MAP_FLAG;
-pub(crate) const MAP_PLAIN_FLAGS: u64 = (MAP_FLAG << 1) | PLAIN_FLAG;
-pub(crate) const _MAP_MAP_FLAGS: u64 = (MAP_FLAG << 1) | MAP_FLAG;
+pub(crate) const MAP_PLAIN_FLAGS: u64 = (PLAIN_FLAG << 1) | MAP_FLAG;
+pub(crate) const PLAIN_MAP_FLAGS: u64 = (MAP_FLAG << 1) | PLAIN_FLAG;
+// pub(crate) const _MAP_MAP_FLAGS: u64 = (MAP_FLAG << 1) | MAP_FLAG;
 
 pub(crate) const DECODE_TWIN_FLAG_MASK: u64 = 0x3;
 pub(crate) const DECODE_TWIN_FLAG_MASK_BITS: u8 = 2;
@@ -27,7 +27,7 @@ pub(crate) const DECODE_FLAG_MASK: u64 = 0x1;
 pub(crate) const DECODE_FLAG_MASK_BITS: u8 = 1;
 
 pub struct State {
-    pub(crate) chunk_map: [u32; 1 << CHAMELEON_HASH_BITS],
+    pub(crate) chunk_map: Vec<u32>,
 }
 
 pub struct Chameleon {
@@ -37,7 +37,7 @@ pub struct Chameleon {
 impl Chameleon {
     pub fn new() -> Self {
         Chameleon {
-            state: State { chunk_map: [0; 1 << CHAMELEON_HASH_BITS] },
+            state: State { chunk_map: vec![0; 1 << CHAMELEON_HASH_BITS] },
         }
     }
 
@@ -50,18 +50,33 @@ impl Chameleon {
         let mut chameleon = Chameleon::new();
         chameleon.decode(input, output)
     }
+
+    #[inline(always)]
+    fn decode_plain(&mut self, in_buffer: &mut ReadBuffer) -> u32 {
+        let quad = in_buffer.read_u32_le();
+        let hash = (quad.wrapping_mul(CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
+        self.state.chunk_map[hash as usize] = quad;
+        quad
+    }
+
+    #[inline(always)]
+    fn decode_map(&mut self, in_buffer: &mut ReadBuffer) -> u32 {
+        let hash = in_buffer.read_u16_le();
+        let quad = self.state.chunk_map[hash as usize];
+        quad
+    }
 }
 
 impl QuadEncoder for Chameleon {
     #[inline(always)]
-    fn encode_quad(&mut self, unit: u32, out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
-        let hash_u16 = ((unit.wrapping_mul(CHAMELEON_HASH_MULTIPLIER)) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
+    fn encode_quad(&mut self, quad: u32, out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
+        let hash_u16 = (quad.wrapping_mul(CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
         let dictionary_value = &mut self.state.chunk_map[hash_u16 as usize];
-        if *dictionary_value != unit {
+        if *dictionary_value != quad {
             signature.push_bits(PLAIN_FLAG, FLAG_SIZE_BITS);
-            out_buffer.push(&unit.to_le_bytes());
+            out_buffer.push(&quad.to_le_bytes());
 
-            *dictionary_value = unit;
+            *dictionary_value = quad;
         } else {
             signature.push_bits(MAP_FLAG, FLAG_SIZE_BITS);
             out_buffer.push(&hash_u16.to_le_bytes());
@@ -73,66 +88,34 @@ impl Decoder for Chameleon {
     #[inline(always)]
     fn decode_unit(&mut self, in_buffer: &mut ReadBuffer, signature: &mut ReadSignature, out_buffer: &mut WriteBuffer) {
         let (quad_a, quad_b) = match signature.read_bits(DECODE_TWIN_FLAG_MASK, DECODE_TWIN_FLAG_MASK_BITS) {
-            PLAIN_PLAIN_FLAGS => {
-                let quad_a = in_buffer.read_u32_le();
-                let quad_b = in_buffer.read_u32_le();
-                let hash_a = ((quad_a * CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
-                let hash_b = ((quad_b * CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
-                self.state.chunk_map[hash_a as usize] = quad_a;
-                self.state.chunk_map[hash_b as usize] = quad_b;
-                (quad_a, quad_b)
-            }
-            PLAIN_MAP_FLAGS => {
-                let quad_a = in_buffer.read_u32_le();
-                let hash_b = in_buffer.read_u16_le();
-                let hash_a = ((quad_a * CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
-                let quad_b = self.state.chunk_map[hash_b as usize];
-                self.state.chunk_map[hash_a as usize] = quad_a;
-                (quad_a, quad_b)
-            }
-            MAP_PLAIN_FLAGS => {
-                let hash_a = in_buffer.read_u16_le();
-                let quad_b = in_buffer.read_u32_le();
-                let quad_a = self.state.chunk_map[hash_a as usize];
-                let hash_b = ((quad_b * CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
-                self.state.chunk_map[hash_b as usize] = quad_b;
-                (quad_a, quad_b)
-            }
-            _ => {
-                let hash_a = in_buffer.read_u16_le();
-                let hash_b = in_buffer.read_u16_le();
-                let quad_a = self.state.chunk_map[hash_a as usize];
-                let quad_b = self.state.chunk_map[hash_b as usize];
-                (quad_a, quad_b)
-            }
+            PLAIN_PLAIN_FLAGS => { (self.decode_plain(in_buffer), self.decode_plain(in_buffer)) }
+            MAP_PLAIN_FLAGS => { (self.decode_map(in_buffer), self.decode_plain(in_buffer)) }
+            PLAIN_MAP_FLAGS => { (self.decode_plain(in_buffer), self.decode_map(in_buffer)) }
+            _ => { (self.decode_map(in_buffer), self.decode_map(in_buffer)) }
         };
         out_buffer.push(&quad_a.to_le_bytes());
         out_buffer.push(&quad_b.to_le_bytes());
     }
 
     #[inline(always)]
-    fn decode_partial_unit(&mut self, in_buffer: &mut ReadBuffer, signature: &mut ReadSignature, out_buffer: &mut WriteBuffer) {
-        match signature.read_bits(DECODE_FLAG_MASK, DECODE_FLAG_MASK_BITS) {
-            PLAIN_FLAG => {
-                match in_buffer.remaining() {
-                    1 | 2 | 3 => {
-                        out_buffer.push(in_buffer.read(in_buffer.remaining()));
-                        return;
-                    }
-                    _ => {
-                        let quad = in_buffer.read_u32_le();
-                        let hash = ((quad * CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
-                        self.state.chunk_map[hash as usize] = quad;
-                        out_buffer.push(&quad.to_le_bytes());
+    fn decode_partial_unit(&mut self, in_buffer: &mut ReadBuffer, signature: &mut ReadSignature, out_buffer: &mut WriteBuffer) -> bool {
+        for _ in 0..self.decode_unit_size() / BYTE_SIZE_U32 {
+            let quad = match signature.read_bits(DECODE_FLAG_MASK, DECODE_FLAG_MASK_BITS) {
+                PLAIN_FLAG => {
+                    match in_buffer.remaining() {
+                        0 => { return true; }
+                        1..=3 => {
+                            out_buffer.push(in_buffer.read(in_buffer.remaining()));
+                            return true;
+                        }
+                        _ => { self.decode_plain(in_buffer) }
                     }
                 }
-            }
-            _ => {
-                let hash = in_buffer.read_u16_le();
-                let quad = self.state.chunk_map[hash as usize];
-                out_buffer.push(&quad.to_le_bytes());
-            }
+                _ => { self.decode_map(in_buffer) }
+            };
+            out_buffer.push(&quad.to_le_bytes());
         }
+        false
     }
 }
 
@@ -141,5 +124,5 @@ impl Codec for Chameleon {
     fn block_size(&self) -> usize { 256 }
 
     #[inline(always)]
-    fn decode_units_per_block(&self) -> usize { 32 }
+    fn decode_unit_size(&self) -> usize { 8 }
 }

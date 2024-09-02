@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct ReadSignature {
     pub(crate) value: u64,
     pub(crate) shift: u8,
@@ -10,8 +11,11 @@ impl ReadSignature {
 
     #[inline(always)]
     pub fn read_bits(&mut self, mask: u64, n: u8) -> u64 {
-        let value = (self.value >> self.shift) & mask;
-        self.shift += n;
+        let value = self.value & mask;
+        self.value >>= n;
         value
+        /*let value = (self.value >> self.shift) & mask;
+        self.shift += n;
+        value*/
     }
 }
