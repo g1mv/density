@@ -1,6 +1,9 @@
+use crate::utils::file_path;
+
 mod utils;
 
 fn main() {
+    file_path(true);
     divan::main();
 }
 
@@ -13,17 +16,19 @@ mod default {
     use snap::write::FrameEncoder;
     use std::fs::read;
     use std::io;
+    use std::io::Write;
 
     #[divan::bench(name = "compress/stream            ")]
     fn encode_stream(bencher: Bencher) {
-        let file_mem = read(file_path()).unwrap();
+        let file_mem = read(file_path(false)).unwrap();
         let capacity = file_mem.len() << 1;
         let mut encoded_mem = Vec::with_capacity(capacity);
 
-        let mut writer = FrameEncoder::new(&mut encoded_mem);
-        io::copy(&mut file_mem.as_slice(), &mut writer).unwrap();
+        let mut encoder = FrameEncoder::new(&mut encoded_mem);
+        io::copy(&mut file_mem.as_slice(), &mut encoder).unwrap();
+        encoder.flush().unwrap();
 
-        print!("\r\t\t\t\x1b[1m\x1b[34m({:.3}x)\x1b[0m   ", file_mem.len() as f64 / writer.get_ref().len() as f64);
+        print!("\r\t\t\t\x1b[1m\x1b[34m({:.3}x)\x1b[0m   ", file_mem.len() as f64 / encoder.get_ref().len() as f64);
 
         bencher
             .counter(BytesCount::of_slice(&file_mem))
@@ -35,7 +40,7 @@ mod default {
 
     #[divan::bench(name = "decompress/stream          ")]
     fn decode_raw(bencher: Bencher) {
-        let file_mem = read(file_path()).unwrap();
+        let file_mem = read(file_path(false)).unwrap();
         let capacity = file_mem.len() << 1;
         let mut encoded_mem = Vec::with_capacity(capacity);
         let mut decoded_mem = Vec::with_capacity(capacity);
@@ -43,6 +48,7 @@ mod default {
         let encoded_size = {
             let mut encoder = FrameEncoder::new(&mut encoded_mem);
             io::copy(&mut file_mem.as_slice(), &mut encoder).unwrap();
+            encoder.flush().unwrap();
             encoder.get_ref().len()
         };
 

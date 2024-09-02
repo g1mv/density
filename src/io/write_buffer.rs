@@ -21,9 +21,8 @@ impl<'a> WriteBuffer<'a> {
     }
 
     #[inline(always)]
-    pub fn ink_and_init(&mut self, signature: &mut WriteSignature) {
+    pub fn ink(&mut self, signature: &mut WriteSignature) {
         self.write_at(signature.pos, &signature.value.to_le_bytes());
-        signature.init(self.index);
     }
 
     #[inline(always)]
