@@ -28,7 +28,7 @@ mod default {
         io::copy(&mut file_mem.as_slice(), &mut encoder).unwrap();
         encoder.flush().unwrap();
 
-        print!("\r\t\t\t\x1b[1m\x1b[34m({:.3}x)\x1b[0m   ", file_mem.len() as f64 / encoder.get_ref().len() as f64);
+        print!("\r\t\t\t(\x1b[1m\x1b[34m{:.3}x\x1b[0m)   ", file_mem.len() as f64 / encoder.get_ref().len() as f64);
 
         bencher
             .counter(BytesCount::of_slice(&file_mem))

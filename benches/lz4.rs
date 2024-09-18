@@ -20,7 +20,7 @@ mod default {
         let file_mem = read(file_path(false)).unwrap();
         let mut encoded_mem = vec![0_u8; file_mem.len() << 1];
 
-        print!("\r\t\t\t\x1b[1m\x1b[34m({:.3}x)\x1b[0m   ", file_mem.len() as f64 / compress_into(&file_mem, &mut encoded_mem).unwrap() as f64);
+        print!("\r\t\t\t(\x1b[1m\x1b[34m{:.3}x\x1b[0m)   ", file_mem.len() as f64 / compress_into(&file_mem, &mut encoded_mem).unwrap() as f64);
 
         bencher
             .counter(BytesCount::of_slice(&file_mem))
