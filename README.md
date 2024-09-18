@@ -237,7 +237,7 @@ When this is done you can start using the **DENSITY API** :
     density_processing_result result;
 
     // Compress
-    result = density_compress(text, text_length, outCompressed, compress_safe_size, DENSITY_COMPRESSION_MODE_CHAMELEON_ALGORITHM);
+    result = density_compress(text, text_length, outCompressed, compress_safe_size, DENSITY_ALGORITHM_CHAMELEON);
     if(!result.state)
         printf("Compressed %llu bytes to %llu bytes\n", result.bytesRead, result.bytesWritten);
 
