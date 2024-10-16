@@ -11,7 +11,7 @@ fn main() {
 #[divan::bench_group(sample_count = 25)]
 mod chameleon {
     use crate::utils::file_path;
-    use density::algorithms::chameleon::chameleon::Chameleon;
+    use density_rs::algorithms::chameleon::chameleon::Chameleon;
     use divan::counter::BytesCount;
     use divan::Bencher;
     use std::fs::read;
@@ -50,7 +50,7 @@ mod chameleon {
 #[divan::bench_group(sample_count = 25)]
 mod cheetah {
     use crate::utils::file_path;
-    use density::algorithms::cheetah::cheetah::Cheetah;
+    use density_rs::algorithms::cheetah::cheetah::Cheetah;
     use divan::counter::BytesCount;
     use divan::Bencher;
     use std::fs::read;
@@ -89,7 +89,7 @@ mod cheetah {
 #[divan::bench_group(sample_count = 25)]
 mod lion {
     use crate::utils::file_path;
-    use density::algorithms::lion::lion::Lion;
+    use density_rs::algorithms::lion::lion::Lion;
     use divan::counter::BytesCount;
     use divan::Bencher;
     use std::fs::read;
