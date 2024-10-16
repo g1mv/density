@@ -12,6 +12,17 @@ use crate::{BYTE_SIZE_SIGNATURE, BYTE_SIZE_U128, BYTE_SIZE_U32};
 pub trait Codec: QuadEncoder + Decoder {
     fn block_size(&self) -> usize;
     fn decode_unit_size(&self) -> usize;
+    fn signature_significant_bytes(&self) -> usize;
+
+    #[inline(always)]
+    fn write_signature(&mut self, out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
+        out_buffer.ink(signature);
+    }
+
+    #[inline(always)]
+    fn read_signature(&mut self, in_buffer: &mut ReadBuffer) -> ReadSignature {
+        ReadSignature::new(in_buffer.read_u64_le())
+    }
 
     #[inline(always)]
     fn encode_block(&mut self, block: &[u8], out_buffer: &mut WriteBuffer, signature: &mut WriteSignature, protection_state: &mut ProtectionState) {
@@ -21,7 +32,7 @@ pub trait Codec: QuadEncoder + Decoder {
         } else {
             let mark = out_buffer.index;
             signature.init(out_buffer.index);
-            out_buffer.skip(BYTE_SIZE_SIGNATURE);
+            out_buffer.skip(self.signature_significant_bytes());
             for sub_block in block.chunks(BYTE_SIZE_U128) {
                 match <&[u8] as TryInto<[u8; BYTE_SIZE_U128]>>::try_into(sub_block) {
                     Ok(array) => {
@@ -59,7 +70,7 @@ pub trait Codec: QuadEncoder + Decoder {
                     }
                 }
             }
-            out_buffer.ink(signature);
+            self.write_signature(out_buffer, signature);
             protection_state.update(out_buffer.index - mark >= self.block_size());
         }
     }
@@ -86,7 +97,7 @@ pub trait Codec: QuadEncoder + Decoder {
                 protection_state.decay();
             } else {
                 let mark = in_buffer.index;
-                let mut signature = ReadSignature::new(in_buffer.read_u64_le());
+                let mut signature = self.read_signature(&mut in_buffer);
                 for _ in 0..iterations {
                     self.decode_unit(&mut in_buffer, &mut signature, &mut out_buffer);
                 }
@@ -105,7 +116,7 @@ pub trait Codec: QuadEncoder + Decoder {
                 protection_state.decay();
             } else {
                 let mark = in_buffer.index;
-                let mut signature = ReadSignature::new(in_buffer.read_u64_le());
+                let mut signature = self.read_signature(&mut in_buffer);
                 for _ in 0..iterations {
                     if in_buffer.remaining() >= self.decode_unit_size() {
                         self.decode_unit(&mut in_buffer, &mut signature, &mut out_buffer);

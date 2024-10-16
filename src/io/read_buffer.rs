@@ -23,6 +23,10 @@ impl<'a> ReadBuffer<'a> {
         self.index = end_index;
         array
     }
+    #[inline(always)]
+    pub fn rewind(&mut self, n: usize) {
+        self.index -= n;
+    }
 
     #[inline(always)]
     pub fn read_u64_le(&mut self) -> u64 {

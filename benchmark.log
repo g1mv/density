@@ -1,0 +1,56 @@
+cargo bench
+    Finished `bench` profile [optimized] target(s) in 0.25s
+     Running unittests src/lib.rs (target/release/deps/density-eca0f58eb1934098)
+
+running 3 tests
+test tests::chameleon ... ignored
+test tests::cheetah ... ignored
+test tests::lion ... ignored
+
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running benches/density.rs (target/release/deps/density-58f17a9cb31d5ffa)
+Using file ./benches/data/dickens (10192446 bytes)
+Timer precision: 41 ns
+density                            fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ chameleon                                     │               │               │               │         │
+│  ├─ compress/raw      (1.749x)   4.653 ms      │ 5.075 ms      │ 4.677 ms      │ 4.709 ms      │ 25      │ 25
+│  │                               2.19 GB/s     │ 2.008 GB/s    │ 2.179 GB/s    │ 2.164 GB/s    │         │
+│  ╰─ decompress/raw               3.582 ms      │ 4.016 ms      │ 3.594 ms      │ 3.645 ms      │ 25      │ 25
+│                                  2.844 GB/s    │ 2.537 GB/s    │ 2.835 GB/s    │ 2.795 GB/s    │         │
+├─ cheetah                                       │               │               │               │         │
+│  ├─ compress/raw      (1.860x)   8.454 ms      │ 8.571 ms      │ 8.503 ms      │ 8.506 ms      │ 25      │ 25
+│  │                               1.205 GB/s    │ 1.189 GB/s    │ 1.198 GB/s    │ 1.198 GB/s    │         │
+│  ╰─ decompress/raw               5.816 ms      │ 6.078 ms      │ 5.827 ms      │ 5.841 ms      │ 25      │ 25
+│                                  1.752 GB/s    │ 1.676 GB/s    │ 1.748 GB/s    │ 1.744 GB/s    │         │
+╰─ lion                                          │               │               │               │         │
+   ├─ compress/raw      (1.966x)   14.31 ms      │ 14.57 ms      │ 14.37 ms      │ 14.37 ms      │ 25      │ 25
+   │                               711.8 MB/s    │ 699.3 MB/s    │ 709.2 MB/s    │ 708.9 MB/s    │         │
+   ╰─ decompress/raw               9.367 ms      │ 9.581 ms      │ 9.388 ms      │ 9.415 ms      │ 25      │ 25
+                                   1.088 GB/s    │ 1.063 GB/s    │ 1.085 GB/s    │ 1.082 GB/s    │         │
+
+     Running benches/lz4.rs (target/release/deps/lz4-50c49b96a3c81bc3)
+Using file ./benches/data/dickens (10192446 bytes)
+Timer precision: 41 ns
+lz4                                fastest       │ slowest       │ median        │ mean          │ samples │ iters
+╰─ default                                       │               │               │               │         │
+   ├─ compress/raw      (1.585x)   21.37 ms      │ 21.94 ms      │ 21.41 ms      │ 21.44 ms      │ 25      │ 25
+   │                               476.8 MB/s    │ 464.3 MB/s    │ 475.8 MB/s    │ 475.2 MB/s    │         │
+   ╰─ decompress/raw               3.412 ms      │ 3.608 ms      │ 3.417 ms      │ 3.434 ms      │ 25      │ 25
+                                   2.986 GB/s    │ 2.824 GB/s    │ 2.982 GB/s    │ 2.967 GB/s    │         │
+
+     Running benches/snappy.rs (target/release/deps/snappy-72cc7aef73346edc)
+Using file ./benches/data/dickens (10192446 bytes)
+Timer precision: 41 ns
+snappy                             fastest       │ slowest       │ median        │ mean          │ samples │ iters
+╰─ default                                       │               │               │               │         │
+   ├─ compress/stream   (1.607x)   29.14 ms      │ 29.54 ms      │ 29.27 ms      │ 29.28 ms      │ 25      │ 25
+   │                               349.6 MB/s    │ 344.9 MB/s    │ 348.1 MB/s    │ 348.1 MB/s    │         │
+   ╰─ decompress/stream            12.95 ms      │ 13.41 ms      │ 12.99 ms      │ 13.01 ms      │ 25      │ 25
+                                   786.7 MB/s    │ 759.9 MB/s    │ 784.4 MB/s    │ 783.1 MB/s    │         │
+
+     Running benches/utils.rs (target/release/deps/utils-a7c18fbc46e09acf)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

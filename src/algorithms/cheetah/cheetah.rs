@@ -8,9 +8,9 @@ use crate::io::read_buffer::ReadBuffer;
 use crate::io::read_signature::ReadSignature;
 use crate::io::write_buffer::WriteBuffer;
 use crate::io::write_signature::WriteSignature;
-use crate::BIT_SIZE_U32;
+use crate::{BIT_SIZE_U16, BIT_SIZE_U32, BYTE_SIZE_U32};
 
-pub(crate) const CHEETAH_HASH_BITS: usize = 16;
+pub(crate) const CHEETAH_HASH_BITS: usize = BIT_SIZE_U16;
 pub(crate) const CHEETAH_HASH_MULTIPLIER: u32 = 0x9D6EF916;
 
 
@@ -171,8 +171,11 @@ impl Decoder for Cheetah {
 
 impl Codec for Cheetah {
     #[inline(always)]
-    fn block_size(&self) -> usize { 128 }
+    fn block_size(&self) -> usize { BYTE_SIZE_U32 * (self.signature_significant_bytes() << 3) / FLAG_SIZE_BITS as usize }
 
     #[inline(always)]
     fn decode_unit_size(&self) -> usize { 4 }
+
+    #[inline(always)]
+    fn signature_significant_bytes(&self) -> usize { 8 }
 }

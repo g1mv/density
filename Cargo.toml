@@ -22,7 +22,6 @@ overflow-checks = false
 divan = "0.1.14"
 snap = "1.1.1"
 lz4_flex = "0.11.3"
-zstd = "0.13.2"
 
 [[bench]]
 name = "density"
