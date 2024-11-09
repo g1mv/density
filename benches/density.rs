@@ -83,7 +83,7 @@ mod cheetah {
         let mut encoded_mem = vec![0_u8; cheetah.safe_encode_buffer_size(file_mem.len())];
         let encoded_size = cheetah.encode(&file_mem, &mut encoded_mem).unwrap();
 
-        let mut decoded_mem = vec![0_u8; file_mem.len() << 1];
+        let mut decoded_mem = vec![0_u8; file_mem.len()];
         let decoded_size = Cheetah::decode(&encoded_mem[0..encoded_size], &mut decoded_mem).unwrap();
         assert_eq!(file_mem.len(), decoded_size);
         for i in 0..decoded_size {
@@ -127,7 +127,7 @@ mod lion {
         let mut encoded_mem = vec![0_u8; lion.safe_encode_buffer_size(file_mem.len())];
         let encoded_size = lion.encode(&file_mem, &mut encoded_mem).unwrap();
 
-        let mut decoded_mem = vec![0_u8; file_mem.len() << 1];
+        let mut decoded_mem = vec![0_u8; file_mem.len()];
         let decoded_size = Lion::decode(&encoded_mem[0..encoded_size], &mut decoded_mem).unwrap();
         assert_eq!(file_mem.len(), decoded_size);
         for i in 0..decoded_size {

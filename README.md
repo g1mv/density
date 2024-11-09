@@ -130,11 +130,13 @@ use density_rs::algorithms::chameleon::chameleon::Chameleon;
 fn main() {
     let file_mem = read("file_path").unwrap();
 
-    let mut encoded_mem = vec![0_u8; file_mem.len() << 1];
-    let encoded_size = Chameleon::encode(&file_mem, &mut encoded_mem).unwrap();
-
-    let mut decoded_mem = vec![0_u8; file_mem.len() << 1];
-    let decoded_size = Chameleon::decode(&encoded_mem[0..encoded_size], &mut decoded_mem).unwrap();
+    let mut chameleon = Chameleon::new();
+    let mut encoded_mem = vec![0_u8; chameleon.safe_encode_buffer_size(file_mem.len())];
+    let encoded_size = chameleon.encode(&file_mem, &mut encoded_mem).unwrap();
+      
+    chameleon.clear_state();
+    let mut decoded_mem = vec![0_u8; file_mem.len()];
+    let decoded_size = chameleon.decode(&encoded_mem[0..encoded_size], &mut decoded_mem).unwrap();
 }
 ```
 
