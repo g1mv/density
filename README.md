@@ -8,6 +8,11 @@ It is focused on high-speed compression, at the best ratio possible. **Density**
 
 **Density** features a simple API to enable quick integration in any project.
 
+[![MIT licensed](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE-MIT)
+[![Apache-2.0 licensed](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE-APACHE)
+[![Crates.io](https://img.shields.io/crates/v/density-rs.svg?maxAge=2592000)](https://crates.io/crates/density-rs)
+[![Build Status](https://github.com/g1mv/density-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/g1mv/density-rs/actions)
+
 Why is it so fast ?
 -------------------
 
@@ -113,14 +118,14 @@ Include the required dependency in the *Cargo.toml* file:
 
 ```toml
 [dependencies]
-density = "0.16.0"
+density-rs = "0.16.2"
 ```
 
 Use the API:
 
 ```rust
 use std::fs::read;
-use density::algorithms::chameleon::chameleon::Chameleon;
+use density_rs::algorithms::chameleon::chameleon::Chameleon;
 
 fn main() {
     let file_mem = read("file_path").unwrap();
