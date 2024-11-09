@@ -1,4 +1,4 @@
-name: Cargo Build & Test
+name: CI
 
 on:
   push:
