@@ -12,6 +12,7 @@ fn main() {
 mod chameleon {
     use crate::utils::file_path;
     use density_rs::algorithms::chameleon::chameleon::Chameleon;
+    use density_rs::codec::codec::Codec;
     use divan::counter::BytesCount;
     use divan::Bencher;
     use std::fs::read;
@@ -19,9 +20,11 @@ mod chameleon {
     #[divan::bench(name = "compress/raw")]
     fn encode_raw(bencher: Bencher) {
         let file_mem = read(file_path(false)).unwrap();
-        let mut encoded_mem = vec![0_u8; file_mem.len() << 1];
 
-        print!("\r\t\t\t(\x1b[1m\x1b[34m{:.3}x\x1b[0m)   ", file_mem.len() as f64 / Chameleon::encode(&file_mem, &mut encoded_mem).unwrap() as f64);
+        let mut chameleon = Chameleon::new();
+        let mut encoded_mem = vec![0_u8; chameleon.safe_encode_buffer_size(file_mem.len())];
+
+        print!("\r\t\t\t(\x1b[1m\x1b[34m{:.3}x\x1b[0m)   ", file_mem.len() as f64 / chameleon.encode(&file_mem, &mut encoded_mem).unwrap() as f64);
 
         bencher
             .counter(BytesCount::of_slice(&file_mem))
@@ -31,10 +34,12 @@ mod chameleon {
     #[divan::bench(name = "decompress/raw             ")]
     fn decode_raw(bencher: Bencher) {
         let file_mem = read(file_path(false)).unwrap();
-        let mut encoded_mem = vec![0_u8; file_mem.len() << 1];
-        let encoded_size = Chameleon::encode(&file_mem, &mut encoded_mem).unwrap();
-        let mut decoded_mem = vec![0_u8; file_mem.len() << 1];
 
+        let mut chameleon = Chameleon::new();
+        let mut encoded_mem = vec![0_u8; chameleon.safe_encode_buffer_size(file_mem.len())];
+        let encoded_size = chameleon.encode(&file_mem, &mut encoded_mem).unwrap();
+
+        let mut decoded_mem = vec![0_u8; file_mem.len()];
         let decoded_size = Chameleon::decode(&encoded_mem[0..encoded_size], &mut decoded_mem).unwrap();
         assert_eq!(file_mem.len(), decoded_size);
         for i in 0..decoded_size {
@@ -51,6 +56,7 @@ mod chameleon {
 mod cheetah {
     use crate::utils::file_path;
     use density_rs::algorithms::cheetah::cheetah::Cheetah;
+    use density_rs::codec::codec::Codec;
     use divan::counter::BytesCount;
     use divan::Bencher;
     use std::fs::read;
@@ -58,9 +64,11 @@ mod cheetah {
     #[divan::bench(name = "compress/raw")]
     fn encode_raw(bencher: Bencher) {
         let file_mem = read(file_path(false)).unwrap();
-        let mut encoded_mem = vec![0_u8; file_mem.len() << 1];
 
-        print!("\r\t\t\t(\x1b[1m\x1b[34m{:.3}x\x1b[0m)   ", file_mem.len() as f64 / Cheetah::encode(&file_mem, &mut encoded_mem).unwrap() as f64);
+        let mut cheetah = Cheetah::new();
+        let mut encoded_mem = vec![0_u8; cheetah.safe_encode_buffer_size(file_mem.len())];
+
+        print!("\r\t\t\t(\x1b[1m\x1b[34m{:.3}x\x1b[0m)   ", file_mem.len() as f64 / cheetah.encode(&file_mem, &mut encoded_mem).unwrap() as f64);
 
         bencher
             .counter(BytesCount::of_slice(&file_mem))
@@ -70,10 +78,12 @@ mod cheetah {
     #[divan::bench(name = "decompress/raw")]
     fn decode_raw(bencher: Bencher) {
         let file_mem = read(file_path(false)).unwrap();
-        let mut encoded_mem = vec![0_u8; file_mem.len() << 1];
-        let encoded_size = Cheetah::encode(&file_mem, &mut encoded_mem).unwrap();
-        let mut decoded_mem = vec![0_u8; file_mem.len() << 1];
 
+        let mut cheetah = Cheetah::new();
+        let mut encoded_mem = vec![0_u8; cheetah.safe_encode_buffer_size(file_mem.len())];
+        let encoded_size = cheetah.encode(&file_mem, &mut encoded_mem).unwrap();
+
+        let mut decoded_mem = vec![0_u8; file_mem.len() << 1];
         let decoded_size = Cheetah::decode(&encoded_mem[0..encoded_size], &mut decoded_mem).unwrap();
         assert_eq!(file_mem.len(), decoded_size);
         for i in 0..decoded_size {
@@ -90,6 +100,7 @@ mod cheetah {
 mod lion {
     use crate::utils::file_path;
     use density_rs::algorithms::lion::lion::Lion;
+    use density_rs::codec::codec::Codec;
     use divan::counter::BytesCount;
     use divan::Bencher;
     use std::fs::read;
@@ -97,9 +108,11 @@ mod lion {
     #[divan::bench(name = "compress/raw")]
     fn encode_raw(bencher: Bencher) {
         let file_mem = read(file_path(false)).unwrap();
-        let mut encoded_mem = vec![0_u8; file_mem.len() << 1];
 
-        print!("\r\t\t\t(\x1b[1m\x1b[34m{:.3}x\x1b[0m)   ", file_mem.len() as f64 / Lion::encode(&file_mem, &mut encoded_mem).unwrap() as f64);
+        let mut lion = Lion::new();
+        let mut encoded_mem = vec![0_u8; lion.safe_encode_buffer_size(file_mem.len())];
+
+        print!("\r\t\t\t(\x1b[1m\x1b[34m{:.3}x\x1b[0m)   ", file_mem.len() as f64 / lion.encode(&file_mem, &mut encoded_mem).unwrap() as f64);
 
         bencher
             .counter(BytesCount::of_slice(&file_mem))
@@ -109,10 +122,12 @@ mod lion {
     #[divan::bench(name = "decompress/raw")]
     fn decode_raw(bencher: Bencher) {
         let file_mem = read(file_path(false)).unwrap();
-        let mut encoded_mem = vec![0_u8; file_mem.len() << 1];
-        let encoded_size = Lion::encode(&file_mem, &mut encoded_mem).unwrap();
-        let mut decoded_mem = vec![0_u8; file_mem.len() << 1];
 
+        let mut lion = Lion::new();
+        let mut encoded_mem = vec![0_u8; lion.safe_encode_buffer_size(file_mem.len())];
+        let encoded_size = lion.encode(&file_mem, &mut encoded_mem).unwrap();
+
+        let mut decoded_mem = vec![0_u8; file_mem.len() << 1];
         let decoded_size = Lion::decode(&encoded_mem[0..encoded_size], &mut decoded_mem).unwrap();
         assert_eq!(file_mem.len(), decoded_size);
         for i in 0..decoded_size {

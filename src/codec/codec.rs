@@ -7,12 +7,18 @@ use crate::io::read_buffer::ReadBuffer;
 use crate::io::read_signature::ReadSignature;
 use crate::io::write_buffer::WriteBuffer;
 use crate::io::write_signature::WriteSignature;
-use crate::{BYTE_SIZE_SIGNATURE, BYTE_SIZE_U128, BYTE_SIZE_U32};
+use crate::{BYTE_SIZE_U128, BYTE_SIZE_U32};
 
 pub trait Codec: QuadEncoder + Decoder {
     fn block_size(&self) -> usize;
     fn decode_unit_size(&self) -> usize;
     fn signature_significant_bytes(&self) -> usize;
+    fn clear_state(&mut self);
+
+    fn safe_encode_buffer_size(&self, size: usize) -> usize {
+        let blocks = size / self.block_size();
+        size + blocks * self.signature_significant_bytes() + if size % self.block_size() > 0 { self.signature_significant_bytes() } else { 0 }
+    }
 
     #[inline(always)]
     fn write_signature(&mut self, out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
@@ -91,7 +97,7 @@ pub trait Codec: QuadEncoder + Decoder {
         let mut protection_state = ProtectionState::new();
         let iterations = self.block_size() / self.decode_unit_size();
 
-        while in_buffer.remaining() >= BYTE_SIZE_SIGNATURE + self.block_size() {
+        while in_buffer.remaining() >= self.signature_significant_bytes() + self.block_size() {
             if protection_state.revert_to_copy() {
                 out_buffer.push(in_buffer.read(self.block_size()));
                 protection_state.decay();

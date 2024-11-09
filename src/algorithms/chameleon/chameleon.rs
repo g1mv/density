@@ -128,4 +128,8 @@ impl Codec for Chameleon {
 
     #[inline(always)]
     fn signature_significant_bytes(&self) -> usize { 8 }
+
+    fn clear_state(&mut self) {
+        self.state.chunk_map.clear();
+    }
 }

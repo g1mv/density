@@ -178,4 +178,10 @@ impl Codec for Cheetah {
 
     #[inline(always)]
     fn signature_significant_bytes(&self) -> usize { 8 }
+
+    fn clear_state(&mut self) {
+        self.state.last_hash = 0;
+        self.state.chunk_map.clear();
+        self.state.prediction_map.clear();
+    }
 }

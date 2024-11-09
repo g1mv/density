@@ -308,6 +308,12 @@ impl Codec for Lion {
     #[inline(always)]
     fn signature_significant_bytes(&self) -> usize { 6 }
 
+    fn clear_state(&mut self) {
+        self.state.last_hash = 0;
+        self.state.chunk_map.clear();
+        self.state.prediction_map.clear();
+    }
+
     #[inline(always)]
     fn write_signature(&mut self, out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
         out_buffer.write_at(signature.pos, &signature.value.to_le_bytes()[0..self.signature_significant_bytes()]);

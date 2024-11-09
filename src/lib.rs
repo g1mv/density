@@ -6,9 +6,7 @@ pub mod io;
 
 pub(crate) const BYTE_SIZE_U16: usize = size_of::<u16>();
 pub(crate) const BYTE_SIZE_U32: usize = size_of::<u32>();
-pub(crate) const BYTE_SIZE_U64: usize = size_of::<u64>();
 pub(crate) const BYTE_SIZE_U128: usize = size_of::<u128>();
-pub(crate) const BYTE_SIZE_SIGNATURE: usize = BYTE_SIZE_U64;
 pub(crate) const BIT_SIZE_U16: usize = BYTE_SIZE_U16 << 3;
 pub(crate) const BIT_SIZE_U32: usize = BYTE_SIZE_U32 << 3;
 
