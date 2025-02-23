@@ -14,7 +14,7 @@ jobs:
     name: test
     env:
       CARGO: cargo
-      TARGET:
+      TARGET: ""
       CROSS_VERSION: v0.2.5
     runs-on: ${{ matrix.os }}
     strategy:
@@ -85,3 +85,5 @@ jobs:
         run: ${{ env.CARGO }} doc --verbose $TARGET
       - name: Test
         run: ${{ env.CARGO }} test --verbose $TARGET
+      - name: Benchmark
+        run: ${{ env.CARGO }} bench $TARGET

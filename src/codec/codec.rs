@@ -42,30 +42,18 @@ pub trait Codec: QuadEncoder + Decoder {
             for sub_block in block.chunks(BYTE_SIZE_U128) {
                 match <&[u8] as TryInto<[u8; BYTE_SIZE_U128]>>::try_into(sub_block) {
                     Ok(array) => {
-                        let value_u128 = u128::from_ne_bytes(array);
-
-                        #[cfg(target_endian = "little")]
-                        {
-                            self.encode_quad((value_u128 & 0xffffffff) as u32, out_buffer, signature);
-                            self.encode_quad(((value_u128 >> 32) & 0xffffffff) as u32, out_buffer, signature);
-                            self.encode_quad(((value_u128 >> 64) & 0xffffffff) as u32, out_buffer, signature);
-                            self.encode_quad((value_u128 >> 96) as u32, out_buffer, signature);
-                        }
-
-                        #[cfg(target_endian = "big")]
-                        {
-                            self.encode_quad((value_u128 >> 96) as u32, out_buffer, signature);
-                            self.encode_quad(((value_u128 >> 64) & 0xffffffff) as u32, out_buffer, signature);
-                            self.encode_quad(((value_u128 >> 32) & 0xffffffff) as u32, out_buffer, signature);
-                            self.encode_quad((value_u128 & 0xffffffff) as u32, out_buffer, signature);
-                        }
+                        let value_u128 = u128::from_le_bytes(array);
+                        self.encode_quad((value_u128 & 0xffffffff) as u32, out_buffer, signature);
+                        self.encode_quad(((value_u128 >> 32) & 0xffffffff) as u32, out_buffer, signature);
+                        self.encode_quad(((value_u128 >> 64) & 0xffffffff) as u32, out_buffer, signature);
+                        self.encode_quad((value_u128 >> 96) as u32, out_buffer, signature);
                     }
                     Err(_error) => {
                         // Less than 16 bytes left
                         for bytes in sub_block.chunks(BYTE_SIZE_U32) {
                             match <&[u8] as TryInto<[u8; BYTE_SIZE_U32]>>::try_into(bytes) {
                                 Ok(array) => {
-                                    self.encode_quad(u32::from_ne_bytes(array), out_buffer, signature);
+                                    self.encode_quad(u32::from_le_bytes(array), out_buffer, signature);
                                 }
                                 Err(_error) => {
                                     // Implicit signature plain flag (0x0)
