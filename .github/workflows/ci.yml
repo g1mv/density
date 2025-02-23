@@ -62,7 +62,9 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
-      - name: Use Cross
+      - name: Add target
+        run: rustup target add ${{ matrix.target }}
+      - name: Use cross
         if: matrix.os == 'ubuntu-latest' && matrix.target != ''
         run: |
           dir="$RUNNER_TEMP/cross-download"
