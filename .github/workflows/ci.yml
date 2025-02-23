@@ -80,8 +80,8 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: lscpu
       - name: Build
-        run: cargo build --verbose $TARGET
+        run: ${{ env.CARGO }} build --verbose $TARGET
       - name: Build docs
-        run: cargo doc --verbose $TARGET
+        run: ${{ env.CARGO }} doc --verbose $TARGET
       - name: Test
-        run: cargo test --verbose $TARGET
+        run: ${{ env.CARGO }} test --verbose $TARGET
