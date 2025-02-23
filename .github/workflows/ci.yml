@@ -12,6 +12,10 @@ permissions:
 jobs:
   test:
     name: test
+    env:
+      CARGO: cargo
+      TARGET:
+      CROSS_VERSION: v0.2.5
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -58,12 +62,23 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
+      - name: Use Cross
+        if: matrix.os == 'ubuntu-latest' && matrix.target != ''
+        run: |
+          dir="$RUNNER_TEMP/cross-download"
+          mkdir "$dir"
+          echo "$dir" >> $GITHUB_PATH
+          cd "$dir"
+          curl -LO "https://github.com/cross-rs/cross/releases/download/$CROSS_VERSION/cross-x86_64-unknown-linux-musl.tar.gz"
+          tar xf cross-x86_64-unknown-linux-musl.tar.gz
+          echo "CARGO=cross" >> $GITHUB_ENV
+          echo "TARGET=--target ${{ matrix.target }}" >> $GITHUB_ENV
       - name: Show CPU info
         if: matrix.os == 'ubuntu-latest'
         run: lscpu
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --verbose $TARGET
       - name: Build docs
-        run: cargo doc --verbose
+        run: cargo doc --verbose $TARGET
       - name: Test
-        run: cargo test --verbose
+        run: cargo test --verbose $TARGET
