@@ -1,7 +1,7 @@
 use std::env;
 use std::fs::metadata;
 
-const DEFAULT_FILE_PATH: &str = "./benches/data/dickens";
+const DEFAULT_FILE_PATH: &str = "./benches/data/dickens.txt";
 
 pub fn file_path(display: bool) -> String {
     let file_path = match env::var("FILE") {
