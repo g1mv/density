@@ -54,7 +54,7 @@ pub trait Codec: QuadEncoder + Decoder {
 
                         #[cfg(target_endian = "big")]
                         {
-                            self.encode_quad((value_u128 >> 96) as u32, output, out_buffer, signature);
+                            self.encode_quad((value_u128 >> 96) as u32, out_buffer, signature);
                             self.encode_quad(((value_u128 >> 64) & 0xffffffff) as u32, out_buffer, signature);
                             self.encode_quad(((value_u128 >> 32) & 0xffffffff) as u32, out_buffer, signature);
                             self.encode_quad((value_u128 & 0xffffffff) as u32, out_buffer, signature);
