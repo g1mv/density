@@ -75,7 +75,7 @@ jobs:
           echo "TARGET=--target ${{ matrix.target }}" >> $GITHUB_ENV
       - name: Add target
         if: matrix.target != ''
-        run: rustup target add $TARGET
+        run: rustup target add ${{ matrix.target }}
       - name: Show CPU info
         if: matrix.os == 'ubuntu-latest'
         run: lscpu
