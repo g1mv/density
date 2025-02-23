@@ -1,5 +1,4 @@
 name: CI
-
 on:
   push:
   pull_request:
@@ -7,42 +6,64 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-jobs:
-  test_little_endian:
-    name: Test on Little-Endian (x86_64)
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        toolchain:
-          - stable
-          - beta
-          - nightly
-    steps:
-      - uses: actions/checkout@v4
-      - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
-      - run: cargo build --verbose
-      - run: cargo test --verbose
+permissions:
+  contents: read
 
-  test_big_endian:
-    name: Test on Big-Endian (s390x)
-    runs-on: ubuntu-latest
+jobs:
+  test:
+    name: test
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        toolchain:
-          - stable
-          - beta
-          - nightly
+        include:
+          - build: stable
+            os: ubuntu-latest
+            toolchain: stable
+          - build: beta
+            os: ubuntu-latest
+            toolchain: beta
+          - build: nightly
+            os: ubuntu-latest
+            toolchain: nightly
+          - build: macos
+            os: macos-latest
+            toolchain: stable
+          - build: win-msvc
+            os: windows-latest
+            toolchain: stable
+          - build: win-gnu
+            os: windows-latest
+            toolchain: stable-x86_64-gnu
+          - build: stable-x86
+            os: ubuntu-latest
+            toolchain: stable
+            target: i686-unknown-linux-gnu
+          - build: stable-aarch64
+            os: ubuntu-latest
+            toolchain: stable
+            target: aarch64-unknown-linux-gnu
+          - build: stable-powerpc64
+            os: ubuntu-latest
+            toolchain: stable
+            target: powerpc64-unknown-linux-gnu
+          - build: stable-s390x
+            os: ubuntu-latest
+            toolchain: stable
+            target: s390x-unknown-linux-gnu
     steps:
-      - uses: docker/setup-qemu-action@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
         with:
-          platforms: linux/s390x
-      - uses: docker/setup-buildx-action@v3
-        with:
-          platforms: linux/s390x
-      - uses: docker/build-push-action@v5
-        with:
-          platforms: linux/s390x
-      - uses: actions/checkout@v4
-      - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
-      - run: cargo build --verbose
-      - run: cargo test --verbose
+          toolchain: ${{ matrix.toolchain }}
+      - name: Show CPU info
+        if: matrix.os == 'ubuntu-latest'
+        run: lscpu
+      - name: Build
+        run: cargo build --verbose
+      - name: Build docs
+        run: cargo doc --verbose
+      - name: Test
+        run: cargo test --verbose
