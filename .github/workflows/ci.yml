@@ -62,8 +62,6 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
-      - name: Add target
-        run: rustup target add ${{ matrix.target }}
       - name: Use cross
         if: matrix.os == 'ubuntu-latest' && matrix.target != ''
         run: |
@@ -75,6 +73,8 @@ jobs:
           tar xf cross-x86_64-unknown-linux-musl.tar.gz
           echo "CARGO=cross" >> $GITHUB_ENV
           echo "TARGET=--target ${{ matrix.target }}" >> $GITHUB_ENV
+      - name: Add target
+        run: rustup target add $TARGET
       - name: Show CPU info
         if: matrix.os == 'ubuntu-latest'
         run: lscpu
