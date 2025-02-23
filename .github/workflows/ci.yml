@@ -8,7 +8,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build_and_test:
+  test_little_endian:
+    name: Test on Little-Endian (x86_64)
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -16,6 +17,17 @@ jobs:
           - stable
           - beta
           - nightly
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - run: cargo build --verbose
+      - run: cargo test --verbose
+
+  test_big_endian:
+    name: Test on Big-Endian (s390x)
+    runs-on: ubuntu-latest
+    container:
+      image: s390x/rust:latest
     steps:
       - uses: actions/checkout@v4
       - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
