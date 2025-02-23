@@ -74,6 +74,7 @@ jobs:
           echo "CARGO=cross" >> $GITHUB_ENV
           echo "TARGET=--target ${{ matrix.target }}" >> $GITHUB_ENV
       - name: Add target
+        if: matrix.target != ''
         run: rustup target add $TARGET
       - name: Show CPU info
         if: matrix.os == 'ubuntu-latest'
