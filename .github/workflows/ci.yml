@@ -32,9 +32,16 @@ jobs:
           - stable
           - beta
           - nightly
-    container:
-      image: s390x/rust:latest
     steps:
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/s390x
+      - uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/s390x
+      - uses: docker/build-push-action@v5
+        with:
+          platforms: linux/s390x
       - uses: actions/checkout@v4
       - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
       - run: cargo build --verbose
