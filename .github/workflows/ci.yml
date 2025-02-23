@@ -26,6 +26,12 @@ jobs:
   test_big_endian:
     name: Test on Big-Endian (s390x)
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - beta
+          - nightly
     container:
       image: s390x/rust:latest
     steps:
