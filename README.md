@@ -64,7 +64,7 @@ Other benchmarks featuring **density** (non-exhaustive list) :
 
 Build
 -----
-**Density** can be built on a number of rust-compatible platforms. First use [rustup](https://rustup.rs) to install
+**Density** can be built on rust-compatible platforms. First use [rustup](https://rustup.rs) to install
 rust.
 
 a) get the source code:
