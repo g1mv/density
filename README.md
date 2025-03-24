@@ -118,7 +118,7 @@ Include the required dependency in the *Cargo.toml* file:
 
 ```toml
 [dependencies]
-density-rs = "0.16.3"
+density-rs = "0.16.4"
 ```
 
 Use the API:
