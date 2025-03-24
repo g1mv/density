@@ -181,7 +181,7 @@ impl Codec for Cheetah {
 
     fn clear_state(&mut self) {
         self.state.last_hash = 0;
-        self.state.chunk_map.clear();
-        self.state.prediction_map.clear();
+        self.state.chunk_map.fill(ChunkData { chunk_a: 0, chunk_b: 0 });
+        self.state.prediction_map.fill(PredictionData { next: 0 });
     }
 }

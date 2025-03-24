@@ -310,8 +310,8 @@ impl Codec for Lion {
 
     fn clear_state(&mut self) {
         self.state.last_hash = 0;
-        self.state.chunk_map.clear();
-        self.state.prediction_map.clear();
+        self.state.chunk_map.fill(ChunkData { chunk_a: 0, chunk_b: 0 });
+        self.state.prediction_map.fill(PredictionData { next_a: 0, next_b: 0, next_c: 0, next_d: 0, next_e: 0 });
     }
 
     #[inline(always)]
