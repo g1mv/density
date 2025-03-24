@@ -10,7 +10,7 @@ It is focused on high-speed compression, at the best ratio possible. **Density**
 
 [![MIT licensed](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE-MIT)
 [![Apache-2.0 licensed](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE-APACHE)
-[![Crates.io](https://img.shields.io/crates/v/density-rs.svg?maxAge=2592000)](https://crates.io/crates/density-rs)
+[![Crates.io](https://img.shields.io/crates/v/density-rs.svg)](https://crates.io/crates/density-rs)
 [![Build Status](https://github.com/g1mv/density/actions/workflows/ci.yml/badge.svg)](https://github.com/g1mv/density/actions)
 
 Why is it so fast ?
