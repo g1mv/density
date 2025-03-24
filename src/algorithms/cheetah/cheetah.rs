@@ -171,13 +171,13 @@ impl Decoder for Cheetah {
 
 impl Codec for Cheetah {
     #[inline(always)]
-    fn block_size(&self) -> usize { BYTE_SIZE_U32 * (self.signature_significant_bytes() << 3) / FLAG_SIZE_BITS as usize }
+    fn block_size() -> usize { BYTE_SIZE_U32 * (Self::signature_significant_bytes() << 3) / FLAG_SIZE_BITS as usize }
 
     #[inline(always)]
-    fn decode_unit_size(&self) -> usize { 4 }
+    fn decode_unit_size() -> usize { 4 }
 
     #[inline(always)]
-    fn signature_significant_bytes(&self) -> usize { 8 }
+    fn signature_significant_bytes() -> usize { 8 }
 
     fn clear_state(&mut self) {
         self.state.last_hash = 0;

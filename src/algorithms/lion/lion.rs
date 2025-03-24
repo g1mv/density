@@ -300,13 +300,13 @@ impl Decoder for Lion {
 
 impl Codec for Lion {
     #[inline(always)]
-    fn block_size(&self) -> usize { BYTE_SIZE_U32 * (self.signature_significant_bytes() << 3) / FLAG_SIZE_BITS as usize }
+    fn block_size() -> usize { BYTE_SIZE_U32 * (Self::signature_significant_bytes() << 3) / FLAG_SIZE_BITS as usize }
 
     #[inline(always)]
-    fn decode_unit_size(&self) -> usize { 4 }
+    fn decode_unit_size() -> usize { 4 }
 
     #[inline(always)]
-    fn signature_significant_bytes(&self) -> usize { 6 }
+    fn signature_significant_bytes() -> usize { 6 }
 
     fn clear_state(&mut self) {
         self.state.last_hash = 0;
@@ -315,15 +315,15 @@ impl Codec for Lion {
     }
 
     #[inline(always)]
-    fn write_signature(&mut self, out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
-        out_buffer.write_at(signature.pos, &signature.value.to_le_bytes()[0..self.signature_significant_bytes()]);
+    fn write_signature(out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
+        out_buffer.write_at(signature.pos, &signature.value.to_le_bytes()[0..Self::signature_significant_bytes()]);
     }
 
     #[inline(always)]
-    fn read_signature(&mut self, in_buffer: &mut ReadBuffer) -> ReadSignature {
+    fn read_signature(in_buffer: &mut ReadBuffer) -> ReadSignature {
         match in_buffer.remaining() {
             0..=7 => {
-                let bytes = [in_buffer.read(self.signature_significant_bytes()), &[0, 0]].concat();
+                let bytes = [in_buffer.read(Self::signature_significant_bytes()), &[0, 0]].concat();
                 ReadSignature::new(u64::from_le_bytes(<&[u8] as TryInto<[u8; size_of::<u64>()]>>::try_into(&bytes).unwrap()))
             }
             _ => {

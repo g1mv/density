@@ -10,23 +10,23 @@ use crate::io::write_signature::WriteSignature;
 use crate::{BYTE_SIZE_U128, BYTE_SIZE_U32};
 
 pub trait Codec: QuadEncoder + Decoder {
-    fn block_size(&self) -> usize;
-    fn decode_unit_size(&self) -> usize;
-    fn signature_significant_bytes(&self) -> usize;
+    fn block_size() -> usize;
+    fn decode_unit_size() -> usize;
+    fn signature_significant_bytes() -> usize;
     fn clear_state(&mut self);
 
-    fn safe_encode_buffer_size(&self, size: usize) -> usize {
-        let blocks = size / self.block_size();
-        size + blocks * self.signature_significant_bytes() + if size % self.block_size() > 0 { self.signature_significant_bytes() } else { 0 }
+    fn safe_encode_buffer_size(size: usize) -> usize {
+        let blocks = size / Self::block_size();
+        size + blocks * Self::signature_significant_bytes() + if size % Self::block_size() > 0 { Self::signature_significant_bytes() } else { 0 }
     }
 
     #[inline(always)]
-    fn write_signature(&mut self, out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
+    fn write_signature(out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
         out_buffer.ink(signature);
     }
 
     #[inline(always)]
-    fn read_signature(&mut self, in_buffer: &mut ReadBuffer) -> ReadSignature {
+    fn read_signature(in_buffer: &mut ReadBuffer) -> ReadSignature {
         ReadSignature::new(in_buffer.read_u64_le())
     }
 
@@ -38,7 +38,7 @@ pub trait Codec: QuadEncoder + Decoder {
         } else {
             let mark = out_buffer.index;
             signature.init(out_buffer.index);
-            out_buffer.skip(self.signature_significant_bytes());
+            out_buffer.skip(Self::signature_significant_bytes());
             for sub_block in block.chunks(BYTE_SIZE_U128) {
                 match <&[u8] as TryInto<[u8; BYTE_SIZE_U128]>>::try_into(sub_block) {
                     Ok(array) => {
@@ -64,8 +64,8 @@ pub trait Codec: QuadEncoder + Decoder {
                     }
                 }
             }
-            self.write_signature(out_buffer, signature);
-            protection_state.update(out_buffer.index - mark >= self.block_size());
+            Self::write_signature(out_buffer, signature);
+            protection_state.update(out_buffer.index - mark >= Self::block_size());
         }
     }
 
@@ -73,7 +73,7 @@ pub trait Codec: QuadEncoder + Decoder {
         let mut out_buffer = WriteBuffer::new(output);
         let mut signature = WriteSignature::new();
         let mut protection_state = ProtectionState::new();
-        for block in input.chunks(self.block_size()) {
+        for block in input.chunks(Self::block_size()) {
             self.encode_block(block, &mut out_buffer, &mut signature, &mut protection_state);
         }
         Ok(out_buffer.index)
@@ -83,26 +83,26 @@ pub trait Codec: QuadEncoder + Decoder {
         let mut in_buffer = ReadBuffer::new(input);
         let mut out_buffer = WriteBuffer::new(output);
         let mut protection_state = ProtectionState::new();
-        let iterations = self.block_size() / self.decode_unit_size();
+        let iterations = Self::block_size() / Self::decode_unit_size();
 
-        while in_buffer.remaining() >= self.signature_significant_bytes() + self.block_size() {
+        while in_buffer.remaining() >= Self::signature_significant_bytes() + Self::block_size() {
             if protection_state.revert_to_copy() {
-                out_buffer.push(in_buffer.read(self.block_size()));
+                out_buffer.push(in_buffer.read(Self::block_size()));
                 protection_state.decay();
             } else {
                 let mark = in_buffer.index;
-                let mut signature = self.read_signature(&mut in_buffer);
+                let mut signature = Self::read_signature(&mut in_buffer);
                 for _ in 0..iterations {
                     self.decode_unit(&mut in_buffer, &mut signature, &mut out_buffer);
                 }
-                protection_state.update(in_buffer.index - mark >= self.block_size());
+                protection_state.update(in_buffer.index - mark >= Self::block_size());
             }
         }
 
         'end: while in_buffer.remaining() > 0 {
             if protection_state.revert_to_copy() {
-                if in_buffer.remaining() > self.block_size() {
-                    out_buffer.push(in_buffer.read(self.block_size()));
+                if in_buffer.remaining() > Self::block_size() {
+                    out_buffer.push(in_buffer.read(Self::block_size()));
                 } else {
                     out_buffer.push(in_buffer.read(in_buffer.remaining()));
                     break 'end;
@@ -110,15 +110,15 @@ pub trait Codec: QuadEncoder + Decoder {
                 protection_state.decay();
             } else {
                 let mark = in_buffer.index;
-                let mut signature = self.read_signature(&mut in_buffer);
+                let mut signature = Self::read_signature(&mut in_buffer);
                 for _ in 0..iterations {
-                    if in_buffer.remaining() >= self.decode_unit_size() {
+                    if in_buffer.remaining() >= Self::decode_unit_size() {
                         self.decode_unit(&mut in_buffer, &mut signature, &mut out_buffer);
                     } else {
                         if self.decode_partial_unit(&mut in_buffer, &mut signature, &mut out_buffer) { break 'end; }
                     }
                 }
-                protection_state.update(in_buffer.index - mark >= self.block_size());
+                protection_state.update(in_buffer.index - mark >= Self::block_size());
             }
         }
 

@@ -99,7 +99,7 @@ impl Decoder for Chameleon {
 
     #[inline(always)]
     fn decode_partial_unit(&mut self, in_buffer: &mut ReadBuffer, signature: &mut ReadSignature, out_buffer: &mut WriteBuffer) -> bool {
-        for _ in 0..self.decode_unit_size() / BYTE_SIZE_U32 {
+        for _ in 0..Self::decode_unit_size() / BYTE_SIZE_U32 {
             let quad = match signature.read_bits(DECODE_FLAG_MASK, DECODE_FLAG_MASK_BITS) {
                 PLAIN_FLAG => {
                     match in_buffer.remaining() {
@@ -121,13 +121,13 @@ impl Decoder for Chameleon {
 
 impl Codec for Chameleon {
     #[inline(always)]
-    fn block_size(&self) -> usize { BYTE_SIZE_U32 * (self.signature_significant_bytes() << 3) }
+    fn block_size() -> usize { BYTE_SIZE_U32 * (Self::signature_significant_bytes() << 3) }
 
     #[inline(always)]
-    fn decode_unit_size(&self) -> usize { 8 }
+    fn decode_unit_size() -> usize { 8 }
 
     #[inline(always)]
-    fn signature_significant_bytes(&self) -> usize { 8 }
+    fn signature_significant_bytes() -> usize { 8 }
 
     fn clear_state(&mut self) {
         self.state.chunk_map.fill(0);
