@@ -84,7 +84,7 @@ b) build and test:
 c) run benchmarks with or without your own files:
 
 ```shell
-    cargo bench
+    RUSTFLAGS="-C target-cpu=native" cargo bench
     FILE=... cargo bench
 ```
 

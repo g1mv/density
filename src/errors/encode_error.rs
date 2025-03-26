@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
@@ -9,4 +10,4 @@ impl Display for EncodeError {
     }
 }
 
-impl std::error::Error for EncodeError {}
+impl Error for EncodeError {}
