@@ -1,6 +1,6 @@
 [package]
 name = "density-rs"
-version = "0.16.4"
+version = "0.16.5"
 edition = "2021"
 description = "Superfast compression library"
 license = "MIT OR Apache-2.0"
