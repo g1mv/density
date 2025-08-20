@@ -121,7 +121,7 @@ impl QuadEncoder for Chameleon {
                 for i in 0..vl {
                     let single_mask = vslidedown_vx_m_b32(v_mask, i as u32, vl);
                     hit_arr[i] = vfirst_m_b32(single_mask, 1) != -1; 
-
+                }
                 for i in 0..vl {
                     let quad = quad_arr[i];
                     let hash_u16 = hash_arr[i] as u16;
