@@ -40,30 +40,24 @@ pub trait Codec: QuadEncoder + Decoder {
             signature.init(out_buffer.index);
             out_buffer.skip(Self::signature_significant_bytes());
 
-            // 安全对齐block到u32，用于批处理
             let (prefix, u32_block, suffix) = unsafe { block.align_to::<u32>() };
 
-            // 处理不对齐前缀（<4字节，稀有；使用标量或直接push）
             for bytes in prefix.chunks(BYTE_SIZE_U32) {
                 if bytes.len() == BYTE_SIZE_U32 {
                     let quad = u32::from_le_bytes(bytes.try_into().unwrap());
                     self.encode_quad(quad, out_buffer, signature);
                 } else {
-                    // 隐式plain flag
                     out_buffer.push(bytes);
                 }
             }
 
-            // 批处理对齐的u32 quads（主要热点路径）
             self.encode_batch(u32_block, out_buffer, signature);
 
-            // 处理后缀（<4字节剩余）
             for bytes in suffix.chunks(BYTE_SIZE_U32) {
                 if bytes.len() == BYTE_SIZE_U32 {
                     let quad = u32::from_le_bytes(bytes.try_into().unwrap());
                     self.encode_quad(quad, out_buffer, signature);
                 } else {
-                    // 隐式plain flag
                     out_buffer.push(bytes);
                 }
             }
