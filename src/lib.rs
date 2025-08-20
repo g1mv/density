@@ -1,3 +1,6 @@
+#![feature(riscv_ext_intrinsics)]
+#![feature(riscv_target_feature)]
+
 pub mod codec;
 pub mod algorithms;
 pub mod buffer;

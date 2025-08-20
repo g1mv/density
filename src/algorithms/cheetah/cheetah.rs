@@ -13,7 +13,6 @@ use crate::{BIT_SIZE_U16, BIT_SIZE_U32, BYTE_SIZE_U32};
 pub(crate) const CHEETAH_HASH_BITS: usize = BIT_SIZE_U16;
 pub(crate) const CHEETAH_HASH_MULTIPLIER: u32 = 0x9D6EF916;
 
-
 pub(crate) const FLAG_SIZE_BITS: u8 = 2;
 pub(crate) const MAP_A_FLAG: u64 = 0x1;
 pub(crate) const MAP_B_FLAG: u64 = 0x2;
@@ -130,6 +129,13 @@ impl QuadEncoder for Cheetah {
             signature.push_bits(PREDICTED_FLAG, FLAG_SIZE_BITS); // Predicted
         }
         self.state.last_hash = hash_u16;
+    }
+
+    #[inline(always)]
+    fn encode_batch(&mut self, quads: &[u32], out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
+        for &quad in quads {
+            self.encode_quad(quad, out_buffer, signature);
+        }
     }
 }
 
