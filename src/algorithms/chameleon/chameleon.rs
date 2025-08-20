@@ -1,3 +1,5 @@
+// File: src/chameleon.rs
+
 use crate::algorithms::PLAIN_FLAG;
 use crate::codec::codec::Codec;
 use crate::codec::decoder::Decoder;
@@ -9,6 +11,7 @@ use crate::io::read_signature::ReadSignature;
 use crate::io::write_buffer::WriteBuffer;
 use crate::io::write_signature::WriteSignature;
 use crate::{BIT_SIZE_U16, BIT_SIZE_U32, BYTE_SIZE_U32};
+use std::arch::riscv64::*;
 
 pub(crate) const CHAMELEON_HASH_BITS: usize = BIT_SIZE_U16;
 pub(crate) const CHAMELEON_HASH_MULTIPLIER: u32 = 0x9D6EF916;
@@ -82,16 +85,74 @@ impl QuadEncoder for Chameleon {
             out_buffer.push(&hash_u16.to_le_bytes());
         }
     }
+
+    #[inline(always)]
+    fn encode_batch(&mut self, quads: &[u32], out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
+        #[cfg(not(all(target_arch = "riscv64", target_feature = "v")))]
+        {
+            for &quad in quads {
+                self.encode_quad(quad, out_buffer, signature);
+            }
+            return;
+        }
+
+        #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+        unsafe {
+            let num_quads = quads.len();
+            let mut offset = 0;
+            while offset < num_quads {
+                let remaining = num_quads - offset;
+                let vl = vsetvli(remaining, riscv64::riscv_v_sew::E32, riscv64::riscv_v_lmul::M1, riscv64::riscv_v_ta::TA, riscv64::riscv_v_ma::MA);
+
+                let v_quad = vle32_v_u32m1(quads.as_ptr().add(offset) as *const u32, vl);
+
+                let v_mult = vmul_vx_u32m1(v_quad, CHAMELEON_HASH_MULTIPLIER, vl);
+                let v_hash = vsrl_vx_u32m1(v_mult, BIT_SIZE_U32 - CHAMELEON_HASH_BITS as u32, vl);
+
+                let dict_ptr = self.state.chunk_map.as_mut_ptr();
+                let v_dict = vluxei32_v_u32m1(dict_ptr as *const u32, v_hash, vl);
+
+                let v_mask = vmseq_vv_m_b32(v_dict, v_quad, vl);  // hit mask (true if match)
+
+                let mut quad_arr = vec![0u32; vl];
+                let mut hash_arr = vec![0u32; vl];
+                let mut hit_arr = vec![false; vl];
+
+                vse32_v_u32m1(quad_arr.as_mut_ptr(), v_quad, vl);
+                vse32_v_u32m1(hash_arr.as_mut_ptr(), v_hash, vl);
+
+                for i in 0..vl {
+                    let single_mask = vslidedown_vx_m_b32(v_mask, i as u32, vl);
+                    hit_arr[i] = vfirst_m_b32(single_mask, 1) != -1;  // 如果位 set，则 hit
+                }
+
+                for i in 0..vl {
+                    let quad = quad_arr[i];
+                    let hash_u16 = hash_arr[i] as u16;
+                    if hit_arr[i] {
+                        signature.push_bits(MAP_FLAG, FLAG_SIZE_BITS);
+                        out_buffer.push(&hash_u16.to_le_bytes());
+                    } else {
+                        signature.push_bits(PLAIN_FLAG, FLAG_SIZE_BITS);
+                        out_buffer.push(&quad.to_le_bytes());
+                        self.state.chunk_map[hash_u16 as usize] = quad;
+                    }
+                }
+
+                offset += vl;
+            }
+        }
+    }
 }
 
 impl Decoder for Chameleon {
     #[inline(always)]
     fn decode_unit(&mut self, in_buffer: &mut ReadBuffer, signature: &mut ReadSignature, out_buffer: &mut WriteBuffer) {
         let (quad_a, quad_b) = match signature.read_bits(DECODE_TWIN_FLAG_MASK, DECODE_TWIN_FLAG_MASK_BITS) {
-            PLAIN_PLAIN_FLAGS => { (self.decode_plain(in_buffer), self.decode_plain(in_buffer)) }
-            MAP_PLAIN_FLAGS => { (self.decode_map(in_buffer), self.decode_plain(in_buffer)) }
-            PLAIN_MAP_FLAGS => { (self.decode_plain(in_buffer), self.decode_map(in_buffer)) }
-            _ => { (self.decode_map(in_buffer), self.decode_map(in_buffer)) }
+            PLAIN_PLAIN_FLAGS => (self.decode_plain(in_buffer), self.decode_plain(in_buffer)),
+            MAP_PLAIN_FLAGS => (self.decode_map(in_buffer), self.decode_plain(in_buffer)),
+            PLAIN_MAP_FLAGS => (self.decode_plain(in_buffer), self.decode_map(in_buffer)),
+            _ => (self.decode_map(in_buffer), self.decode_map(in_buffer)),
         };
         out_buffer.push(&quad_a.to_le_bytes());
         out_buffer.push(&quad_b.to_le_bytes());
@@ -103,15 +164,15 @@ impl Decoder for Chameleon {
             let quad = match signature.read_bits(DECODE_FLAG_MASK, DECODE_FLAG_MASK_BITS) {
                 PLAIN_FLAG => {
                     match in_buffer.remaining() {
-                        0 => { return true; }
+                        0 => return true,
                         1..=3 => {
                             out_buffer.push(in_buffer.read(in_buffer.remaining()));
                             return true;
                         }
-                        _ => { self.decode_plain(in_buffer) }
+                        _ => self.decode_plain(in_buffer),
                     }
                 }
-                _ => { self.decode_map(in_buffer) }
+                _ => self.decode_map(in_buffer),
             };
             out_buffer.push(&quad.to_le_bytes());
         }
