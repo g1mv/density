@@ -1,5 +1,3 @@
-// File: src/chameleon.rs
-
 use crate::algorithms::PLAIN_FLAG;
 use crate::codec::codec::Codec;
 use crate::codec::decoder::Decoder;
@@ -23,7 +21,6 @@ pub(crate) const PLAIN_PLAIN_FLAGS: u64 = (PLAIN_FLAG << 1) | PLAIN_FLAG;
 pub(crate) const MAP_PLAIN_FLAGS: u64 = (PLAIN_FLAG << 1) | MAP_FLAG;
 pub(crate) const PLAIN_MAP_FLAGS: u64 = (MAP_FLAG << 1) | PLAIN_FLAG;
 // pub(crate) const _MAP_MAP_FLAGS: u64 = (MAP_FLAG << 1) | MAP_FLAG;
-
 pub(crate) const DECODE_TWIN_FLAG_MASK: u64 = 0x3;
 pub(crate) const DECODE_TWIN_FLAG_MASK_BITS: u8 = 2;
 pub(crate) const DECODE_FLAG_MASK: u64 = 0x1;
@@ -123,8 +120,7 @@ impl QuadEncoder for Chameleon {
 
                 for i in 0..vl {
                     let single_mask = vslidedown_vx_m_b32(v_mask, i as u32, vl);
-                    hit_arr[i] = vfirst_m_b32(single_mask, 1) != -1;  // 如果位 set，则 hit
-                }
+                    hit_arr[i] = vfirst_m_b32(single_mask, 1) != -1; 
 
                 for i in 0..vl {
                     let quad = quad_arr[i];
