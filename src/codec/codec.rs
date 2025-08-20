@@ -39,31 +39,35 @@ pub trait Codec: QuadEncoder + Decoder {
             let mark = out_buffer.index;
             signature.init(out_buffer.index);
             out_buffer.skip(Self::signature_significant_bytes());
-            for sub_block in block.chunks(BYTE_SIZE_U128) {
-                match <&[u8] as TryInto<[u8; BYTE_SIZE_U128]>>::try_into(sub_block) {
-                    Ok(array) => {
-                        let value_u128 = u128::from_le_bytes(array);
-                        self.encode_quad((value_u128 & 0xffffffff) as u32, out_buffer, signature);
-                        self.encode_quad(((value_u128 >> 32) & 0xffffffff) as u32, out_buffer, signature);
-                        self.encode_quad(((value_u128 >> 64) & 0xffffffff) as u32, out_buffer, signature);
-                        self.encode_quad((value_u128 >> 96) as u32, out_buffer, signature);
-                    }
-                    Err(_error) => {
-                        // Less than 16 bytes left
-                        for bytes in sub_block.chunks(BYTE_SIZE_U32) {
-                            match <&[u8] as TryInto<[u8; BYTE_SIZE_U32]>>::try_into(bytes) {
-                                Ok(array) => {
-                                    self.encode_quad(u32::from_le_bytes(array), out_buffer, signature);
-                                }
-                                Err(_error) => {
-                                    // Implicit signature plain flag (0x0)
-                                    out_buffer.push(bytes);
-                                }
-                            }
-                        }
-                    }
+
+            // 安全对齐block到u32，用于批处理
+            let (prefix, u32_block, suffix) = unsafe { block.align_to::<u32>() };
+
+            // 处理不对齐前缀（<4字节，稀有；使用标量或直接push）
+            for bytes in prefix.chunks(BYTE_SIZE_U32) {
+                if bytes.len() == BYTE_SIZE_U32 {
+                    let quad = u32::from_le_bytes(bytes.try_into().unwrap());
+                    self.encode_quad(quad, out_buffer, signature);
+                } else {
+                    // 隐式plain flag
+                    out_buffer.push(bytes);
                 }
             }
+
+            // 批处理对齐的u32 quads（主要热点路径）
+            self.encode_batch(u32_block, out_buffer, signature);
+
+            // 处理后缀（<4字节剩余）
+            for bytes in suffix.chunks(BYTE_SIZE_U32) {
+                if bytes.len() == BYTE_SIZE_U32 {
+                    let quad = u32::from_le_bytes(bytes.try_into().unwrap());
+                    self.encode_quad(quad, out_buffer, signature);
+                } else {
+                    // 隐式plain flag
+                    out_buffer.push(bytes);
+                }
+            }
+
             Self::write_signature(out_buffer, signature);
             protection_state.update(out_buffer.index - mark >= Self::block_size());
         }
