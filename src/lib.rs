@@ -1,5 +1,5 @@
-#![feature(riscv_ext_intrinsics)]
-#![feature(riscv_target_feature)]
+#![cfg_attr(all(target_arch = "riscv64", target_feature = "v"), feature(riscv_ext_intrinsics))]
+#![cfg_attr(all(target_arch = "riscv64", target_feature = "v"), feature(riscv_target_feature))]
 
 pub mod codec;
 pub mod algorithms;

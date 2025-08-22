@@ -9,6 +9,8 @@ use crate::io::read_signature::ReadSignature;
 use crate::io::write_buffer::WriteBuffer;
 use crate::io::write_signature::WriteSignature;
 use crate::{BIT_SIZE_U16, BIT_SIZE_U32, BYTE_SIZE_U32};
+
+#[cfg(all(target_arch = "riscv64", target_feature = "v"))]
 use std::arch::riscv64::*;
 
 pub(crate) const CHAMELEON_HASH_BITS: usize = BIT_SIZE_U16;
