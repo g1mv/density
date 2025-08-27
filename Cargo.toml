@@ -1,7 +1,7 @@
 [package]
 name = "density-rs"
 version = "0.16.5"
-edition = "2021"
+edition = "2024"
 description = "Superfast compression library"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/g1mv/density"
@@ -19,9 +19,9 @@ incremental = false
 overflow-checks = false
 
 [dev-dependencies]
-divan = "0.1.17"
+divan = "0.1.21"
 snap = "1.1.1"
-lz4_flex = "0.11.3"
+lz4_flex = "0.11.5"
 
 [[bench]]
 name = "density"
