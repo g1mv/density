@@ -7,7 +7,7 @@ use crate::io::read_buffer::ReadBuffer;
 use crate::io::read_signature::ReadSignature;
 use crate::io::write_buffer::WriteBuffer;
 use crate::io::write_signature::WriteSignature;
-use crate::{BYTE_SIZE_U128, BYTE_SIZE_U32};
+use crate::BYTE_SIZE_U32;
 
 pub trait Codec: QuadEncoder + Decoder {
     fn block_size() -> usize;
@@ -39,31 +39,31 @@ pub trait Codec: QuadEncoder + Decoder {
             let mark = out_buffer.index;
             signature.init(out_buffer.index);
             out_buffer.skip(Self::signature_significant_bytes());
-            for sub_block in block.chunks(BYTE_SIZE_U128) {
-                match <&[u8] as TryInto<[u8; BYTE_SIZE_U128]>>::try_into(sub_block) {
-                    Ok(array) => {
-                        let value_u128 = u128::from_le_bytes(array);
-                        self.encode_quad((value_u128 & 0xffffffff) as u32, out_buffer, signature);
-                        self.encode_quad(((value_u128 >> 32) & 0xffffffff) as u32, out_buffer, signature);
-                        self.encode_quad(((value_u128 >> 64) & 0xffffffff) as u32, out_buffer, signature);
-                        self.encode_quad((value_u128 >> 96) as u32, out_buffer, signature);
-                    }
-                    Err(_error) => {
-                        // Less than 16 bytes left
-                        for bytes in sub_block.chunks(BYTE_SIZE_U32) {
-                            match <&[u8] as TryInto<[u8; BYTE_SIZE_U32]>>::try_into(bytes) {
-                                Ok(array) => {
-                                    self.encode_quad(u32::from_le_bytes(array), out_buffer, signature);
-                                }
-                                Err(_error) => {
-                                    // Implicit signature plain flag (0x0)
-                                    out_buffer.push(bytes);
-                                }
-                            }
-                        }
-                    }
+
+            // 统一处理所有数据为小端序的quads
+            let mut all_quads = Vec::new();
+            let mut remaining_bytes = Vec::new();
+            
+            for chunk in block.chunks(BYTE_SIZE_U32) {
+                if chunk.len() == BYTE_SIZE_U32 {
+                    let quad = u32::from_le_bytes(chunk.try_into().unwrap());
+                    all_quads.push(quad);
+                } else {
+                    // 收集不完整的字节，稍后处理
+                    remaining_bytes.extend_from_slice(chunk);
                 }
             }
+            
+            // 先处理所有完整的quads
+            if !all_quads.is_empty() {
+                self.encode_batch(&all_quads, out_buffer, signature);
+            }
+            
+            // 最后处理剩余的不完整字节
+            if !remaining_bytes.is_empty() {
+                out_buffer.push(&remaining_bytes);
+            }
+
             Self::write_signature(out_buffer, signature);
             protection_state.update(out_buffer.index - mark >= Self::block_size());
         }

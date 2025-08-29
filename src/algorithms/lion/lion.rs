@@ -14,7 +14,6 @@ use std::slice::{from_raw_parts, from_raw_parts_mut};
 pub(crate) const LION_HASH_BITS: usize = BIT_SIZE_U16;
 pub(crate) const LION_HASH_MULTIPLIER: u32 = 0x9D6EF916;
 
-
 pub(crate) const FLAG_SIZE_BITS: u8 = 3;
 pub(crate) const PREDICTED_A_FLAG: u64 = 0x1;
 pub(crate) const PREDICTED_B_FLAG: u64 = 0x2;
@@ -267,6 +266,13 @@ impl QuadEncoder for Lion {
         }
 
         self.update_last_hash(hash_u16);
+    }
+
+    #[inline(always)]
+    fn encode_batch(&mut self, quads: &[u32], out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
+        for &quad in quads {
+            self.encode_quad(quad, out_buffer, signature);
+        }
     }
 }
 
