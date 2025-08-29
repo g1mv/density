@@ -7,7 +7,7 @@ use crate::io::read_buffer::ReadBuffer;
 use crate::io::read_signature::ReadSignature;
 use crate::io::write_buffer::WriteBuffer;
 use crate::io::write_signature::WriteSignature;
-use crate::{BYTE_SIZE_U128, BYTE_SIZE_U32};
+use crate::BYTE_SIZE_U32;
 
 pub trait Codec: QuadEncoder + Decoder {
     fn block_size() -> usize;
@@ -40,26 +40,28 @@ pub trait Codec: QuadEncoder + Decoder {
             signature.init(out_buffer.index);
             out_buffer.skip(Self::signature_significant_bytes());
 
-            let (prefix, u32_block, suffix) = unsafe { block.align_to::<u32>() };
-
-            for bytes in prefix.chunks(BYTE_SIZE_U32) {
-                if bytes.len() == BYTE_SIZE_U32 {
-                    let quad = u32::from_le_bytes(bytes.try_into().unwrap());
-                    self.encode_quad(quad, out_buffer, signature);
+            // 统一处理所有数据为小端序的quads
+            let mut all_quads = Vec::new();
+            let mut remaining_bytes = Vec::new();
+            
+            for chunk in block.chunks(BYTE_SIZE_U32) {
+                if chunk.len() == BYTE_SIZE_U32 {
+                    let quad = u32::from_le_bytes(chunk.try_into().unwrap());
+                    all_quads.push(quad);
                 } else {
-                    out_buffer.push(bytes);
+                    // 收集不完整的字节，稍后处理
+                    remaining_bytes.extend_from_slice(chunk);
                 }
             }
-
-            self.encode_batch(u32_block, out_buffer, signature);
-
-            for bytes in suffix.chunks(BYTE_SIZE_U32) {
-                if bytes.len() == BYTE_SIZE_U32 {
-                    let quad = u32::from_le_bytes(bytes.try_into().unwrap());
-                    self.encode_quad(quad, out_buffer, signature);
-                } else {
-                    out_buffer.push(bytes);
-                }
+            
+            // 先处理所有完整的quads
+            if !all_quads.is_empty() {
+                self.encode_batch(&all_quads, out_buffer, signature);
+            }
+            
+            // 最后处理剩余的不完整字节
+            if !remaining_bytes.is_empty() {
+                out_buffer.push(&remaining_bytes);
             }
 
             Self::write_signature(out_buffer, signature);

@@ -74,14 +74,17 @@ impl QuadEncoder for Chameleon {
     fn encode_quad(&mut self, quad: u32, out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
         let hash_u16 = (quad.wrapping_mul(CHAMELEON_HASH_MULTIPLIER) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as u16;
         let dictionary_value = &mut self.state.chunk_map[hash_u16 as usize];
-        if *dictionary_value != quad {
-            signature.push_bits(PLAIN_FLAG, FLAG_SIZE_BITS);
-            out_buffer.push(&quad.to_le_bytes());
-
-            *dictionary_value = quad;
-        } else {
+        
+        // 检查字典命中
+        if *dictionary_value == quad {
+            // 字典命中，输出哈希引用
             signature.push_bits(MAP_FLAG, FLAG_SIZE_BITS);
             out_buffer.push(&hash_u16.to_le_bytes());
+        } else {
+            // 字典未命中，输出原始数据并更新字典
+            signature.push_bits(PLAIN_FLAG, FLAG_SIZE_BITS);
+            out_buffer.push(&quad.to_le_bytes());
+            *dictionary_value = quad;
         }
     }
 
@@ -94,6 +97,8 @@ impl QuadEncoder for Chameleon {
             }
             return;
         }
+
+        // ... existing code ...
 
         #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
         unsafe {
