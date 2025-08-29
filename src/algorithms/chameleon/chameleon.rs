@@ -9,6 +9,7 @@ use crate::io::read_signature::ReadSignature;
 use crate::io::write_buffer::WriteBuffer;
 use crate::io::write_signature::WriteSignature;
 use crate::{BIT_SIZE_U16, BIT_SIZE_U32, BYTE_SIZE_U32};
+use std::slice::{from_raw_parts, from_raw_parts_mut};
 
 #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
 use std::arch::riscv64::*;
@@ -66,6 +67,21 @@ impl Chameleon {
         let hash = in_buffer.read_u16_le();
         let quad = self.state.chunk_map[hash as usize];
         quad
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn chameleon_encode(input: *const u8, input_size: usize, output: *mut u8, output_size: usize) -> usize {
+        unsafe { Self::encode(from_raw_parts(input, input_size), from_raw_parts_mut(output, output_size)).unwrap_or(0) }
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn chameleon_decode(input: *const u8, input_size: usize, output: *mut u8, output_size: usize) -> usize {
+        unsafe { Self::decode(from_raw_parts(input, input_size), from_raw_parts_mut(output, output_size)).unwrap_or(0) }
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn chameleon_safe_encode_buffer_size(size: usize) -> usize {
+        Self::safe_encode_buffer_size(size)
     }
 }
 

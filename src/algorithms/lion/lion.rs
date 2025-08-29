@@ -9,6 +9,7 @@ use crate::io::read_signature::ReadSignature;
 use crate::io::write_buffer::WriteBuffer;
 use crate::io::write_signature::WriteSignature;
 use crate::{BIT_SIZE_U16, BIT_SIZE_U32, BYTE_SIZE_U16, BYTE_SIZE_U32};
+use std::slice::{from_raw_parts, from_raw_parts_mut};
 
 pub(crate) const LION_HASH_BITS: usize = BIT_SIZE_U16;
 pub(crate) const LION_HASH_MULTIPLIER: u32 = 0x9D6EF916;
@@ -186,6 +187,21 @@ impl Lion {
     #[inline(always)]
     fn update_last_hash(&mut self, hash_u16: u16) {
         self.state.last_hash = hash_u16;
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn lion_encode(input: *const u8, input_size: usize, output: *mut u8, output_size: usize) -> usize {
+        unsafe { Self::encode(from_raw_parts(input, input_size), from_raw_parts_mut(output, output_size)).unwrap_or(0) }
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn lion_decode(input: *const u8, input_size: usize, output: *mut u8, output_size: usize) -> usize {
+        unsafe { Self::decode(from_raw_parts(input, input_size), from_raw_parts_mut(output, output_size)).unwrap_or(0) }
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn lion_safe_encode_buffer_size(size: usize) -> usize {
+        Self::safe_encode_buffer_size(size)
     }
 }
 
