@@ -4,6 +4,30 @@ pub mod buffer;
 pub mod errors;
 pub mod io;
 
+// RVV 优化支持
+#[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+mod rvv_support {
+    use crate::algorithms::chameleon::chameleon::Chameleon;
+    
+    /// 检测 RISC-V 平台是否支持向量扩展
+    pub fn is_rvv_supported() -> bool {
+        // 使用 Chameleon 的 RVV 检测函数
+        Chameleon::is_rvv_available()
+    }
+}
+
+#[cfg(not(all(target_arch = "riscv64", target_feature = "v")))]
+mod rvv_support {
+    pub fn is_rvv_supported() -> bool {
+        false
+    }
+}
+
+/// 公开 API: 检测当前平台是否支持 RVV 优化
+pub fn is_rvv_available() -> bool {
+    rvv_support::is_rvv_supported()
+}
+
 pub(crate) const BYTE_SIZE_U16: usize = size_of::<u16>();
 pub(crate) const BYTE_SIZE_U32: usize = size_of::<u32>();
 pub(crate) const BYTE_SIZE_U128: usize = size_of::<u128>();
