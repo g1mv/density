@@ -223,13 +223,13 @@ impl Lion {
         Self::safe_encode_buffer_size(size)
     }
 
-    // ==== RVV 优化实现 ====
+    // ==== RVV Optimization Implementation ====
     
-    /// 检测是否支持 RVV
+    /// Detect if RVV is supported
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     #[inline(always)]
     fn is_rvv_available() -> bool {
-        // 运行时检测 RVV 支持
+        // Runtime detection of RVV support
         Self::detect_rvv_capability()
     }
     
@@ -239,13 +239,13 @@ impl Lion {
         false
     }
     
-    /// 检测 RVV 能力
+    /// Detect RVV capability
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     #[inline(always)]
     fn detect_rvv_capability() -> bool {
         unsafe {
             use core::arch::riscv64::*;
-            // Lion 的预测逻辑最复杂，需要谨慎使用 RVV
+            // Lion's prediction logic is most complex, need to use RVV carefully
             let vl = vsetvli(4, VtypeBuilder::e32m1());
             vl >= 4
         }

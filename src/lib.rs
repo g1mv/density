@@ -4,14 +4,14 @@ pub mod buffer;
 pub mod errors;
 pub mod io;
 
-// RVV 优化支持
+// RVV optimization support
 #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
 mod rvv_support {
     use crate::algorithms::chameleon::chameleon::Chameleon;
     
-    /// 检测 RISC-V 平台是否支持向量扩展
+    /// Detect if RISC-V platform supports vector extension
     pub fn is_rvv_supported() -> bool {
-        // 使用 Chameleon 的 RVV 检测函数
+        // Use Chameleon's RVV detection function
         Chameleon::is_rvv_available()
     }
 }
@@ -23,7 +23,7 @@ mod rvv_support {
     }
 }
 
-/// 公开 API: 检测当前平台是否支持 RVV 优化
+/// Public API: Detect if current platform supports RVV optimization
 pub fn is_rvv_available() -> bool {
     rvv_support::is_rvv_supported()
 }

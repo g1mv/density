@@ -100,15 +100,15 @@ impl Chameleon {
         Self::safe_encode_buffer_size(size)
     }
 
-    // ==== RVV 优化实现 ====
+    // ==== RVV Optimization Implementation ====
     
-    // ==== RVV 优化实现 ====
+    // ==== RVV Optimization Implementation ====
     
-    /// 检测是否支持 RVV
+    /// Detect if RVV is supported
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     #[inline(always)]
     fn is_rvv_available() -> bool {
-        // 运行时检测 RVV 支持
+        // Runtime detection of RVV support
         Self::detect_rvv_capability()
     }
     
@@ -247,27 +247,27 @@ impl Chameleon {
                 // 加载 8 个 u32 数据
                 let quads_vec = vle32_v_u32m1(quads.as_ptr().add(processed), vl);
                 
-                // 向量化哈希计算：hash = (quad * MULTIPLIER) >> (32 - HASH_BITS)
+                // Vectorized hash calculation: hash = (quad * MULTIPLIER) >> (32 - HASH_BITS)
                 let multiplier_vec = vmv_v_x_u32m1(CHAMELEON_HASH_MULTIPLIER, vl);
                 let hash_temp = vmul_vv_u32m1(quads_vec, multiplier_vec, vl);
                 let shift_amount = 32 - CHAMELEON_HASH_BITS;
                 let hashes = vsrl_vx_u32m1(hash_temp, shift_amount as usize, vl);
                 
-                // 将哈希值转换为索引数组
+                // Convert hash values to index array
                 let mut hash_indices = [0u32; 8];
                 vse32_v_u32m1(hash_indices.as_mut_ptr(), hashes, vl);
                 
-                // 批量检查冲突和处理
+                // Batch check conflicts and processing
                 let mut conflicts = false;
                 let mut quad_array = [0u32; 8];
                 vse32_v_u32m1(quad_array.as_mut_ptr(), quads_vec, vl);
                 
-                // 检查哈希冲突 - 这部分需要标量处理以确保正确性
+                // Check hash conflicts - this part needs scalar processing to ensure correctness
                 for i in 0..vl {
                     let hash_idx = (hash_indices[i] & ((1 << CHAMELEON_HASH_BITS) - 1)) as usize;
                     let quad = quad_array[i];
                     
-                    // 检查是否与现有条目冲突
+                    // Check if conflicts with existing entries
                     if self.state.chunk_map[hash_idx] != 0 && self.state.chunk_map[hash_idx] != quad {
                         conflicts = true;
                         break;
@@ -275,20 +275,20 @@ impl Chameleon {
                 }
                 
                 if conflicts {
-                    // 有冲突，回退到标量处理这一批
+                    // Has conflicts, fallback to scalar processing for this batch
                     break;
                 } else {
-                    // 无冲突，批量处理
+                    // No conflicts, batch processing
                     for i in 0..vl {
                         let hash_idx = (hash_indices[i] & ((1 << CHAMELEON_HASH_BITS) - 1)) as usize;
                         let quad = quad_array[i];
                         
                         if self.state.chunk_map[hash_idx] == quad && quad != 0 {
-                            // 匹配：输出压缩标记
+                            // Match: output compressed flag
                             signature.push_bits(MAP_FLAG, FLAG_SIZE_BITS);
                             out_buffer.push(&(hash_idx as u16).to_le_bytes());
                         } else {
-                            // 不匹配：输出原始数据并更新字典
+                            // No match: output original data and update dictionary
                             signature.push_bits(PLAIN_FLAG, FLAG_SIZE_BITS);
                             out_buffer.push(&quad.to_le_bytes());
                             self.state.chunk_map[hash_idx] = quad;
