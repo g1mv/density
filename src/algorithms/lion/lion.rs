@@ -74,13 +74,13 @@ impl Lion {
     pub fn encode(input: &[u8], output: &mut [u8]) -> Result<usize, EncodeError> {
         #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
         {
-            // 检测是否支持 RVV，如果支持且数据量足够则使用 RVV 优化版本
+            // Detect if RVV is supported, use RVV optimized version if supported and data size is sufficient
             if Self::is_rvv_available() && input.len() >= 128 {
                 return Self::encode_rvv(input, output);
             }
         }
         
-        // 回退到标准实现
+        // Fallback to standard implementation
         let mut lion = Lion::new();
         lion.encode(input, output)
     }
@@ -88,13 +88,13 @@ impl Lion {
     pub fn decode(input: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
         #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
         {
-            // 检测是否支持 RVV，如果支持且数据量足够则使用 RVV 优化版本
+            // Detect if RVV is supported, use RVV optimized version if supported and data size is sufficient
             if Self::is_rvv_available() && input.len() >= 64 {
                 return Self::decode_rvv(input, output);
             }
         }
         
-        // 回退到标准实现
+        // Fallback to standard implementation
         let mut lion = Lion::new();
         lion.decode(input, output)
     }
@@ -251,7 +251,7 @@ impl Lion {
         }
     }
     
-    /// RVV 优化的编码实现
+    /// RVV optimized encoding implementation
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn encode_rvv(input: &[u8], output: &mut [u8]) -> Result<usize, EncodeError> {
         let mut lion = Lion::new();
@@ -259,13 +259,13 @@ impl Lion {
         let mut out_buffer = WriteBuffer::new(output);
         let mut protection_state = ProtectionState::new();
 
-        // Lion 的预测逻辑最复杂，主要使用 RVV 加速哈希计算
+        // Lion's prediction logic is most complex, mainly using RVV to accelerate hash calculation
         lion.encode_process_rvv(&mut in_buffer, &mut out_buffer, &mut protection_state)?;
         
         Ok(out_buffer.index)
     }
     
-    /// RVV 优化的解码实现
+    /// RVV optimized decoding implementation
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn decode_rvv(input: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
         let mut lion = Lion::new();
@@ -278,7 +278,7 @@ impl Lion {
         Ok(out_buffer.index)
     }
     
-    /// RVV 优化的编码处理流程
+    /// RVV optimized encoding processing flow
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn encode_process_rvv(&mut self, 
                          in_buffer: &mut ReadBuffer, 
@@ -303,7 +303,7 @@ impl Lion {
                 let available_bytes = in_buffer.remaining().min(Self::block_size());
                 let quad_count = available_bytes / BYTE_SIZE_U32;
                 
-                // Lion 的预测逻辑复杂，主要用 RVV 加速哈希计算
+                // Lion's prediction logic is complex, mainly using RVV to accelerate hash calculation
                 if quad_count >= 4 {
                     let mut quads = Vec::with_capacity(quad_count);
                     for _ in 0..quad_count {
@@ -314,7 +314,7 @@ impl Lion {
                     
                     self.encode_batch_lion_rvv(&quads, out_buffer, &mut signature);
                 } else {
-                    // 使用标准处理
+                    // Use standard processing
                     for _ in 0..iterations {
                         if in_buffer.remaining() >= BYTE_SIZE_U32 {
                             let quad = in_buffer.read_u32_le();
@@ -336,7 +336,7 @@ impl Lion {
         Ok(())
     }
     
-    /// 向量化的 Lion 哈希计算（保存复杂的预测逻辑为标量处理）
+    /// Vectorized Lion hash calculation (preserve complex prediction logic for scalar processing)
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     #[inline(always)]
     fn encode_batch_lion_rvv(&mut self, 
@@ -346,7 +346,7 @@ impl Lion {
         let len = quads.len();
         let mut processed = 0;
 
-        // Lion 的预测逻辑最复杂，主要用 RVV 加速哈希计算
+        // Lion's prediction logic is most complex, mainly using RVV to accelerate hash calculation
         while processed + 4 <= len {
             unsafe {
                 use core::arch::riscv64::*;
@@ -357,10 +357,10 @@ impl Lion {
                     break;
                 }
 
-                // 加载 4 个 u32 数据
+                // Load 4 u32 data
                 let quads_vec = vle32_v_u32m1(quads.as_ptr().add(processed), vl);
                 
-                // 向量化哈希计算 - Lion 的哈希更复杂
+                // Vectorized hash calculation - Lion's hash is more complex
                 let multiplier_vec = vmv_v_x_u32m1(LION_HASH_MULTIPLIER, vl);
                 let hash_temp = vmul_vv_u32m1(quads_vec, multiplier_vec, vl);
                 let shift_amount = 32 - LION_HASH_BITS;
@@ -371,18 +371,18 @@ impl Lion {
                 vse32_v_u32m1(hash_indices.as_mut_ptr(), hashes, vl);
                 vse32_v_u32m1(quad_array.as_mut_ptr(), quads_vec, vl);
                 
-                // Lion 的预测逻辑太复杂，不适合批量处理。只用 RVV 加速哈希计算
-                // 然后逐个使用标准逻辑处理
+                // Lion's prediction logic is too complex for batch processing. Only use RVV to accelerate hash calculation
+                // Then process one by one using standard logic
                 for i in 0..vl {
                     let quad = quad_array[i];
-                    // 使用标准的 Lion 逻辑处理复杂的预测
+                    // Use standard Lion logic to process complex predictions
                     self.encode_quad(quad, out_buffer, signature);
                 }
                 processed += vl;
             }
         }
         
-        // 处理剩余数据
+        // Process remaining data
         while processed < len {
             let quad = quads[processed];
             self.encode_quad(quad, out_buffer, signature);
@@ -392,7 +392,7 @@ impl Lion {
         processed
     }
     
-    /// RVV 优化的解码处理流程
+    /// RVV optimized decoding processing flow
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn decode_process_rvv(&mut self, 
                          in_buffer: &mut ReadBuffer, 
@@ -414,7 +414,7 @@ impl Lion {
                 let mark = in_buffer.index;
                 let mut signature = Self::read_signature(in_buffer);
                 
-                // Lion 的解码也复杂，主要使用标准逻辑
+                // Lion's decoding is also complex, mainly using standard logic
                 for _ in 0..iterations {
                     if in_buffer.remaining() >= Self::decode_unit_size() {
                         self.decode_unit(in_buffer, &mut signature, out_buffer);

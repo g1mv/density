@@ -45,13 +45,13 @@ impl Chameleon {
     pub fn encode(input: &[u8], output: &mut [u8]) -> Result<usize, EncodeError> {
         #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
         {
-            // 检测是否支持 RVV，如果支持且数据量足够则使用 RVV 优化版本
+            // Detect if RVV is supported, use RVV optimized version if supported and data size is sufficient
             if Self::is_rvv_available() && input.len() >= 128 {
                 return Self::encode_rvv(input, output);
             }
         }
         
-        // 回退到标准实现
+        // Fallback to standard implementation
         let mut chameleon = Chameleon::new();
         chameleon.encode(input, output)
     }
@@ -59,13 +59,13 @@ impl Chameleon {
     pub fn decode(input: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
         #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
         {
-            // 检测是否支持 RVV，如果支持且数据量足够则使用 RVV 优化版本
+            // Detect if RVV is supported, use RVV optimized version if supported and data size is sufficient
             if Self::is_rvv_available() && input.len() >= 64 {
                 return Self::decode_rvv(input, output);
             }
         }
         
-        // 回退到标准实现
+        // Fallback to standard implementation
         let mut chameleon = Chameleon::new();
         chameleon.decode(input, output)
     }
@@ -102,8 +102,6 @@ impl Chameleon {
 
     // ==== RVV Optimization Implementation ====
     
-    // ==== RVV Optimization Implementation ====
-    
     /// Detect if RVV is supported
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     #[inline(always)]
@@ -118,19 +116,19 @@ impl Chameleon {
         false
     }
     
-    /// 检测 RVV 能力
+    /// Detect RVV capability
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     #[inline(always)]
     fn detect_rvv_capability() -> bool {
         unsafe {
             use core::arch::riscv64::*;
-            // 检测 VLEN 是否足够支持批量处理
+            // Detect if VLEN is sufficient to support batch processing
             let vl = vsetvli(8, VtypeBuilder::e32m1());
-            vl >= 4  // 至少需要能处理 4 个 u32
+            vl >= 4  // At least need to process 4 u32
         }
     }
     
-    /// RVV 优化的编码实现
+    /// RVV optimized encoding implementation
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn encode_rvv(input: &[u8], output: &mut [u8]) -> Result<usize, EncodeError> {
         let mut chameleon = Chameleon::new();
@@ -138,13 +136,13 @@ impl Chameleon {
         let mut out_buffer = WriteBuffer::new(output);
         let mut protection_state = ProtectionState::new();
 
-        // 使用 RVV 优化的编码处理
+        // Use RVV optimized encoding processing
         chameleon.encode_process_rvv(&mut in_buffer, &mut out_buffer, &mut protection_state)?;
         
         Ok(out_buffer.index)
     }
     
-    /// RVV 优化的解码实现
+    /// RVV optimized decoding implementation
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn decode_rvv(input: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
         let mut chameleon = Chameleon::new();
@@ -152,13 +150,13 @@ impl Chameleon {
         let mut out_buffer = WriteBuffer::new(output);
         let mut protection_state = ProtectionState::new();
 
-        // 使用 RVV 优化的解码处理
+        // Use RVV optimized decoding processing
         chameleon.decode_process_rvv(&mut in_buffer, &mut out_buffer, &mut protection_state)?;
         
         Ok(out_buffer.index)
     }
     
-    /// RVV 优化的编码处理流程
+    /// RVV optimized encoding processing flow
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn encode_process_rvv(&mut self, 
                          in_buffer: &mut ReadBuffer, 
@@ -169,7 +167,7 @@ impl Chameleon {
         
         while in_buffer.remaining() > 0 {
             if protection_state.revert_to_copy() {
-                // 保护状态：直接复制
+                // Protection state: direct copy
                 if in_buffer.remaining() > Self::block_size() {
                     out_buffer.push(in_buffer.read(Self::block_size()));
                 } else {
@@ -178,16 +176,16 @@ impl Chameleon {
                 }
                 protection_state.decay();
             } else {
-                // 正常编码
+                // Normal encoding
                 let mark = out_buffer.index;
                 let mut signature = WriteSignature::new();
                 
-                // 准备批量数据
+                // Prepare batch data
                 let available_bytes = in_buffer.remaining().min(Self::block_size());
                 let quad_count = available_bytes / BYTE_SIZE_U32;
                 
                 if quad_count >= 8 {
-                    // 有足够数据进行向量化处理
+                    // Sufficient data for vectorized processing
                     let mut quads = Vec::with_capacity(quad_count);
                     for _ in 0..quad_count {
                         if in_buffer.remaining() >= BYTE_SIZE_U32 {
@@ -195,16 +193,16 @@ impl Chameleon {
                         }
                     }
                     
-                    // 使用 RVV 批量处理
+                    // Use RVV batch processing
                     self.encode_batch_rvv(&quads, out_buffer, &mut signature);
                 } else {
-                    // 数据太少，使用标量处理
+                    // Insufficient data, use scalar processing
                     for _ in 0..iterations {
                         if in_buffer.remaining() >= BYTE_SIZE_U32 {
                             let quad = in_buffer.read_u32_le();
                             self.encode_quad(quad, out_buffer, &mut signature);
                         } else if in_buffer.remaining() > 0 {
-                            // 处理不足 4 字节的数据
+                            // Process data less than 4 bytes
                             let remaining_bytes = in_buffer.read(in_buffer.remaining());
                             signature.push_bits(PLAIN_FLAG, FLAG_SIZE_BITS);
                             out_buffer.push(remaining_bytes);
@@ -221,7 +219,7 @@ impl Chameleon {
         Ok(())
     }
     
-    /// 向量化批量编码核心循环
+    /// Vectorized batch encoding core loop
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     #[inline(always)]
     fn encode_batch_rvv(&mut self, 
@@ -231,20 +229,20 @@ impl Chameleon {
         let len = quads.len();
         let mut processed = 0;
 
-        // 处理向量长度的批次
+        // Process vector length batches
         while processed + 8 <= len {
             unsafe {
                 use core::arch::riscv64::*;
                 
-                // 设置向量长度为 8 个元素 (32 字节)
+                // Set vector length to 8 elements (32 bytes)
                 let vl = vsetvli(8, VtypeBuilder::e32m1());
                 
                 if vl < 8 {
-                    // VLEN 太小，回退到标量处理
+                    // VLEN too small, fallback to scalar processing
                     break;
                 }
 
-                // 加载 8 个 u32 数据
+                // Load 8 u32 data
                 let quads_vec = vle32_v_u32m1(quads.as_ptr().add(processed), vl);
                 
                 // Vectorized hash calculation: hash = (quad * MULTIPLIER) >> (32 - HASH_BITS)
@@ -299,7 +297,7 @@ impl Chameleon {
             }
         }
         
-        // 处理剩余的数据（标量处理）
+        // Process remaining data (scalar processing)
         while processed < len {
             self.encode_quad_scalar(quads[processed], out_buffer, signature);
             processed += 1;
@@ -308,7 +306,7 @@ impl Chameleon {
         processed
     }
     
-    /// 标量版本的 encode_quad（用于回退和剩余数据处理）
+    /// Scalar version of encode_quad (used for fallback and remaining data processing)
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     #[inline(always)]
     fn encode_quad_scalar(&mut self, quad: u32, out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
@@ -316,18 +314,18 @@ impl Chameleon {
         let hash_idx = hash & ((1 << CHAMELEON_HASH_BITS) - 1);
         
         if self.state.chunk_map[hash_idx] == quad && quad != 0 {
-            // 匹配：压缩
+            // Match: compression
             signature.push_bits(MAP_FLAG, FLAG_SIZE_BITS);
             out_buffer.push(&(hash_idx as u16).to_le_bytes());
         } else {
-            // 不匹配：输出原始数据
+            // No match: output original data
             signature.push_bits(PLAIN_FLAG, FLAG_SIZE_BITS);
             out_buffer.push(&quad.to_le_bytes());
             self.state.chunk_map[hash_idx] = quad;
         }
     }
     
-    /// RVV 优化的解码处理流程
+    /// RVV optimized decoding processing flow
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn decode_process_rvv(&mut self, 
                          in_buffer: &mut ReadBuffer, 
@@ -338,7 +336,7 @@ impl Chameleon {
         
         while in_buffer.remaining() > 0 {
             if protection_state.revert_to_copy() {
-                // 保护状态：直接复制
+                // Protection state: direct copy
                 if in_buffer.remaining() > Self::block_size() {
                     out_buffer.push(in_buffer.read(Self::block_size()));
                 } else {
@@ -347,7 +345,7 @@ impl Chameleon {
                 }
                 protection_state.decay();
             } else {
-                // 正常解码
+                // Normal decoding
                 let mark = in_buffer.index;
                 let mut signature = Self::read_signature(in_buffer);
                 
@@ -372,7 +370,7 @@ impl Chameleon {
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     #[inline(always)]
     fn decode_unit_rvv(&mut self, in_buffer: &mut ReadBuffer, signature: &mut ReadSignature) -> u32 {
-        // 对于 Chameleon，解码逻辑相对简单，直接使用原有逻辑
+        // For Chameleon, decoding logic is relatively simple, directly use original logic
         if signature.read_bits(DECODE_FLAG_MASK, DECODE_FLAG_MASK_BITS) == PLAIN_FLAG {
             self.decode_plain(in_buffer)
         } else {
@@ -386,7 +384,7 @@ impl Chameleon {
                               in_buffer: &mut ReadBuffer, 
                               signature: &mut ReadSignature, 
                               out_buffer: &mut WriteBuffer) -> bool {
-        // 使用原有的 decode_partial_unit 逻辑
+        // Use original decode_partial_unit logic
         self.decode_partial_unit(in_buffer, signature, out_buffer)
     }
 }

@@ -57,13 +57,13 @@ impl Cheetah {
     pub fn encode(input: &[u8], output: &mut [u8]) -> Result<usize, EncodeError> {
         #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
         {
-            // 检测是否支持 RVV，如果支持且数据量足够则使用 RVV 优化版本
+            // Detect if RVV is supported, use RVV optimized version if supported and data size is sufficient
             if Self::is_rvv_available() && input.len() >= 128 {
                 return Self::encode_rvv(input, output);
             }
         }
         
-        // 回退到标准实现
+        // Fallback to standard implementation
         let mut cheetah = Cheetah::new();
         cheetah.encode(input, output)
     }
@@ -71,13 +71,13 @@ impl Cheetah {
     pub fn decode(input: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
         #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
         {
-            // 检测是否支持 RVV，如果支持且数据量足够则使用 RVV 优化版本
+            // Detect if RVV is supported, use RVV optimized version if supported and data size is sufficient
             if Self::is_rvv_available() && input.len() >= 64 {
                 return Self::decode_rvv(input, output);
             }
         }
         
-        // 回退到标准实现
+        // Fallback to standard implementation
         let mut cheetah = Cheetah::new();
         cheetah.decode(input, output)
     }
@@ -163,7 +163,7 @@ impl Cheetah {
         }
     }
     
-    /// RVV 优化的编码实现
+    /// RVV optimized encoding implementation
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn encode_rvv(input: &[u8], output: &mut [u8]) -> Result<usize, EncodeError> {
         let mut cheetah = Cheetah::new();
@@ -171,13 +171,13 @@ impl Cheetah {
         let mut out_buffer = WriteBuffer::new(output);
         let mut protection_state = ProtectionState::new();
 
-        // 使用 RVV 优化的编码处理
+        // Use RVV optimized encoding processing
         cheetah.encode_process_rvv(&mut in_buffer, &mut out_buffer, &mut protection_state)?;
         
         Ok(out_buffer.index)
     }
     
-    /// RVV 优化的解码实现
+    /// RVV optimized decoding implementation
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn decode_rvv(input: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
         let mut cheetah = Cheetah::new();
@@ -185,13 +185,13 @@ impl Cheetah {
         let mut out_buffer = WriteBuffer::new(output);
         let mut protection_state = ProtectionState::new();
 
-        // 使用 RVV 优化的解码处理
+        // Use RVV optimized decoding processing
         cheetah.decode_process_rvv(&mut in_buffer, &mut out_buffer, &mut protection_state)?;
         
         Ok(out_buffer.index)
     }
     
-    /// RVV 优化的编码处理流程
+    /// RVV optimized encoding processing flow
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn encode_process_rvv(&mut self, 
                          in_buffer: &mut ReadBuffer, 
@@ -217,7 +217,7 @@ impl Cheetah {
                 let quad_count = available_bytes / BYTE_SIZE_U32;
                 
                 if quad_count >= 4 {
-                    // Cheetah 的预测逻辑更复杂，使用较小的批量
+                    // Cheetah's prediction logic is more complex, use smaller batches
                     let mut quads = Vec::with_capacity(quad_count);
                     for _ in 0..quad_count {
                         if in_buffer.remaining() >= BYTE_SIZE_U32 {
@@ -227,7 +227,7 @@ impl Cheetah {
                     
                     self.encode_batch_cheetah_rvv(&quads, out_buffer, &mut signature);
                 } else {
-                    // 数据太少，使用标量处理
+                    // Insufficient data, use scalar processing
                     for _ in 0..iterations {
                         if in_buffer.remaining() >= BYTE_SIZE_U32 {
                             let quad = in_buffer.read_u32_le();
@@ -249,7 +249,7 @@ impl Cheetah {
         Ok(())
     }
     
-    /// 向量化的 Cheetah 预测处理
+    /// Vectorized Cheetah prediction processing
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     #[inline(always)]
     fn encode_batch_cheetah_rvv(&mut self, 
@@ -259,7 +259,7 @@ impl Cheetah {
         let len = quads.len();
         let mut processed = 0;
 
-        // Cheetah 的预测逻辑更复杂，使用较小的批次大小
+        // Cheetah's prediction logic is more complex, use smaller batch sizes
         while processed + 4 <= len {
             unsafe {
                 use core::arch::riscv64::*;
@@ -270,10 +270,10 @@ impl Cheetah {
                     break;
                 }
 
-                // 加载 4 个 u32 数据
+                // Load 4 u32 data
                 let quads_vec = vle32_v_u32m1(quads.as_ptr().add(processed), vl);
                 
-                // 向量化哈希计算
+                // Vectorized hash calculation
                 let multiplier_vec = vmv_v_x_u32m1(CHEETAH_HASH_MULTIPLIER, vl);
                 let hash_temp = vmul_vv_u32m1(quads_vec, multiplier_vec, vl);
                 let shift_amount = 32 - CHEETAH_HASH_BITS;
@@ -284,29 +284,29 @@ impl Cheetah {
                 vse32_v_u32m1(hash_indices.as_mut_ptr(), hashes, vl);
                 vse32_v_u32m1(quad_array.as_mut_ptr(), quads_vec, vl);
                 
-                // 检查预测和冲突
+                // Check predictions and conflicts
                 let mut has_conflicts = false;
                 for i in 0..vl {
                     let hash_idx = (hash_indices[i] & ((1 << CHEETAH_HASH_BITS) - 1)) as usize;
                     let quad = quad_array[i];
                     
-                    // Cheetah 特有的预测逻辑检查
+                    // Cheetah specific prediction logic check
                     let chunk_data = &self.state.chunk_map[hash_idx];
                     let prediction = self.state.prediction_map[self.state.last_hash as usize].next;
                     
-                    // 检查复杂的预测逻辑是否适合批量处理
+                    // Check if complex prediction logic is suitable for batch processing
                     if chunk_data.chunk_a != 0 && prediction != 0 {
-                        // 有复杂状态，可能需要精确的顺序处理
+                        // Has complex state, may need precise sequential processing
                         has_conflicts = true;
                         break;
                     }
                 }
                 
                 if has_conflicts {
-                    // 回退到标量处理
+                    // Fallback to scalar processing
                     break;
                 } else {
-                    // 批量处理（简化的Cheetah逻辑）
+                    // Batch processing (simplified Cheetah logic)
                     for i in 0..vl {
                         let hash_idx = (hash_indices[i] & ((1 << CHEETAH_HASH_BITS) - 1)) as usize;
                         let quad = quad_array[i];
@@ -318,7 +318,7 @@ impl Cheetah {
             }
         }
         
-        // 处理剩余数据
+        // Process remaining data
         while processed < len {
             let quad = quads[processed];
             let hash = ((quad.wrapping_mul(CHEETAH_HASH_MULTIPLIER)) >> (BIT_SIZE_U32 - CHEETAH_HASH_BITS)) as usize;
@@ -330,7 +330,7 @@ impl Cheetah {
         processed
     }
     
-    /// Cheetah 标量编码（用于回退）
+    /// Cheetah scalar encoding (used for fallback)
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     #[inline(always)]
     fn encode_quad_cheetah_scalar(&mut self, 
@@ -338,11 +338,11 @@ impl Cheetah {
                                  quad: u32, 
                                  out_buffer: &mut WriteBuffer, 
                                  signature: &mut WriteSignature) {
-        // 使用原有的 encode_quad 逻辑
+        // Use original encode_quad logic
         self.encode_quad(quad, out_buffer, signature);
     }
     
-    /// RVV 优化的解码处理流程
+    /// RVV optimized decoding processing flow
     #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
     fn decode_process_rvv(&mut self, 
                          in_buffer: &mut ReadBuffer, 

@@ -32,7 +32,7 @@ pub fn encode(input: &[u8], output: &mut [u8]) -> Result<usize, EncodeError> {
 
 ## Feature Configuration
 
-### Cargo.toml 配置
+### Cargo.toml Configuration
 ```toml
 [features]
 default = []
