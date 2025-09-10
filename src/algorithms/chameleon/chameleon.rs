@@ -43,11 +43,29 @@ impl Chameleon {
     }
 
     pub fn encode(input: &[u8], output: &mut [u8]) -> Result<usize, EncodeError> {
+        #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+        {
+            // Detect if RVV is supported, use RVV optimized version if supported and data size is sufficient
+            if Self::is_rvv_available() && input.len() >= 128 {
+                return Self::encode_rvv(input, output);
+            }
+        }
+        
+        // Fallback to standard implementation
         let mut chameleon = Chameleon::new();
         chameleon.encode(input, output)
     }
 
     pub fn decode(input: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
+        #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+        {
+            // Detect if RVV is supported, use RVV optimized version if supported and data size is sufficient
+            if Self::is_rvv_available() && input.len() >= 64 {
+                return Self::decode_rvv(input, output);
+            }
+        }
+        
+        // Fallback to standard implementation
         let mut chameleon = Chameleon::new();
         chameleon.decode(input, output)
     }
@@ -80,6 +98,294 @@ impl Chameleon {
     #[unsafe(no_mangle)]
     pub extern "C" fn chameleon_safe_encode_buffer_size(size: usize) -> usize {
         Self::safe_encode_buffer_size(size)
+    }
+
+    // ==== RVV Optimization Implementation ====
+    
+    /// Detect if RVV is supported
+    #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+    #[inline(always)]
+    fn is_rvv_available() -> bool {
+        // Runtime detection of RVV support
+        Self::detect_rvv_capability()
+    }
+    
+    #[cfg(not(all(target_arch = "riscv64", target_feature = "v")))]
+    #[inline(always)]
+    fn is_rvv_available() -> bool {
+        false
+    }
+    
+    /// Detect RVV capability
+    #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+    #[inline(always)]
+    fn detect_rvv_capability() -> bool {
+        unsafe {
+            use core::arch::riscv64::*;
+            // Detect if VLEN is sufficient to support batch processing
+            let vl = vsetvli(8, VtypeBuilder::e32m1());
+            vl >= 4  // At least need to process 4 u32
+        }
+    }
+    
+    /// RVV optimized encoding implementation
+    #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+    fn encode_rvv(input: &[u8], output: &mut [u8]) -> Result<usize, EncodeError> {
+        let mut chameleon = Chameleon::new();
+        let mut in_buffer = ReadBuffer::new(input)?;
+        let mut out_buffer = WriteBuffer::new(output);
+        let mut protection_state = ProtectionState::new();
+
+        // Use RVV optimized encoding processing
+        chameleon.encode_process_rvv(&mut in_buffer, &mut out_buffer, &mut protection_state)?;
+        
+        Ok(out_buffer.index)
+    }
+    
+    /// RVV optimized decoding implementation
+    #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+    fn decode_rvv(input: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
+        let mut chameleon = Chameleon::new();
+        let mut in_buffer = ReadBuffer::new(input)?;
+        let mut out_buffer = WriteBuffer::new(output);
+        let mut protection_state = ProtectionState::new();
+
+        // Use RVV optimized decoding processing
+        chameleon.decode_process_rvv(&mut in_buffer, &mut out_buffer, &mut protection_state)?;
+        
+        Ok(out_buffer.index)
+    }
+    
+    /// RVV optimized encoding processing flow
+    #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+    fn encode_process_rvv(&mut self, 
+                         in_buffer: &mut ReadBuffer, 
+                         out_buffer: &mut WriteBuffer, 
+                         protection_state: &mut ProtectionState) -> Result<(), EncodeError> {
+        
+        let iterations = Self::block_size() / Self::decode_unit_size();
+        
+        while in_buffer.remaining() > 0 {
+            if protection_state.revert_to_copy() {
+                // Protection state: direct copy
+                if in_buffer.remaining() > Self::block_size() {
+                    out_buffer.push(in_buffer.read(Self::block_size()));
+                } else {
+                    out_buffer.push(in_buffer.read(in_buffer.remaining()));
+                    break;
+                }
+                protection_state.decay();
+            } else {
+                // Normal encoding
+                let mark = out_buffer.index;
+                let mut signature = WriteSignature::new();
+                
+                // Prepare batch data
+                let available_bytes = in_buffer.remaining().min(Self::block_size());
+                let quad_count = available_bytes / BYTE_SIZE_U32;
+                
+                if quad_count >= 8 {
+                    // Sufficient data for vectorized processing
+                    let mut quads = Vec::with_capacity(quad_count);
+                    for _ in 0..quad_count {
+                        if in_buffer.remaining() >= BYTE_SIZE_U32 {
+                            quads.push(in_buffer.read_u32_le());
+                        }
+                    }
+                    
+                    // Use RVV batch processing
+                    self.encode_batch_rvv(&quads, out_buffer, &mut signature);
+                } else {
+                    // Insufficient data, use scalar processing
+                    for _ in 0..iterations {
+                        if in_buffer.remaining() >= BYTE_SIZE_U32 {
+                            let quad = in_buffer.read_u32_le();
+                            self.encode_quad(quad, out_buffer, &mut signature);
+                        } else if in_buffer.remaining() > 0 {
+                            // Process data less than 4 bytes
+                            let remaining_bytes = in_buffer.read(in_buffer.remaining());
+                            signature.push_bits(PLAIN_FLAG, FLAG_SIZE_BITS);
+                            out_buffer.push(remaining_bytes);
+                            break;
+                        }
+                    }
+                }
+                
+                Self::write_signature(out_buffer, &mut signature);
+                protection_state.update(out_buffer.index - mark >= Self::block_size());
+            }
+        }
+        
+        Ok(())
+    }
+    
+    /// Vectorized batch encoding core loop
+    #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+    #[inline(always)]
+    fn encode_batch_rvv(&mut self, 
+                        quads: &[u32], 
+                        out_buffer: &mut WriteBuffer, 
+                        signature: &mut WriteSignature) -> usize {
+        let len = quads.len();
+        let mut processed = 0;
+
+        // Process vector length batches
+        while processed + 8 <= len {
+            unsafe {
+                use core::arch::riscv64::*;
+                
+                // Set vector length to 8 elements (32 bytes)
+                let vl = vsetvli(8, VtypeBuilder::e32m1());
+                
+                if vl < 8 {
+                    // VLEN too small, fallback to scalar processing
+                    break;
+                }
+
+                // Load 8 u32 data
+                let quads_vec = vle32_v_u32m1(quads.as_ptr().add(processed), vl);
+                
+                // Vectorized hash calculation: hash = (quad * MULTIPLIER) >> (32 - HASH_BITS)
+                let multiplier_vec = vmv_v_x_u32m1(CHAMELEON_HASH_MULTIPLIER, vl);
+                let hash_temp = vmul_vv_u32m1(quads_vec, multiplier_vec, vl);
+                let shift_amount = 32 - CHAMELEON_HASH_BITS;
+                let hashes = vsrl_vx_u32m1(hash_temp, shift_amount as usize, vl);
+                
+                // Convert hash values to index array
+                let mut hash_indices = [0u32; 8];
+                vse32_v_u32m1(hash_indices.as_mut_ptr(), hashes, vl);
+                
+                // Batch check conflicts and processing
+                let mut conflicts = false;
+                let mut quad_array = [0u32; 8];
+                vse32_v_u32m1(quad_array.as_mut_ptr(), quads_vec, vl);
+                
+                // Check hash conflicts - this part needs scalar processing to ensure correctness
+                for i in 0..vl {
+                    let hash_idx = (hash_indices[i] & ((1 << CHAMELEON_HASH_BITS) - 1)) as usize;
+                    let quad = quad_array[i];
+                    
+                    // Check if conflicts with existing entries
+                    if self.state.chunk_map[hash_idx] != 0 && self.state.chunk_map[hash_idx] != quad {
+                        conflicts = true;
+                        break;
+                    }
+                }
+                
+                if conflicts {
+                    // Has conflicts, fallback to scalar processing for this batch
+                    break;
+                } else {
+                    // No conflicts, batch processing
+                    for i in 0..vl {
+                        let hash_idx = (hash_indices[i] & ((1 << CHAMELEON_HASH_BITS) - 1)) as usize;
+                        let quad = quad_array[i];
+                        
+                        if self.state.chunk_map[hash_idx] == quad && quad != 0 {
+                            // Match: output compressed flag
+                            signature.push_bits(MAP_FLAG, FLAG_SIZE_BITS);
+                            out_buffer.push(&(hash_idx as u16).to_le_bytes());
+                        } else {
+                            // No match: output original data and update dictionary
+                            signature.push_bits(PLAIN_FLAG, FLAG_SIZE_BITS);
+                            out_buffer.push(&quad.to_le_bytes());
+                            self.state.chunk_map[hash_idx] = quad;
+                        }
+                    }
+                    processed += vl;
+                }
+            }
+        }
+        
+        // Process remaining data (scalar processing)
+        while processed < len {
+            self.encode_quad_scalar(quads[processed], out_buffer, signature);
+            processed += 1;
+        }
+        
+        processed
+    }
+    
+    /// Scalar version of encode_quad (used for fallback and remaining data processing)
+    #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+    #[inline(always)]
+    fn encode_quad_scalar(&mut self, quad: u32, out_buffer: &mut WriteBuffer, signature: &mut WriteSignature) {
+        let hash = ((quad.wrapping_mul(CHAMELEON_HASH_MULTIPLIER)) >> (BIT_SIZE_U32 - CHAMELEON_HASH_BITS)) as usize;
+        let hash_idx = hash & ((1 << CHAMELEON_HASH_BITS) - 1);
+        
+        if self.state.chunk_map[hash_idx] == quad && quad != 0 {
+            // Match: compression
+            signature.push_bits(MAP_FLAG, FLAG_SIZE_BITS);
+            out_buffer.push(&(hash_idx as u16).to_le_bytes());
+        } else {
+            // No match: output original data
+            signature.push_bits(PLAIN_FLAG, FLAG_SIZE_BITS);
+            out_buffer.push(&quad.to_le_bytes());
+            self.state.chunk_map[hash_idx] = quad;
+        }
+    }
+    
+    /// RVV optimized decoding processing flow
+    #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+    fn decode_process_rvv(&mut self, 
+                         in_buffer: &mut ReadBuffer, 
+                         out_buffer: &mut WriteBuffer, 
+                         protection_state: &mut ProtectionState) -> Result<(), DecodeError> {
+        
+        let iterations = Self::block_size() / Self::decode_unit_size();
+        
+        while in_buffer.remaining() > 0 {
+            if protection_state.revert_to_copy() {
+                // Protection state: direct copy
+                if in_buffer.remaining() > Self::block_size() {
+                    out_buffer.push(in_buffer.read(Self::block_size()));
+                } else {
+                    out_buffer.push(in_buffer.read(in_buffer.remaining()));
+                    break;
+                }
+                protection_state.decay();
+            } else {
+                // Normal decoding
+                let mark = in_buffer.index;
+                let mut signature = Self::read_signature(in_buffer);
+                
+                for _ in 0..iterations {
+                    if in_buffer.remaining() >= Self::decode_unit_size() {
+                        let quad = self.decode_unit_rvv(in_buffer, &mut signature);
+                        out_buffer.push(&quad.to_le_bytes());
+                    } else {
+                        if self.decode_partial_unit_rvv(in_buffer, &mut signature, out_buffer) {
+                            break;
+                        }
+                    }
+                }
+                
+                protection_state.update(in_buffer.index - mark >= Self::block_size());
+            }
+        }
+        
+        Ok(())
+    }
+
+    #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+    #[inline(always)]
+    fn decode_unit_rvv(&mut self, in_buffer: &mut ReadBuffer, signature: &mut ReadSignature) -> u32 {
+        // For Chameleon, decoding logic is relatively simple, directly use original logic
+        if signature.read_bits(DECODE_FLAG_MASK, DECODE_FLAG_MASK_BITS) == PLAIN_FLAG {
+            self.decode_plain(in_buffer)
+        } else {
+            self.decode_map(in_buffer)
+        }
+    }
+
+    #[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+    #[inline(always)]
+    fn decode_partial_unit_rvv(&mut self, 
+                              in_buffer: &mut ReadBuffer, 
+                              signature: &mut ReadSignature, 
+                              out_buffer: &mut WriteBuffer) -> bool {
+        // Use original decode_partial_unit logic
+        self.decode_partial_unit(in_buffer, signature, out_buffer)
     }
 }
 

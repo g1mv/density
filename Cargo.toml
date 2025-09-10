@@ -18,6 +18,13 @@ panic = "unwind"
 incremental = false
 overflow-checks = false
 
+[features]
+default = []
+rvv = []  # RISC-V Vector Extension support
+
+[dependencies]
+# RVV support dependencies will be added when needed
+
 [dev-dependencies]
 divan = "0.1.21"
 snap = "1.1.1"
