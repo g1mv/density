@@ -4,6 +4,30 @@ pub mod buffer;
 pub mod errors;
 pub mod io;
 
+// RVV optimization support
+#[cfg(all(target_arch = "riscv64", target_feature = "v"))]
+mod rvv_support {
+    use crate::algorithms::chameleon::chameleon::Chameleon;
+    
+    /// Detect if RISC-V platform supports vector extension
+    pub fn is_rvv_supported() -> bool {
+        // Use Chameleon's RVV detection function
+        Chameleon::is_rvv_available()
+    }
+}
+
+#[cfg(not(all(target_arch = "riscv64", target_feature = "v")))]
+mod rvv_support {
+    pub fn is_rvv_supported() -> bool {
+        false
+    }
+}
+
+/// Public API: Detect if current platform supports RVV optimization
+pub fn is_rvv_available() -> bool {
+    rvv_support::is_rvv_supported()
+}
+
 pub(crate) const BYTE_SIZE_U16: usize = size_of::<u16>();
 pub(crate) const BYTE_SIZE_U32: usize = size_of::<u32>();
 pub(crate) const BYTE_SIZE_U128: usize = size_of::<u128>();
