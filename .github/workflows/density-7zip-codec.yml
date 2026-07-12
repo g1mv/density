@@ -1,0 +1,66 @@
+name: density-7zip-codec
+
+'on':
+  workflow_dispatch:
+  push:
+    paths:
+      - '7zip-plugin/**'
+      - 'src/**'
+      - 'Cargo.toml'
+  pull_request:
+    paths:
+      - '7zip-plugin/**'
+      - 'src/**'
+      - 'Cargo.toml'
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - artifact: x64
+            cmake_arch: x64
+            rust_target: x86_64-pc-windows-msvc
+          - artifact: x86
+            cmake_arch: Win32
+            rust_target: i686-pc-windows-msvc
+          - artifact: arm64
+            cmake_arch: ARM64
+            rust_target: aarch64-pc-windows-msvc
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout official 7-Zip 26.02 source
+        uses: actions/checkout@v4
+        with:
+          repository: ip7z/7zip
+          path: deps/7zip
+          ref: 26.02
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target }}
+
+      - name: Test Rust bridge
+        if: matrix.artifact == 'x64'
+        run: cargo test --manifest-path 7zip-plugin/rust/Cargo.toml
+
+      - name: Configure
+        run: >-
+          cmake -S 7zip-plugin -B build-density-codec
+          -A ${{ matrix.cmake_arch }}
+          -DSEVENZIP_SOURCE_DIR=${{ github.workspace }}/deps/7zip
+          -DDENSITY_RUST_TARGET=${{ matrix.rust_target }}
+
+      - name: Build
+        run: cmake --build build-density-codec --config Release
+
+      - name: Upload DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: DensityCodec-windows-${{ matrix.artifact }}
+          path: build-density-codec/bin/Release/DensityCodec.dll
